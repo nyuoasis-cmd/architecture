@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>롤백 전략 비교판</title>
+    <style>
+      :root {
+        --bg: #f8f5f5;
+        --card: #fff;
+        --text: #2d1f1f;
+        --muted: #776767;
+        --border: #ead7d7;
+        --accent: #dc2626;
+        --accent-soft: #fee2e2;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; }
+      body { overflow: hidden; }
+      #app { width: 100%; height: 100%; overflow-y: auto; }
+      .screen { min-height: 100%; padding: 16px 14px 22px; }
+      .hero, .board, .log { border: 1px solid var(--border); border-radius: 18px; background: var(--card); }
+      .hero { padding: 16px; background: linear-gradient(135deg, #fee2e2, #ffffff); }
+      .eyebrow { margin: 0 0 6px; font-size: 11px; color: var(--muted); }
+      h1 { margin: 0; font-size: 18px; }
+      .summary { margin: 8px 0 0; font-size: 12px; line-height: 1.7; }
+      .board { margin-top: 12px; padding: 14px; }
+      .card { padding: 12px; border: 1px solid var(--border); border-radius: 16px; background: #fff; }
+      .card + .card { margin-top: 8px; }
+      .card.active { border-color: var(--accent); background: var(--accent-soft); }
+      .card h2 { margin: 0 0 4px; font-size: 12px; }
+      .card p { margin: 0; font-size: 11px; line-height: 1.6; color: var(--muted); }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+      .chip { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 11px; }
+      .chip.hot { border-color: #fca5a5; background: var(--accent-soft); color: #991b1b; }
+      .log { margin-top: 12px; padding: 12px 14px; background: #111827; color: #f8fafc; }
+      .line { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; line-height: 1.7; }
+      .time { color: #fca5a5; margin-right: 6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#rollback': {
+          title: '즉시 롤백',
+          summary: '새 버전을 내리고 직전 안정 버전으로 빠르게 되돌리는 가장 단순한 복구 방식입니다.',
+          active: 0,
+          chips: ['빠른 복귀', '단순함', '직전 버전', '데이터 정합성 주의'],
+          hot: 0,
+          logs: [['14:10:01', 'error spike detected'], ['14:10:02', 'release v42 rolled back'], ['14:10:03', 'service stable on v41']],
+        },
+        '#bluegreen': {
+          title: '블루그린 배포',
+          summary: '운영 환경을 두 벌 두고 트래픽 방향만 바꿔 전환과 복귀를 쉽게 만듭니다.',
+          active: 1,
+          chips: ['환경 2세트', '즉시 전환', '복귀 쉬움', '비용 증가'],
+          hot: 1,
+          logs: [['14:10:04', 'green environment ready'], ['14:10:05', 'traffic switched to green'], ['14:10:06', 'fallback path kept on blue']],
+        },
+        '#canary': {
+          title: '카나리 배포',
+          summary: '일부 사용자에게만 먼저 열어 새 버전의 위험을 작은 범위에서 확인합니다.',
+          active: 2,
+          chips: ['부분 노출', '점진 확장', '세밀한 모니터링', '트래픽 제어'],
+          hot: 2,
+          logs: [['14:10:07', '5% users on v42'], ['14:10:08', 'latency normal'], ['14:10:09', 'ramp-up paused after errors']],
+        },
+        '#decision': {
+          title: '전략 선택',
+          summary: '서비스 특성과 비용, 복구 속도를 보고 어느 비상구가 맞는지 고릅니다.',
+          active: 1,
+          chips: ['복구 시간', '운영 비용', '데이터 영향', '트래픽 규모'],
+          hot: 3,
+          logs: [['14:10:10', 'critical payment path'], ['14:10:11', 'rollback plan chosen: blue-green'], ['14:10:12', 'playbook attached to release']],
+        },
+      };
+
+      function render() {
+        const hash = scenes[location.hash] ? location.hash : '#rollback';
+        const scene = scenes[hash];
+        const cards = [
+          ['즉시 롤백', '가장 빠른 후진'],
+          ['블루그린', '두 벌 준비 후 전환'],
+          ['카나리', '작게 열고 넓히기'],
+        ].map((card, index) => '<div class="card' + (scene.active === index ? ' active' : '') + '"><h2>' + card[0] + '</h2><p>' + card[1] + '</p></div>').join('');
+        const chips = scene.chips.map((chip, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + chip + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+        document.getElementById('app').innerHTML =
+          '<div class="screen"><section class="hero"><p class="eyebrow">복구 전략</p><h1>' + scene.title + '</h1><p class="summary">' + scene.summary + '</p></section>' +
+          '<section class="board">' + cards + '<div class="chips">' + chips + '</div></section>' +
+          '<section class="log"><p class="eyebrow" style="color:#fecaca;">복구 이벤트</p>' + logs + '</section></div>';
+      }
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
