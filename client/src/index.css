@@ -9,6 +9,8 @@
   --color-border-strong: var(--color-border-hover);
   --color-text-secondary: var(--color-text-muted);
   --color-text-faint: var(--color-text-quaternary);
+  --color-accent: #6366f1;
+  --color-bg-card: var(--color-surface);
 }
 
 @layer base {
@@ -307,13 +309,13 @@
   }
 
   .demo-launcher:hover {
-    border-color: #6366f1;
-    background: rgba(99, 102, 241, 0.04);
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 4%, white);
   }
 
   .demo-launcher.active {
-    border-color: #6366f1;
-    background: rgba(99, 102, 241, 0.08);
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 8%, white);
   }
 
   .demo-launcher .arrow {
@@ -358,6 +360,12 @@
     padding: 0;
     background: transparent;
     cursor: pointer;
+    border-radius: 8px;
+  }
+
+  .guide-progress-button:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
   .guide-progress-badge {
@@ -376,6 +384,33 @@
     width: 100%;
     height: 4px;
     border-radius: 9999px;
+  }
+
+  .preview-scenario-dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 16px;
+  }
+
+  .preview-scenario-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    border: none;
+    background: var(--color-border-strong);
+    cursor: pointer;
+    transition: transform 150ms cubic-bezier(.2,.8,.2,1), background 150ms cubic-bezier(.2,.8,.2,1);
+  }
+
+  .preview-scenario-dot.is-active {
+    background: var(--color-accent);
+    transform: scale(1.15);
+  }
+
+  .preview-scenario-dot:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
   .scrollbar-hide::-webkit-scrollbar {

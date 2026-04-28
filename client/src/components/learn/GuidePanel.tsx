@@ -27,22 +27,19 @@ function getBadgeStyle(state: ProgressState) {
     return {
       background: 'var(--color-success)',
       color: '#fff',
-      label: '✓',
     };
   }
 
   if (state === 'current') {
     return {
-      background: '#6366f1',
+      background: 'var(--color-accent)',
       color: '#fff',
-      label: '현재',
     };
   }
 
   return {
     background: '#f5f5f4',
     color: 'var(--color-text-muted)',
-    label: '대기',
   };
 }
 
@@ -64,7 +61,10 @@ export default function GuidePanel({
           </span>
           <span
             className="ml-auto rounded-full px-1.5 py-0.5 text-[10px]"
-            style={{ background: 'rgba(99,102,241,0.10)', color: '#6366f1' }}
+            style={{
+              background: 'color-mix(in srgb, var(--color-accent) 10%, white)',
+              color: 'var(--color-accent)',
+            }}
           >
             {chapter.category}
           </span>
@@ -75,10 +75,10 @@ export default function GuidePanel({
             const state = getProgressState(currentQa.order, qa.order);
             const badge = getBadgeStyle(state);
             const route = `/library/${chapter.id}/${qa.id}`;
-            const badgeText = state === 'current' ? String(qa.order) : badge.label;
+            const badgeText = state === 'done' ? '✓' : String(qa.order);
 
             return (
-              <Link key={qa.id} className="guide-progress-button focus-visible:outline-none" to={route}>
+              <Link key={qa.id} className="guide-progress-button" to={route}>
                 <span
                   className="guide-progress-badge"
                   style={{ background: badge.background, color: badge.color }}
@@ -149,7 +149,7 @@ export default function GuidePanel({
                       className="mr-1.5 font-mono text-[11px]"
                       style={{
                         color:
-                          activeScenarioId === scenarioId ? '#6366f1' : 'var(--color-text-muted)',
+                          activeScenarioId === scenarioId ? 'var(--color-accent)' : 'var(--color-text-muted)',
                       }}
                     >
                       {number}
@@ -185,7 +185,7 @@ export default function GuidePanel({
           </p>
           <button
             className="mt-2 rounded-md px-2.5 py-1 text-[11px]"
-            style={{ background: '#6366f1', color: '#fff', border: 'none' }}
+            style={{ background: 'var(--color-accent)', color: '#fff', border: 'none' }}
             type="button"
           >
             확인 완료

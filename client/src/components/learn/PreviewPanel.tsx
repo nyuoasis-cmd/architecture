@@ -35,7 +35,12 @@ export default function PreviewPanel({
   };
 
   const handleReload = () => {
-    iframeRef.current?.contentWindow?.location.reload();
+    const iframe = iframeRef.current;
+    if (!iframe || !demo) {
+      return;
+    }
+
+    iframe.src = `${demo.url}#${scenarioId}`;
   };
 
   const handleFullscreen = async () => {
@@ -81,6 +86,9 @@ export default function PreviewPanel({
           <button className="toolbar-btn" onClick={handleReload} title="처음 상태로" type="button">
             ↺
           </button>
+          <button className="toolbar-btn" title="QR로 내 폰에서 보기" type="button">
+            ⌁
+          </button>
           <button className="toolbar-btn" onClick={handleFullscreen} title="전체화면" type="button">
             ⛶
           </button>
@@ -104,17 +112,15 @@ export default function PreviewPanel({
                   />
                 </div>
               </div>
-              <div className="mt-4 flex flex-wrap justify-center gap-2">
+              <div className="preview-scenario-dots" aria-label="시연 시나리오 선택">
                 {demo.scenarios.map((scenario) => (
                   <button
                     key={scenario.id}
-                    className={`demo-launcher ${scenarioId === scenario.id ? 'active' : ''}`}
+                    aria-label={scenario.label}
+                    className={`preview-scenario-dot ${scenarioId === scenario.id ? 'is-active' : ''}`}
                     onClick={() => handleScenarioHash(scenario.id)}
                     type="button"
-                  >
-                    <span>{scenario.label}</span>
-                    <span className="arrow">▶</span>
-                  </button>
+                  />
                 ))}
               </div>
               <p className="mt-4 text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
