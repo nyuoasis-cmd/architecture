@@ -1,0 +1,49 @@
+{
+  "pr": "#7",
+  "phase": "eval-visual",
+  "model": "codex",
+  "evaluated_commit": "d2d78e9",
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /teacher. 교사 UUID를 localStorage에 넣고 진입하면 body가 빈 화면으로 끝나고 콘솔에 \"The result of getSnapshot should be cached to avoid an infinite loop\" 및 TeacherDashboardPage 크래시가 발생했다. 헤더 D안(items-end/2줄/버튼 하단 정렬) 자체를 렌더하지 못했다. Screenshot: /tmp/arch-pr6-eval-visual/teacher-dashboard-crash-desktop.png"
+    },
+    {
+      "id": "V2",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /teacher. V1과 같은 렌더 크래시로 우상단 primary CTA가 나타나지 않아 위치와 최소 높이(44px)를 실측할 수 없었다. Screenshot: /tmp/arch-pr6-eval-visual/teacher-dashboard-crash-desktop.png"
+    },
+    {
+      "id": "V3",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /teacher. 대시보드가 크래시해서 \"새 세션 만들기\" 버튼을 열 수 없었고, 따라서 max-w-lg 모달/50% black backdrop/챕터 체크박스 그리드/disabled 버튼 색상을 실제 렌더에서 검증할 수 없었다. Root cause는 useDevUser()가 useSyncExternalStore snapshot 규약을 깨는 렌더 오류다."
+    },
+    {
+      "id": "V4",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /teacher. SessionCard가 전혀 렌더되지 않아 6자리 monospace 코드, QR 인라인 버튼, 종료 카드 opacity 60%, 종료 라벨을 확인할 수 없었다. 동일 콘솔 크래시가 대시보드 진입 즉시 발생했다."
+    },
+    {
+      "id": "V5",
+      "verdict": "REVISE",
+      "evidence": "Mobile 375x667, /join. 코드 input은 font-size 24px, letter-spacing 10.8px로 강조되고, 닉네임 input maxlength는 20으로 맞다. 가로 스크롤도 375px 이내였다. 다만 빈 제출 시 에러가 토스트가 아니라 배경 없는 inline block 텍스트로만 렌더되고 hasToast=false였다. Screenshot: /tmp/arch-pr6-eval-visual/join-mobile-error.png"
+    },
+    {
+      "id": "V6",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /teacher/session/33333333-3333-4333-8333-333333333333. TeacherSessionPage가 교사 인증 상태에서 빈 body로 크래시해 큰 코드(>=32px), 200px+ QR, destructive 종료 버튼을 실제 렌더에서 확인할 수 없었다. Screenshot: /tmp/arch-pr6-eval-visual/teacher-session-crash-desktop.png"
+    },
+    {
+      "id": "V7",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /teacher/session/:id. TeacherSessionPage 렌더 자체가 실패해 ParticipantList의 EmptyState, hover 상태, 진도 N/M 표시를 검증할 수 없었다. 콘솔에는 동일한 useSyncExternalStore snapshot 오류가 반복되었다."
+    },
+    {
+      "id": "V8",
+      "verdict": "FAIL",
+      "evidence": "Mobile 375x667, /teacher/session/33333333-3333-4333-8333-333333333333. 모바일에서도 body가 빈 화면으로 끝났고 TeacherSessionPage 크래시가 재현됐다. 따라서 세션명+코드+QR 1열, 리스트 스크롤, 종료 버튼 viewport 내 여부를 검증할 수 없었다. Screenshot: /tmp/arch-pr6-eval-visual/teacher-session-crash-mobile.png"
+    }
+  ],
+  "overall": "FAIL"
+}
