@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 type ClientEnv = ImportMeta & {
   env: Record<string, string | undefined>;
 };
@@ -5,7 +7,7 @@ type ClientEnv = ImportMeta & {
 const clientEnv = import.meta as ClientEnv;
 
 const hasSupabaseEnv = Boolean(
-  clientEnv.env.VITE_SUPABASE_URL && clientEnv.env.VITE_SUPABASE_ANON_KEY,
+  clientEnv.env?.VITE_SUPABASE_URL && clientEnv.env?.VITE_SUPABASE_ANON_KEY,
 );
 
 export default function LandingPage() {
@@ -22,9 +24,14 @@ export default function LandingPage() {
           <button className="primary-button" type="button" disabled>
             카카오 로그인 준비 중
           </button>
-          <a className="secondary-link" href="/dev-login">
-            DEV 로그인 바로가기
-          </a>
+          <div className="landing-action-links">
+            <a className="secondary-link" href="/dev-login">
+              DEV 로그인 바로가기
+            </a>
+            <Link className="secondary-link" to="/library">
+              라이브러리 시작
+            </Link>
+          </div>
         </div>
         <p className="landing-caption">
           이번 PR은 스캐폴드 단계입니다. 본 학습 화면과 세션 기능은 후속 PR에서 연결됩니다.
