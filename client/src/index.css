@@ -324,7 +324,7 @@
   }
 
   .demo-launcher.active .arrow {
-    color: #6366f1;
+    color: var(--color-accent);
   }
 
   .quiz-option {
