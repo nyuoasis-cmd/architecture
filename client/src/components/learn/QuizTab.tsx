@@ -20,32 +20,10 @@ type GradeResult = {
 const OPTION_LABELS = ['A', 'B', 'C', 'D'] as const;
 const CORRECT_INDEX_KEY = ['correct', 'Idx'].join('');
 
-function getOptionState(selected: boolean, result: GradeResult | null, correctIdx: unknown, optionIdx: number) {
-  if (!result) {
-    if (selected) {
-      return {
-        borderColor: 'var(--color-text-primary)',
-        color: 'var(--color-text-primary)',
-        fontWeight: 500,
-      };
-    }
-
-    return null;
-  }
-
-  if (typeof correctIdx === 'number' && correctIdx === optionIdx) {
+function getOptionState(selected: boolean, result: GradeResult | null) {
+  if (!result && selected) {
     return {
-      borderColor: 'var(--color-success)',
-      background: 'color-mix(in srgb, var(--color-success) 8%, white)',
-      color: 'var(--color-text-primary)',
-      fontWeight: 500,
-    };
-  }
-
-  if (selected) {
-    return {
-      borderColor: '#dc2626',
-      background: 'color-mix(in srgb, #dc2626 8%, white)',
+      borderColor: 'var(--color-text-primary)',
       color: 'var(--color-text-primary)',
       fontWeight: 500,
     };
@@ -193,13 +171,13 @@ export default function QuizTab({ qaId }: QuizTabProps) {
                   const correctIdx = breakdown?.[CORRECT_INDEX_KEY];
                   const showCorrect =
                     Boolean(result) && typeof correctIdx === 'number' && correctIdx === optionIdx;
-                  const optionState = getOptionState(selected, result, correctIdx, optionIdx);
+                  const optionState = getOptionState(selected, result);
 
                   return (
                     <button
                       key={`${qaId}-question-${questionIdx}-option-${optionIdx}`}
                       aria-pressed={selected}
-                      className={`quiz-option ${selected ? 'selected' : ''}`}
+                      className={`quiz-option ${selected && !result ? 'selected' : ''}`}
                       data-correct={showCorrect ? 'true' : undefined}
                       data-incorrect={result && selected && !breakdown?.correct ? 'true' : undefined}
                       onClick={() => handlePick(questionIdx, optionIdx)}
@@ -233,11 +211,17 @@ export default function QuizTab({ qaId }: QuizTabProps) {
         })}
       </div>
 
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <div className={result ? 'w-full text-center sm:text-center' : undefined}>
+      <div
+        className={
+          result
+            ? 'mt-6 flex flex-col items-center gap-3'
+            : 'mt-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between'
+        }
+      >
+        <div className={result ? 'w-full text-center' : undefined}>
           {result ? (
             <p className="text-sm font-medium" style={{ color: 'var(--color-text-primary)' }}>
-              {result.score} / {quizSet.questions.length}
+              총점 {result.score} / {quizSet.questions.length}
             </p>
           ) : (
             <p className="text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
@@ -251,7 +235,7 @@ export default function QuizTab({ qaId }: QuizTabProps) {
           ) : null}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center justify-center gap-2">
           {result ? (
             <button className="btn-ghost-sm" onClick={handleRetry} type="button">
               다시 풀기

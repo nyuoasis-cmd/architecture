@@ -350,6 +350,20 @@
     font-weight: 500;
   }
 
+  .quiz-option[data-correct='true'] {
+    border: 2px solid var(--color-success);
+    background: color-mix(in srgb, var(--color-success) 8%, white);
+    color: var(--color-text-primary);
+    font-weight: 500;
+  }
+
+  .quiz-option[data-incorrect='true'] {
+    border: 2px solid #dc2626;
+    background: color-mix(in srgb, #dc2626 8%, white);
+    color: var(--color-text-primary);
+    font-weight: 500;
+  }
+
   .quiz-option:focus-visible,
   .btn-primary-sm:focus-visible,
   .btn-ghost-sm:focus-visible {
