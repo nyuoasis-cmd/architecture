@@ -99,7 +99,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
         <section
           className={`${mobileTab === 'chat' ? 'flex' : 'hidden'} w-full flex-col border-r border-[var(--color-border)] lg:flex lg:w-[320px] lg:min-w-[280px] lg:flex-shrink-0`}
         >
-          <ChatPanel />
+          <ChatPanel qaId={qa.id} qaTitle={qa.title} />
         </section>
 
         <section
