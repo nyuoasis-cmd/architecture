@@ -36,11 +36,18 @@ export default function PreviewPanel({
 
   const handleReload = () => {
     const iframe = iframeRef.current;
-    if (!iframe || !demo) {
+    if (!iframe) {
       return;
     }
 
-    iframe.src = `${demo.url}#${scenarioId}`;
+    if (iframe.contentWindow) {
+      iframe.contentWindow.location.reload();
+      return;
+    }
+
+    if (demo) {
+      iframe.src = `${demo.url}#${scenarioId}`;
+    }
   };
 
   const handleFullscreen = async () => {
@@ -85,9 +92,6 @@ export default function PreviewPanel({
         <div className="flex items-center gap-1" style={{ visibility: isDemo ? 'visible' : 'hidden' }}>
           <button className="toolbar-btn" onClick={handleReload} title="처음 상태로" type="button">
             ↺
-          </button>
-          <button className="toolbar-btn" title="QR로 내 폰에서 보기" type="button">
-            ⌁
           </button>
           <button className="toolbar-btn" onClick={handleFullscreen} title="전체화면" type="button">
             ⛶
