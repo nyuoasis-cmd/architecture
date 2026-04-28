@@ -1,0 +1,44 @@
+{
+  "pr": "#5",
+  "phase": "eval-visual-round2",
+  "model": "codex",
+  "evaluated_commit": "99b01463ee15b06fd4995ef500d8998ccecd1607",
+  "screenshots": [
+    "/home/claude/architecture/qa-screenshots/pr5-round2/S1-desktop-initial.png",
+    "/home/claude/architecture/qa-screenshots/pr5-round2/S2-desktop-loading-mocked.png",
+    "/home/claude/architecture/qa-screenshots/pr5-round2/S3-desktop-success-mocked.png",
+    "/home/claude/architecture/qa-screenshots/pr5-round2/S4-desktop-error-real.png",
+    "/home/claude/architecture/qa-screenshots/pr5-round2/S5-mobile-375x400-chat.png"
+  ],
+  "excluded_items": [
+    "V1",
+    "V5",
+    "V7"
+  ],
+  "items": [
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "Desktop mocked-loading capture S2. user bubble class=bubble-user max-w-[92%], source at client/src/components/learn/ChatPanel.tsx:131-141. Computed background rgb(238, 242, 255) with border rgb(199, 210, 254), replacing the prior dark stone tone."
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "Desktop mocked-loading capture S2. loading node exposed role=status and aria-live=polite with aria-label=\"응답을 생성 중입니다\". Source at client/src/components/learn/ChatPanel.tsx:161-176."
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "Real error capture S4. alert node exposed role=alert and aria-live=assertive. Source at client/src/components/learn/ChatPanel.tsx:189-198. Computed colors were text rgb(244, 63, 94), background rgb(254, 242, 242), border rgb(254, 202, 202); token-backed red styling is visibly applied."
+    },
+    {
+      "id": "V6",
+      "verdict": "REVISE",
+      "evidence": "Mobile capture S5 at 375x400 after switching to the chat tab. textarea bottom measured 451.625px and send button bottom measured 503.625px while viewport height was 400px, so the input area remains below the viewport. Requirement in HANDOFF-pr5-round2 §B.1 was textarea bottom < 400px."
+    }
+  ],
+  "overall": "REVISE",
+  "summary": "V2/V3/V4 passed. V6 failed on direct viewport measurement; the mobile chat composer is still pushed below the 375x400 viewport.",
+  "next_action": "Generator should rework the mobile ChatPanel layout so the composer remains within the reduced viewport, then rerun T3 visual validation for V6 only.",
+  "generated_at": "2026-04-28T13:44:58Z"
+}
