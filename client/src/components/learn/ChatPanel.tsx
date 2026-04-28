@@ -214,7 +214,7 @@ export default function ChatPanel({ qaId, qaTitle }: ChatPanelProps) {
 
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
           <textarea
-            className="min-h-[72px] flex-1 resize-none rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2 text-[13px] focus-visible:border-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] focus-visible:outline-offset-2"
+            className="min-h-[56px] flex-1 resize-none rounded-[10px] border border-[var(--color-border)] bg-white px-3 py-2 text-[13px] focus-visible:border-[var(--color-accent)] focus-visible:outline-2 focus-visible:outline-[var(--color-accent)] focus-visible:outline-offset-2"
             disabled={loading}
             maxLength={280}
             onChange={(event) => setDraft(event.target.value)}

@@ -65,8 +65,8 @@ export default function LearnPage({ mode }: LearnPageProps) {
   }
 
   return (
-    <>
-      <nav className="flex border-b border-[var(--color-border)] lg:hidden">
+    <div className="flex h-[calc(100dvh-56px)] min-h-0 flex-col">
+      <nav className="flex flex-shrink-0 border-b border-[var(--color-border)] lg:hidden">
         {(Object.keys(LABELS) as Array<keyof typeof LABELS>).map((tab) => (
           <button
             key={tab}
@@ -79,7 +79,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
         ))}
       </nav>
 
-      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1">
+      <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 overflow-hidden">
         <aside
           className={`${mobileTab === 'guide' ? 'flex' : 'hidden'} w-full flex-col border-r border-[var(--color-border)] lg:flex lg:w-[280px] lg:min-w-[260px] lg:flex-shrink-0`}
         >
@@ -114,6 +114,6 @@ export default function LearnPage({ mode }: LearnPageProps) {
           />
         </section>
       </div>
-    </>
+    </div>
   );
 }
