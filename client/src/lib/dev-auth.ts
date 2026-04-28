@@ -87,6 +87,8 @@ function subscribe(onStoreChange: () => void) {
   };
 }
 
+export const subscribeDevUser = subscribe;
+
 export function useDevUser() {
   return useSyncExternalStore(subscribe, getDevUser, () => null);
 }

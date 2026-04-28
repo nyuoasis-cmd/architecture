@@ -3,22 +3,21 @@ import { Navigate, useParams } from 'react-router-dom';
 import QrInline from '../components/common/QrInline';
 import ParticipantList from '../components/teacher/ParticipantList';
 import { CHAPTERS, getQasByChapterId } from '../data/qa-stubs';
-import { useDevUser } from '../lib/dev-auth';
-import { endSession, getSession, getSessionParticipants } from '../lib/session-client';
+import { endSession, getSession, getSessionParticipants, SessionClientError } from '../lib/session-client';
 import { useSessionStore } from '../store/session-store';
 
 export default function TeacherSessionPage() {
-  const user = useDevUser();
   const { id = '' } = useParams();
   const [error, setError] = useState<string | null>(null);
   const [isEnding, setIsEnding] = useState(false);
+  const [isForbidden, setIsForbidden] = useState(false);
   const currentSession = useSessionStore((state) => state.currentSession);
   const participants = useSessionStore((state) => state.participants);
   const setCurrentSession = useSessionStore((state) => state.setCurrentSession);
   const setParticipants = useSessionStore((state) => state.setParticipants);
 
   useEffect(() => {
-    if (!user || !id) {
+    if (!id) {
       return;
     }
 
@@ -33,6 +32,11 @@ export default function TeacherSessionPage() {
       })
       .catch((caught) => {
         if (!cancelled) {
+          if (caught instanceof SessionClientError && caught.status === 403) {
+            setIsForbidden(true);
+            return;
+          }
+
           setError(caught instanceof Error ? caught.message : '세션 정보를 불러오지 못했습니다.');
         }
       });
@@ -40,10 +44,10 @@ export default function TeacherSessionPage() {
     return () => {
       cancelled = true;
     };
-  }, [id, setCurrentSession, user]);
+  }, [id, setCurrentSession]);
 
   useEffect(() => {
-    if (!user || !id) {
+    if (!id) {
       return;
     }
 
@@ -80,10 +84,10 @@ export default function TeacherSessionPage() {
         window.clearTimeout(timer);
       }
     };
-  }, [id, setParticipants, user]);
+  }, [id, setParticipants]);
 
-  if (!user) {
-    return <Navigate replace to={`/dev-login?from=/teacher/session/${id}`} />;
+  if (isForbidden) {
+    return <Navigate replace to="/forbidden" />;
   }
 
   if (!currentSession || currentSession.id !== id) {

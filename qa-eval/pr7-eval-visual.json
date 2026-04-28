@@ -1,0 +1,45 @@
+{
+  "pr": "#7",
+  "phase": "eval-visual",
+  "model": "codex",
+  "evaluated_commit": "384526a",
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /login. 화면 전체가 흰색 공백으로 끝났고 bodyTextLength=0, screenshot=/tmp/arch-pr7-eval-visual/login-desktop.png. 브라우저 예외는 `TypeError: Cannot read properties of undefined (reading 'DEV')` at `client/src/pages/LoginPage.tsx:7:42`였다. 따라서 카카오 노란색 버튼, DEV secondary, 헤더 D안 정합을 실제 렌더에서 확인할 수 없었다."
+    },
+    {
+      "id": "V2",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /auth/callback. 콜백 페이지도 동일한 앱 부트스트랩 크래시로 공백 화면만 렌더됐고 screenshot=/tmp/arch-pr7-eval-visual/auth-callback-desktop.png. 로딩 인디케이터, 안내 텍스트, 1초 후 토스트 모두 나타나지 않았다. 원인은 `/login`과 동일한 `LoginPage.tsx:7:42` 예외로 App 초기화가 중단되기 때문이다."
+    },
+    {
+      "id": "V3",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /forbidden. 403 안내 페이지 역시 흰색 공백만 보였고 screenshot=/tmp/arch-pr7-eval-visual/forbidden-desktop.png. 명료한 403 문구와 홈/로그인 CTA 2개를 전혀 렌더하지 못했다. 동일한 `Cannot read properties of undefined (reading 'DEV')` 예외가 앱 전체 렌더를 막았다."
+    },
+    {
+      "id": "V4",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /teacher. 최종 URL이 `http://localhost:5176/teacher`에 머문 채 공백 화면으로 끝났고 screenshot=/tmp/arch-pr7-eval-visual/teacher-redirect-desktop.png. 미인증 시 즉시 /login 리다이렉트되어야 하지만, AuthGate까지 도달하기 전에 App가 `LoginPage.tsx:7:42` 예외로 중단되어 빈 화면이 노출됐다."
+    },
+    {
+      "id": "V5",
+      "verdict": "FAIL",
+      "evidence": "Mobile 375x667, /login. 모바일에서도 전체가 흰색 공백으로 렌더됐고 screenshot=/tmp/arch-pr7-eval-visual/login-mobile.png. scrollWidth=clientWidth=375라 가로 스크롤 자체는 없었지만, 카카오 버튼 풀폭 여부와 폰트 가독성을 확인할 실제 UI가 존재하지 않았다. 원인은 동일한 `LoginPage.tsx:7:42` 런타임 예외다."
+    },
+    {
+      "id": "V6",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900, /library 및 /library/6/ch06_q03. 두 경로 모두 bodyTextLength=0의 공백 화면으로 끝났고 screenshots=/tmp/arch-pr7-eval-visual/library-desktop.png, /tmp/arch-pr7-eval-visual/library-learn-desktop.png. PR #5/#6 자율학습 화면이 회귀 없이 보여야 하지만, `LoginPage.tsx`의 import.meta.env 접근 오류가 App 부트스트랩을 깨뜨려 라이브러리 전체가 열리지 않았다."
+    }
+  ],
+  "overall": "FAIL",
+  "root_cause": {
+    "file": "client/src/pages/LoginPage.tsx",
+    "line": 7,
+    "message": "TypeError: Cannot read properties of undefined (reading 'DEV')",
+    "note": "`const clientEnv = import.meta as ClientEnv; const isDevBuild = Boolean(clientEnv.env.DEV);` 패턴이 Vite 런타임 변환을 우회해 `import.meta.env` 대신 undefined를 읽으면서 앱 전체 초기화를 중단시킨다."
+  }
+}

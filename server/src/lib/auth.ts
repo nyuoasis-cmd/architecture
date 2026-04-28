@@ -1,4 +1,5 @@
 import type { Request } from 'express';
+import { env } from '../env';
 import { getSupabaseAdminClient } from './supabase';
 
 export type AuthUser = {
@@ -22,33 +23,37 @@ export function getBearerToken(req: Request): string | null {
 }
 
 export async function getRequestUser(req: Request): Promise<AuthUser | null> {
-  const devTeacherId = req.get('x-dev-teacher-id');
-  if (devTeacherId) {
+  const token = getBearerToken(req);
+  if (token) {
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      return null;
+    }
+
+    const { data, error } = await supabase.auth.getUser(token);
+    if (error || !data.user) {
+      return null;
+    }
+
     return {
-      id: devTeacherId,
-      source: 'dev-header',
-      label: req.get('x-dev-teacher-name') ?? undefined,
+      id: data.user.id,
+      source: 'supabase',
+      label: data.user.email ?? undefined,
     };
   }
 
-  const token = getBearerToken(req);
-  if (!token) {
+  if (env.NODE_ENV !== 'development') {
     return null;
   }
 
-  const supabase = getSupabaseAdminClient();
-  if (!supabase) {
-    return null;
-  }
-
-  const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data.user) {
+  const devTeacherId = req.get('x-dev-teacher-id');
+  if (!devTeacherId) {
     return null;
   }
 
   return {
-    id: data.user.id,
-    source: 'supabase',
-    label: data.user.email ?? undefined,
+    id: devTeacherId,
+    source: 'dev-header',
+    label: req.get('x-dev-teacher-name') ?? undefined,
   };
 }
