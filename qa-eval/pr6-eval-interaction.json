@@ -1,0 +1,79 @@
+{
+  "pr": "#7",
+  "phase": "eval-interaction",
+  "model": "codex",
+  "evaluated_commit": "d2d78e9",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "REVISE",
+      "evidence": "POST /api/sessions on 2026-04-28 returned 201 with full session payload including teacher_id/chapter_ids/status/max_participants/created_at/ended_at, not the contracted 200 + {id, code, name}. Runtime session id=3d187655-0399-4cf3-a288-e18cc0d14c5c, code=XG4U8J. Source: server/src/routes/sessions.ts:116-168."
+    },
+    {
+      "id": "I2",
+      "verdict": "REVISE",
+      "evidence": "Collision retry loop exists for 5 attempts in server/src/routes/sessions.ts:143-160 and code generator uses 31-char alphabet in server/src/lib/session-code.ts:1-6, but this eval could not force a live collision and there is no monitoring log on retries or exhaustion. Runtime-only proof of retry behavior is absent."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "GET /api/sessions with teacher1 header returned only session 3d187655-0399-4cf3-a288-e18cc0d14c5c; teacher2 header returned only e8407629-d81d-4ef1-8b1d-97aa24ae198c. Cross-teacher leakage was not observed."
+    },
+    {
+      "id": "I4",
+      "verdict": "PASS",
+      "evidence": "POST /api/join with active code XG4U8J returned 200, Set-Cookie arch_pt=...; HttpOnly; SameSite=Lax; Max-Age=43200, and body {session_id:3d187655-0399-4cf3-a288-e18cc0d14c5c, participant_id:467f3f32-aeec-4433-954b-268c586296cc, nickname:'민지'}."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "POST /api/join with invalid code ZZZZZZ returned 404 {error:'session_not_found'}. Client redirect handler maps 404 to /join?code=...&invalid=1 in client/src/pages/JoinPage.tsx:41-49."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "After ending session 3d187655-0399-4cf3-a288-e18cc0d14c5c, POST /api/join with code XG4U8J returned 410 {error:'session_closed'}. Client redirect handler maps 410 to /join?code=...&closed=1 in client/src/pages/JoinPage.tsx:47-49."
+    },
+    {
+      "id": "I7",
+      "verdict": "FAIL",
+      "evidence": "Participant progress write is broken on active sessions. Fresh active session 3ce05da5-95f8-418e-9852-d6a72d009878 joined successfully, direct DB read showed architecture_sessions.status='active' for participant fb74b038-f89b-4286-bba6-7d06639f1b86, but PATCH /api/progress with valid arch_pt still returned 410 {error:'session_closed'}. Root cause: progress resolver casts architecture_sessions join to Array and checks joinedSessions[0]?.status, but Supabase returns an object. Source: server/src/routes/progress.ts:33-49."
+    },
+    {
+      "id": "I8",
+      "verdict": "FAIL",
+      "evidence": "Self-study progress write is broken. After signing in user ae04505e-d5b4-4bbc-ab81-708577b23069 via Supabase auth, PATCH /api/progress with Authorization: Bearer ... returned 500 {error:'progress_write_failed'} twice, and no architecture_progress row for qa_id=ch06_q03 was created. Direct insert with updated_at failed against production DB with PGRST204 'Could not find the updated_at column of architecture_progress'. Source expects updated_at in payload at server/src/routes/progress.ts:84-105."
+    },
+    {
+      "id": "I9",
+      "verdict": "REVISE",
+      "evidence": "Expired participant token correctly returned 401 {error:'unauthorized'} when a valid HMAC token was generated with exp in the past. However client handling is generic: LearnPage redirects any 401 to /join?invalid=1, which shows '세션 코드를 찾지 못했습니다' rather than an explicit expired-token / re-enter nickname flow. Source: client/src/pages/LearnPage.tsx:217-224 and client/src/pages/JoinPage.tsx:14-22."
+    },
+    {
+      "id": "I10",
+      "verdict": "PASS",
+      "evidence": "Tampering the final byte of arch_pt caused PATCH /api/progress to return 401 {error:'unauthorized'}. HMAC mismatch rejection is enforced by verifyParticipantToken in server/src/lib/participant-token.ts."
+    },
+    {
+      "id": "I11",
+      "verdict": "PASS",
+      "evidence": "POST /api/sessions/3d187655-0399-4cf3-a288-e18cc0d14c5c/end returned 403 for non-owner teacher2, then 200 for owner teacher1 with status='ended'. Subsequent participant GET /api/sessions/:id and PATCH /api/progress returned 410, and new join on code XG4U8J also returned 410."
+    },
+    {
+      "id": "I12",
+      "verdict": "FAIL",
+      "evidence": "DB migration is not fully aligned with runtime expectations. architecture_sessions and architecture_participants rows were created, XOR constraint enforcement on architecture_progress worked (insert with both participant_id and user_id failed with PostgreSQL 23514 progress_mode_xor), but architecture_progress lacks updated_at in the live schema and thus cannot satisfy the current server write path. Result: no participant/self progress rows were created during this eval."
+    },
+    {
+      "id": "I13",
+      "verdict": "PASS",
+      "evidence": "PR #5 chatbot baseline still answers and DB-caches. POST /api/chat for qaId=ch06_q03 returned 200 with model=claude-haiku-4-5-20251001 and cached=false; identical second call returned cached=true with same answer. Cache/rate-limit code path remains in server/src/lib/chat-service.ts:109-176 and 319-341. This eval did not exhaust the 100/min limiter, so rate-limit behavior was source-confirmed rather than load-proven."
+    },
+    {
+      "id": "I14",
+      "verdict": "FAIL",
+      "evidence": "PR #4B self-study progress regression detected. Authenticated user progress save for qa_id=ch06_q03 failed with 500 twice and left no architecture_progress row for user ae04505e-d5b4-4bbc-ab81-708577b23069, so self-study read/quiz persistence is not operational."
+    }
+  ],
+  "overall": "FAIL"
+}
