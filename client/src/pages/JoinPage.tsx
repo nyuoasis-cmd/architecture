@@ -12,6 +12,9 @@ export default function JoinPage() {
   const [error, setError] = useState<string | null>(null);
 
   const banner = useMemo(() => {
+    if (searchParams.get('expired') === '1') {
+      return '참여 시간이 만료되었습니다. 닉네임을 다시 입력해 참여해주세요.';
+    }
     if (searchParams.get('invalid') === '1') {
       return '세션 코드를 찾지 못했습니다. 6자리 코드를 다시 확인해주세요.';
     }

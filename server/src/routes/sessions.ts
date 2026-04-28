@@ -165,7 +165,7 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  res.status(201).json(session);
+  res.status(200).json({ id: session.id, code: session.code, name: session.name });
 });
 
 router.get('/', async (req, res) => {

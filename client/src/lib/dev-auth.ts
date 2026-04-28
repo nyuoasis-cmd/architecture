@@ -9,7 +9,11 @@ export type DevUser = {
 
 const listeners = new Set<() => void>();
 
+let cachedRaw: string | null | undefined;
+let cachedUser: DevUser | null = null;
+
 function emit() {
+  cachedRaw = undefined;
   listeners.forEach((listener) => listener());
 }
 
@@ -34,7 +38,13 @@ export function getDevUser(): DevUser | null {
     return null;
   }
 
-  return parse(window.localStorage.getItem(KEY));
+  const raw = window.localStorage.getItem(KEY);
+  if (raw === cachedRaw) {
+    return cachedUser;
+  }
+  cachedRaw = raw;
+  cachedUser = parse(raw);
+  return cachedUser;
 }
 
 export function setDevUser(user: DevUser) {

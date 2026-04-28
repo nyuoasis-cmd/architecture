@@ -220,7 +220,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
     }
 
     if (sessionStatus === 'error' && sessionError?.status === 401) {
-      return <Navigate replace to="/join?invalid=1" />;
+      return <Navigate replace to="/join?expired=1" />;
     }
 
     if (

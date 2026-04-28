@@ -32,7 +32,7 @@ async function resolveProgressIdentity(req: Request): Promise<ProgressIdentity |
 
     const { data: participant, error } = await supabase
       .from('architecture_participants')
-      .select('id, session_id, architecture_sessions!inner(status)')
+      .select('id, session_id')
       .eq('id', payload.participant_id)
       .eq('session_id', payload.session_id)
       .single();
@@ -41,8 +41,13 @@ async function resolveProgressIdentity(req: Request): Promise<ProgressIdentity |
       return null;
     }
 
-    const joinedSessions = participant.architecture_sessions as Array<{ status: string }>;
-    if (joinedSessions[0]?.status !== 'active') {
+    const { data: session, error: sessionError } = await supabase
+      .from('architecture_sessions')
+      .select('status')
+      .eq('id', payload.session_id)
+      .single();
+
+    if (sessionError || !session || session.status !== 'active') {
       throw new Error('session_closed');
     }
 
