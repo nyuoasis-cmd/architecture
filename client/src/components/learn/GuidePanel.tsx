@@ -14,13 +14,13 @@ type GuidePanelProps = {
 type ProgressState = 'done' | 'current' | 'todo';
 
 function getProgressState(currentQaId: string, qaId: string): ProgressState {
-  if (qaId === currentQaId) {
-    return 'current';
-  }
-
   const progress = getProgress(qaId);
   if (progress && (progress.read || (progress.quizScore ?? 0) >= 2)) {
     return 'done';
+  }
+
+  if (qaId === currentQaId) {
+    return 'current';
   }
 
   return 'todo';

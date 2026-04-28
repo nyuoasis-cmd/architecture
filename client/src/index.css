@@ -350,6 +350,13 @@
     font-weight: 500;
   }
 
+  .quiz-option:focus-visible,
+  .btn-primary-sm:focus-visible,
+  .btn-ghost-sm:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+  }
+
   .guide-progress-button {
     display: flex;
     flex: 1 1 0%;
