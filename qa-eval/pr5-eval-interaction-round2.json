@@ -1,0 +1,61 @@
+{
+  "pr": "#5",
+  "phase": "eval-interaction-round2",
+  "model": "codex",
+  "evaluated_commit": "99b01463ee15b06fd4995ef500d8998ccecd1607",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "curl first call to POST /api/chat with qaId=ch06_q03 returned 200-equivalent JSON in 2693ms with answer text, cached=false, model=claude-haiku-4-5-20251001, blockedCount=0."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "Immediate second call with the identical question returned in 68ms with cached=true."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "First response body contained cached=false and model=claude-haiku-4-5-20251001; second response body preserved the same model and flipped cached=true."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "Headless Tab sequence reached the chat textarea on the 18th focusable element. Computed focus styles on textarea were outline-width 2px, outline-style solid, outline-color rgb(99, 102, 241). Shift+Enter produced a newline (\"첫줄\\n둘째줄\"), and the next Tab moved focus to the 전송 button."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "Supabase row for the first uncached request was inserted into architecture_chats with qa_id=ch06_q03, anonymous_id=::1, model_used=claude-haiku-4-5-20251001, cached=false, blocked_count=0, upgraded_to_sonnet=false, created_at=2026-04-28T13:45:26.340581+00:00."
+    },
+    {
+      "id": "I9",
+      "verdict": "PASS",
+      "evidence": "After updating the inserted row created_at to 8 days old, the same question missed cache and returned cached=false in 3230ms. A new architecture_chats row was then present with a fresh 2026-04-28T13:46:01.766286+00:00 created_at, confirming the 7-day TTL gate."
+    },
+    {
+      "id": "I13",
+      "verdict": "PASS",
+      "evidence": "Preview iframe rendered with sandbox=allow-scripts. Clicking the reload control emitted child frame navigations about:blank -> http://localhost:5177/demos/ch06/q03.html#launch, matching the expected reset pattern."
+    },
+    {
+      "id": "I14",
+      "verdict": "PASS",
+      "evidence": "Quiz tab still rendered 12 options for the 3-question quiz, grading completed with total score text \"총점 0 / 3\", localStorage architecture-progress-v1 updated ch06_q03 with read=true and quizScore=0, and /library continued to render chapter progress snippets (\"진도 0/7\")."
+    }
+  ],
+  "critical_findings": [],
+  "regression_pr4a": {
+    "reload_pattern": "PASS",
+    "iframe_sandbox": "PASS"
+  },
+  "regression_pr4b": {
+    "quiz_grade": "PASS",
+    "progress_localstorage": "PASS",
+    "guide_panel_dots": "PASS"
+  },
+  "code_review_notes": [],
+  "overall": "PASS",
+  "summary": "Round 2 T4 scope passed on the detached PR #5 head. Real Claude response, DB cache hit, 7-day TTL expiry, keyboard focus visibility, iframe reload/sandbox, and quiz/progress regressions all behaved as required."
+}
