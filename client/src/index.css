@@ -10,6 +10,7 @@
   --color-text-secondary: var(--color-text-muted);
   --color-text-faint: var(--color-text-quaternary);
   --color-accent: #6366f1;
+  --color-bg-input: #f5f5f4;
   --color-bg-card: var(--color-surface);
 }
 
@@ -348,6 +349,27 @@
     border-color: var(--color-text-primary);
     color: var(--color-text-primary);
     font-weight: 500;
+  }
+
+  .quiz-option[data-correct='true'] {
+    border: 2px solid var(--color-success);
+    background: color-mix(in srgb, var(--color-success) 8%, white);
+    color: var(--color-text-primary);
+    font-weight: 500;
+  }
+
+  .quiz-option[data-incorrect='true'] {
+    border: 2px solid #dc2626;
+    background: color-mix(in srgb, #dc2626 8%, white);
+    color: var(--color-text-primary);
+    font-weight: 500;
+  }
+
+  .quiz-option:focus-visible,
+  .btn-primary-sm:focus-visible,
+  .btn-ghost-sm:focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
   }
 
   .guide-progress-button {

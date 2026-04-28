@@ -5,6 +5,7 @@ import GuidePanel from '../components/learn/GuidePanel';
 import PreviewPanel from '../components/learn/PreviewPanel';
 import { getChapterById, getQaById, getQasByChapterId } from '../data/qa-stubs';
 import { getDemoByQaId } from '../data/demos';
+import { markRead } from '../lib/progress';
 import { useLearnStore } from '../store/learn-store';
 
 const LABELS = {
@@ -37,6 +38,12 @@ export default function LearnPage({ mode }: LearnPageProps) {
       resetForQa(qa.id, demo?.scenarios[0]?.id ?? 'launch');
     }
   }, [demo?.scenarios, qa, resetForQa]);
+
+  useEffect(() => {
+    if (mode === 'self' && qa) {
+      markRead(qa.id);
+    }
+  }, [mode, qa]);
 
   if (mode === 'session') {
     return (
@@ -102,6 +109,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
             demo={demo}
             initialTab={mobileTab === 'quiz' ? 'quiz' : 'demo'}
             onScenarioChange={setScenarioId}
+            qaId={qa.id}
             scenarioId={scenarioId}
           />
         </section>
