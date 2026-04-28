@@ -57,7 +57,7 @@ export default function GuidePanel({
             const stepNumber = idx + 1;
             const entry = progressMap[qaId];
             const isCurrent = qaId === currentQaId;
-            const isDone = (entry?.quizScore !== undefined && entry.quizScore >= 2) || entry?.read === true;
+            const isDone = entry?.quizScore !== undefined && entry.quizScore >= 2;
 
             const bgColor = isCurrent
               ? 'var(--color-accent)'
