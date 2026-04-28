@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import type { ChapterStub, QaStub } from '../../data/qa-stubs';
+import { getProgress, useProgressMap } from '../../lib/progress';
 
 type GuidePanelProps = {
   chapter: ChapterStub;
@@ -12,13 +13,16 @@ type GuidePanelProps = {
 
 type ProgressState = 'done' | 'current' | 'todo';
 
-function getProgressState(currentOrder: number, order: number): ProgressState {
-  if (order < currentOrder) {
-    return 'done';
-  }
-  if (order === currentOrder) {
+function getProgressState(currentQaId: string, qaId: string): ProgressState {
+  if (qaId === currentQaId) {
     return 'current';
   }
+
+  const progress = getProgress(qaId);
+  if (progress && (progress.read || (progress.quizScore ?? 0) >= 2)) {
+    return 'done';
+  }
+
   return 'todo';
 }
 
@@ -51,6 +55,8 @@ export default function GuidePanel({
   activeScenarioId,
   onScenarioChange,
 }: GuidePanelProps) {
+  useProgressMap();
+
   return (
     <div className="flex h-full flex-col">
       <div className="flex-shrink-0 border-b border-[var(--color-border)] p-3">
@@ -72,7 +78,7 @@ export default function GuidePanel({
 
         <div className="mb-2 flex items-center justify-between gap-1">
           {chapterQas.map((qa) => {
-            const state = getProgressState(currentQa.order, qa.order);
+            const state = getProgressState(currentQa.id, qa.id);
             const badge = getBadgeStyle(state);
             const route = `/library/${chapter.id}/${qa.id}`;
             const badgeText = state === 'done' ? '✓' : String(qa.order);

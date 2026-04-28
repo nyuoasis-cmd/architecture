@@ -3,6 +3,7 @@ import express from 'express';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { env } from './env';
+import quizRouter from './routes/quiz';
 
 const app = express();
 const clientDistPath = resolve(__dirname, '../../client/dist');
@@ -15,6 +16,8 @@ app.get('/api/health', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json({ status: 'ok', ts: Date.now() });
 });
+
+app.use('/api/quiz', quizRouter);
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Not Found' });

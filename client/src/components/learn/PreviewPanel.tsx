@@ -5,6 +5,7 @@ import QuizTab from './QuizTab';
 
 type PreviewPanelProps = {
   demo?: DemoMeta;
+  qaId: string;
   scenarioId: string;
   onScenarioChange: (scenarioId: string) => void;
   initialTab?: 'demo' | 'quiz';
@@ -12,6 +13,7 @@ type PreviewPanelProps = {
 
 export default function PreviewPanel({
   demo,
+  qaId,
   scenarioId,
   onScenarioChange,
   initialTab = 'demo',
@@ -143,7 +145,7 @@ export default function PreviewPanel({
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto p-6 lg:p-10">
-          <QuizTab />
+          <QuizTab qaId={qaId} />
         </div>
       )}
     </section>
