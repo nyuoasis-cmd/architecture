@@ -40,14 +40,17 @@ export default function PreviewPanel({
       return;
     }
 
-    if (iframe.contentWindow) {
-      iframe.contentWindow.location.reload();
+    const currentSrc = iframe.src || (demo ? `${demo.url}#${scenarioId}` : '');
+    if (!currentSrc) {
       return;
     }
 
-    if (demo) {
-      iframe.src = `${demo.url}#${scenarioId}`;
-    }
+    iframe.src = 'about:blank';
+    requestAnimationFrame(() => {
+      if (iframeRef.current) {
+        iframeRef.current.src = currentSrc;
+      }
+    });
   };
 
   const handleFullscreen = async () => {
