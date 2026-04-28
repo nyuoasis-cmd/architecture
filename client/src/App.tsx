@@ -2,6 +2,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import AuthGate from './components/auth/AuthGate';
 import ServiceHeader from './components/layout/ServiceHeader';
 import AuthCallbackPage from './pages/AuthCallbackPage';
+import AboutPage from './pages/AboutPage';
 import DevLoginPage from './pages/DevLoginPage';
 import ForbiddenPage from './pages/ForbiddenPage';
 import JoinPage from './pages/JoinPage';
@@ -20,6 +21,7 @@ export default function App() {
         <ServiceHeader />
         <Routes>
           <Route path="/" element={<LandingPage />} />
+          <Route path="/about" element={<AboutPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/dev-login" element={<DevLoginPage />} />
