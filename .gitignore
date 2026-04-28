@@ -1,0 +1,21 @@
+node_modules/
+dist/
+.env
+*.log
+
+# Build artifacts
+*.tsbuildinfo
+
+# Editor
+.vscode/
+.idea/
+.DS_Store
+
+# Codex/Claude/AO workspaces
+.ao/
+.claude/
+.codex/
+
+# Local QA artifacts
+screenshots/
+qa/
