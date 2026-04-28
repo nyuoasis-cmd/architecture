@@ -1,0 +1,29 @@
+services:
+    - type: web
+      name: architecture
+      runtime: node
+      plan: starter
+      buildCommand: cd client && npm install --include=dev &&
+  npm run build && cd ../server && npm install --include=dev
+  && npm run build
+      startCommand: npm start
+      healthCheckPath: /api/health
+      envVars:
+        - key: NODE_ENV
+          value: production
+        - key: ANTHROPIC_API_KEY
+          sync: false
+        - key: SUPABASE_URL
+          sync: false
+        - key: SUPABASE_SERVICE_ROLE_KEY
+          sync: false
+        - key: SUPABASE_ANON_KEY
+          sync: false
+        - key: VITE_SUPABASE_URL
+          sync: false
+        - key: VITE_SUPABASE_ANON_KEY
+          sync: false
+        - key: KAKAO_OAUTH_REDIRECT_URI
+          sync: false
+        - key: HMAC_SECRET
+          sync: false
