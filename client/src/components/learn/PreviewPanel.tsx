@@ -34,8 +34,10 @@ export default function PreviewPanel({
 
   const handleScenarioHash = (nextScenarioId: string) => {
     const iframe = iframeRef.current;
-    if (iframe?.contentWindow) {
-      iframe.contentWindow.location.hash = nextScenarioId;
+    if (iframe && demo) {
+      // sandbox iframe은 cross-origin location.hash 쓰기를 차단하므로
+      // src 자체를 #scenario 으로 재할당하여 시나리오를 바꾼다.
+      iframe.src = `${demo.url}#${nextScenarioId}`;
     }
     onScenarioChange(nextScenarioId);
   };

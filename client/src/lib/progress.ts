@@ -89,12 +89,30 @@ export function getAllProgress(): ProgressMap {
   return ensureCache();
 }
 
+async function syncProgressRemote(qaId: string, payload: { readAt?: string; quizScore?: number }) {
+  try {
+    await fetch('/api/progress', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        qa_id: qaId,
+        read_at: payload.readAt,
+        quiz_score: payload.quizScore,
+      }),
+    });
+  } catch {
+    // local cache 유지, 다음 호출에서 재시도
+  }
+}
+
 export function markRead(qaId: string) {
   updateProgress(qaId, (current) => ({
     read: true,
     quizScore: current?.quizScore,
     updatedAt: Date.now(),
   }));
+  void syncProgressRemote(qaId, { readAt: new Date().toISOString() });
 }
 
 export function setQuizScore(qaId: string, score: number) {
@@ -103,6 +121,7 @@ export function setQuizScore(qaId: string, score: number) {
     quizScore: score,
     updatedAt: Date.now(),
   }));
+  void syncProgressRemote(qaId, { quizScore: score });
 }
 
 export function getChapterProgress(chapterId: number): { done: number; total: number } {
