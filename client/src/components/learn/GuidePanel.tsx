@@ -6,8 +6,12 @@ type GuidePanelProps = {
   chapter: ChapterStub;
   currentQa: QaStub;
   chapterQas: QaStub[];
+  allSessionQas?: QaStub[];
+  availableChapters?: ChapterStub[];
   mode: 'self' | 'session';
   activeScenarioId: string;
+  progressMapOverride?: Record<string, { read: boolean; quizScore?: number }>;
+  sessionId?: string;
   onScenarioChange: (scenarioId: string) => void;
 };
 
@@ -15,27 +19,60 @@ export default function GuidePanel({
   chapter,
   currentQa,
   chapterQas,
+  allSessionQas,
+  availableChapters,
   mode,
   activeScenarioId,
+  progressMapOverride,
+  sessionId,
   onScenarioChange,
 }: GuidePanelProps) {
-  const progressMap = useProgressMap();
+  const localProgressMap = useProgressMap();
+  const progressMap = progressMapOverride ?? localProgressMap;
   const navigate = useNavigate();
   const currentQaId = currentQa.id;
   const stepQaIds = chapterQas.map((qa) => qa.id);
+  const sessionQaIds = allSessionQas?.map((qa) => qa.id) ?? stepQaIds;
+  const sessionQaIndex = sessionQaIds.indexOf(currentQaId);
+  const previousSessionQa = sessionQaIndex > 0 ? allSessionQas?.[sessionQaIndex - 1] : undefined;
+  const nextSessionQa = sessionQaIndex >= 0 ? allSessionQas?.[sessionQaIndex + 1] : undefined;
 
   const navigateTo = (qaId: string) => {
-    const qa = chapterQas.find((item) => item.id === qaId);
-    if (!qa) {
+    const targetQa = chapterQas.find((item) => item.id === qaId) ?? allSessionQas?.find((item) => item.id === qaId);
+    if (!targetQa) {
       return;
     }
 
-    navigate(`/library/${chapter.id}/${qa.id}`);
+    if (mode === 'session' && sessionId) {
+      navigate(`/learn/${sessionId}?qa=${targetQa.id}`);
+      return;
+    }
+
+    navigate(`/library/${targetQa.chapterId}/${targetQa.id}`);
   };
 
   return (
     <div className="flex h-full flex-col">
       <div className="flex-shrink-0 border-b border-[var(--color-border)] p-3">
+        {mode === 'session' && availableChapters && availableChapters.length > 1 ? (
+          <div className="mb-3 flex flex-wrap gap-1.5">
+            {availableChapters.map((sessionChapter) => (
+              <button
+                key={sessionChapter.id}
+                className={`rounded-full px-2.5 py-1 text-[11px] ${
+                  sessionChapter.id === chapter.id
+                    ? 'bg-stone-950 text-white'
+                    : 'border border-[var(--color-border)] bg-white text-stone-600'
+                }`}
+                onClick={() => navigateTo(sessionChapter.firstQaId)}
+                type="button"
+              >
+                {sessionChapter.id}장
+              </button>
+            ))}
+          </div>
+        ) : null}
+
         <div className="mb-2 flex items-center gap-2">
           <span>{chapter.emoji}</span>
           <span className="truncate text-xs font-medium" style={{ fontFamily: 'var(--font-heading)' }}>
@@ -224,9 +261,35 @@ export default function GuidePanel({
             )}
           </>
         ) : (
-          <button className="btn-ghost-sm flex-1" disabled type="button">
-            세션 학습은 PR #6에서 연결됩니다
-          </button>
+          <>
+            {previousSessionQa ? (
+              <button
+                className="btn-ghost-sm flex flex-1 items-center justify-center"
+                onClick={() => navigateTo(previousSessionQa.id)}
+                type="button"
+              >
+                ← 이전
+              </button>
+            ) : (
+              <button className="btn-ghost-sm flex-1" disabled type="button">
+                ← 이전
+              </button>
+            )}
+
+            {nextSessionQa ? (
+              <button
+                className="btn-primary-sm flex flex-1 items-center justify-center"
+                onClick={() => navigateTo(nextSessionQa.id)}
+                type="button"
+              >
+                다음 →
+              </button>
+            ) : (
+              <button className="btn-primary-sm flex-1" disabled type="button">
+                다음 →
+              </button>
+            )}
+          </>
         )}
       </div>
     </div>

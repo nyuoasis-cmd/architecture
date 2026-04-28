@@ -1,12 +1,15 @@
-import { useEffect } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Navigate, useParams, useSearchParams } from 'react-router-dom';
 import ChatPanel from '../components/learn/ChatPanel';
 import GuidePanel from '../components/learn/GuidePanel';
 import PreviewPanel from '../components/learn/PreviewPanel';
-import { getChapterById, getQaById, getQasByChapterId } from '../data/qa-stubs';
+import { CHAPTERS, getChapterById, getQaById, getQasByChapterId, type QaStub } from '../data/qa-stubs';
 import { getDemoByQaId } from '../data/demos';
 import { markRead } from '../lib/progress';
+import { getSession, patchProgress, SessionClientError } from '../lib/session-client';
+import { clearSessionTokenHint } from '../lib/session-token';
 import { useLearnStore } from '../store/learn-store';
+import { useSessionStore } from '../store/session-store';
 
 const LABELS = {
   guide: '📖 학습',
@@ -19,50 +22,22 @@ type LearnPageProps = {
   mode: 'self' | 'session';
 };
 
-export default function LearnPage({ mode }: LearnPageProps) {
-  const params = useParams();
-  const chapterId = Number(params.chapterId);
-  const qaId = params.qaId ?? '';
-  const chapter = getChapterById(chapterId);
-  const qa = getQaById(qaId);
-  const chapterQas = chapter ? getQasByChapterId(chapter.id) : [];
-  const demo = qa ? getDemoByQaId(qa.id) : undefined;
+function LearnLayout(props: {
+  mode: 'self' | 'session';
+  chapter: NonNullable<ReturnType<typeof getChapterById>>;
+  chapterQas: QaStub[];
+  qa: QaStub;
+  demo: ReturnType<typeof getDemoByQaId>;
+  allSessionQas?: QaStub[];
+  availableChapters?: typeof CHAPTERS;
+  progressMapOverride?: Record<string, { read: boolean; quizScore?: number }>;
+  sessionId?: string;
+  onScore?: (score: number) => void;
+}) {
   const mobileTab = useLearnStore((state) => state.mobileTab);
   const scenarioId = useLearnStore((state) => state.scenarioId);
   const setMobileTab = useLearnStore((state) => state.setMobileTab);
-  const resetForQa = useLearnStore((state) => state.resetForQa);
   const setScenarioId = useLearnStore((state) => state.setScenarioId);
-
-  useEffect(() => {
-    if (qa) {
-      resetForQa(qa.id, demo?.scenarios[0]?.id ?? 'launch');
-    }
-  }, [demo?.scenarios, qa, resetForQa]);
-
-  useEffect(() => {
-    if (mode === 'self' && qa) {
-      markRead(qa.id);
-    }
-  }, [mode, qa]);
-
-  if (mode === 'session') {
-    return (
-      <main className="mx-auto flex min-h-[calc(100vh-56px)] w-full max-w-[920px] items-center justify-center px-6 py-10">
-        <section className="w-full rounded-xl border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
-          <p className="mb-3 text-sm font-medium text-stone-500">세션 학습 준비중</p>
-          <h1 className="mb-3 text-2xl font-medium">세션 학습은 PR #6에서 연결됩니다</h1>
-          <p className="text-sm text-stone-600">
-            현재 PR은 자율학습 UI 골격만 다룹니다. 교사 세션 코드, 참여 흐름, 실시간 진도는 다음 단계에서
-            연결됩니다.
-          </p>
-        </section>
-      </main>
-    );
-  }
-
-  if (!chapter || !qa || qa.chapterId !== chapter.id) {
-    return <Navigate replace to="/library" />;
-  }
 
   return (
     <div className="flex h-[calc(100dvh-56px)] min-h-0 flex-col">
@@ -85,35 +60,220 @@ export default function LearnPage({ mode }: LearnPageProps) {
         >
           <GuidePanel
             activeScenarioId={scenarioId}
-            chapter={chapter}
-            chapterQas={chapterQas}
-            currentQa={qa}
-            mode={mode}
+            allSessionQas={props.allSessionQas}
+            availableChapters={props.availableChapters}
+            chapter={props.chapter}
+            chapterQas={props.chapterQas}
+            currentQa={props.qa}
+            mode={props.mode}
             onScenarioChange={(nextScenarioId) => {
               setScenarioId(nextScenarioId);
               setMobileTab('preview');
             }}
+            progressMapOverride={props.progressMapOverride}
+            sessionId={props.sessionId}
           />
         </aside>
 
         <section
           className={`${mobileTab === 'chat' ? 'flex' : 'hidden'} w-full flex-col border-r border-[var(--color-border)] lg:flex lg:w-[320px] lg:min-w-[280px] lg:flex-shrink-0`}
         >
-          <ChatPanel qaId={qa.id} qaTitle={qa.title} />
+          <ChatPanel qaId={props.qa.id} qaTitle={props.qa.title} />
         </section>
 
         <section
           className={`${mobileTab === 'preview' || mobileTab === 'quiz' ? 'flex' : 'hidden'} flex-1 flex-col lg:flex`}
         >
           <PreviewPanel
-            demo={demo}
+            demo={props.demo}
             initialTab={mobileTab === 'quiz' ? 'quiz' : 'demo'}
             onScenarioChange={setScenarioId}
-            qaId={qa.id}
+            qaId={props.qa.id}
+            quizProps={props.onScore ? { onScore: props.onScore } : undefined}
             scenarioId={scenarioId}
           />
         </section>
       </div>
     </div>
+  );
+}
+
+export default function LearnPage({ mode }: LearnPageProps) {
+  const params = useParams();
+  const [searchParams] = useSearchParams();
+  const resetForQa = useLearnStore((state) => state.resetForQa);
+  const currentSession = useSessionStore((state) => state.currentSession);
+  const setCurrentSession = useSessionStore((state) => state.setCurrentSession);
+  const viewerProgress = useSessionStore((state) => state.viewerProgress);
+  const updateViewerProgress = useSessionStore((state) => state.updateViewerProgress);
+  const [sessionStatus, setSessionStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>(
+    mode === 'session' ? 'loading' : 'idle',
+  );
+  const [sessionError, setSessionError] = useState<{ status?: number; message: string } | null>(null);
+
+  const chapterId = Number(params.chapterId);
+  const qaId = params.qaId ?? '';
+
+  let chapter = getChapterById(chapterId);
+  let qa = getQaById(qaId);
+  let chapterQas = chapter ? getQasByChapterId(chapter.id) : [];
+  let sessionQas: QaStub[] = [];
+  let sessionChapters: typeof CHAPTERS = [];
+
+  if (mode === 'session' && currentSession && currentSession.id === params.sessionId) {
+    sessionChapters = currentSession.chapter_ids
+      .map((selectedChapterId) => CHAPTERS.find((item) => item.id === selectedChapterId))
+      .filter((item): item is (typeof CHAPTERS)[number] => Boolean(item));
+    sessionQas = currentSession.chapter_ids.flatMap((selectedChapterId) => getQasByChapterId(selectedChapterId));
+
+    const sessionQaId = searchParams.get('qa') ?? sessionQas[0]?.id ?? '';
+    const resolvedQa = sessionQas.find((item) => item.id === sessionQaId) ?? sessionQas[0];
+    if (resolvedQa) {
+      qa = resolvedQa;
+      chapter = getChapterById(resolvedQa.chapterId);
+      chapterQas = chapter ? getQasByChapterId(chapter.id) : [];
+    }
+  }
+
+  const demo = qa ? getDemoByQaId(qa.id) : undefined;
+
+  useEffect(() => {
+    if (!qa) {
+      return;
+    }
+
+    resetForQa(qa.id, demo?.scenarios[0]?.id ?? 'launch');
+  }, [demo?.scenarios, qa, resetForQa]);
+
+  useEffect(() => {
+    if (mode === 'self' && qa) {
+      markRead(qa.id);
+    }
+  }, [mode, qa]);
+
+  useEffect(() => {
+    if (mode !== 'session' || !params.sessionId) {
+      return;
+    }
+
+    let cancelled = false;
+    setSessionStatus('loading');
+    setSessionError(null);
+
+    getSession(params.sessionId)
+      .then((session) => {
+        if (!cancelled) {
+          setCurrentSession(session);
+          setSessionStatus('ready');
+        }
+      })
+      .catch((caught) => {
+        if (!cancelled) {
+          if (caught instanceof SessionClientError && caught.status === 401) {
+            clearSessionTokenHint();
+          }
+
+          setSessionError({
+            status: caught instanceof SessionClientError ? caught.status : undefined,
+            message: caught instanceof Error ? caught.message : '세션 정보를 불러오지 못했습니다.',
+          });
+          setSessionStatus('error');
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [mode, params.sessionId, setCurrentSession]);
+
+  useEffect(() => {
+    if (mode !== 'session' || !qa || !currentSession || currentSession.id !== params.sessionId) {
+      return;
+    }
+
+    let cancelled = false;
+
+    patchProgress({
+      qaId: qa.id,
+      readAt: new Date().toISOString(),
+    })
+      .then(() => {
+        if (!cancelled) {
+          updateViewerProgress(qa.id, {
+            read: true,
+            quizScore: viewerProgress[qa.id]?.quizScore,
+          });
+        }
+      })
+      .catch(() => {
+        return undefined;
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [currentSession, mode, params.sessionId, qa, updateViewerProgress, viewerProgress]);
+
+  if (mode === 'session') {
+    if (sessionStatus === 'error' && sessionError?.status === 410) {
+      return <Navigate replace to="/join?closed=1" />;
+    }
+
+    if (sessionStatus === 'error' && sessionError?.status === 401) {
+      return <Navigate replace to="/join?invalid=1" />;
+    }
+
+    if (
+      sessionStatus !== 'ready' ||
+      !qa ||
+      !chapter ||
+      !currentSession ||
+      currentSession.id !== params.sessionId
+    ) {
+      return (
+        <main className="mx-auto flex min-h-[calc(100vh-56px)] w-full max-w-[920px] items-center justify-center px-6 py-10">
+          <section className="w-full rounded-xl border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
+            <p className="mb-3 text-sm font-medium text-stone-500">세션 학습 로딩 중</p>
+            <p className="text-sm text-stone-600">{sessionError?.message ?? '세션과 참여자 정보를 확인하고 있습니다.'}</p>
+          </section>
+        </main>
+      );
+    }
+
+    return (
+      <LearnLayout
+        allSessionQas={sessionQas}
+        availableChapters={sessionChapters}
+        chapter={chapter}
+        chapterQas={chapterQas}
+        demo={demo}
+        mode={mode}
+        onScore={(score) => {
+          void patchProgress({ qaId: qa.id, quizScore: score }).then(() => {
+            updateViewerProgress(qa.id, {
+              read: true,
+              quizScore: score,
+            });
+          });
+        }}
+        progressMapOverride={viewerProgress}
+        qa={qa}
+        sessionId={currentSession.id}
+      />
+    );
+  }
+
+  if (!chapter || !qa || qa.chapterId !== chapter.id) {
+    return <Navigate replace to="/library" />;
+  }
+
+  return (
+    <LearnLayout
+      chapter={chapter}
+      chapterQas={chapterQas}
+      demo={demo}
+      mode={mode}
+      qa={qa}
+    />
   );
 }

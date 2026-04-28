@@ -9,6 +9,9 @@ type PreviewPanelProps = {
   scenarioId: string;
   onScenarioChange: (scenarioId: string) => void;
   initialTab?: 'demo' | 'quiz';
+  quizProps?: {
+    onScore?: (score: number) => void;
+  };
 };
 
 export default function PreviewPanel({
@@ -17,6 +20,7 @@ export default function PreviewPanel({
   scenarioId,
   onScenarioChange,
   initialTab = 'demo',
+  quizProps,
 }: PreviewPanelProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const previewTab = useLearnStore((state) => state.previewTab);
@@ -145,7 +149,7 @@ export default function PreviewPanel({
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto p-6 lg:p-10">
-          <QuizTab qaId={qaId} />
+          <QuizTab onScore={quizProps?.onScore} qaId={qaId} />
         </div>
       )}
     </section>
