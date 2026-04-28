@@ -1,0 +1,115 @@
+{
+  "pr": 7,
+  "round": 1,
+  "role": "eval-interaction",
+  "session_id": "arch-17",
+  "evaluated_commit": "384526a2b31b523c03280d935c4c7ec16679e7a5",
+  "evaluated_branch": "codex/pr7-oauth",
+  "evaluated_at_utc": "2026-04-28T21:20:04Z",
+  "verdict": "REVISE",
+  "summary": "Server-side auth and PR #5/#6 API regressions are mostly intact, but the SPA fails to boot because multiple modules access import.meta.env indirectly. That breaks the Kakao login flow, callback handling, useAuth visibility in the UI, AuthGate navigation, DEV login, and any browser-level verification. Production routing is also broken for non-root SPA routes.",
+  "items": [
+    {
+      "id": "I1",
+      "title": "Kakao signInWithOAuth",
+      "status": "FAIL",
+      "evidence": [
+        "Puppeteer on http://127.0.0.1:5177/login?from=%2Fteacher produced pageerror: Cannot read properties of undefined (reading 'DEV')",
+        "The login page rendered blank text, so the Kakao button never became clickable and no OAuth redirect request was issued."
+      ]
+    },
+    {
+      "id": "I2",
+      "title": "AuthCallback token parsing",
+      "status": "FAIL",
+      "evidence": [
+        "Opening /auth/callback with real Supabase access_token and refresh_token left the app blank with the same pageerror: Cannot read properties of undefined (reading 'DEV')",
+        "After 2.5s the browser still stayed on the hash URL and both localStorage and sessionStorage were empty, so setSession never completed."
+      ]
+    },
+    {
+      "id": "I3",
+      "title": "useAuth user state",
+      "status": "FAIL",
+      "evidence": [
+        "Because the SPA crashes during module evaluation, no authenticated UI rendered and user.id/email could not appear anywhere in the browser.",
+        "Direct Supabase password login for eval-pr7-owner@example.com and eval-pr7-other@example.com succeeded outside the app, so the failure is in the client bootstrap path rather than the auth backend."
+      ]
+    },
+    {
+      "id": "I4",
+      "title": "/teacher AuthGate",
+      "status": "FAIL",
+      "evidence": [
+        "Puppeteer on http://127.0.0.1:5177/teacher also produced pageerror: Cannot read properties of undefined (reading 'DEV')",
+        "The route stayed blank instead of rendering AuthGate loading or redirecting to /login."
+      ]
+    },
+    {
+      "id": "I5",
+      "title": "DEV login in development",
+      "status": "FAIL",
+      "evidence": [
+        "Browser route /dev-login?from=%2Fteacher crashed with the same import.meta.env pageerror, so DEV login is not usable in the app.",
+        "Server-side development fallback itself works: GET /api/sessions and POST /api/sessions on http://127.0.0.1:3004 succeeded with x-dev-teacher-id=197cd5bc-3f95-4967-9a88-8146d0590831."
+      ]
+    },
+    {
+      "id": "I6",
+      "title": "DEV login in production",
+      "status": "FAIL",
+      "evidence": [
+        "Server-side production fallback is correctly blocked: GET http://127.0.0.1:3005/api/sessions with x-dev-teacher-id returned 401 unauthorized.",
+        "Client-side production routing is broken: /dev-login, /login, and /teacher on http://127.0.0.1:3005 all returned HTTP 404 Not Found instead of rendering the SPA and showing /forbidden or login guidance."
+      ]
+    },
+    {
+      "id": "I7",
+      "title": "signOut",
+      "status": "FAIL",
+      "evidence": [
+        "No UI path invokes signOut(); ripgrep found only the function definition in client/src/lib/auth.ts and no call sites.",
+        "The required redirect to / is also not implemented inside signOut(); it only clears auth state."
+      ]
+    },
+    {
+      "id": "I8",
+      "title": "Non-owner /teacher/session/:id access",
+      "status": "FAIL",
+      "evidence": [
+        "Server-side owner protection works: GET /api/sessions/37d04ee1-d3fd-4633-a774-82a8b89258d0 with the non-owner bearer token returned HTTP 403 {\"error\":\"forbidden\"}.",
+        "Browser-level redirect to /forbidden could not be validated because the SPA crashes before rendering teacher routes in development, and production non-root routing returns 404."
+      ]
+    },
+    {
+      "id": "I9",
+      "title": "PR #6 regression",
+      "status": "PASS",
+      "evidence": [
+        "Teacher bearer auth on the target server worked on port 3004: POST /api/sessions created session 37d04ee1-d3fd-4633-a774-82a8b89258d0 and GET /api/sessions listed it for the owner only.",
+        "POST /api/join returned a participant token cookie, PATCH /api/progress returned {\"ok\":true}, and GET /api/sessions/:id as the participant returned viewer.progress for ch06_q03."
+      ]
+    },
+    {
+      "id": "I10",
+      "title": "PR #5 regression",
+      "status": "PASS",
+      "evidence": [
+        "POST http://127.0.0.1:3004/api/chat with qaId=ch06_q03 and question='프로세스가 뭐예요?' returned a Claude Haiku response with cached=false and upgradedToSonnet=false.",
+        "This confirms the ChatPanel backend path remains functional on the evaluated commit."
+      ]
+    }
+  ],
+  "root_cause_hypotheses": [
+    "client/src/pages/LoginPage.tsx and client/src/pages/DevLoginPage.tsx read import.meta.env through an intermediate object (clientEnv.env / import.meta as ClientEnv), which is undefined at runtime in the bundled app.",
+    "client/src/lib/supabase-client.ts uses the same indirect import.meta.env access pattern, so even routes that avoid LoginPage will not initialize the Supabase client correctly.",
+    "server/src/index.ts production fallback does not serve index.html for nested SPA routes, causing /login, /dev-login, and /teacher to return 404 in production."
+  ],
+  "commands": [
+    "git fetch origin codex/pr7-oauth && git checkout --detach FETCH_HEAD && git rev-parse HEAD",
+    "set -a && source /home/claude/architecture/.env && set +a && PORT=3004 npm run dev",
+    "set -a && source /home/claude/architecture/.env && set +a && NODE_ENV=production PORT=3005 npm run start",
+    "Puppeteer against http://127.0.0.1:5177 and http://127.0.0.1:3005",
+    "curl against /api/sessions, /api/join, /api/progress, /api/chat"
+  ]
+}
