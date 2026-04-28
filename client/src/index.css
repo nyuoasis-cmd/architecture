@@ -254,14 +254,22 @@
   }
 
   .phone-frame {
-    width: 320px;
-    height: 640px;
+    width: min(320px, 100%);
+    aspect-ratio: 320 / 640;
     background: #1c1917;
     border-radius: 36px;
     padding: 12px;
     box-shadow: 0 24px 64px rgba(28, 25, 23, 0.18), 0 4px 16px rgba(28, 25, 23, 0.08);
     position: relative;
     flex-shrink: 0;
+  }
+
+  @media (min-width: 768px) {
+    .phone-frame {
+      width: 320px;
+      height: 640px;
+      aspect-ratio: auto;
+    }
   }
 
   .phone-notch {

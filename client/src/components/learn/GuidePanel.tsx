@@ -147,8 +147,10 @@ export default function GuidePanel({
           {currentQa.title}
         </h3>
 
-        <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-body)', lineHeight: 1.8 }}>
-          {currentQa.body}
+        <div className="space-y-2 text-xs leading-relaxed" style={{ color: 'var(--color-text-body)', lineHeight: 1.8 }}>
+          {currentQa.body.split(/\n\n+/).map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
         </div>
 
         <div className="flex flex-wrap gap-1">
