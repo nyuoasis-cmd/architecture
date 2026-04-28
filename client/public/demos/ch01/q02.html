@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>무대와 대본으로 나누는 컴퓨터</title>
+    <style>
+      :root {
+        --bg: #fffaf0;
+        --card: #ffffff;
+        --text: #292524;
+        --muted: #78716c;
+        --border: #e7e5e4;
+        --stage: #0f172a;
+        --stage-soft: #f5f3ff;
+        --script: #1d4ed8;
+        --script-soft: #eff6ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      #app {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      .screen {
+        min-height: 100%;
+        padding: 16px 14px 22px;
+      }
+
+      .hero,
+      .zone,
+      .log {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--card);
+      }
+
+      .hero {
+        padding: 16px;
+        background: linear-gradient(145deg, #fff7ed, #ffffff);
+      }
+
+      .eyebrow {
+        margin: 0 0 6px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .summary {
+        margin: 8px 0 0;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .columns {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+        margin-top: 12px;
+      }
+
+      .zone {
+        padding: 14px;
+      }
+
+      .zone.active-stage {
+        background: linear-gradient(180deg, #1f2937, #0f172a);
+        color: #f8fafc;
+      }
+
+      .zone.active-script {
+        background: var(--script-soft);
+        border-color: #93c5fd;
+      }
+
+      .zone h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+      }
+
+      .card-list {
+        display: grid;
+        gap: 8px;
+      }
+
+      .card {
+        padding: 9px 10px;
+        border-radius: 14px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.9);
+        font-size: 11px;
+      }
+
+      .zone.active-stage .card {
+        border-color: rgba(255, 255, 255, 0.18);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      .zone.active-script .card {
+        border-color: #bfdbfe;
+        background: #ffffff;
+      }
+
+      .badge-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .badge {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: #fff;
+        font-size: 11px;
+      }
+
+      .log {
+        margin-top: 12px;
+        padding: 12px 14px;
+        background: #1c1917;
+        color: #fafaf9;
+      }
+
+      .line {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        line-height: 1.7;
+      }
+
+      .time {
+        margin-right: 6px;
+        color: #a8a29e;
+      }
+
+      @media (max-width: 375px) {
+        .columns {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#stage': {
+          title: '무대 장비 — 하드웨어',
+          summary: '조명, 스피커, 무대 바닥처럼 실제로 설치된 장비가 하드웨어입니다.',
+          stageActive: true,
+          scriptActive: false,
+          stageCards: ['CPU 조명실', 'RAM 대기석', 'SSD 소품 창고', '키보드 입구'],
+          scriptCards: ['명령은 아직 대기 중', '장비만으로는 공연 시작 불가'],
+          badges: ['실체 있음', '전기 신호 처리', '성능 한계 결정'],
+          logs: [
+            ['11:20:01', '무대 장비 전원 확인'],
+            ['11:20:02', '스피커와 조명 준비 완료'],
+            ['11:20:03', '대본 입력 대기'],
+          ],
+        },
+        '#script': {
+          title: '대본 흐름 — 소프트웨어',
+          summary: '누가 언제 등장하고 어떤 동작을 할지 적은 규칙 묶음이 소프트웨어입니다.',
+          stageActive: false,
+          scriptActive: true,
+          stageCards: ['무대는 그대로 유지', '장비는 같은 자리에 있음'],
+          scriptCards: ['1막 시작', '배우 입장', '배경 전환', '엔딩 음악 재생'],
+          badges: ['명령의 묶음', '기능 결정', '업데이트 가능'],
+          logs: [
+            ['11:20:04', '공연 대본 로드'],
+            ['11:20:05', '장면 순서 배치'],
+            ['11:20:06', '무대 장비에 동작 지시'],
+          ],
+        },
+        '#rehearsal': {
+          title: '함께 움직이기',
+          summary: '무대와 대본이 함께 있어야 비로소 공연이 시작되듯, 하드웨어와 소프트웨어는 함께 동작합니다.',
+          stageActive: true,
+          scriptActive: true,
+          stageCards: ['조명 ON', '스피커 재생', '무대 장치 이동'],
+          scriptCards: ['오프닝 음악', '대사 출력', '장면 전환 요청'],
+          badges: ['둘 다 필요', '분리해서 생각 가능', '함께 실행됨'],
+          logs: [
+            ['11:20:07', '대본 1막 시작'],
+            ['11:20:08', '조명과 스피커 동시 반응'],
+            ['11:20:09', '공연 장면 정상 진행'],
+          ],
+        },
+        '#swap': {
+          title: '대본만 바꾸기',
+          summary: '무대는 그대로 두고 대본만 바꾸면 전혀 다른 공연이 됩니다. 같은 컴퓨터에 다른 앱을 설치하는 상황과 비슷합니다.',
+          stageActive: false,
+          scriptActive: true,
+          stageCards: ['같은 CPU', '같은 RAM', '같은 SSD'],
+          scriptCards: ['뮤지컬 대본 → 게임 규칙', '문서 편집 → 영상 편집'],
+          badges: ['장비 재사용', '기능 변화', '소프트웨어 교체'],
+          logs: [
+            ['11:20:10', '새 대본 업로드'],
+            ['11:20:11', '기존 무대 장비 유지'],
+            ['11:20:12', '다른 기능으로 공연 시작'],
+          ],
+        },
+      };
+
+      function render() {
+        const hash = scenes[location.hash] ? location.hash : '#stage';
+        const scene = scenes[hash];
+        const stageCards = scene.stageCards.map((item) => '<div class="card">' + item + '</div>').join('');
+        const scriptCards = scene.scriptCards.map((item) => '<div class="card">' + item + '</div>').join('');
+        const badges = scene.badges.map((item) => '<span class="badge">' + item + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+
+        document.getElementById('app').innerHTML =
+          '<div class="screen"><section class="hero"><p class="eyebrow">하드웨어 vs 소프트웨어</p><h1>' +
+          scene.title +
+          '</h1><p class="summary">' +
+          scene.summary +
+          '</p></section><div class="columns"><section class="zone' +
+          (scene.stageActive ? ' active-stage' : '') +
+          '"><h2>무대 = 하드웨어</h2><div class="card-list">' +
+          stageCards +
+          '</div></section><section class="zone' +
+          (scene.scriptActive ? ' active-script' : '') +
+          '"><h2>대본 = 소프트웨어</h2><div class="card-list">' +
+          scriptCards +
+          '</div></section></div><div class="badge-row">' +
+          badges +
+          '</div><section class="log"><p class="eyebrow" style="color:#a8a29e;">운영 로그</p>' +
+          logs +
+          '</section></div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

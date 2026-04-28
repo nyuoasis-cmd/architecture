@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>식당 매니저로 보는 운영체제</title>
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --card: #ffffff;
+        --text: #172033;
+        --muted: #667085;
+        --border: #d7deea;
+        --accent: #0f766e;
+        --accent-soft: #ecfeff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      #app {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      .screen {
+        min-height: 100%;
+        padding: 16px 14px 22px;
+      }
+
+      .hero,
+      .board,
+      .log {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--card);
+      }
+
+      .hero {
+        padding: 16px;
+        background: linear-gradient(135deg, #f0fdfa, #ffffff);
+      }
+
+      .eyebrow {
+        margin: 0 0 6px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .summary {
+        margin: 8px 0 0;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .board {
+        margin-top: 12px;
+        padding: 14px;
+      }
+
+      .board h2 {
+        margin: 0 0 10px;
+        font-size: 13px;
+      }
+
+      .lanes {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+
+      .lane {
+        min-height: 110px;
+        padding: 10px;
+        border-radius: 14px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+      }
+
+      .lane.active {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+
+      .lane-title {
+        margin: 0 0 8px;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--muted);
+      }
+
+      .ticket {
+        padding: 8px 9px;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid var(--border);
+        font-size: 11px;
+        line-height: 1.5;
+      }
+
+      .note {
+        margin-top: 12px;
+        padding: 10px 12px;
+        border-radius: 14px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        font-size: 11px;
+        line-height: 1.7;
+        color: #334155;
+      }
+
+      .log {
+        margin-top: 12px;
+        padding: 12px 14px;
+        background: #102a43;
+        color: #f8fafc;
+      }
+
+      .line {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        line-height: 1.7;
+      }
+
+      .time {
+        color: #93c5fd;
+        margin-right: 6px;
+      }
+
+      @media (max-width: 375px) {
+        .lanes {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#seats': {
+          title: '자리 배치 — 자원 분배',
+          summary: '운영체제는 여러 앱이 동시에 몰려와도 CPU와 메모리 자리를 나눠 줍니다.',
+          active: 0,
+          lanes: [
+            ['브라우저 손님', '메신저 손님'],
+            ['CPU 좌석 2개 배정', 'RAM 1.2GB 사용'],
+            ['대기 손님 없음'],
+          ],
+          note: '앱마다 필요한 자원이 다르기 때문에 운영체제는 누가 먼저 앉고 얼마나 오래 쓸지 계속 조정합니다.',
+          logs: [
+            ['13:05:01', '브라우저 앱 입장'],
+            ['13:05:02', '메신저 앱 입장'],
+            ['13:05:03', 'CPU 시간과 메모리 배정 완료'],
+          ],
+        },
+        '#orders': {
+          title: '주문 나누기 — 작업 조정',
+          summary: '운영체제는 어떤 앱 작업을 먼저 처리할지 순서를 조정해 전체 흐름을 맞춥니다.',
+          active: 1,
+          lanes: [
+            ['사진 편집 요청', '음악 재생 유지'],
+            ['CPU 작업 분배', '입출력 대기 조정'],
+            ['백그라운드 업데이트 대기'],
+          ],
+          note: '모든 앱이 동시에 "나부터"를 외치면 느려집니다. 운영체제는 짧은 시간 단위로 차례를 돌리며 체감상 동시에 움직이게 만듭니다.',
+          logs: [
+            ['13:05:04', '사진 편집 큐 등록'],
+            ['13:05:05', '음악 재생 우선 유지'],
+            ['13:05:06', '백그라운드 작업 지연 배치'],
+          ],
+        },
+        '#storage': {
+          title: '영수증 보관 — 파일 관리',
+          summary: '운영체제는 파일을 저장하고 찾는 규칙을 정해 사용자가 일관된 방식으로 문서를 다루게 합니다.',
+          active: 2,
+          lanes: [
+            ['영수증 묶음', '예약 장부'],
+            ['폴더 규칙 정리', '이름표 붙이기'],
+            ['필요 시 다시 찾기'],
+          ],
+          note: '파일 관리가 없으면 같은 문서를 어디에 저장했는지 찾기 어려워집니다. 운영체제는 저장소를 사용할 공통 질서를 제공합니다.',
+          logs: [
+            ['13:05:07', 'report.pdf 저장 요청'],
+            ['13:05:08', '문서 폴더 경로 확인'],
+            ['13:05:09', '파일 목록 갱신 완료'],
+          ],
+        },
+        '#checkout': {
+          title: '결제 확인 — 권한과 인터페이스',
+          summary: '운영체제는 누가 무엇을 열 수 있는지 확인하고, 사람에게는 버튼과 창으로 결과를 보여 줍니다.',
+          active: 1,
+          lanes: [
+            ['앱 권한 확인', '로그인 상태 점검'],
+            ['결제 버튼 표시', '확인 창 띄우기'],
+            ['허용 또는 차단 결과 전달'],
+          ],
+          note: '사용자 인터페이스와 권한 관리는 따로 노는 기능이 아닙니다. 사용자가 안전하게 명령을 내릴 수 있게 만드는 운영체제의 중요한 역할입니다.',
+          logs: [
+            ['13:05:10', '카메라 권한 요청 수신'],
+            ['13:05:11', '사용자 승인 창 표시'],
+            ['13:05:12', '허용 결과 앱에 전달'],
+          ],
+        },
+      };
+
+      const laneTitles = ['앱 손님', '매니저 조정', '결과'];
+
+      function render() {
+        const hash = scenes[location.hash] ? location.hash : '#seats';
+        const scene = scenes[hash];
+        const lanes = scene.lanes
+          .map((items, index) => {
+            const cards = items.map((item) => '<div class="ticket">' + item + '</div>').join('');
+            const active = scene.active === index ? ' active' : '';
+            return '<div class="lane' + active + '"><p class="lane-title">' + laneTitles[index] + '</p>' + cards + '</div>';
+          })
+          .join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+
+        document.getElementById('app').innerHTML =
+          '<div class="screen"><section class="hero"><p class="eyebrow">운영체제의 역할</p><h1>' +
+          scene.title +
+          '</h1><p class="summary">' +
+          scene.summary +
+          '</p></section><section class="board"><h2>식당 흐름 보드</h2><div class="lanes">' +
+          lanes +
+          '</div><div class="note">' +
+          scene.note +
+          '</div></section><section class="log"><p class="eyebrow" style="color:#bfdbfe;">매니저 로그</p>' +
+          logs +
+          '</section></div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
