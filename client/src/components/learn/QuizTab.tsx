@@ -4,6 +4,7 @@ import { setQuizScore } from '../../lib/progress';
 
 type QuizTabProps = {
   qaId: string;
+  onScore?: (score: number) => void;
 };
 
 type GradeBreakdown = {
@@ -23,7 +24,7 @@ const baseBorder = { borderWidth: '1px', borderColor: 'var(--color-border)', bor
 const correctBorder = { borderWidth: '2px', borderColor: '#10b981', borderStyle: 'solid' as const };
 const wrongBorder = { borderWidth: '2px', borderColor: '#ef4444', borderStyle: 'solid' as const };
 
-export default function QuizTab({ qaId }: QuizTabProps) {
+export default function QuizTab({ qaId, onScore }: QuizTabProps) {
   const quizSet = QUIZZES[qaId];
   const [picks, setPicks] = useState<Array<number | null>>([]);
   const [result, setResult] = useState<GradeResult | null>(null);
@@ -91,7 +92,11 @@ export default function QuizTab({ qaId }: QuizTabProps) {
 
       const payload = (await response.json()) as GradeResult;
       setResult(payload);
-      setQuizScore(qaId, payload.score);
+      if (onScore) {
+        onScore(payload.score);
+      } else {
+        setQuizScore(qaId, payload.score);
+      }
     } catch {
       setError('채점 요청 중 문제가 발생했습니다.');
     } finally {

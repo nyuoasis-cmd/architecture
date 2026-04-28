@@ -1,0 +1,67 @@
+{
+  "pr": "#7",
+  "phase": "eval-visual",
+  "round": 2,
+  "model": "codex",
+  "evaluated_commit": "54b62950637a88e85b1cbe92676e68876bc517a8",
+  "screenshots": [
+    "/tmp/arch-pr6-eval-visual-r2/dashboard-ascii.png",
+    "/tmp/arch-pr6-eval-visual-r2/dashboard-modal-ascii.png",
+    "/tmp/arch-pr6-eval-visual-r2/session-desktop-ascii.png",
+    "/tmp/arch-pr6-eval-visual-r2/session-empty-ascii.png",
+    "/tmp/arch-pr6-eval-visual-r2/session-mobile-ascii.png",
+    "/tmp/arch-pr6-eval-visual-r2/join-invalid-1.png",
+    "/tmp/arch-pr6-eval-visual-r2/join-closed-1.png",
+    "/tmp/arch-pr6-eval-visual-r2/join-expired-1.png",
+    "/tmp/arch-pr6-eval-visual-r2/dashboard.png"
+  ],
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /teacher. evaluated_commit 54b6295에서 localStorage dev user 주입 후 TeacherDashboard가 더 이상 useSyncExternalStore snapshot 오류로 크래시하지 않았다. h1='내 세션 관리' 렌더, pageErrors=0. Screenshot: /tmp/arch-pr6-eval-visual-r2/dashboard-ascii.png"
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /teacher. '+ 새 세션 만들기' CTA rect={x:1128.95,y:112.59,width:143.05,height:44}; 우상단 정렬 유지, 최소 높이 44px 충족. Screenshot: /tmp/arch-pr6-eval-visual-r2/dashboard-ascii.png"
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /teacher modal. backdropBg=oklab(0 0 0 / 0.5), dialogWidth=512px(max-w-lg 대응), chapter checkbox 10개, primary '만들기' 버튼 disabled=true, height=44, disabled bg=oklch(0.869 0.005 56.366). Screenshot: /tmp/arch-pr6-eval-visual-r2/dashboard-modal-ascii.png"
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /teacher. active SessionCard 코드 배지는 font='JetBrains Mono', letterSpacing=6.3px, 종료 카드 opacity=0.6으로 약화 표시가 적용됐다. Screenshot: /tmp/arch-pr6-eval-visual-r2/dashboard-ascii.png"
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "Mobile 375x667, /join. code input fontSize=24px, letterSpacing=10.8px, maxlength=6; nickname maxlength=20; scrollWidth=375. invalid/closed/expired 3개 배너가 모두 동일 amber 배경(oklch(0.987 0.022 95.277))과 통일된 카드 레이아웃으로 표시됐다. Screenshots: /tmp/arch-pr6-eval-visual-r2/join-invalid-1.png, /tmp/arch-pr6-eval-visual-r2/join-closed-1.png, /tmp/arch-pr6-eval-visual-r2/join-expired-1.png"
+    },
+    {
+      "id": "V6",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /teacher/session/33333333-3333-4333-8333-333333333333. 세션 코드 배지 fontSize=32px, letterSpacing=16px, font='JetBrains Mono'; QR svg width=220; 종료 버튼 bg=oklch(0.586 0.253 17.585), height=44. Screenshot: /tmp/arch-pr6-eval-visual-r2/session-desktop-ascii.png"
+    },
+    {
+      "id": "V7",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /teacher/session/:id. populated 상태에서 '3조 민지 진도 8/17 47%', '4조 현우 진도 3/17 18%'가 렌더됐고, participant row DOM class에 'transition hover:-translate-y-0.5 hover:border-stone-400'가 남아 있다. empty fixture에서도 빈 상태 문구가 정상 표시됐다. Screenshots: /tmp/arch-pr6-eval-visual-r2/session-desktop-ascii.png, /tmp/arch-pr6-eval-visual-r2/session-empty-ascii.png"
+    },
+    {
+      "id": "V8",
+      "verdict": "PASS",
+      "evidence": "Mobile 375x667, /teacher/session/:id. scrollWidth=375로 가로 스크롤이 없고, 상단 정보 카드 y=40 / QR 카드 y=432.98로 1열 스택이 유지됐다. 종료 버튼 bottom=383.98 < viewport 667로 첫 화면 안에 남는다. Screenshot: /tmp/arch-pr6-eval-visual-r2/session-mobile-ascii.png"
+    }
+  ],
+  "overall": "PASS",
+  "summary": "Round 1 FAIL/REVISE였던 V1~V8 8건을 evaluated_commit 54b6295에서 재검증했다. useDevUser snapshot 캐시 수정으로 /teacher 및 /teacher/session/:id 렌더 크래시는 재현되지 않았고, JoinPage invalid/closed/expired 배너도 모바일에서 동일 톤으로 통일됐다.",
+  "notes": [
+    "추가 관찰: dev user 이름을 한글(예: 김교사)로 localStorage에 주입하면 브라우저 fetch가 'Failed to read the headers property from RequestInit: String contains non ISO-8859-1 code point'로 차단된다. 이 경우 /teacher API 호출이 실패하고 진행/종료 세션은 empty state로 보인다. Screenshot: /tmp/arch-pr6-eval-visual-r2/dashboard.png",
+    "추가 관찰: /join 빈 제출 에러는 여전히 inline text이며 role=alert/status 토스트는 아니다. 이번 round 2 핵심 수정 대상(배너 통일)과는 별개라 PASS 판정에는 반영하지 않았다."
+  ],
+  "next_action": "Eval-Visual round 2 기준으로는 PASS 처리 가능하다. 다만 generator 후속 라운드가 열린다면 x-dev-teacher-name 한글 헤더 인코딩 이슈를 별도 수정 대상으로 올리는 편이 안전하다."
+}

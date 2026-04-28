@@ -34,7 +34,7 @@ export default function LandingPage() {
           </div>
         </div>
         <p className="landing-caption">
-          이번 PR은 스캐폴드 단계입니다. 본 학습 화면과 세션 기능은 후속 PR에서 연결됩니다.
+          교사 세션 생성, 학생 참여, 라이브러리 학습까지 기본 흐름을 바로 점검할 수 있습니다.
         </p>
         {!hasSupabaseEnv ? (
           <p className="landing-note">VITE_SUPABASE_URL 또는 VITE_SUPABASE_ANON_KEY가 아직 설정되지 않았습니다.</p>

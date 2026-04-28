@@ -5,7 +5,10 @@ import { resolve } from 'node:path';
 import { env } from './env';
 import { buildCopyrightIndex } from './lib/copyright-index';
 import chatRouter from './routes/chat';
+import joinRouter from './routes/join';
+import progressRouter from './routes/progress';
 import quizRouter from './routes/quiz';
+import sessionsRouter from './routes/sessions';
 
 const app = express();
 const clientDistPath = resolve(__dirname, '../../client/dist');
@@ -21,7 +24,10 @@ app.get('/api/health', (_req, res) => {
 });
 
 app.use('/api/chat', chatRouter);
+app.use('/api/join', joinRouter);
+app.use('/api/progress', progressRouter);
 app.use('/api/quiz', quizRouter);
+app.use('/api/sessions', sessionsRouter);
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Not Found' });
