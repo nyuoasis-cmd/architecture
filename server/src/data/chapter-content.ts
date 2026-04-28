@@ -163,6 +163,97 @@ export const QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
       };
     }
 
+    if (chapter.id === 3 && order === 1) {
+      return {
+        id: 'ch03_q01',
+        chapterId: 3,
+        chapterTitle: chapter.title,
+        title: '단위·통합·E2E 테스트는 무엇이 다른가?',
+        summary: '검증 범위가 다른 세 테스트를 피라미드 구조와 함께 설명합니다.',
+        body: '단위 테스트는 함수나 클래스 같은 작은 부품을 빠르게 확인합니다. 통합 테스트는 여러 부품이 연결될 때 규칙이 맞는지 봅니다. E2E 테스트는 사용자의 전체 흐름을 처음부터 끝까지 점검합니다. 보통 빠르고 싼 단위 테스트를 많이 두고, 넓고 비싼 E2E 테스트는 핵심 경로에만 두는 피라미드 구조를 씁니다.',
+        keywords: ['단위 테스트', '통합 테스트', 'E2E', '테스트 피라미드'],
+        checkpoint: '세 테스트를 검증 범위와 속도 기준으로 구분할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 3 && order === 2) {
+      return {
+        id: 'ch03_q02',
+        chapterId: 3,
+        chapterTitle: chapter.title,
+        title: 'TDD는 어떻게 일하는 방식인가?',
+        summary: 'Red-Green-Refactor 순환이 설계와 구현을 어떻게 이끄는지 설명합니다.',
+        body: 'TDD는 테스트를 먼저 쓰고 그 테스트를 통과시키며 구현을 키워 가는 방식입니다. Red 단계에서는 실패하는 테스트로 목표를 분명히 하고, Green 단계에서는 최소 구현으로 통과를 만듭니다. Refactor 단계에서는 테스트를 안전망 삼아 구조를 정리합니다. 즉, TDD는 나중 검사보다 작은 약속을 먼저 세우는 설계 리듬에 가깝습니다.',
+        keywords: ['TDD', 'Red-Green-Refactor', '설계', '리팩터링'],
+        checkpoint: 'TDD의 세 단계가 왜 그 순서로 도는지 설명할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 3 && order === 3) {
+      return {
+        id: 'ch03_q03',
+        chapterId: 3,
+        chapterTitle: chapter.title,
+        title: 'CI는 무엇이고 왜 쓰나?',
+        summary: '자주 합치고 자동 검증으로 위험을 빨리 드러내는 이유를 설명합니다.',
+        body: 'CI는 여러 사람이 만든 코드를 자주 합치고, 그때마다 빌드와 테스트 같은 자동 검증을 돌리는 방식입니다. 작은 변경 단위에서 바로 실패를 발견하면 원인 범위를 빨리 좁힐 수 있습니다. 팀의 공통 기준도 실행 규칙으로 남길 수 있어 사람마다 검사 방식이 달라지는 문제를 줄여 줍니다. 즉, CI는 큰 장애를 입구에서 걸러 주는 자동 게이트입니다.',
+        keywords: ['CI', '자동 검증', '빌드', '품질 게이트'],
+        checkpoint: 'CI를 쓰는 이유를 자동 검증과 조기 발견 관점에서 설명할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 3 && order === 4) {
+      return {
+        id: 'ch03_q04',
+        chapterId: 3,
+        chapterTitle: chapter.title,
+        title: 'CD와 배포 환경(dev/staging/prod) 차이는?',
+        summary: '배포 자동화와 환경 분리가 왜 함께 필요한지 계단형 검증 흐름으로 정리합니다.',
+        body: 'CD는 검증된 변경을 배포 가능한 상태까지 자동화해 밀어 올리는 흐름입니다. dev는 빠른 개발 확인, staging은 운영과 비슷한 리허설, prod는 실제 사용자 환경입니다. 환경을 나누면 같은 기능도 단계별로 다른 질문을 하며 위험을 조금씩 노출할 수 있습니다. 결국 CD와 환경 분리는 더 자주 배포하면서도 놀라지 않게 만드는 장치입니다.',
+        keywords: ['CD', 'dev', 'staging', 'prod'],
+        checkpoint: 'CD와 dev·staging·prod 환경의 역할 차이를 구분할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 3 && order === 5) {
+      return {
+        id: 'ch03_q05',
+        chapterId: 3,
+        chapterTitle: chapter.title,
+        title: '배포가 잘못되면 어떻게 되돌리나?',
+        summary: '롤백과 블루그린, 카나리 전략이 실패를 줄이는 방식을 비교합니다.',
+        body: '즉시 롤백은 직전 안정 버전으로 빠르게 되돌리는 가장 단순한 방법입니다. 블루그린은 운영 환경을 두 벌 준비해 전환과 복귀를 쉽게 만듭니다. 카나리는 일부 사용자에게만 새 버전을 먼저 열어 영향을 작게 관찰합니다. 세 전략 모두 목적은 실패를 없애는 것이 아니라 실패 범위와 복구 시간을 줄이는 데 있습니다.',
+        keywords: ['롤백', '블루그린', '카나리', '복구'],
+        checkpoint: '즉시 롤백, 블루그린, 카나리의 차이를 설명할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 3 && order === 6) {
+      return {
+        id: 'ch03_q06',
+        chapterId: 3,
+        chapterTitle: chapter.title,
+        title: '운영 중인 서비스는 어떻게 감시하나?',
+        summary: '모니터링과 알림, SLI·SLO를 운영 품질의 언어로 연결합니다.',
+        body: '운영 중에는 요청 수, 응답 시간, 에러율 같은 신호를 계속 모아 서비스 상태를 봅니다. 알림은 그중에서 지금 행동이 필요한 순간만 골라 알려 주는 장치입니다. SLI는 실제로 재는 지표이고, SLO는 그 지표가 지켜야 할 목표 수준입니다. 이렇게 해야 운영 상태를 느낌이 아니라 숫자로 설명하고 대응할 수 있습니다.',
+        keywords: ['모니터링', '알림', 'SLI', 'SLO'],
+        checkpoint: '모니터링, 알림, SLI·SLO의 역할 차이를 구분할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 3 && order === 7) {
+      return {
+        id: 'ch03_q07',
+        chapterId: 3,
+        chapterTitle: chapter.title,
+        title: '코드 리뷰는 왜 하고 어떻게 하나?',
+        summary: '코드 리뷰를 품질 점검과 지식 공유의 대화 과정으로 설명합니다.',
+        body: '코드 리뷰는 변경이 팀 기준에 맞는지 함께 확인하는 대화 과정입니다. 다른 눈이 빠진 예외 처리나 애매한 이름을 조기에 발견할 수 있고, 변경 의도와 맥락도 팀 안에 공유됩니다. 작은 PR과 명확한 설명은 리뷰 품질과 속도를 함께 높여 줍니다. 좋은 리뷰는 취향 싸움보다 위험과 근거를 분명히 남기는 쪽에 가깝습니다.',
+        keywords: ['코드 리뷰', 'PR', '지식 공유', '결함 발견'],
+        checkpoint: '좋은 코드 리뷰가 품질과 지식 공유에 왜 도움이 되는지 말할 수 있다.',
+      };
+    }
+
     return createPlaceholderQa(chapter.id, order, chapter.title);
   }),
 );

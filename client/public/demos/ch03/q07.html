@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>코드 리뷰 흐름 보드</title>
+    <style>
+      :root {
+        --bg: #f6f7fa;
+        --card: #fff;
+        --text: #1b2431;
+        --muted: #697586;
+        --border: #d8dee8;
+        --accent: #4f46e5;
+        --accent-soft: #e0e7ff;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; }
+      body { overflow: hidden; }
+      #app { width: 100%; height: 100%; overflow-y: auto; }
+      .screen { min-height: 100%; padding: 16px 14px 22px; }
+      .hero, .board, .log { border: 1px solid var(--border); border-radius: 18px; background: var(--card); }
+      .hero { padding: 16px; background: linear-gradient(135deg, #e0e7ff, #ffffff); }
+      .eyebrow { margin: 0 0 6px; font-size: 11px; color: var(--muted); }
+      h1 { margin: 0; font-size: 18px; }
+      .summary { margin: 8px 0 0; font-size: 12px; line-height: 1.7; }
+      .board { margin-top: 12px; padding: 14px; display: grid; gap: 8px; }
+      .lane { padding: 12px; border: 1px solid var(--border); border-radius: 16px; background: #fff; }
+      .lane.active { border-color: var(--accent); background: var(--accent-soft); }
+      .lane h2 { margin: 0 0 4px; font-size: 12px; }
+      .lane p { margin: 0; font-size: 11px; line-height: 1.6; color: var(--muted); }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+      .chip { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 11px; }
+      .chip.hot { border-color: #a5b4fc; background: var(--accent-soft); color: #3730a3; }
+      .log { margin-top: 12px; padding: 12px 14px; background: #0f172a; color: #f8fafc; }
+      .line { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; line-height: 1.7; }
+      .time { color: #a5b4fc; margin-right: 6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#pr': {
+          title: 'PR 열기',
+          summary: '작은 범위와 명확한 설명이 리뷰 품질과 속도를 함께 올립니다.',
+          active: 0,
+          chips: ['작은 PR', '변경 의도', '테스트 결과', '영향 범위'],
+          hot: 1,
+          logs: [['16:00:01', 'PR opened: add chapter 3 content'], ['16:00:02', 'description includes scope + checks'], ['16:00:03', 'reviewers assigned']],
+        },
+        '#comment': {
+          title: '코멘트 남기기',
+          summary: '좋은 리뷰는 취향보다 위험과 근거를 구체적으로 남깁니다.',
+          active: 1,
+          chips: ['행동 가능', '근거 제시', '예외 처리', '맥락 질문'],
+          hot: 0,
+          logs: [['16:00:04', 'comment: null case may fail here'], ['16:00:05', 'suggestion linked to test gap'], ['16:00:06', 'author acknowledged']],
+        },
+        '#revise': {
+          title: '수정 반영',
+          summary: '작성자는 방어보다 의도 설명과 후속 커밋으로 대화를 이어 갑니다.',
+          active: 2,
+          chips: ['후속 커밋', '설명 보강', '테스트 추가', '대화 유지'],
+          hot: 2,
+          logs: [['16:00:07', 'fix pushed for null guard'], ['16:00:08', 'test added for empty state'], ['16:00:09', 'review thread replied']],
+        },
+        '#merge': {
+          title: '승인 후 머지',
+          summary: '리뷰가 끝난 변경만 메인에 합쳐져 팀의 공용 지식으로 남습니다.',
+          active: 3,
+          chips: ['승인', '체크 통과', '기록 보존', '지식 공유'],
+          hot: 3,
+          logs: [['16:00:10', 'all checks passed'], ['16:00:11', 'review approved'], ['16:00:12', 'merge completed']],
+        },
+      };
+
+      function render() {
+        const hash = scenes[location.hash] ? location.hash : '#pr';
+        const scene = scenes[hash];
+        const lanes = [
+          ['PR', '변경을 작게 열기'],
+          ['Comment', '위험과 근거 남기기'],
+          ['Revise', '수정과 설명 반영'],
+          ['Merge', '승인 후 합치기'],
+        ].map((lane, index) => '<div class="lane' + (scene.active === index ? ' active' : '') + '"><h2>' + lane[0] + '</h2><p>' + lane[1] + '</p></div>').join('');
+        const chips = scene.chips.map((chip, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + chip + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+        document.getElementById('app').innerHTML =
+          '<div class="screen"><section class="hero"><p class="eyebrow">코드 리뷰</p><h1>' + scene.title + '</h1><p class="summary">' + scene.summary + '</p></section>' +
+          '<section class="board">' + lanes + '<div class="chips">' + chips + '</div></section>' +
+          '<section class="log"><p class="eyebrow" style="color:#c7d2fe;">리뷰 로그</p>' + logs + '</section></div>';
+      }
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

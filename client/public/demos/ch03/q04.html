@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>배포 환경 계단</title>
+    <style>
+      :root {
+        --bg: #f7f5fb;
+        --card: #fff;
+        --text: #221b36;
+        --muted: #6f6585;
+        --border: #ddd6f0;
+        --accent: #7c3aed;
+        --accent-soft: #ede9fe;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; }
+      body { overflow: hidden; }
+      #app { width: 100%; height: 100%; overflow-y: auto; }
+      .screen { min-height: 100%; padding: 16px 14px 22px; }
+      .hero, .stairs, .log { border: 1px solid var(--border); border-radius: 18px; background: var(--card); }
+      .hero { padding: 16px; background: linear-gradient(135deg, #ede9fe, #ffffff); }
+      .eyebrow { margin: 0 0 6px; font-size: 11px; color: var(--muted); }
+      h1 { margin: 0; font-size: 18px; }
+      .summary { margin: 8px 0 0; font-size: 12px; line-height: 1.7; }
+      .stairs { margin-top: 12px; padding: 14px; }
+      .step { margin-bottom: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 16px; background: #fff; }
+      .step.active { border-color: var(--accent); background: var(--accent-soft); }
+      .step:last-child { margin-bottom: 0; }
+      .step h2 { margin: 0 0 4px; font-size: 12px; }
+      .step p { margin: 0; font-size: 11px; line-height: 1.6; color: var(--muted); }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+      .chip { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 11px; }
+      .chip.hot { border-color: #c4b5fd; background: var(--accent-soft); color: #5b21b6; }
+      .log { margin-top: 12px; padding: 12px 14px; background: #111827; color: #f8fafc; }
+      .line { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; line-height: 1.7; }
+      .time { color: #c4b5fd; margin-right: 6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#dev': {
+          title: 'dev — 빠르게 부수고 고친다',
+          summary: '개발자는 여기서 기능이 대체로 돌아가는지 빠르게 확인합니다.',
+          active: 0,
+          chips: ['로컬/개발 서버', '빠른 반복', '실험 허용', '즉시 수정'],
+          hot: 1,
+          logs: [['13:00:01', 'new feature deployed to dev'], ['13:00:02', 'UI glitch found'], ['13:00:03', 'hotfix commit pushed']],
+        },
+        '#staging': {
+          title: 'staging — 운영 리허설',
+          summary: '운영과 비슷한 조건에서 설정과 외부 연동을 마지막으로 점검합니다.',
+          active: 1,
+          chips: ['운영 유사 설정', 'QA 확인', '외부 연동', '배포 리허설'],
+          hot: 2,
+          logs: [['13:00:04', 'payment sandbox connected'], ['13:00:05', 'release checklist complete'], ['13:00:06', 'staging sign-off']],
+        },
+        '#prod': {
+          title: 'prod — 실제 사용자 환경',
+          summary: '이곳에서만 실제 사용자가 접속하므로 변화는 가장 신중하게 반영됩니다.',
+          active: 2,
+          chips: ['실사용자', '실데이터', '안정 우선', '모니터링 필수'],
+          hot: 0,
+          logs: [['13:00:07', 'traffic switched to prod'], ['13:00:08', 'error budget within target'], ['13:00:09', 'release announced']],
+        },
+        '#cd': {
+          title: 'CD — 계단을 자동으로 오른다',
+          summary: '검증된 변경을 다음 환경으로 밀어 올리는 절차를 규칙화합니다.',
+          active: 1,
+          chips: ['재현 가능', '수작업 감소', '환경별 승격', '배포 기록'],
+          hot: 3,
+          logs: [['13:00:10', 'dev passed'], ['13:00:11', 'promoted to staging'], ['13:00:12', 'awaiting prod approval']],
+        },
+      };
+
+      function render() {
+        const hash = scenes[location.hash] ? location.hash : '#dev';
+        const scene = scenes[hash];
+        const steps = [
+          ['dev', '빠른 기능 확인'],
+          ['staging', '운영 리허설'],
+          ['prod', '실제 서비스'],
+        ].map((step, index) => '<div class="step' + (scene.active === index ? ' active' : '') + '"><h2>' + step[0] + '</h2><p>' + step[1] + '</p></div>').join('');
+        const chips = scene.chips.map((chip, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + chip + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+        document.getElementById('app').innerHTML =
+          '<div class="screen"><section class="hero"><p class="eyebrow">배포 환경</p><h1>' + scene.title + '</h1><p class="summary">' + scene.summary + '</p></section>' +
+          '<section class="stairs">' + steps + '<div class="chips">' + chips + '</div></section>' +
+          '<section class="log"><p class="eyebrow" style="color:#ddd6fe;">배포 로그</p>' + logs + '</section></div>';
+      }
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

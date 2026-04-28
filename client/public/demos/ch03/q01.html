@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>테스트 피라미드 실험실</title>
+    <style>
+      :root {
+        --bg: #f7f4ef;
+        --card: #fffdf8;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --border: #e5dccd;
+        --accent: #c2410c;
+        --accent-soft: #ffedd5;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; }
+      body { overflow: hidden; }
+      #app { width: 100%; height: 100%; overflow-y: auto; }
+      .screen { min-height: 100%; padding: 16px 14px 22px; }
+      .hero, .pyramid, .log { border: 1px solid var(--border); border-radius: 18px; background: var(--card); }
+      .hero { padding: 16px; background: linear-gradient(135deg, #fff7ed, #fffdf8); }
+      .eyebrow { margin: 0 0 6px; font-size: 11px; color: var(--muted); }
+      h1 { margin: 0; font-size: 18px; }
+      .summary { margin: 8px 0 0; font-size: 12px; line-height: 1.7; }
+      .pyramid { margin-top: 12px; padding: 14px; }
+      .level { margin: 0 auto 8px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 14px; text-align: center; font-size: 12px; background: #fff; }
+      .level.active { border-color: var(--accent); background: var(--accent-soft); }
+      .level.top { width: 44%; }
+      .level.mid { width: 68%; }
+      .level.base { width: 92%; margin-bottom: 0; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+      .chip { padding: 6px 10px; border-radius: 999px; border: 1px solid var(--border); background: #fff; font-size: 11px; }
+      .chip.hot { border-color: #fdba74; background: var(--accent-soft); color: #9a3412; }
+      .log { margin-top: 12px; padding: 12px 14px; background: #111827; color: #f8fafc; }
+      .line { font-family: 'JetBrains Mono', ui-monospace, monospace; font-size: 10px; line-height: 1.7; }
+      .time { color: #fdba74; margin-right: 6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#unit': {
+          title: '단위 테스트 — 작은 부품 확인',
+          summary: '함수 하나, 계산 하나처럼 가장 작은 조각이 약속한 값을 내는지 빠르게 확인합니다.',
+          active: 'base',
+          chips: ['빠름', '작은 범위', '원인 추적 쉬움', '많이 쌓기 좋음'],
+          hot: 0,
+          logs: [['10:00:01', 'tax(10000) => 11000 통과'], ['10:00:02', 'formatDate() 경계값 확인'], ['10:00:03', '실패 원인: discount 함수']],
+        },
+        '#integration': {
+          title: '통합 테스트 — 연결 지점 확인',
+          summary: '여러 부품이 함께 움직일 때 데이터 흐름과 규칙이 어긋나지 않는지 봅니다.',
+          active: 'mid',
+          chips: ['API 연결', 'DB 저장', '권한 확인', '경계 검증'],
+          hot: 1,
+          logs: [['10:00:04', '로그인 후 세션 저장'], ['10:00:05', '주문 생성 + 결제 연결'], ['10:00:06', '응답 형식 mismatch 감지']],
+        },
+        '#e2e': {
+          title: 'E2E 테스트 — 사용자 여정 확인',
+          summary: '버튼 클릭부터 결과 화면까지 실제 사용 흐름 전체가 이어지는지 점검합니다.',
+          active: 'top',
+          chips: ['브라우저 자동화', '회원가입', '결제 흐름', '핵심 경로'],
+          hot: 3,
+          logs: [['10:00:07', '회원가입 폼 입력'], ['10:00:08', '인증 메일 확인'], ['10:00:09', '완료 화면 렌더 실패 감지']],
+        },
+        '#balance': {
+          title: '피라미드 균형 — 많이 아래, 적게 위',
+          summary: '빠른 단위 테스트를 바닥에 많이 두고, 넓은 E2E는 핵심 흐름 위주로 좁게 둡니다.',
+          active: 'all',
+          chips: ['단위 다수', '통합 핵심 연결', 'E2E 최소 핵심', '비용 균형'],
+          hot: 2,
+          logs: [['10:00:10', '단위 180건'], ['10:00:11', '통합 24건'], ['10:00:12', 'E2E 6건으로 핵심 경로 유지']],
+        },
+      };
+
+      function levelClass(name, scene) {
+        return scene.active === name || scene.active === 'all' ? 'level ' + name + ' active' : 'level ' + name;
+      }
+
+      function render() {
+        const hash = scenes[location.hash] ? location.hash : '#unit';
+        const scene = scenes[hash];
+        const chips = scene.chips.map((chip, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + chip + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+        document.getElementById('app').innerHTML =
+          '<div class="screen"><section class="hero"><p class="eyebrow">테스트 범위 비교</p><h1>' + scene.title + '</h1><p class="summary">' + scene.summary + '</p></section>' +
+          '<section class="pyramid"><div class="' + levelClass('top', scene) + '">E2E</div><div class="' + levelClass('mid', scene) + '">통합</div><div class="' + levelClass('base', scene) + '">단위</div><div class="chips">' + chips + '</div></section>' +
+          '<section class="log"><p class="eyebrow" style="color:#fed7aa;">검증 로그</p>' + logs + '</section></div>';
+      }
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
