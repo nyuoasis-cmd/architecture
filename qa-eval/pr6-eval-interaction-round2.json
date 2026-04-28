@@ -1,0 +1,87 @@
+{
+  "pr": "#6",
+  "phase": "eval-interaction-round2",
+  "round": 2,
+  "model": "codex",
+  "evaluated_commit": "ee0f057c7ab7335a971e3ca64074d77ee6daa318",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "POST /api/sessions with existing teacher_id=daf6a573-5b28-44ce-bfab-6a0754c12932 returned 200 and body {id:\"b4d13e4a-cbb4-4e55-8d24-ec7fb284ecf5\",code:\"BYQ5DP\",name:\"AO T4 R2 Active\"}. Response omitted teacher_id, chapter_ids, status, max_participants, created_at, ended_at as required. Code path also returns only {id, code, name} at server/src/routes/sessions.ts:168."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "GET /api/sessions with the same teacher headers returned 200 + Cache-Control:no-store. While AO T4 R2 Active was active it appeared before ended sessions and showed participant_count=1; after ending it moved into the ended block. curl also confirmed the no-store header on the list response."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "GET /api/sessions/b4d13e4a-cbb4-4e55-8d24-ec7fb284ecf5 as the owner returned 200 with session metadata plus participants[{nickname:\"3조 민지\",progress_count:0}] before progress writes, matching the teacher detail contract."
+    },
+    {
+      "id": "I4",
+      "verdict": "PASS",
+      "evidence": "GET /api/sessions/b4d13e4a-cbb4-4e55-8d24-ec7fb284ecf5/participants returned 200 + Cache-Control:no-store with {status:\"active\",participants:[...progress_count:1]} after the participant completed one read/quiz update, confirming the polling endpoint stays in sync with teacher detail."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "POST /api/join for code BYQ5DP returned 200 + Cache-Control:no-store, set-cookie arch_pt=..., and body {session_id:\"b4d13e4a-cbb4-4e55-8d24-ec7fb284ecf5\",participant_id:\"7bfcc88f-2a9b-443d-a408-0fd1d9235838\",nickname:\"3조 민지\"}."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "curl POST /api/join with code ZZZZZZ returned 404 and body {\"error\":\"session_not_found\"}. This matches JoinPage's invalid path handling."
+    },
+    {
+      "id": "I7",
+      "verdict": "PASS",
+      "evidence": "A second fixture session (d25771ee-de06-4812-b504-70912be926b4 / XX4WY6) was ended first, then POST /api/join returned 410 {error:\"session_closed\"}. JoinPage exposes distinct closed and expired banners, with the expired copy added at client/src/pages/JoinPage.tsx:14-24."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "PATCH /api/progress for the participant cookie succeeded twice with 200 {ok:true}: first with read_at=2026-04-28T20:55:00.000Z, then with quiz_score=67. Subsequent participant GET /api/sessions/:id returned viewer.progress.ch06_q03={read:true,quizScore:67} and teacher-side progress_count advanced from 0 to 1."
+    },
+    {
+      "id": "I9",
+      "verdict": "PASS",
+      "evidence": "The participant cookie issued for session BYQ5DP was reused against the different ended session XX4WY6; GET /api/sessions/d25771ee-de06-4812-b504-70912be926b4 returned 401 {error:\"unauthorized\"}. This matches the intended expired-session client behavior, and LearnPage now maps 401 to /join?expired=1 at client/src/pages/LearnPage.tsx:217-224."
+    },
+    {
+      "id": "I10",
+      "verdict": "PASS",
+      "evidence": "GET /api/sessions/b4d13e4a-cbb4-4e55-8d24-ec7fb284ecf5 with a different existing teacher_id=03faab0d-c37c-474d-8ee7-a869457d4c13 returned 403 {error:\"forbidden\"}, so owner-only protection remained intact."
+    },
+    {
+      "id": "I11",
+      "verdict": "PASS",
+      "evidence": "POST /api/sessions/b4d13e4a-cbb4-4e55-8d24-ec7fb284ecf5/end returned 200 and the full ended row with status:\"ended\" plus ended_at:\"2026-04-28T20:54:53.325+00:00\"."
+    },
+    {
+      "id": "I12",
+      "verdict": "PASS",
+      "evidence": "After the active session was ended, PATCH /api/progress with the same participant cookie returned 410 {error:\"session_closed\"}. Direct Supabase query on architecture_progress still showed the pre-end row with updated_at=\"2026-04-28T20:54:52.928+00:00\", proving the operating DB has the updated_at column applied and the closed-session guard prevented a post-close mutation. The resolver now performs a separate architecture_sessions status query at server/src/routes/progress.ts:33-55 instead of relying on an !inner relation."
+    },
+    {
+      "id": "I13",
+      "verdict": "PASS",
+      "evidence": "JoinPage includes an explicit expired banner message '참여 시간이 만료되었습니다. 닉네임을 다시 입력해 참여해주세요.' ahead of invalid/closed handling at client/src/pages/JoinPage.tsx:14-24, covering the new expired UX copy path."
+    },
+    {
+      "id": "I14",
+      "verdict": "PASS",
+      "evidence": "Session round-trip regression remained clean on ee0f057: create -> join -> teacher detail -> participant detail -> progress write -> participants poll -> end -> closed/expired errors all matched the PR6 contract, with no unexpected 500s observed in the server during the exercised paths."
+    }
+  ],
+  "critical_findings": [],
+  "overall": "PASS",
+  "summary": "Round 2 T4 session flow passed on detached HEAD ee0f057. The previously flagged fixes were all present in behavior: POST /api/sessions now returns only {id,code,name}, participant progress resolution uses separate participant/session checks, architecture_progress.updated_at is populated in the live DB, LearnPage maps 401 to /join?expired=1, and JoinPage has a distinct expired banner.",
+  "notes": [
+    "The requested source file /home/claude/architecture/HANDOFF-pr6-round1.md was not present in the workspace or /home/claude, so the 14-item checklist was reconstructed from the explicit round-2 instructions, the current PR6 code, and live API/DB behavior.",
+    "Initial create-session attempts with a synthetic teacher UUID failed because architecture_sessions.teacher_id has a real FK to users. Re-running with an existing teacher UUID produced the expected 200 path; this is an evaluation setup constraint, not a PR6 regression."
+  ],
+  "next_action": "PASS. The interaction regression set for PR6 round 2 can be treated as closed."
+}
