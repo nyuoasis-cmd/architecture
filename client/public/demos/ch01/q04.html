@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>책장과 책상 사이의 데이터 이동</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #dbe4f0;
+        --accent: #7c3aed;
+        --accent-soft: #f5f3ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      #app {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      .screen {
+        min-height: 100%;
+        padding: 16px 14px 22px;
+      }
+
+      .hero,
+      .map,
+      .log {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--card);
+      }
+
+      .hero {
+        padding: 16px;
+        background: linear-gradient(135deg, #f5f3ff, #ffffff);
+      }
+
+      .eyebrow {
+        margin: 0 0 6px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .summary {
+        margin: 8px 0 0;
+        font-size: 12px;
+        line-height: 1.7;
+      }
+
+      .map {
+        margin-top: 12px;
+        padding: 14px;
+      }
+
+      .track {
+        display: grid;
+        gap: 8px;
+      }
+
+      .node {
+        position: relative;
+        padding: 11px 12px;
+        border-radius: 15px;
+        border: 1px solid var(--border);
+        background: #fff;
+      }
+
+      .node.active {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+
+      .node-title {
+        margin: 0;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      .node-desc {
+        margin: 4px 0 0;
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.6;
+      }
+
+      .arrow {
+        text-align: center;
+        font-size: 18px;
+        color: #a78bfa;
+        line-height: 1;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      .chip {
+        padding: 6px 10px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: #fff;
+        font-size: 11px;
+      }
+
+      .chip.hot {
+        background: var(--accent-soft);
+        border-color: #c4b5fd;
+        color: #5b21b6;
+      }
+
+      .log {
+        margin-top: 12px;
+        padding: 12px 14px;
+        background: #111827;
+        color: #f8fafc;
+      }
+
+      .line {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        line-height: 1.7;
+      }
+
+      .time {
+        color: #c4b5fd;
+        margin-right: 6px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#storage': {
+          title: '책장에서 찾기 — 저장소',
+          summary: '오래 보관된 파일은 SSD 같은 저장소에 있습니다. 필요할 때 먼저 여기서 꺼냅니다.',
+          active: 0,
+          chips: ['report.docx', 'photo.png', 'music.mp3'],
+          hot: -1,
+          logs: [
+            ['15:42:01', '저장소에서 report.docx 검색'],
+            ['15:42:02', '파일 블록 읽기 시작'],
+            ['15:42:03', 'RAM으로 전송 준비'],
+          ],
+        },
+        '#ram': {
+          title: '책상에 펼치기 — RAM',
+          summary: '지금 작업할 자료를 책상 위에 펴 두듯, 저장소의 일부 데이터를 RAM으로 올립니다.',
+          active: 1,
+          chips: ['문서 본문', '현재 편집 위치', '열린 창 상태'],
+          hot: 0,
+          logs: [
+            ['15:42:04', 'RAM 32MB 할당'],
+            ['15:42:05', '작업 데이터 적재'],
+            ['15:42:06', 'CPU 읽기 대기'],
+          ],
+        },
+        '#cache': {
+          title: '포스트잇 붙이기 — 캐시',
+          summary: '방금 쓴 정보는 CPU 가까이에 더 작은 메모로 붙여 둬서 다음 접근을 빠르게 만듭니다.',
+          active: 2,
+          chips: ['방금 읽은 제목', '자주 쓰는 숫자', '최근 계산 결과'],
+          hot: 1,
+          logs: [
+            ['15:42:07', '최근 접근 데이터 캐시에 적중'],
+            ['15:42:08', 'RAM 재탐색 생략'],
+            ['15:42:09', '응답 지연 감소'],
+          ],
+        },
+        '#cpu': {
+          title: '펜으로 계산 — CPU',
+          summary: 'CPU는 RAM과 캐시에서 값을 읽어 실제 계산과 판단을 수행합니다.',
+          active: 3,
+          chips: ['수식 계산', '문장 정렬', '화면 갱신 요청'],
+          hot: 2,
+          logs: [
+            ['15:42:10', '명령 해석 시작'],
+            ['15:42:11', '연산 결과 생성'],
+            ['15:42:12', '결과를 RAM에 기록'],
+          ],
+        },
+        '#save': {
+          title: '다시 꽂기 — 결과 저장',
+          summary: '완성된 결과는 다시 저장소에 기록되거나 화면으로 출력돼 사용자가 확인합니다.',
+          active: 4,
+          chips: ['수정된 report.docx', '자동 저장 완료', '화면 반영'],
+          hot: 0,
+          logs: [
+            ['15:42:13', '수정 내용 RAM에서 저장소로 반영'],
+            ['15:42:14', '자동 저장 타임스탬프 갱신'],
+            ['15:42:15', '화면에 최신 결과 출력'],
+          ],
+        },
+      };
+
+      const nodes = [
+        ['저장소', '오래 보관하는 책장'],
+        ['RAM', '작업 중 펼치는 책상'],
+        ['캐시', 'CPU 옆 포스트잇'],
+        ['CPU', '실제로 계산하는 펜'],
+        ['결과', '다시 저장하거나 출력'],
+      ];
+
+      function render() {
+        const hash = scenes[location.hash] ? location.hash : '#storage';
+        const scene = scenes[hash];
+        const track = nodes
+          .map((node, index) => {
+            const active = scene.active === index ? ' active' : '';
+            return (
+              '<div class="node' +
+              active +
+              '"><p class="node-title">' +
+              node[0] +
+              '</p><p class="node-desc">' +
+              node[1] +
+              '</p></div>' +
+              (index < nodes.length - 1 ? '<div class="arrow">↓</div>' : '')
+            );
+          })
+          .join('');
+        const chips = scene.chips
+          .map((item, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + item + '</span>')
+          .join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+
+        document.getElementById('app').innerHTML =
+          '<div class="screen"><section class="hero"><p class="eyebrow">데이터 흐름</p><h1>' +
+          scene.title +
+          '</h1><p class="summary">' +
+          scene.summary +
+          '</p></section><section class="map"><div class="track">' +
+          track +
+          '</div><div class="chips">' +
+          chips +
+          '</div></section><section class="log"><p class="eyebrow" style="color:#c4b5fd;">흐름 로그</p>' +
+          logs +
+          '</section></div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

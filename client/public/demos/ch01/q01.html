@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>라면으로 보는 컴퓨터 한 바퀴</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --text: #0f172a;
+        --muted: #64748b;
+        --border: #dbe4f0;
+        --accent: #ea580c;
+        --accent-soft: #fff7ed;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--bg);
+        color: var(--text);
+        font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif;
+      }
+
+      body {
+        overflow: hidden;
+      }
+
+      #app {
+        width: 100%;
+        height: 100%;
+        overflow-y: auto;
+      }
+
+      .screen {
+        min-height: 100%;
+        padding: 18px 14px 22px;
+      }
+
+      .hero,
+      .panel,
+      .log {
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--card);
+      }
+
+      .hero {
+        padding: 16px;
+        background: linear-gradient(135deg, #fff7ed, #ffedd5 58%, #ffffff);
+      }
+
+      .eyebrow {
+        margin: 0 0 6px;
+        font-size: 11px;
+        color: var(--muted);
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 18px;
+      }
+
+      .summary {
+        margin: 8px 0 0;
+        font-size: 12px;
+        line-height: 1.7;
+        color: #7c2d12;
+      }
+
+      .flow {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 8px;
+        margin-top: 14px;
+      }
+
+      .step {
+        padding: 10px 8px;
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        background: #fff;
+        text-align: center;
+      }
+
+      .step.active {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+        box-shadow: 0 10px 30px rgba(234, 88, 12, 0.12);
+      }
+
+      .num {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 24px;
+        height: 24px;
+        border-radius: 999px;
+        background: #fff;
+        border: 1px solid var(--border);
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .step.active .num {
+        border-color: transparent;
+        background: var(--accent);
+        color: #fff;
+      }
+
+      .label {
+        margin-top: 8px;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .desc {
+        margin-top: 4px;
+        font-size: 10px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+
+      .panel {
+        margin-top: 12px;
+        padding: 14px;
+      }
+
+      .panel h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+      }
+
+      .items {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .chip {
+        padding: 7px 10px;
+        border-radius: 999px;
+        background: #f8fafc;
+        border: 1px solid var(--border);
+        font-size: 11px;
+      }
+
+      .chip.accent {
+        background: var(--accent-soft);
+        border-color: #fdba74;
+        color: #9a3412;
+      }
+
+      .log {
+        margin-top: 12px;
+        padding: 12px 14px;
+        background: #111827;
+        color: #f8fafc;
+      }
+
+      .log-row {
+        font-family: 'JetBrains Mono', ui-monospace, monospace;
+        font-size: 10px;
+        line-height: 1.7;
+      }
+
+      .time {
+        color: #94a3b8;
+        margin-right: 6px;
+      }
+
+      @media (max-width: 375px) {
+        .flow {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenarios = {
+        '#input': {
+          title: '재료 받기 — 입력',
+          summary: '사용자가 건네는 재료가 입력입니다. 아직 조리되기 전의 값이 들어오는 단계입니다.',
+          active: 0,
+          items: ['면', '물', '스프', '계란'],
+          focus: '키보드, 마우스, 센서처럼 바깥에서 들어오는 신호가 모두 입력에 해당합니다.',
+          logs: [
+            ['10:10:01', '사용자 요청 수신'],
+            ['10:10:02', '재료 목록 확인'],
+            ['10:10:03', '조리 준비 단계로 전달'],
+          ],
+        },
+        '#memory': {
+          title: '냄비 준비 — 메모리',
+          summary: '당장 쓸 재료를 냄비와 조리대에 올려두는 장면은 메모리와 비슷합니다.',
+          active: 1,
+          items: ['냄비 속 물', '올려둔 면', '곧 넣을 스프'],
+          focus: '메모리는 작업 중 재료를 잠깐 붙잡아 두는 공간이라 빠르지만 영구 보관 창고는 아닙니다.',
+          logs: [
+            ['10:10:04', '작업대에 재료 배치'],
+            ['10:10:05', '냄비에 물 채움'],
+            ['10:10:06', '즉시 사용할 재료 유지'],
+          ],
+        },
+        '#cpu': {
+          title: '불로 익히기 — 처리',
+          summary: '실제로 변화를 만들어내는 단계가 처리입니다. CPU가 규칙에 따라 계산하는 순간과 닮았습니다.',
+          active: 2,
+          items: ['끓는 물', '익는 면', '섞이는 스프'],
+          focus: 'CPU는 메모리에 올라온 재료를 읽어 순서대로 계산하고 상태를 바꿉니다.',
+          logs: [
+            ['10:10:07', '불 점화'],
+            ['10:10:08', '조리 순서 실행'],
+            ['10:10:09', '결과 상태 갱신'],
+          ],
+        },
+        '#output': {
+          title: '그릇에 담기 — 출력',
+          summary: '완성된 결과를 사람이 바로 확인할 수 있는 형태로 내놓는 단계가 출력입니다.',
+          active: 3,
+          items: ['완성된 라면', '김 나는 그릇', '먹을 준비 완료'],
+          focus: '화면, 스피커, 프린터처럼 결과를 밖으로 드러내는 장치가 출력 역할을 맡습니다.',
+          logs: [
+            ['10:10:10', '완성 결과 생성'],
+            ['10:10:11', '그릇에 담기'],
+            ['10:10:12', '사용자에게 제공'],
+          ],
+        },
+      };
+
+      const steps = ['입력', '메모리', '처리', '출력'];
+
+      function render() {
+        const hash = scenarios[location.hash] ? location.hash : '#input';
+        const data = scenarios[hash];
+        const flow = steps
+          .map((label, index) => {
+            const active = data.active === index ? ' active' : '';
+            return (
+              '<div class="step' +
+              active +
+              '"><div class="num">0' +
+              (index + 1) +
+              '</div><div class="label">' +
+              label +
+              '</div><div class="desc">' +
+              (index === 0
+                ? '재료 받기'
+                : index === 1
+                  ? '올려 두기'
+                  : index === 2
+                    ? '변화 만들기'
+                    : '결과 내놓기') +
+              '</div></div>'
+            );
+          })
+          .join('');
+
+        const items = data.items.map((item, idx) => '<span class="chip' + (idx === 0 ? ' accent' : '') + '">' + item + '</span>').join('');
+        const logs = data.logs.map((row) => '<div class="log-row"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+
+        document.getElementById('app').innerHTML =
+          '<div class="screen">' +
+          '<section class="hero"><p class="eyebrow">컴퓨터의 큰 그림</p><h1>' +
+          data.title +
+          '</h1><p class="summary">' +
+          data.summary +
+          '</p><div class="flow">' +
+          flow +
+          '</div></section>' +
+          '<section class="panel"><h2>지금 화면의 재료</h2><div class="items">' +
+          items +
+          '</div><p class="summary" style="color:#475569;">' +
+          data.focus +
+          '</p></section>' +
+          '<section class="log"><div class="eyebrow" style="color:#94a3b8;">실시간 로그</div>' +
+          logs +
+          '</section></div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

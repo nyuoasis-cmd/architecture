@@ -1,5 +1,5 @@
 const CHAPTERS = [
-  { id: 1, title: '컴퓨터의 큰 그림', count: 7, category: '컴퓨터 기초' },
+  { id: 1, title: '컴퓨터의 큰 그림', count: 4, category: '컴퓨터 기초' },
   { id: 2, title: '소프트웨어 개발', count: 7, category: '개발' },
   { id: 3, title: '테스트와 배포', count: 7, category: '개발' },
   { id: 4, title: '데이터 다루기', count: 7, category: '데이터' },
@@ -56,6 +56,58 @@ export const QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
         body: '프로그램은 디스크에 저장된 실행 파일입니다. 프로세스는 그 파일이 메모리에 올라와 실제로 움직이는 상태입니다. 프로세서는 CPU처럼 계산을 처리하는 부품입니다. 같은 앱을 두 번 열면 프로세스는 두 개가 생기지만 프로그램 파일은 그대로입니다.',
         keywords: ['프로그램', '프로세스', '프로세서', 'CPU'],
         checkpoint: '프로그램, 프로세스, 프로세서를 각각 한 줄로 구분할 수 있어야 합니다.',
+      };
+    }
+
+    if (chapter.id === 1 && order === 1) {
+      return {
+        id: 'ch01_q01',
+        chapterId: 1,
+        chapterTitle: chapter.title,
+        title: '컴퓨터는 결국 무슨 일을 하나요?',
+        summary: '입력과 저장, 처리와 출력을 한 흐름으로 묶어 컴퓨터의 기본 동작을 잡습니다.',
+        body: '컴퓨터는 바깥에서 정보를 받아들이고(입력), 잠시 메모리에 붙잡아 둔 뒤 CPU가 계산하고(처리), 다시 화면이나 스피커로 보여 줍니다(출력). 폰 노이만 구조에서 CPU·메모리·입출력 장치가 역할을 나눕니다. 사진·소리·문장도 결국 0과 1 신호로 환원되어 같은 체계로 처리됩니다.',
+        keywords: ['입력', '처리', '출력', '폰 노이만'],
+        checkpoint: '컴퓨터의 동작을 입력·처리·출력 사이클로 한 줄로 설명할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 1 && order === 2) {
+      return {
+        id: 'ch01_q02',
+        chapterId: 1,
+        chapterTitle: chapter.title,
+        title: '하드웨어와 소프트웨어의 차이는?',
+        summary: '손으로 만질 수 있는 부품과 그 부품에 일을 시키는 명령을 분리해 이해합니다.',
+        body: '하드웨어는 CPU, RAM, SSD, 키보드처럼 손으로 만질 수 있는 물리 부품입니다. 소프트웨어는 그 부품들이 어떤 순서로 움직일지 적어 둔 명령의 묶음입니다. 무대(하드웨어)와 대본(소프트웨어)의 관계로 이해하면 쉽습니다. 하드웨어가 능력을 제공하고 소프트웨어가 그 능력을 쓸 곳을 결정합니다.',
+        keywords: ['하드웨어', '소프트웨어', '물리', '명령'],
+        checkpoint: '하드웨어와 소프트웨어를 무대와 대본 비유로 구분할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 1 && order === 3) {
+      return {
+        id: 'ch01_q03',
+        chapterId: 1,
+        chapterTitle: chapter.title,
+        title: '운영체제는 무슨 역할을 하나요?',
+        summary: 'OS가 사용자와 부품 사이에서 자원을 배분하고 규칙을 세우는 이유를 설명합니다.',
+        body: '운영체제(OS)는 사용자와 하드웨어 사이의 통역자이자 현장 감독입니다. 핵심 역할은 자원 분배(CPU 시간·메모리), 파일 관리, 보안과 사용자 인터페이스입니다. 식당 매니저가 손님 자리 배치·주문 분배·계산 순서를 정리하듯 OS도 앱과 부품 사이에서 질서를 유지합니다. Windows, macOS, Linux, Android, iOS가 대표적입니다.',
+        keywords: ['운영체제', '자원', '관리', '인터페이스'],
+        checkpoint: 'OS의 핵심 역할 3가지(자원 분배·파일 관리·UI)를 들 수 있다.',
+      };
+    }
+
+    if (chapter.id === 1 && order === 4) {
+      return {
+        id: 'ch01_q04',
+        chapterId: 1,
+        chapterTitle: chapter.title,
+        title: '컴퓨터 안에서 데이터는 어떻게 흐르나요?',
+        summary: '저장소·메모리·CPU 사이의 이동 경로와 캐시의 위치를 비유로 잡습니다.',
+        body: '데이터는 보통 저장소(SSD)에서 메모리(RAM)로 올라간 뒤 CPU가 RAM의 값을 읽어 계산합니다. 결과는 다시 RAM 또는 저장소로 갑니다. RAM은 빠르지만 휘발성이고, SSD는 느리지만 영구 저장입니다. 캐시는 자주 쓰는 메모를 책상 위 포스트잇처럼 CPU 가까이에 두어 시간을 줄이는 보조 기억입니다.',
+        keywords: ['RAM', '저장소', '캐시', '데이터 흐름'],
+        checkpoint: '데이터가 SSD→RAM→CPU 순서로 이동하는 이유를 비유로 설명할 수 있다.',
       };
     }
 

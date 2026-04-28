@@ -1,4 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
+import { getDemoByQaId } from '../../data/demos';
 import type { ChapterStub, QaStub } from '../../data/qa-stubs';
 import { useProgressMap } from '../../lib/progress';
 
@@ -31,6 +32,7 @@ export default function GuidePanel({
   const progressMap = progressMapOverride ?? localProgressMap;
   const navigate = useNavigate();
   const currentQaId = currentQa.id;
+  const demo = currentQa.demoQaId ? getDemoByQaId(currentQa.demoQaId) : undefined;
   const stepQaIds = chapterQas.map((qa) => qa.id);
   const sessionQaIds = allSessionQas?.map((qa) => qa.id) ?? stepQaIds;
   const sessionQaIndex = sessionQaIds.indexOf(currentQaId);
@@ -145,8 +147,10 @@ export default function GuidePanel({
           {currentQa.title}
         </h3>
 
-        <div className="text-xs leading-relaxed" style={{ color: 'var(--color-text-body)', lineHeight: 1.8 }}>
-          {currentQa.body}
+        <div className="space-y-2 text-xs leading-relaxed" style={{ color: 'var(--color-text-body)', lineHeight: 1.8 }}>
+          {currentQa.body.split(/\n\n+/).map((para, i) => (
+            <p key={i}>{para}</p>
+          ))}
         </div>
 
         <div className="flex flex-wrap gap-1">
@@ -170,16 +174,11 @@ export default function GuidePanel({
           </p>
           {currentQa.demoQaId ? (
             <div className="space-y-1.5">
-              {[
-                ['launch', '01', '카톡 실행 — 프로세스 만들어지기'],
-                ['multi', '02', '같은 앱 두 번 — 프로세스 2개'],
-                ['cpu', '03', 'CPU가 일하는 모습'],
-                ['kill', '04', '앱 종료 — 프로세스 사라지기'],
-              ].map(([scenarioId, number, label]) => (
+              {demo?.scenarios.map((scenario, index) => (
                 <button
-                  key={scenarioId}
-                  className={`demo-launcher ${activeScenarioId === scenarioId ? 'active' : ''}`}
-                  onClick={() => onScenarioChange(scenarioId)}
+                  key={scenario.id}
+                  className={`demo-launcher ${activeScenarioId === scenario.id ? 'active' : ''}`}
+                  onClick={() => onScenarioChange(scenario.id)}
                   type="button"
                 >
                   <span>
@@ -187,16 +186,16 @@ export default function GuidePanel({
                       className="mr-1.5 font-mono text-[11px]"
                       style={{
                         color:
-                          activeScenarioId === scenarioId ? 'var(--color-accent)' : 'var(--color-text-muted)',
+                          activeScenarioId === scenario.id ? 'var(--color-accent)' : 'var(--color-text-muted)',
                       }}
                     >
-                      {number}
+                      {String(index + 1).padStart(2, '0')}
                     </span>
-                    {label}
+                    {scenario.label}
                   </span>
                   <span className="arrow">▶</span>
                 </button>
-              ))}
+              )) ?? null}
             </div>
           ) : (
             <div
