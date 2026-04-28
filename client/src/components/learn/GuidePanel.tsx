@@ -59,10 +59,10 @@ export default function GuidePanel({
             const isCurrent = qaId === currentQaId;
             const isDone = entry?.quizScore !== undefined && entry.quizScore >= 2;
 
-            const bgColor = isCurrent
-              ? 'var(--color-accent)'
-              : isDone
-                ? 'var(--color-success)'
+            const bgColor = isDone
+              ? 'var(--color-success)'
+              : isCurrent
+                ? 'var(--color-accent)'
                 : 'var(--color-bg-input)';
 
             const textColor = isCurrent || isDone ? '#fff' : 'var(--color-text-muted)';
