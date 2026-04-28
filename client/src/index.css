@@ -129,8 +129,11 @@
   border: none;
   background: var(--color-btn-primary);
   color: #ffffff;
-  cursor: not-allowed;
-  opacity: var(--btn-disabled-opacity);
+  cursor: pointer;
+}
+
+.primary-button:hover {
+  background: var(--color-btn-primary-hover);
 }
 
 .secondary-link {

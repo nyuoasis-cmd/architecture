@@ -21,9 +21,9 @@ export default function LandingPage() {
           흐름을 단계별로 정리하는 티처메이트 학습 서비스입니다.
         </p>
         <div className="landing-actions">
-          <button className="primary-button" type="button" disabled>
-            카카오 로그인 준비 중
-          </button>
+          <Link className="primary-button" to="/login">
+            교사로 시작
+          </Link>
           <div className="landing-action-links">
             <a className="secondary-link" href="/dev-login">
               DEV 로그인 바로가기

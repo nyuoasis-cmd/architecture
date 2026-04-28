@@ -1,4 +1,4 @@
-import { getDevUser } from './dev-auth';
+import { getTeacherAuthHeaders } from './auth';
 
 export type SessionStatus = 'active' | 'ended';
 
@@ -46,18 +46,6 @@ export class SessionClientError extends Error {
   }
 }
 
-function getTeacherHeaders() {
-  const user = getDevUser();
-  if (!user) {
-    return {} as Record<string, string>;
-  }
-
-  return {
-    'x-dev-teacher-id': user.id,
-    'x-dev-teacher-name': user.name,
-  } satisfies Record<string, string>;
-}
-
 async function readJson<T>(response: Response): Promise<T> {
   const body = (await response.json().catch(() => ({}))) as { error?: string; message?: string };
   if (!response.ok) {
@@ -72,8 +60,9 @@ async function readJson<T>(response: Response): Promise<T> {
 }
 
 export async function listTeacherSessions(): Promise<SessionRecord[]> {
+  const headers = await getTeacherAuthHeaders();
   const response = await fetch('/api/sessions', {
-    headers: getTeacherHeaders(),
+    headers,
   });
   return readJson<SessionRecord[]>(response);
 }
@@ -83,11 +72,12 @@ export async function createSession(input: {
   chapterIds: number[];
   maxParticipants: 50 | 100 | 200;
 }): Promise<SessionRecord> {
+  const headers = await getTeacherAuthHeaders();
   const response = await fetch('/api/sessions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      ...getTeacherHeaders(),
+      ...headers,
     },
     body: JSON.stringify({
       name: input.name,
@@ -99,8 +89,9 @@ export async function createSession(input: {
 }
 
 export async function getSession(sessionId: string, options?: { teacher?: boolean }): Promise<SessionDetail> {
+  const headers = options?.teacher ? await getTeacherAuthHeaders() : undefined;
   const response = await fetch(`/api/sessions/${sessionId}`, {
-    headers: options?.teacher ? getTeacherHeaders() : undefined,
+    headers,
     credentials: 'include',
   });
   return readJson<SessionDetail>(response);
@@ -111,16 +102,18 @@ export async function getSessionParticipants(sessionId: string): Promise<{
   status: SessionStatus;
   participants: SessionParticipant[];
 }> {
+  const headers = await getTeacherAuthHeaders();
   const response = await fetch(`/api/sessions/${sessionId}/participants`, {
-    headers: getTeacherHeaders(),
+    headers,
   });
   return readJson(response);
 }
 
 export async function endSession(sessionId: string): Promise<SessionRecord> {
+  const headers = await getTeacherAuthHeaders();
   const response = await fetch(`/api/sessions/${sessionId}/end`, {
     method: 'POST',
-    headers: getTeacherHeaders(),
+    headers,
   });
   return readJson<SessionRecord>(response);
 }

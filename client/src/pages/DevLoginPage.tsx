@@ -1,8 +1,10 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
 import { clearDevUser, getDevUser, setDevUser } from '../lib/dev-auth';
 
 export default function DevLoginPage() {
+  const auth = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const saved = getDevUser();
@@ -10,6 +12,15 @@ export default function DevLoginPage() {
   const [name, setName] = useState(saved?.name ?? 'DEV Teacher');
 
   const target = searchParams.get('from') ?? '/teacher';
+  const isDevBuild = Boolean(import.meta.env.DEV);
+
+  if (!isDevBuild) {
+    return <Navigate replace to="/forbidden" />;
+  }
+
+  if (!auth.isLoading && auth.isAuthenticated) {
+    return <Navigate replace to={target} />;
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 items-center px-6 py-12">
