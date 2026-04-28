@@ -1,0 +1,629 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>학생 학습 — Architecture Academy 목업 (v3 · ai-app-builder 본질 반영)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet" />
+<style>
+  :root {
+    --color-text-primary: #1c1917;
+    --color-text-body: #57534e;
+    --color-text-muted: #78716c;
+    --color-text-faint: #a8a29e;
+    --color-border: #e7e5e4;
+    --color-border-hover: #d6d3d1;
+    --color-bg-card: #ffffff;
+    --color-bg-subtle: #fafaf9;
+    --color-bg-input: #f5f5f4;
+    --color-btn-primary: #1c1917;
+    --color-btn-primary-hover: #292524;
+    --color-accent: #6366f1;
+    --color-accent-text: #ffffff;
+    --color-success: #10b981;
+    --font-heading: 'Outfit', 'Pretendard Variable', sans-serif;
+    --font-body: 'Pretendard Variable', -apple-system, 'Noto Sans KR', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  html, body {
+    background: var(--color-bg-card);
+    color: var(--color-text-primary);
+    font-family: var(--font-body);
+    letter-spacing: -0.005em;
+    line-height: 1.7;
+    font-weight: 400;
+    height: 100%;
+  }
+  @media (min-width: 1024px) { html, body { font-weight: 300; } }
+  h1, h2, h3, h4 {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+    line-height: 1.35;
+    color: var(--color-text-primary);
+  }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .btn-primary {
+    background: var(--color-btn-primary); color: #fff;
+    border-radius: 10px; height: 36px; padding: 0 14px;
+    font-weight: 500; font-size: 13px;
+  }
+  .btn-primary:hover { background: var(--color-btn-primary-hover); }
+  .btn-ghost {
+    background: var(--color-bg-card); color: var(--color-text-primary);
+    border: 1px solid var(--color-border);
+    border-radius: 10px; height: 36px; padding: 0 12px;
+    font-weight: 500; font-size: 13px;
+  }
+  .btn-ghost:hover { background: var(--color-bg-input); }
+  .toolbar-btn {
+    width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px; color: var(--color-text-muted); background: transparent; border: none;
+    cursor: pointer;
+  }
+  .toolbar-btn:hover { background: var(--color-bg-input); color: var(--color-text-primary); }
+  .toolbar-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* 로고 */
+  .logo-bar { display: inline-flex; align-items: center; gap: 4px; }
+  .logo-bar i { display: block; width: 4px; height: 18px; border-radius: 2px; }
+  .logo-bar i:nth-child(1) { background: #1B2A4A; }
+  .logo-bar i:nth-child(2) { background: #7EC8B5; }
+
+  /* phone-frame (ai-app-builder PreviewPanel 패턴) */
+  .phone-frame {
+    width: 320px;
+    height: 640px;
+    background: #1c1917;
+    border-radius: 36px;
+    padding: 12px;
+    box-shadow: 0 24px 64px rgba(28,25,23,0.18), 0 4px 16px rgba(28,25,23,0.08);
+    position: relative;
+    flex-shrink: 0;
+  }
+  .phone-notch {
+    position: absolute;
+    top: 12px; left: 50%; transform: translateX(-50%);
+    width: 100px; height: 22px;
+    background: #1c1917;
+    border-radius: 0 0 14px 14px;
+    z-index: 2;
+  }
+  .phone-screen {
+    width: 100%; height: 100%;
+    background: #fff;
+    border-radius: 26px;
+    overflow: hidden;
+    position: relative;
+  }
+  /* 시연 앱 내부 스타일 */
+  .demo {
+    width: 100%; height: 100%;
+    padding: 36px 16px 16px;
+    display: flex; flex-direction: column;
+    font-family: var(--font-body);
+    font-size: 12px;
+    color: var(--color-text-primary);
+    overflow-y: auto;
+  }
+  .demo h4 {
+    font-family: var(--font-heading);
+    font-size: 13px; font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .demo-tier {
+    border: 1.5px solid var(--color-border);
+    border-radius: 10px;
+    padding: 10px;
+    background: var(--color-bg-subtle);
+  }
+  .demo-tier.active { border-color: var(--color-accent); background: rgba(99,102,241,0.05); }
+  .demo-tier-label {
+    font-size: 10px; font-family: var(--font-mono);
+    color: var(--color-text-muted);
+    letter-spacing: 0.05em; text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .demo-chip {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 8px; border-radius: 999px;
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    font-size: 11px;
+  }
+  .demo-chip.proc {
+    background: var(--color-accent); color: #fff; border-color: transparent;
+  }
+  .demo-arrow {
+    text-align: center; color: var(--color-text-faint);
+    font-size: 14px; line-height: 1;
+    margin: 4px 0;
+  }
+  .demo-cpu-cores {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 4px;
+    margin-top: 6px;
+  }
+  .demo-core {
+    border: 1px solid var(--color-border); border-radius: 6px;
+    padding: 4px 6px; font-size: 10px;
+    background: #fff; text-align: center;
+  }
+  .demo-core.busy { background: var(--color-accent); color: #fff; border-color: transparent; }
+  .demo-log {
+    margin-top: 10px;
+    background: #1c1917; color: #fafaf9;
+    border-radius: 8px; padding: 8px 10px;
+    font-family: var(--font-mono); font-size: 10px;
+    line-height: 1.6; max-height: 100px; overflow-y: auto;
+  }
+  .demo-log .ts { color: #a8a29e; margin-right: 4px; }
+  .demo-btn {
+    background: #1c1917; color: #fff; border: none;
+    border-radius: 8px; padding: 8px 12px;
+    font-size: 12px; font-weight: 500;
+    cursor: pointer; width: 100%;
+    margin-top: 8px;
+  }
+
+  /* 채팅 버블 */
+  .bubble-bot {
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: 12px 12px 12px 2px;
+    padding: 10px 12px; font-size: 13px;
+    color: var(--color-text-body); line-height: 1.6;
+  }
+  .bubble-user {
+    background: var(--color-text-primary); color: #fff;
+    border-radius: 12px 12px 2px 12px;
+    padding: 10px 12px; font-size: 13px; line-height: 1.6;
+  }
+
+  /* 약속된 시연 버튼 */
+  .demo-launcher {
+    width: 100%; text-align: left;
+    padding: 10px 12px;
+    background: var(--color-bg-subtle);
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    font-size: 12px; color: var(--color-text-primary);
+    line-height: 1.5;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    transition: all .15s cubic-bezier(.2,.8,.2,1);
+  }
+  .demo-launcher:hover { border-color: var(--color-accent); background: rgba(99,102,241,0.04); }
+  .demo-launcher.active {
+    border-color: var(--color-accent);
+    background: rgba(99,102,241,0.08);
+  }
+  .demo-launcher .arrow { color: var(--color-text-faint); flex-shrink: 0; }
+  .demo-launcher.active .arrow { color: var(--color-accent); }
+
+  /* 퀴즈 */
+  .quiz-option {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 14px; color: var(--color-text-body);
+    background: var(--color-bg-card);
+    text-align: left; width: 100%;
+    transition: all .15s cubic-bezier(.2,.8,.2,1);
+  }
+  .quiz-option:hover { border-color: var(--color-border-hover); background: var(--color-bg-input); }
+  .quiz-option.selected {
+    border-color: var(--color-text-primary);
+    color: var(--color-text-primary); font-weight: 500;
+  }
+</style>
+</head>
+
+<body>
+
+<!-- =====================================================================
+     ai-app-builder BuilderPage 구조 그대로 차용
+     좌 GuidePanel(280px) | 중 ChatPanel(320px) | 우 PreviewPanel(flex-1)
+     우 패널: phone-frame + 도구바 + 탭(시연/퀴즈)
+     모바일: 학습 / 채팅 / 시연 / 퀴즈 4탭
+===================================================================== -->
+
+<!-- ServiceHeader (56px) -->
+<header class="border-b sticky top-0 z-20 bg-white" style="border-color: var(--color-border); height: 56px;">
+  <div class="h-full max-w-[1440px] mx-auto px-4 lg:px-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="logo-bar"><i></i><i></i></span>
+      <span class="font-medium text-[15px]" style="font-family: var(--font-heading)">teachermate</span>
+      <span style="color: var(--color-text-faint)">/</span>
+      <span class="text-[14px]" style="color: var(--color-text-body)">기술노트 아카데미</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="hidden sm:inline text-[12px]" style="color: var(--color-text-muted)">세션</span>
+      <span class="text-[12px] font-mono px-2 py-0.5 rounded" style="background: var(--color-bg-input); color: var(--color-text-primary);">MJ4P2X</span>
+      <span class="text-[13px] font-medium ml-2">민지</span>
+    </div>
+  </div>
+</header>
+
+<!-- 모바일 탭바 (4개) -->
+<div class="flex lg:hidden" style="border-bottom: 1px solid var(--color-border);">
+  <button data-mtab="guide" class="mtab flex-1 py-2.5 text-sm font-medium cursor-pointer is-active" style="background:transparent;">📖 학습</button>
+  <button data-mtab="chat" class="mtab flex-1 py-2.5 text-sm font-medium cursor-pointer" style="background:transparent;">💬 채팅</button>
+  <button data-mtab="preview" class="mtab flex-1 py-2.5 text-sm font-medium cursor-pointer" style="background:transparent;">📱 시연</button>
+  <button data-mtab="quiz-m" class="mtab flex-1 py-2.5 text-sm font-medium cursor-pointer" style="background:transparent;">✅ 퀴즈</button>
+</div>
+<style>
+  .mtab { color: var(--color-text-muted); border-bottom: 2px solid transparent; }
+  .mtab.is-active { color: var(--color-text-primary); border-bottom-color: var(--color-text-primary); }
+</style>
+
+<!-- 3컬럼 본문 -->
+<div class="flex flex-1 min-h-0" style="height: calc(100vh - 56px - 41px); height: calc(100dvh - 56px - 41px);">
+<style>
+  @media (min-width: 1024px) {
+    .threecol-host { height: calc(100vh - 56px) !important; height: calc(100dvh - 56px) !important; }
+  }
+</style>
+
+<div class="threecol-host flex flex-1 min-h-0 max-w-[1440px] mx-auto w-full">
+
+  <!-- ===== GuidePanel (좌, 280px) ===== -->
+  <aside data-panel="guide"
+    class="flex w-full lg:flex lg:w-[280px] lg:min-w-[260px] lg:flex-shrink-0 flex-col"
+    style="border-right: 1px solid var(--color-border);">
+    <div class="flex flex-col h-full">
+
+      <!-- GuideHeader -->
+      <div class="flex-shrink-0 p-3 border-b" style="border-color: var(--color-border);">
+        <div class="flex items-center gap-2 mb-2">
+          <span>💻</span>
+          <span class="text-xs font-medium truncate" style="font-family: var(--font-heading);">
+            6장 · 컴퓨터 구조와 운영체제
+          </span>
+          <span class="ml-auto text-[10px] px-1.5 py-0.5 rounded-full"
+            style="background: rgba(99,102,241,0.10); color: var(--color-accent);">컴퓨터 기초</span>
+        </div>
+
+        <!-- 10단계 점 진행도 -->
+        <div class="flex items-center justify-between gap-1 mb-2">
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-success); color:#fff;">✓</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-success);"></span>
+          </button>
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-success); color:#fff;">✓</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-success);"></span>
+          </button>
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-accent); color:#fff;">3</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-accent);"></span>
+          </button>
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-bg-input); color: var(--color-text-muted);">4</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-bg-input);"></span>
+          </button>
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-bg-input); color: var(--color-text-muted);">5</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-bg-input);"></span>
+          </button>
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-bg-input); color: var(--color-text-muted);">6</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-bg-input);"></span>
+          </button>
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-bg-input); color: var(--color-text-muted);">7</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-bg-input);"></span>
+          </button>
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-bg-input); color: var(--color-text-muted);">8</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-bg-input);"></span>
+          </button>
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-bg-input); color: var(--color-text-muted);">9</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-bg-input);"></span>
+          </button>
+          <button class="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer">
+            <span class="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold" style="background: var(--color-bg-input); color: var(--color-text-muted);">10</span>
+            <span class="block w-full h-1 rounded-full" style="background: var(--color-bg-input);"></span>
+          </button>
+        </div>
+        <div class="flex justify-between text-[10px]">
+          <span style="color: var(--color-text-muted);">단계를 눌러 이동</span>
+          <span class="font-mono" style="color: var(--color-text-faint);">3/10</span>
+        </div>
+      </div>
+
+      <!-- GuideStepContent -->
+      <div class="flex-1 overflow-y-auto scrollbar-hide p-3 space-y-3">
+        <h3 class="text-sm font-medium" style="font-family: var(--font-heading);">
+          프로그램, 프로세스, 프로세서의 차이가 뭔가요?
+        </h3>
+
+        <div class="text-xs leading-relaxed" style="color: var(--color-text-body); line-height:1.8;">
+          세 단어가 비슷해 보이지만 가리키는 대상이 전혀 다릅니다.
+          <strong style="color:var(--color-text-primary); font-weight:500;">프로그램</strong>은 디스크에 저장된 파일,
+          <strong style="color:var(--color-text-primary); font-weight:500;">프로세스</strong>는 메모리에 올라가 실행 중인 상태,
+          <strong style="color:var(--color-text-primary); font-weight:500;">프로세서</strong>는 실제 처리 부품(CPU)입니다.
+        </div>
+
+        <!-- 키워드 칩 -->
+        <div class="flex flex-wrap gap-1">
+          <span class="text-[10px] px-1.5 py-0.5 rounded" style="background: var(--color-bg-input); color: var(--color-text-muted);">프로그램</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded" style="background: var(--color-bg-input); color: var(--color-text-muted);">프로세스</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded" style="background: var(--color-bg-input); color: var(--color-text-muted);">프로세서</span>
+          <span class="text-[10px] px-1.5 py-0.5 rounded" style="background: var(--color-bg-input); color: var(--color-text-muted);">CPU</span>
+        </div>
+
+        <!-- 약속된 시연 버튼들 (핵심 — 이게 ai-app-builder 본질의 변주) -->
+        <div>
+          <p class="text-[10px] font-medium mb-2 uppercase tracking-wider" style="color: var(--color-text-faint);">
+            ▶ 옆 화면에 시연하기
+          </p>
+          <div class="space-y-1.5">
+            <button class="demo-launcher active" data-demo="launch">
+              <span><span class="text-[11px] font-mono mr-1.5" style="color:var(--color-accent);">01</span>카톡 실행 — 프로세스 만들어지기</span>
+              <span class="arrow">▶</span>
+            </button>
+            <button class="demo-launcher" data-demo="multi">
+              <span><span class="text-[11px] font-mono mr-1.5" style="color:var(--color-text-muted);">02</span>같은 앱 두 번 — 프로세스 2개</span>
+              <span class="arrow">▶</span>
+            </button>
+            <button class="demo-launcher" data-demo="cpu">
+              <span><span class="text-[11px] font-mono mr-1.5" style="color:var(--color-text-muted);">03</span>CPU가 일하는 모습</span>
+              <span class="arrow">▶</span>
+            </button>
+            <button class="demo-launcher" data-demo="kill">
+              <span><span class="text-[11px] font-mono mr-1.5" style="color:var(--color-text-muted);">04</span>앱 종료 — 프로세스 사라지기</span>
+              <span class="arrow">▶</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 체크포인트 -->
+        <div class="p-2.5 rounded-lg" style="background: var(--color-bg-subtle); border: 1px solid var(--color-border);">
+          <p class="text-[10px] font-medium mb-1 uppercase tracking-wider" style="color: var(--color-text-faint);">✅ 체크포인트</p>
+          <p class="text-xs" style="color: var(--color-text-body);">
+            프로그램·프로세스·프로세서를 한 줄로 구분해 설명할 수 있다.
+          </p>
+          <button class="mt-2 text-[11px] px-2.5 py-1 rounded-md cursor-pointer"
+            style="background: var(--color-accent); color: #fff; border: none;">확인 완료</button>
+        </div>
+      </div>
+
+      <!-- GuideFooter -->
+      <div class="flex-shrink-0 flex gap-2 p-3" style="border-top: 1px solid var(--color-border);">
+        <button class="btn-ghost flex-1">← 이전</button>
+        <button class="btn-primary flex-1">다음 →</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== ChatPanel (중, 320px) ===== -->
+  <section data-panel="chat"
+    class="hidden lg:flex w-full lg:w-[320px] lg:min-w-[280px] lg:flex-shrink-0 flex-col"
+    style="border-right: 1px solid var(--color-border);">
+
+    <div class="flex-shrink-0 px-4 py-3" style="border-bottom: 1px solid var(--color-border);">
+      <p class="text-[13px] font-medium">AI 챗봇</p>
+      <p class="text-[11px] mt-0.5" style="color: var(--color-text-muted);">시연으로 부족한 부분을 보충 질문</p>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-3 scrollbar-hide">
+      <div class="bubble-bot max-w-[90%]">
+        옆 패널에서 ▶ 버튼을 눌러보세요. 시연을 보고 더 궁금한 게 있으면 여기서 물어보면 돼요.
+      </div>
+
+      <div class="flex justify-end">
+        <div class="bubble-user max-w-[85%]">왜 메모리에 올려야 해? 디스크에서 바로 읽으면 안 돼?</div>
+      </div>
+
+      <div class="bubble-bot max-w-[90%]">
+        디스크는 책장(느림), 메모리는 책상 위(빠름) 같아요. CPU는 책상 위에 있는 책만 빠르게 펼쳐 읽을 수 있어서,
+        실행할 때는 책장에서 책상 위로 옮겨야 합니다.
+      </div>
+    </div>
+
+    <form class="flex-shrink-0 p-3 flex items-end gap-2" style="border-top: 1px solid var(--color-border);" onsubmit="return false">
+      <textarea rows="1" placeholder="질문을 입력하세요"
+        class="flex-1 resize-none rounded-[10px] px-3 py-2 text-[13px] focus:outline-none"
+        style="border: 1px solid var(--color-border);"></textarea>
+      <button class="btn-primary" type="button">보내기</button>
+    </form>
+  </section>
+
+  <!-- ===== PreviewPanel (우, flex-1) ===== -->
+  <section data-panel="preview" class="hidden lg:flex flex-1 flex-col" style="background: var(--color-bg-subtle);">
+
+    <!-- 도구바 (ai-app-builder PreviewPanel 패턴) -->
+    <div class="flex-shrink-0 px-4 py-2 flex items-center justify-between gap-3 bg-white" style="border-bottom: 1px solid var(--color-border);">
+      <div class="flex items-center gap-1">
+        <button id="vtab-preview" class="px-3 py-1 rounded-md text-xs font-medium" style="background: var(--color-bg-input); color: var(--color-text-primary);">시연</button>
+        <button id="vtab-quiz" class="px-3 py-1 rounded-md text-xs font-medium" style="background: transparent; color: var(--color-text-muted);">퀴즈</button>
+      </div>
+
+      <div class="flex items-center gap-1" id="preview-tools">
+        <button class="toolbar-btn" title="처음 상태로">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg>
+        </button>
+        <button class="toolbar-btn" title="QR로 내 폰에서 보기">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z"/></svg>
+        </button>
+        <button class="toolbar-btn" title="전체화면">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3.75 3.75v5.25m0-5.25h5.25m-5.25 0L9 9m11.25-5.25v5.25m0-5.25h-5.25m5.25 0L15 9m-11.25 11.25v-5.25m0 5.25h5.25m-5.25 0L9 15m11.25 5.25v-5.25m0 5.25h-5.25m5.25 0L15 15"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- ===== 시연 뷰 (phone-frame 안 시뮬레이션) ===== -->
+    <div id="view-preview" class="flex-1 flex flex-col items-center justify-center p-6 lg:p-8 overflow-auto">
+      <div class="phone-frame">
+        <div class="phone-notch"></div>
+        <div class="phone-screen">
+
+          <!-- 시연 앱 본체 — "프로그램 → 프로세스 → 프로세서" -->
+          <div class="demo">
+            <h4>📱 카톡 프로세스 시뮬레이터</h4>
+            <p class="text-[11px] mb-3" style="color: var(--color-text-muted);">아래 디스크에서 앱을 눌러 실행해보세요</p>
+
+            <!-- DISK -->
+            <div class="demo-tier mb-1">
+              <p class="demo-tier-label">디스크 (저장)</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="demo-chip">📦 카톡.apk</span>
+                <span class="demo-chip">📦 메모.apk</span>
+                <span class="demo-chip">📦 사진.apk</span>
+              </div>
+              <p class="text-[10px] mt-1.5" style="color: var(--color-text-faint);">= 프로그램 (파일 형태)</p>
+            </div>
+
+            <div class="demo-arrow">↓ 클릭으로 실행</div>
+
+            <!-- MEMORY (active) -->
+            <div class="demo-tier active mb-1">
+              <p class="demo-tier-label">메모리 (실행 중)</p>
+              <div class="flex flex-wrap gap-1.5">
+                <span class="demo-chip proc">⚡ 카톡 PID 1</span>
+                <span class="demo-chip proc">⚡ 메모 PID 2</span>
+              </div>
+              <p class="text-[10px] mt-1.5" style="color: var(--color-text-faint);">= 프로세스</p>
+            </div>
+
+            <div class="demo-arrow">↓ 명령 처리</div>
+
+            <!-- CPU -->
+            <div class="demo-tier">
+              <p class="demo-tier-label">CPU (계산)</p>
+              <div class="demo-cpu-cores">
+                <div class="demo-core busy">코어1 · 카톡</div>
+                <div class="demo-core busy">코어2 · 메모</div>
+                <div class="demo-core">코어3 · 대기</div>
+                <div class="demo-core">코어4 · 대기</div>
+              </div>
+              <p class="text-[10px] mt-1.5" style="color: var(--color-text-faint);">= 프로세서</p>
+            </div>
+
+            <!-- 로그 -->
+            <div class="demo-log">
+              <div><span class="ts">10:24:01</span>카톡.apk → 프로세스 생성 (PID 1)</div>
+              <div><span class="ts">10:24:02</span>메모리 할당 142MB</div>
+              <div><span class="ts">10:24:03</span>CPU 코어1 할당</div>
+              <div><span class="ts">10:24:08</span>메모.apk → 프로세스 생성 (PID 2)</div>
+              <div><span class="ts">10:24:09</span>CPU 코어2 할당</div>
+            </div>
+
+            <button class="demo-btn">↺ 디스크에서 다시 시작</button>
+          </div>
+
+        </div>
+      </div>
+      <p class="mt-4 text-[12px]" style="color: var(--color-text-muted);">
+        ▶ <strong>01 · 카톡 실행</strong> — 디스크의 카톡.apk가 메모리에 올라가 프로세스가 되고, CPU 코어가 처리 중입니다.
+      </p>
+    </div>
+
+    <!-- ===== 퀴즈 뷰 (탭 전환 시) ===== -->
+    <div id="view-quiz" class="hidden flex-1 overflow-y-auto p-6 lg:p-10">
+      <div class="max-w-xl mx-auto">
+        <div class="flex items-center justify-between mb-4">
+          <p class="text-[12px] font-mono" style="color: var(--color-text-muted);">Q1 · 3문항 중 1번째</p>
+          <div class="flex gap-1.5 items-center">
+            <span class="inline-block w-2 h-2 rounded-full" style="background: var(--color-text-primary);"></span>
+            <span class="inline-block w-2 h-2 rounded-full" style="background: var(--color-border-hover);"></span>
+            <span class="inline-block w-2 h-2 rounded-full" style="background: var(--color-border-hover);"></span>
+          </div>
+        </div>
+
+        <h3 class="text-[18px] sm:text-[20px] font-medium leading-snug mb-6">
+          카톡을 켰더니 메모리에 올라가서 실행 중입니다.<br />
+          이 상태를 가리키는 단어는 무엇일까요?
+        </h3>
+
+        <div class="space-y-2">
+          <button class="quiz-option"><span class="font-mono text-[12px] mr-3" style="color: var(--color-text-muted);">A</span>프로그램</button>
+          <button class="quiz-option selected"><span class="font-mono text-[12px] mr-3" style="color: var(--color-text-muted);">B</span>프로세스</button>
+          <button class="quiz-option"><span class="font-mono text-[12px] mr-3" style="color: var(--color-text-muted);">C</span>프로세서</button>
+          <button class="quiz-option"><span class="font-mono text-[12px] mr-3" style="color: var(--color-text-muted);">D</span>디스크</button>
+        </div>
+
+        <div class="mt-8 flex items-center justify-between">
+          <p class="text-[12px]" style="color: var(--color-text-muted);">선택 후 채점 → 해설</p>
+          <button class="btn-primary">제출</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 모바일 전용 퀴즈 패널 (lg- 일 때만 별도 노출) -->
+  <section data-panel="quiz-m" class="hidden flex-1 overflow-y-auto p-4 lg:hidden">
+    <p class="text-[12px] font-mono mb-2" style="color: var(--color-text-muted);">Q1 · 3문항 중 1번째</p>
+    <h3 class="text-[17px] font-medium leading-snug mb-5">카톡을 켰더니 메모리에 올라가서 실행 중입니다. 이 상태는?</h3>
+    <div class="space-y-2">
+      <button class="quiz-option"><span class="font-mono text-[12px] mr-3" style="color: var(--color-text-muted);">A</span>프로그램</button>
+      <button class="quiz-option selected"><span class="font-mono text-[12px] mr-3" style="color: var(--color-text-muted);">B</span>프로세스</button>
+      <button class="quiz-option"><span class="font-mono text-[12px] mr-3" style="color: var(--color-text-muted);">C</span>프로세서</button>
+      <button class="quiz-option"><span class="font-mono text-[12px] mr-3" style="color: var(--color-text-muted);">D</span>디스크</button>
+    </div>
+    <div class="mt-6 flex justify-end"><button class="btn-primary">제출</button></div>
+  </section>
+
+</div>
+</div>
+
+<script>
+  // 모바일 탭 전환
+  const mtabs = document.querySelectorAll('.mtab');
+  const panels = {
+    guide: document.querySelector('[data-panel="guide"]'),
+    chat: document.querySelector('[data-panel="chat"]'),
+    preview: document.querySelector('[data-panel="preview"]'),
+    'quiz-m': document.querySelector('[data-panel="quiz-m"]'),
+  };
+  function setMobileTab(key) {
+    mtabs.forEach(b => b.classList.toggle('is-active', b.dataset.mtab === key));
+    Object.entries(panels).forEach(([k, el]) => {
+      if (window.innerWidth >= 1024) {
+        el.classList.remove('hidden');
+        if (k === 'quiz-m') el.classList.add('hidden'); // 데스크톱은 quiz-m 숨김
+      } else {
+        el.classList.toggle('hidden', k !== key);
+        el.classList.toggle('flex', k === key);
+      }
+    });
+  }
+  mtabs.forEach(b => b.addEventListener('click', () => setMobileTab(b.dataset.mtab)));
+
+  // 우측 패널 시연/퀴즈 탭 전환 (lg+)
+  const vp = document.getElementById('view-preview');
+  const vq = document.getElementById('view-quiz');
+  const tools = document.getElementById('preview-tools');
+  const tabPrev = document.getElementById('vtab-preview');
+  const tabQuiz = document.getElementById('vtab-quiz');
+  function setView(v) {
+    const isP = v === 'preview';
+    vp.classList.toggle('hidden', !isP);
+    vq.classList.toggle('hidden', isP);
+    tabPrev.style.background = isP ? 'var(--color-bg-input)' : 'transparent';
+    tabPrev.style.color = isP ? 'var(--color-text-primary)' : 'var(--color-text-muted)';
+    tabQuiz.style.background = isP ? 'transparent' : 'var(--color-bg-input)';
+    tabQuiz.style.color = isP ? 'var(--color-text-muted)' : 'var(--color-text-primary)';
+    tools.style.visibility = isP ? 'visible' : 'hidden';
+  }
+  tabPrev.addEventListener('click', () => setView('preview'));
+  tabQuiz.addEventListener('click', () => setView('quiz'));
+
+  // 시연 진입 버튼 활성 상태 (목업이므로 active 표시만 토글)
+  document.querySelectorAll('.demo-launcher').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.demo-launcher').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      // 모바일이면 시연 탭으로 자동 전환
+      if (window.innerWidth < 1024) setMobileTab('preview');
+    });
+  });
+</script>
+</body>
+</html>
