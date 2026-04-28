@@ -1,0 +1,165 @@
+@import "@teachermate/shared/design-tokens.css";
+@import "tailwindcss";
+@source ".";
+@source "../../node_modules/@teachermate/shared/dist/**/*.{js,ts}";
+
+@theme {
+  --color-bg-page: var(--color-surface);
+  --color-bg-subtle: var(--color-surface-alt);
+  --color-border-strong: var(--color-border-hover);
+  --color-text-secondary: var(--color-text-muted);
+  --color-text-faint: var(--color-text-quaternary);
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    min-height: 100%;
+    font-family: var(--font-body);
+    color: var(--color-text-primary);
+    background: var(--color-bg-page);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    word-break: keep-all;
+    overflow-wrap: break-word;
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+    background: linear-gradient(180deg, #ffffff 0%, #fafaf9 100%);
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+}
+
+.app-shell {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top right, rgba(126, 200, 181, 0.16), transparent 24rem),
+    linear-gradient(180deg, #ffffff 0%, #fafaf9 100%);
+}
+
+.landing-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px 80px;
+}
+
+.landing-card {
+  width: min(100%, 720px);
+  padding: 32px 24px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 20px 60px rgba(28, 25, 23, 0.08);
+}
+
+.landing-kicker {
+  margin: 0 0 12px;
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.landing-title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-heading);
+  font-size: clamp(2.25rem, 5vw, 3.75rem);
+  font-weight: 600;
+  line-height: 1.08;
+}
+
+.landing-subtitle {
+  max-width: 42rem;
+  margin: 16px 0 0;
+  color: var(--color-text-body);
+  font-size: 16px;
+}
+
+.landing-actions {
+  display: grid;
+  gap: 12px;
+  margin-top: 32px;
+}
+
+.primary-button,
+.secondary-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: var(--radius-btn);
+  font-size: 14px;
+  font-weight: 500;
+  transition: 200ms cubic-bezier(.2, .8, .2, 1);
+}
+
+.primary-button {
+  border: none;
+  background: var(--color-btn-primary);
+  color: #ffffff;
+  cursor: not-allowed;
+  opacity: var(--btn-disabled-opacity);
+}
+
+.secondary-link {
+  border: 1px solid var(--color-border);
+  background: transparent;
+  color: var(--color-text-body);
+}
+
+.secondary-link:hover {
+  border-color: var(--color-border-strong);
+  background: var(--color-bg-subtle);
+}
+
+.landing-caption {
+  margin: 20px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.landing-note {
+  margin: 12px 0 0;
+  color: var(--color-danger);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+@media (min-width: 768px) {
+  .landing-page {
+    padding: 72px 24px 96px;
+  }
+
+  .landing-card {
+    padding: 48px;
+  }
+
+  .landing-actions {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+}
