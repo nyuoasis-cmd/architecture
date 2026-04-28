@@ -7,7 +7,7 @@ type ClientEnv = ImportMeta & {
 const clientEnv = import.meta as ClientEnv;
 
 const hasSupabaseEnv = Boolean(
-  clientEnv.env.VITE_SUPABASE_URL && clientEnv.env.VITE_SUPABASE_ANON_KEY,
+  clientEnv.env?.VITE_SUPABASE_URL && clientEnv.env?.VITE_SUPABASE_ANON_KEY,
 );
 
 export default function LandingPage() {
