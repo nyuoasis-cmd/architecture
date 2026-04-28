@@ -9,7 +9,7 @@
   --color-border-strong: var(--color-border-hover);
   --color-text-secondary: var(--color-text-muted);
   --color-text-faint: var(--color-text-quaternary);
-  --color-accent: var(--color-info);
+  --color-accent: #6366f1;
   --color-bg-card: var(--color-surface);
 }
 
