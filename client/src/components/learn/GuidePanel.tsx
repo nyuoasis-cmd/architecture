@@ -1,6 +1,6 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import type { ChapterStub, QaStub } from '../../data/qa-stubs';
-import { getProgress, useProgressMap } from '../../lib/progress';
+import { useProgressMap } from '../../lib/progress';
 
 type GuidePanelProps = {
   chapter: ChapterStub;
@@ -11,42 +11,6 @@ type GuidePanelProps = {
   onScenarioChange: (scenarioId: string) => void;
 };
 
-type ProgressState = 'done' | 'current' | 'todo';
-
-function getProgressState(currentQaId: string, qaId: string): ProgressState {
-  if (qaId === currentQaId) {
-    return 'current';
-  }
-
-  const progress = getProgress(qaId);
-  if (progress && (progress.read || (progress.quizScore ?? 0) >= 2)) {
-    return 'done';
-  }
-
-  return 'todo';
-}
-
-function getBadgeStyle(state: ProgressState) {
-  if (state === 'done') {
-    return {
-      background: 'var(--color-success)',
-      color: '#fff',
-    };
-  }
-
-  if (state === 'current') {
-    return {
-      background: 'var(--color-accent)',
-      color: '#fff',
-    };
-  }
-
-  return {
-    background: '#f5f5f4',
-    color: 'var(--color-text-muted)',
-  };
-}
-
 export default function GuidePanel({
   chapter,
   currentQa,
@@ -55,7 +19,19 @@ export default function GuidePanel({
   activeScenarioId,
   onScenarioChange,
 }: GuidePanelProps) {
-  useProgressMap();
+  const progressMap = useProgressMap();
+  const navigate = useNavigate();
+  const currentQaId = currentQa.id;
+  const stepQaIds = chapterQas.map((qa) => qa.id);
+
+  const navigateTo = (qaId: string) => {
+    const qa = chapterQas.find((item) => item.id === qaId);
+    if (!qa) {
+      return;
+    }
+
+    navigate(`/library/${chapter.id}/${qa.id}`);
+  };
 
   return (
     <div className="flex h-full flex-col">
@@ -77,25 +53,44 @@ export default function GuidePanel({
         </div>
 
         <div className="mb-2 flex items-center justify-between gap-1">
-          {chapterQas.map((qa) => {
-            const state = getProgressState(currentQa.id, qa.id);
-            const badge = getBadgeStyle(state);
-            const route = `/library/${chapter.id}/${qa.id}`;
-            const badgeText = state === 'done' ? '✓' : String(qa.order);
+          {stepQaIds.map((qaId, idx) => {
+            const stepNumber = idx + 1;
+            const entry = progressMap[qaId];
+            const isCurrent = qaId === currentQaId;
+            const isDone = (entry?.quizScore !== undefined && entry.quizScore >= 2) || entry?.read === true;
+
+            const bgColor = isCurrent
+              ? 'var(--color-accent)'
+              : isDone
+                ? 'var(--color-success)'
+                : 'var(--color-bg-input)';
+
+            const textColor = isCurrent || isDone ? '#fff' : 'var(--color-text-muted)';
+            const dotText = isDone ? '✓' : String(stepNumber);
+            const barColor = isDone
+              ? 'var(--color-success)'
+              : isCurrent
+                ? 'var(--color-accent)'
+                : 'var(--color-bg-input)';
 
             return (
-              <Link key={qa.id} className="guide-progress-button" to={route}>
+              <button
+                key={qaId}
+                onClick={() => navigateTo(qaId)}
+                className="flex-1 flex flex-col items-center gap-1 bg-transparent border-0 p-0 cursor-pointer"
+                type="button"
+              >
                 <span
-                  className="guide-progress-badge"
-                  style={{ background: badge.background, color: badge.color }}
+                  className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[9px] font-semibold"
+                  style={{ background: bgColor, color: textColor }}
                 >
-                  {badgeText}
+                  {dotText}
                 </span>
                 <span
-                  className="guide-progress-bar"
-                  style={{ background: badge.background }}
+                  className="block w-full h-1 rounded-full"
+                  style={{ background: barColor }}
                 />
-              </Link>
+              </button>
             );
           })}
         </div>

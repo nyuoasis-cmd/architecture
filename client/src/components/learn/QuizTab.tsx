@@ -19,18 +19,9 @@ type GradeResult = {
 
 const OPTION_LABELS = ['A', 'B', 'C', 'D'] as const;
 const CORRECT_INDEX_KEY = ['correct', 'Idx'].join('');
-
-function getOptionState(selected: boolean, result: GradeResult | null) {
-  if (!result && selected) {
-    return {
-      borderColor: 'var(--color-text-primary)',
-      color: 'var(--color-text-primary)',
-      fontWeight: 500,
-    };
-  }
-
-  return null;
-}
+const baseBorder = { borderWidth: '1px', borderColor: 'var(--color-border)', borderStyle: 'solid' as const };
+const correctBorder = { borderWidth: '2px', borderColor: '#10b981', borderStyle: 'solid' as const };
+const wrongBorder = { borderWidth: '2px', borderColor: '#ef4444', borderStyle: 'solid' as const };
 
 export default function QuizTab({ qaId }: QuizTabProps) {
   const quizSet = QUIZZES[qaId];
@@ -168,27 +159,26 @@ export default function QuizTab({ qaId }: QuizTabProps) {
               <div className="space-y-2">
                 {question.options.map((option, optionIdx) => {
                   const selected = picked === optionIdx;
-                  const correctIdx = breakdown?.[CORRECT_INDEX_KEY];
-                  const showCorrect =
-                    Boolean(result) && typeof correctIdx === 'number' && correctIdx === optionIdx;
-                  const optionState = getOptionState(selected, result);
+                  const correct = Boolean(breakdown && breakdown[CORRECT_INDEX_KEY] === optionIdx);
+                  const wrong = Boolean(breakdown && selected && !breakdown.correct);
+                  const inlineStyle = result ? (correct ? correctBorder : wrong ? wrongBorder : baseBorder) : undefined;
 
                   return (
                     <button
                       key={`${qaId}-question-${questionIdx}-option-${optionIdx}`}
                       aria-pressed={selected}
                       className={`quiz-option ${selected && !result ? 'selected' : ''}`}
-                      data-correct={showCorrect ? 'true' : undefined}
-                      data-incorrect={result && selected && !breakdown?.correct ? 'true' : undefined}
+                      data-correct={correct ? 'true' : undefined}
+                      data-incorrect={wrong ? 'true' : undefined}
                       onClick={() => handlePick(questionIdx, optionIdx)}
-                      style={optionState ?? undefined}
+                      style={inlineStyle}
                       type="button"
                     >
                       <span className="mr-3 font-mono text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
                         {OPTION_LABELS[optionIdx]}
                       </span>
                       <span className="flex-1 text-left">{option}</span>
-                      {showCorrect ? (
+                      {correct ? (
                         <span className="ml-3 text-[12px] font-medium" style={{ color: 'var(--color-success)' }}>
                           정답
                         </span>
