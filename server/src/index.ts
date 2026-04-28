@@ -33,11 +33,18 @@ app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Not Found' });
 });
 
-if (env.NODE_ENV === 'production' && existsSync(clientDistPath)) {
-  app.use(express.static(clientDistPath));
-  app.get(/^(?!\/api).*/, (_req, res) => {
-    res.sendFile(resolve(clientDistPath, 'index.html'));
-  });
+if (env.NODE_ENV === 'production') {
+  if (existsSync(clientDistPath)) {
+    app.use(express.static(clientDistPath));
+    app.use((req, res, next) => {
+      if (req.path.startsWith('/api')) {
+        return next();
+      }
+      res.sendFile(resolve(clientDistPath, 'index.html'));
+    });
+  } else {
+    console.warn(`[startup] client dist not found at ${clientDistPath}; SPA fallback disabled`);
+  }
 }
 
 const server = app.listen(env.PORT, () => {

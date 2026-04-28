@@ -96,7 +96,9 @@ export default function LandingPage() {
 
       <footer className="flex flex-col gap-2 rounded-[24px] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-5 py-4 text-sm text-stone-600 sm:flex-row sm:items-center sm:justify-between">
         <span>architecture.teachermate.co.kr</span>
-        <span>참고 도서: 알렉 『기술노트(With 알렉)』(2026)</span>
+        <Link className="underline-offset-2 hover:underline" to="/about">
+          참고 도서: 알렉 『기술노트(With 알렉)』(2026) — 출처 보기
+        </Link>
       </footer>
     </main>
   );
