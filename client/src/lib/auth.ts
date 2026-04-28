@@ -208,4 +208,8 @@ export async function signOut() {
 
   clearDevUser();
   consumePostLoginRedirect();
+
+  if (typeof window !== 'undefined') {
+    window.location.assign('/');
+  }
 }

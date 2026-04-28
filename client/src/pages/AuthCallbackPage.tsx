@@ -17,7 +17,7 @@ export default function AuthCallbackPage() {
   useEffect(() => {
     const timer = window.setTimeout(() => {
       setShowToast(true);
-    }, 1000);
+    }, 500);
 
     return () => {
       window.clearTimeout(timer);

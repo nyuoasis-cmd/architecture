@@ -29,9 +29,9 @@ export default function LoginPage() {
             진행 현황 확인, 세션 종료까지 같은 계정으로 이어집니다.
           </p>
 
-          <div className="mt-8 flex flex-wrap gap-3">
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button
-              className="inline-flex min-h-12 items-center justify-center rounded-2xl bg-[#FEE500] px-6 text-sm font-semibold text-[#191600] transition hover:brightness-[0.97] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex w-full min-h-12 items-center justify-center rounded-2xl bg-[#FEE500] px-6 text-sm font-semibold text-[#191600] transition hover:brightness-[0.97] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               disabled={!hasSupabaseEnv || isSubmitting}
               onClick={async () => {
                 setError(null);
@@ -51,7 +51,7 @@ export default function LoginPage() {
 
             {isDevBuild ? (
               <Link
-                className="inline-flex min-h-12 items-center justify-center rounded-2xl border border-[var(--color-border)] px-5 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-50"
+                className="inline-flex w-full min-h-12 items-center justify-center rounded-2xl border border-[var(--color-border)] px-5 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-50 sm:w-auto"
                 to={`/dev-login?from=${encodeURIComponent(target)}`}
               >
                 DEV 로그인
