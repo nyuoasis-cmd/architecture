@@ -1,13 +1,7 @@
 import { Link } from 'react-router-dom';
 
-type ClientEnv = ImportMeta & {
-  env: Record<string, string | undefined>;
-};
-
-const clientEnv = import.meta as ClientEnv;
-
 const hasSupabaseEnv = Boolean(
-  clientEnv.env?.VITE_SUPABASE_URL && clientEnv.env?.VITE_SUPABASE_ANON_KEY,
+  import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY,
 );
 
 export default function LandingPage() {

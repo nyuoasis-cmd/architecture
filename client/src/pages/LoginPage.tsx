@@ -2,17 +2,10 @@ import { useState } from 'react';
 import { Link, Navigate, useSearchParams } from 'react-router-dom';
 import { getPostLoginRedirect, signInKakao, useAuth } from '../lib/auth';
 
-type ClientEnv = ImportMeta & {
-  env: {
-    DEV?: boolean;
-    VITE_SUPABASE_URL?: string;
-    VITE_SUPABASE_ANON_KEY?: string;
-  };
-};
-
-const clientEnv = import.meta as ClientEnv;
-const isDevBuild = Boolean(clientEnv.env.DEV);
-const hasSupabaseEnv = Boolean(clientEnv.env.VITE_SUPABASE_URL && clientEnv.env.VITE_SUPABASE_ANON_KEY);
+const isDevBuild = Boolean(import.meta.env.DEV);
+const hasSupabaseEnv = Boolean(
+  import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY,
+);
 
 export default function LoginPage() {
   const auth = useAuth();

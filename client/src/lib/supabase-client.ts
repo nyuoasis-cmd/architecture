@@ -1,12 +1,7 @@
 import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 
-type ClientEnv = ImportMeta & {
-  env: Record<string, string | undefined>;
-};
-
-const clientEnv = import.meta as ClientEnv;
-const supabaseUrl = clientEnv.env?.VITE_SUPABASE_URL;
-const supabaseAnonKey = clientEnv.env?.VITE_SUPABASE_ANON_KEY;
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL as string | undefined;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
 
 export const supabaseClient: SupabaseClient | null =
   supabaseUrl && supabaseAnonKey ? createClient(supabaseUrl, supabaseAnonKey) : null;

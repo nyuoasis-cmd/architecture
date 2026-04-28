@@ -74,13 +74,27 @@ function subscribe(onStoreChange: () => void) {
   };
 }
 
+let cachedSnapshot: AuthSnapshot = {
+  isLoading: false,
+  supabaseUser: null,
+  devUser: null,
+};
+let lastIsLoading: boolean | undefined;
+let lastUser: User | null | undefined;
+let lastDevUser: DevUser | null | undefined;
+
 function getSnapshot(): AuthSnapshot {
   initAuthStore();
-  return {
-    isLoading: authState.isLoading,
-    supabaseUser: authState.user,
-    devUser: getDevUser(),
-  };
+  const il = authState.isLoading;
+  const u = authState.user;
+  const du = getDevUser();
+  if (il !== lastIsLoading || u !== lastUser || du !== lastDevUser) {
+    lastIsLoading = il;
+    lastUser = u;
+    lastDevUser = du;
+    cachedSnapshot = { isLoading: il, supabaseUser: u, devUser: du };
+  }
+  return cachedSnapshot;
 }
 
 function getServerSnapshot(): AuthSnapshot {
