@@ -76,9 +76,11 @@ export default function AuthCallbackPage() {
         </section>
       </main>
 
-      {showToast && !error ? (
+      {showToast ? (
         <div className="fixed bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-stone-950 px-4 py-2 text-sm text-white shadow-lg">
-          인증 처리에 시간이 걸리면 브라우저가 자동으로 이동할 때까지 기다려주세요.
+          {error
+            ? '인증 정보를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.'
+            : '인증 처리에 시간이 걸리면 브라우저가 자동으로 이동할 때까지 기다려주세요.'}
         </div>
       ) : null}
     </>

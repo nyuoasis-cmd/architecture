@@ -19,8 +19,8 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 items-center px-6 py-12">
-      <section className="grid w-full gap-8 rounded-[32px] border border-[var(--color-border)] bg-white p-8 shadow-sm lg:grid-cols-[minmax(0,1.2fr)_380px] lg:p-10">
+    <main className="mx-auto flex w-full max-w-5xl flex-1 items-center px-4 py-8 sm:px-6 sm:py-12">
+      <section className="grid w-full gap-8 rounded-[32px] border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-8 lg:grid-cols-[minmax(0,1.2fr)_380px] lg:p-10">
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Teacher Access</p>
           <h1 className="mt-3 text-4xl font-medium text-stone-950">교사로 시작</h1>
@@ -31,7 +31,7 @@ export default function LoginPage() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button
-              className="inline-flex w-full min-h-12 items-center justify-center rounded-2xl bg-[#FEE500] px-6 text-sm font-semibold text-[#191600] transition hover:brightness-[0.97] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+              className="flex w-full min-h-12 items-center justify-center rounded-2xl bg-[#FEE500] px-6 text-sm font-semibold text-[#191600] transition hover:brightness-[0.97] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
               disabled={!hasSupabaseEnv || isSubmitting}
               onClick={async () => {
                 setError(null);
@@ -51,7 +51,7 @@ export default function LoginPage() {
 
             {isDevBuild ? (
               <Link
-                className="inline-flex w-full min-h-12 items-center justify-center rounded-2xl border border-[var(--color-border)] px-5 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-50 sm:w-auto"
+                className="flex w-full min-h-12 items-center justify-center rounded-2xl border border-[var(--color-border)] px-5 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-50 sm:w-auto"
                 to={`/dev-login?from=${encodeURIComponent(target)}`}
               >
                 DEV 로그인
