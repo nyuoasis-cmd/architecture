@@ -3,10 +3,13 @@ import express from 'express';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { env } from './env';
+import { buildCopyrightIndex } from './lib/copyright-index';
+import chatRouter from './routes/chat';
 import quizRouter from './routes/quiz';
 
 const app = express();
 const clientDistPath = resolve(__dirname, '../../client/dist');
+const copyrightIndex = buildCopyrightIndex();
 
 app.disable('x-powered-by');
 app.use(cors());
@@ -17,6 +20,7 @@ app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', ts: Date.now() });
 });
 
+app.use('/api/chat', chatRouter);
 app.use('/api/quiz', quizRouter);
 
 app.use('/api', (_req, res) => {
@@ -31,6 +35,13 @@ if (env.NODE_ENV === 'production' && existsSync(clientDistPath)) {
 }
 
 const server = app.listen(env.PORT, () => {
+  if (copyrightIndex.corpusEmpty) {
+    console.log(`copyright index built (corpus empty) in ${copyrightIndex.durationMs}ms`);
+  } else {
+    console.log(
+      `copyright index built (sentences=${copyrightIndex.sentenceCount}, ngrams=${copyrightIndex.ngramCount}) in ${copyrightIndex.durationMs}ms`,
+    );
+  }
   console.log(`Architecture server listening on ${env.PORT}`);
 });
 
