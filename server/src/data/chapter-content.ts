@@ -122,6 +122,69 @@ const CHAPTER_SIX_CONTEXTS: QaContext[] = [
   },
 ];
 
+const CHAPTER_SEVEN_CONTEXTS: QaContext[] = [
+  {
+    id: 'ch07_q01',
+    chapterId: 7,
+    chapterTitle: '데이터베이스',
+    title: 'RDBMS와 NoSQL은 무엇이 다른가?',
+    summary: '고정된 구조와 관계를 중시하는 방식과 유연한 문서·키값 구조를 중시하는 방식을 비교합니다.',
+    body: 'RDBMS는 표와 관계를 중심으로 데이터를 정리해 일관성과 조인을 강하게 가져가는 방식입니다. 반면 NoSQL은 문서, 키-값, 컬럼, 그래프처럼 구조를 더 유연하게 잡아 변화가 잦거나 분산이 필요한 상황에 맞추는 경우가 많습니다. 어느 쪽이 무조건 더 좋다기보다, 데이터 모양과 조회 패턴, 일관성 요구가 무엇인지에 따라 선택이 달라집니다. 즉 데이터베이스 선택은 유행보다 문제 구조를 먼저 보는 일에 가깝습니다.',
+    keywords: ['RDBMS', 'NoSQL', '스키마', '유연성'],
+    checkpoint: 'RDBMS와 NoSQL의 차이를 구조와 일관성 관점에서 설명할 수 있다.',
+  },
+  {
+    id: 'ch07_q02',
+    chapterId: 7,
+    chapterTitle: '데이터베이스',
+    title: 'SQL은 어떤 명령으로 데이터를 다루나?',
+    summary: 'SELECT, INSERT, UPDATE, DELETE가 각각 조회·추가·수정·삭제를 맡는 기본 흐름을 설명합니다.',
+    body: 'SQL은 관계형 데이터베이스에 질문하고 수정 지시를 내리는 공용 언어입니다. SELECT는 찾기, INSERT는 넣기, UPDATE는 바꾸기, DELETE는 지우기 역할을 맡아 데이터 작업의 기본 네 가지를 이룹니다. 핵심은 표 전체를 무작정 뒤지는 것이 아니라 조건과 대상 열을 명확히 적어 원하는 범위만 다루는 데 있습니다. 즉 SQL은 엑셀을 손으로 뒤지는 대신 규칙 있는 문장으로 데이터에 요청하는 방법입니다.',
+    keywords: ['SQL', 'SELECT', 'INSERT', 'UPDATE'],
+    checkpoint: 'SQL의 네 가지 기본 명령을 데이터 작업과 연결해 설명할 수 있다.',
+  },
+  {
+    id: 'ch07_q03',
+    chapterId: 7,
+    chapterTitle: '데이터베이스',
+    title: 'ACID는 왜 중요한가?',
+    summary: '트랜잭션이 중간 실패에도 믿을 수 있게 끝나려면 원자성·일관성·고립성·지속성이 필요하다는 점을 설명합니다.',
+    body: 'ACID는 데이터베이스 트랜잭션이 믿을 만하게 끝나기 위한 네 가지 성질입니다. 원자성은 전부 성공하거나 전부 취소되는 것이고, 일관성은 규칙을 깨지 않는 것이며, 고립성은 동시에 여러 작업이 섞여도 서로 함부로 오염하지 않는 것입니다. 지속성은 완료된 결과가 장애 뒤에도 남는다는 뜻입니다. 그래서 ACID는 돈 이체나 재고 차감처럼 중간에 어긋나면 안 되는 작업의 안전장치로 자주 설명됩니다.',
+    keywords: ['ACID', '트랜잭션', '원자성', '지속성'],
+    checkpoint: 'ACID 네 요소를 실제 데이터 작업의 안전장치로 설명할 수 있다.',
+  },
+  {
+    id: 'ch07_q04',
+    chapterId: 7,
+    chapterTitle: '데이터베이스',
+    title: '인덱스는 검색을 왜 빠르게 하나?',
+    summary: '전체 표를 매번 처음부터 읽지 않고, 정렬된 길잡이를 따라 필요한 위치로 빨리 접근하는 방식을 설명합니다.',
+    body: '인덱스는 데이터 자체와 별도로 검색용 길잡이를 만들어 두는 구조입니다. 책 맨 뒤 색인을 보면 페이지를 전부 넘기지 않고도 필요한 주제로 바로 가듯, 데이터베이스도 인덱스를 이용해 조건에 맞는 위치를 더 빨리 찾습니다. B-tree 같은 구조는 정렬된 가지를 따라 범위를 좁혀 가기 때문에 전체 스캔보다 효율적일 수 있습니다. 다만 인덱스가 많아질수록 쓰기 비용과 저장 공간이 늘어나므로 무조건 많이 두는 것이 정답은 아닙니다.',
+    keywords: ['인덱스', 'B-tree', '검색', '풀 스캔'],
+    checkpoint: '인덱스가 빠른 이유와 쓰기 비용의 대가를 함께 설명할 수 있다.',
+  },
+  {
+    id: 'ch07_q05',
+    chapterId: 7,
+    chapterTitle: '데이터베이스',
+    title: '정규화는 왜 데이터를 나누려 하나?',
+    summary: '중복을 줄이고 수정 이상을 막기 위해 테이블을 역할별로 분리하는 이유를 설명합니다.',
+    body: '정규화는 한 테이블에 모든 정보를 몰아넣지 않고 역할에 따라 나눠 중복과 모순을 줄이는 설계 방법입니다. 같은 고객 주소가 주문 행마다 반복되면 수정할 때 일부만 바뀌는 문제가 생길 수 있는데, 정규화는 이런 갱신 이상을 막는 데 초점이 있습니다. 1, 2, 3정규형은 중복을 줄이는 수준을 단계적으로 높이는 약속으로 볼 수 있습니다. 즉 정규화는 보기 좋게 쪼개는 일이 아니라 데이터를 더 믿을 수 있게 만드는 구조화입니다.',
+    keywords: ['정규화', '중복', '이상 현상', '테이블 설계'],
+    checkpoint: '정규화의 목적을 중복 제거와 수정 안정성 관점에서 설명할 수 있다.',
+  },
+  {
+    id: 'ch07_q06',
+    chapterId: 7,
+    chapterTitle: '데이터베이스',
+    title: '격리 수준은 무엇을 조절하나?',
+    summary: '동시 작업 충돌을 얼마나 막을지와 성능 사이에서 어떤 균형을 잡는지 설명합니다.',
+    body: '트랜잭션 격리 수준은 동시에 여러 작업이 같은 데이터를 건드릴 때 어디까지 서로 간섭을 막을지 정하는 규칙입니다. Read Uncommitted에서 Serializable로 갈수록 더 강하게 막지만, 그만큼 대기와 비용이 커질 수 있습니다. 더티 리드, 반복 불가능 읽기, 팬텀 리드 같은 문제가 어느 수준에서 허용되거나 차단되는지가 핵심 비교 지점입니다. 그래서 격리 수준은 무조건 최고로 올리는 문제가 아니라, 데이터 정확성과 처리량 사이에서 맞는 균형을 찾는 선택입니다.',
+    keywords: ['격리 수준', 'Serializable', '더티 리드', '동시성'],
+    checkpoint: '격리 수준의 목적을 동시성 충돌과 성능 균형으로 설명할 수 있다.',
+  },
+];
+
 function createPlaceholderQa(chapterId: number, order: number, chapterTitle: string): QaContext {
   const qaId = `ch${String(chapterId).padStart(2, '0')}_q${String(order).padStart(2, '0')}`;
   return {
@@ -153,6 +216,9 @@ export const QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
     }
     if (chapter.id === 6) {
       return CHAPTER_SIX_CONTEXTS.find((qa) => qa.id === `ch06_q${String(order).padStart(2, '0')}`) ?? createPlaceholderQa(chapter.id, order, chapter.title);
+    }
+    if (chapter.id === 7) {
+      return CHAPTER_SEVEN_CONTEXTS.find((qa) => qa.id === `ch07_q${String(order).padStart(2, '0')}`) ?? createPlaceholderQa(chapter.id, order, chapter.title);
     }
 
     if (chapter.id === 1 && order === 1) {

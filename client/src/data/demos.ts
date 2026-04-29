@@ -483,6 +483,78 @@ export const DEMOS: DemoMeta[] = [
       { id: 'login', label: '로그인 화면' },
     ],
   },
+  {
+    qaId: 'ch07_q01',
+    title: 'DB 창고 고르기',
+    url: '/demos/ch07/q01.html',
+    description: 'RDBMS와 NoSQL이 구조, 확장, 조회 방식에서 어떻게 다른지 비교합니다.',
+    scenarios: [
+      { id: 'schema', label: '정해진 칸' },
+      { id: 'document', label: '유연한 문서' },
+      { id: 'join', label: '관계 연결' },
+      { id: 'scale', label: '분산 확장' },
+    ],
+  },
+  {
+    qaId: 'ch07_q02',
+    title: 'SQL 주문서',
+    url: '/demos/ch07/q02.html',
+    description: 'SELECT, INSERT, UPDATE, DELETE 네 명령이 어떤 작업을 맡는지 보여줍니다.',
+    scenarios: [
+      { id: 'select', label: '찾기' },
+      { id: 'insert', label: '추가' },
+      { id: 'update', label: '수정' },
+      { id: 'delete', label: '삭제' },
+    ],
+  },
+  {
+    qaId: 'ch07_q03',
+    title: 'ACID 금고',
+    url: '/demos/ch07/q03.html',
+    description: '트랜잭션이 왜 전부 성공하거나 전부 취소되어야 하는지 네 성질로 설명합니다.',
+    scenarios: [
+      { id: 'atomic', label: '원자성' },
+      { id: 'consistent', label: '일관성' },
+      { id: 'isolated', label: '고립성' },
+      { id: 'durable', label: '지속성' },
+    ],
+  },
+  {
+    qaId: 'ch07_q04',
+    title: '인덱스 색인대',
+    url: '/demos/ch07/q04.html',
+    description: '전체 스캔과 인덱스 탐색의 차이를 단계별로 보여줍니다.',
+    scenarios: [
+      { id: 'scan', label: '전체 훑기' },
+      { id: 'tree', label: '가지 따라가기' },
+      { id: 'range', label: '범위 찾기' },
+      { id: 'cost', label: '쓰기 비용' },
+    ],
+  },
+  {
+    qaId: 'ch07_q05',
+    title: '정규화 분리함',
+    url: '/demos/ch07/q05.html',
+    description: '중복된 고객·주문 정보를 나눠 저장하면 어떤 문제가 줄어드는지 보여줍니다.',
+    scenarios: [
+      { id: 'mixed', label: '한 표에 몰아넣기' },
+      { id: 'split', label: '테이블 분리' },
+      { id: 'anomaly', label: '수정 이상' },
+      { id: 'normal3', label: '3정규형 감각' },
+    ],
+  },
+  {
+    qaId: 'ch07_q06',
+    title: '격리 수준 신호등',
+    url: '/demos/ch07/q06.html',
+    description: '동시 작업 충돌을 얼마나 허용할지 격리 수준별로 비교합니다.',
+    scenarios: [
+      { id: 'dirty', label: '더티 리드' },
+      { id: 'committed', label: 'Read Committed' },
+      { id: 'repeatable', label: 'Repeatable Read' },
+      { id: 'serial', label: 'Serializable' },
+    ],
+  },
 ];
 
 export function getDemoByQaId(qaId: string) {
