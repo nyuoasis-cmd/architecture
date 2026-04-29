@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>포맷 택배 라벨 비교</title>
+    <style>
+      :root { --bg:#f4f7fb; --card:#ffffff; --text:#1f2937; --muted:#64748b; --border:#dbe4f0; --accent:#2563eb; --soft:#dbeafe; }
+      * { box-sizing:border-box; }
+      html, body { margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); font-family:'Pretendard Variable','Noto Sans KR',sans-serif; }
+      body { overflow:hidden; }
+      #app { width:100%; height:100%; overflow-y:auto; }
+      .screen { min-height:100%; padding:16px 14px 22px; }
+      .hero, .cards, .log { border:1px solid var(--border); border-radius:18px; background:var(--card); }
+      .hero { padding:16px; background:linear-gradient(135deg,#eff6ff,#ffffff); }
+      .eyebrow { margin:0 0 6px; font-size:11px; color:var(--muted); }
+      h1 { margin:0; font-size:18px; }
+      .summary { margin:8px 0 0; font-size:12px; line-height:1.7; }
+      .cards { margin-top:12px; padding:14px; display:grid; gap:10px; }
+      .card { padding:12px; border:1px solid var(--border); border-radius:14px; background:#fff; }
+      .card.active { border-color:var(--accent); background:var(--soft); }
+      .card pre { margin:8px 0 0; font-size:10px; line-height:1.5; white-space:pre-wrap; font-family:'JetBrains Mono',ui-monospace,monospace; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:11px; }
+      .chip.hot { border-color:#93c5fd; background:var(--soft); color:#1d4ed8; }
+      .log { margin-top:12px; padding:12px 14px; background:#111827; color:#f8fafc; }
+      .line { font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; line-height:1.7; }
+      .time { color:#93c5fd; margin-right:6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#csv': { title:'CSV — 표 한 줄', summary:'단순한 행과 열 중심 데이터에 잘 맞습니다.', active:0, hot:0, chips:['표 계산', '가벼움', '단순 구조', '중첩 약함'], sample:'id,name,score\\n1,mina,95', logs:[['11:00:01','comma separated'],['11:00:02','excel opened'],['11:00:03','nested data not ideal']] },
+        '#json': { title:'JSON — 상자 속 상자', summary:'키와 값으로 구조를 표현하고 중첩 데이터도 담기 쉽습니다.', active:1, hot:1, chips:['API 친화적', '중첩 가능', '가독성 양호', '객체 구조'], sample:'{\\n  \"id\": 1,\\n  \"profile\": { \"name\": \"mina\" }\\n}', logs:[['11:00:04','object parsed'],['11:00:05','nested profile found'],['11:00:06','frontend object mapped']] },
+        '#xml': { title:'XML — 태그 카드', summary:'태그로 의미를 명시해 문서 구조를 세밀하게 표현하기 좋습니다.', active:2, hot:2, chips:['태그 구조', '명시적 의미', '문서 교환', '장황함'], sample:'<user id=\"1\">\\n  <name>mina</name>\\n</user>', logs:[['11:00:07','tag parsed'],['11:00:08','schema validated'],['11:00:09','document exchange ready']] },
+        '#pick': { title:'무엇을 고를까 — 용도에 맞는 포맷 선택', summary:'빠른 표 계산, 웹 API, 엄격한 문서 규칙처럼 상황에 따라 맞는 포맷이 다릅니다.', active:1, hot:3, chips:['용도 기준', '가독성', '중첩 구조', '호환성'], sample:'CSV for sheets\\nJSON for APIs\\nXML for formal docs', logs:[['11:00:10','analytics -> CSV'],['11:00:11','mobile API -> JSON'],['11:00:12','legacy doc -> XML']] },
+      };
+      function render() {
+        const scene = scenes[scenes[location.hash] ? location.hash : '#csv'];
+        const cards = [
+          ['CSV','칸 중심 데이터'],
+          ['JSON','키와 값'],
+          ['XML','태그와 계층'],
+        ].map((item, index) => '<div class="card' + (scene.active === index ? ' active' : '') + '"><strong>' + item[0] + '</strong><div style="font-size:11px;color:var(--muted);margin-top:4px;">' + item[1] + '</div><pre>' + scene.sample + '</pre></div>').join('');
+        const chips = scene.chips.map((chip, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + chip + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+        document.getElementById('app').innerHTML = '<div class="screen"><section class="hero"><p class="eyebrow">데이터 포맷 비교</p><h1>' + scene.title + '</h1><p class="summary">' + scene.summary + '</p></section><section class="cards">' + cards + '<div class="chips">' + chips + '</div></section><section class="log"><p class="eyebrow" style="color:#bfdbfe;">포맷 선택 로그</p>' + logs + '</section></div>';
+      }
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

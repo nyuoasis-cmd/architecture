@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>데이터 서랍 분류기</title>
+    <style>
+      :root { --bg:#f6f3ee; --card:#fffdf9; --text:#1f2937; --muted:#6b7280; --border:#e7dccf; --accent:#b45309; --soft:#ffedd5; }
+      * { box-sizing:border-box; }
+      html, body { margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); font-family:'Pretendard Variable','Noto Sans KR',sans-serif; }
+      body { overflow:hidden; }
+      #app { width:100%; height:100%; overflow-y:auto; }
+      .screen { min-height:100%; padding:16px 14px 22px; }
+      .hero, .drawers, .note { border:1px solid var(--border); border-radius:18px; background:var(--card); }
+      .hero { padding:16px; background:linear-gradient(135deg,#fff7ed,#fffdf9); }
+      .eyebrow { margin:0 0 6px; font-size:11px; color:var(--muted); }
+      h1 { margin:0; font-size:18px; }
+      .summary { margin:8px 0 0; font-size:12px; line-height:1.7; }
+      .drawers { margin-top:12px; padding:14px; display:grid; gap:10px; }
+      .drawer { padding:12px; border:1px solid var(--border); border-radius:14px; background:#fff; }
+      .drawer.active { border-color:var(--accent); background:var(--soft); }
+      .drawer h2 { margin:0 0 4px; font-size:12px; }
+      .drawer p { margin:0; font-size:11px; line-height:1.6; color:var(--muted); }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:11px; }
+      .chip.hot { border-color:#fdba74; background:var(--soft); color:#9a3412; }
+      .note { margin-top:12px; padding:12px 14px; background:#111827; color:#f8fafc; }
+      .line { font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; line-height:1.7; }
+      .time { color:#fdba74; margin-right:6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#structured': {
+          title: '정형 데이터 — 같은 칸에 차곡차곡',
+          summary: '학생 번호, 이름, 점수처럼 무엇이 어디 들어갈지 미리 정해진 데이터입니다.',
+          active: 0,
+          chips: ['열과 행', '예측 가능', '검색 쉬움', '집계 쉬움'],
+          hot: 0,
+          logs: [['09:00:01', 'id | name | score'], ['09:00:02', '3열 구조 유지'], ['09:00:03', '평균 점수 계산 완료']],
+        },
+        '#semi': {
+          title: '반정형 데이터 — 뼈대는 같고 항목은 유동적',
+          summary: '공통 구조는 있지만 주문 메모처럼 어떤 속성은 있을 수도 없을 수도 있습니다.',
+          active: 1,
+          chips: ['JSON', '유연한 속성', '변화 대응', '공통 뼈대'],
+          hot: 1,
+          logs: [['09:00:04', '{orderId, items}'], ['09:00:05', 'memo 필드 optional'], ['09:00:06', 'coupon 필드 추가 가능']],
+        },
+        '#unstructured': {
+          title: '비정형 데이터 — 자유형 내용',
+          summary: '문서 본문, 사진, 음성처럼 고정된 칸으로 바로 나누기 어려운 데이터입니다.',
+          active: 2,
+          chips: ['텍스트', '이미지', '음성', '추가 해석 필요'],
+          hot: 2,
+          logs: [['09:00:07', 'image uploaded'], ['09:00:08', 'speech transcript needed'], ['09:00:09', 'label extraction pending']],
+        },
+        '#choice': {
+          title: '상황별 선택 — 구조에 맞는 그릇이 다르다',
+          summary: '같은 데이터라도 얼마나 일정한 틀이 필요한지에 따라 저장 전략이 달라집니다.',
+          active: 1,
+          chips: ['구조 우선', '유연성', '해석 비용', '저장 전략'],
+          hot: 3,
+          logs: [['09:00:10', 'grade table -> structured'], ['09:00:11', 'profile payload -> semi'], ['09:00:12', 'photo archive -> unstructured']],
+        },
+      };
+
+      function render() {
+        const scene = scenes[scenes[location.hash] ? location.hash : '#structured'];
+        const drawers = [
+          ['정형', '고정 칸과 일정한 규칙'],
+          ['반정형', '공통 틀 + 선택 속성'],
+          ['비정형', '자유형 내용과 추가 해석'],
+        ].map((item, index) => '<div class="drawer' + (scene.active === index ? ' active' : '') + '"><h2>' + item[0] + '</h2><p>' + item[1] + '</p></div>').join('');
+        const chips = scene.chips.map((chip, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + chip + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+        document.getElementById('app').innerHTML =
+          '<div class="screen"><section class="hero"><p class="eyebrow">데이터 구조 비교</p><h1>' + scene.title + '</h1><p class="summary">' + scene.summary + '</p></section><section class="drawers">' + drawers + '<div class="chips">' + chips + '</div></section><section class="note"><p class="eyebrow" style="color:#fed7aa;">분류 로그</p>' + logs + '</section></div>';
+      }
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
