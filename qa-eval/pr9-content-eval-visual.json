@@ -1,0 +1,54 @@
+{
+  "step": "pr9-content-r1",
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-46",
+  "ts": "2026-04-29T13:47:17Z",
+  "pr": 21,
+  "evaluated_commit": "dd6931f5018932b400a2eb922638c726fb00abdc",
+  "branch": "codex/pr9-chapter8",
+  "verdict": "REVISE",
+  "items": [
+    {
+      "id": 1,
+      "verdict": "REVISE",
+      "evidence": "Required files `client/src/content/ch08_q01..07.md` do not exist. `find client/src/content -maxdepth 3 -type f` returned no files. Network prose exists instead in `client/src/data/qa-stubs.ts` around lines 611-686."
+    },
+    {
+      "id": 2,
+      "verdict": "REVISE",
+      "evidence": "Seven demo HTML files exist, but not at the required `client/src/content/demos/ch08_q01..07.html` path. Actual files are `client/public/demos/ch08/q01.html` through `q07.html`. Hash-driven iframe-safe markup is present, e.g. `client/public/demos/ch08/q01.html:35-76` defines `scenarioMap`, `hashchange`, and `render()`."
+    },
+    {
+      "id": 3,
+      "verdict": "PASS",
+      "evidence": "Network quizzes are present in equivalent locations. Client questions: `client/src/data/quizzes.ts:420-628` defines 7 QA sets x 3 questions each, each with 4 options. Server answers/explanations: `server/src/data/quiz-answers.ts:275-393` defines matching 7 QA sets x 3 answers with explanations."
+    },
+    {
+      "id": 4,
+      "verdict": "PASS",
+      "evidence": "Chapter count is numerically aligned at 7 for network chapter on both sides: client `client/src/data/qa-stubs.ts:33` has chapter id 8 with `qaCount: 7`; server `server/src/data/chapter-content.ts:9` has chapter id 8 with `count: 7`."
+    },
+    {
+      "id": 5,
+      "verdict": "PASS",
+      "evidence": "`git diff --stat main..HEAD` shows only 11 files changed, all scoped to chapter 8 assets/data: `client/public/demos/ch08/q01..q07.html`, `client/src/data/qa-stubs.ts`, `client/src/data/quizzes.ts`, `server/src/data/chapter-content.ts`, `server/src/data/quiz-answers.ts`."
+    },
+    {
+      "id": 6,
+      "verdict": "PASS",
+      "evidence": "`npm run build` completed successfully on April 29, 2026 UTC. Client Vite build and server `tsc` both finished without errors."
+    },
+    {
+      "id": 7,
+      "verdict": "PASS",
+      "evidence": "No `README.md` or `CLAUDE.md` files changed relative to `main..HEAD`. `git diff --name-only main..HEAD | rg '(^|/)(README|CLAUDE)\\.md$'` returned no matches."
+    }
+  ],
+  "summary": "The PR contains substantial chapter 8 content, demos, and quizzes, and it builds cleanly. However, the required content artifact paths under `client/src/content/` are missing, so the submission does not satisfy the stated packaging contract.",
+  "fail_items": [],
+  "revise_items": [
+    "Move or generate the seven Markdown files at `client/src/content/ch08_q01..07.md`.",
+    "Move or generate the seven demo HTML files at `client/src/content/demos/ch08_q01..07.html`, or update the contract if `client/public/demos/ch08/q01..q07.html` is the intended canonical location."
+  ]
+}
