@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>보안 원칙 4층</title>
+    <style>
+      :root {
+        --bg: #fcfcfb;
+        --card: #ffffff;
+        --line: #d6d3d1;
+        --text: #1c1917;
+        --muted: #78716c;
+        --accent: #b91c1c;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+      .stack { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .layer { border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; background: var(--card); text-align: center; font-size: 11px; line-height: 1.5; }
+      .layer.active { border-color: var(--accent); background: #fef2f2; }
+      .card { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 12px; line-height: 1.7; font-size: 12px; }
+      .note { border-radius: 14px; background: #7f1d1d; color: #fef2f2; padding: 10px 12px; font-size: 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#auth': { active: 0, text: '인증은 접속하려는 상대가 정말 허가된 사용자나 시스템인지 확인하는 단계입니다. 문을 열기 전에 신분부터 확인합니다.' },
+        '#encrypt': { active: 1, text: '암호화는 데이터가 이동하는 중간에 읽히거나 바뀌지 않도록 보호하는 장치입니다. 내용이 보여도 바로 해독되지 않게 만듭니다.' },
+        '#isolate': { active: 2, text: '격리는 한 구역이 침해되어도 전체로 쉽게 번지지 않게 네트워크와 권한을 나누는 원칙입니다.' },
+        '#least': { active: 3, text: '최소 권한과 로그 모니터링은 사고가 나더라도 피해를 줄이고 원인을 추적하기 쉽게 해 줍니다. 보안은 여러 겹이 함께 있어야 강해집니다.' },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#auth';
+        const scenario = scenarioMap[hash];
+        const labels = ['인증', '암호화', '격리', '최소 권한'];
+        const stack = labels.map((label, idx) => '<div class="layer' + (idx === scenario.active ? ' active' : '') + '">' + label + '</div>').join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>보안 원칙 4층</h4>' +
+          '<p class="sub">네트워크 보안은 한 장비 이름보다, 어떤 원칙을 겹쳐 두는지가 더 중요합니다.</p>' +
+          '<div class="stack">' + stack + '</div>' +
+          '<div class="card">' + scenario.text + '</div>' +
+          '<div class="note">▶ 한 겹이 뚫려도 전체가 무너지지 않도록, 인증·암호화·격리·최소 권한을 함께 쌓습니다.</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

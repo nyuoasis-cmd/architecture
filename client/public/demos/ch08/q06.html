@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>실시간 연결 비교</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --line: #cbd5e1;
+        --text: #0f172a;
+        --muted: #64748b;
+        --accent: #0284c7;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+      .row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .cell { border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; background: var(--card); text-align: center; font-size: 11px; line-height: 1.5; }
+      .cell.active { border-color: var(--accent); background: #e0f2fe; }
+      .card { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 12px; line-height: 1.7; font-size: 12px; }
+      .note { border-radius: 14px; background: #0c4a6e; color: #e0f2fe; padding: 10px 12px; font-size: 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#http': { active: 0, text: 'HTTP는 보통 요청을 보낼 때마다 응답을 받고 대화가 끝나는 구조입니다. 일반 페이지 조회에는 충분히 잘 맞습니다.' },
+        '#polling': { active: 1, text: '폴링은 “새 소식 있나요?”를 짧은 간격으로 반복해 묻는 방식입니다. 단순하지만 불필요한 왕복이 많아질 수 있습니다.' },
+        '#ws': { active: 2, text: 'WebSocket은 한 번 연결한 뒤 그 통로를 유지하며 서버와 클라이언트가 양방향으로 즉시 메시지를 주고받을 수 있습니다.' },
+        '#usecase': { active: 3, text: '채팅, 협업 편집, 실시간 알림처럼 서버가 먼저 밀어 넣어야 할 메시지가 많은 경우 WebSocket이 특히 잘 맞습니다.' },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#http';
+        const scenario = scenarioMap[hash];
+        const labels = ['HTTP', '폴링', 'WebSocket', '적합한 사례'];
+        const row = labels.map((label, idx) => '<div class="cell' + (idx === scenario.active ? ' active' : '') + '">' + label + '</div>').join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>실시간 연결 비교</h4>' +
+          '<p class="sub">핵심은 더 빠른 숫자 경쟁보다, 연결을 계속 붙잡아 둘 필요가 있는지 여부입니다.</p>' +
+          '<div class="row">' + row + '</div>' +
+          '<div class="card">' + scenario.text + '</div>' +
+          '<div class="note">▶ WebSocket은 전화처럼 연결을 유지하고, HTTP는 문자처럼 필요할 때마다 왕복한다고 떠올리면 쉽습니다.</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
