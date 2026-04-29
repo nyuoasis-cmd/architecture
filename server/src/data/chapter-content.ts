@@ -258,6 +258,69 @@ const CHAPTER_EIGHT_CONTEXTS: QaContext[] = [
   },
 ];
 
+const CHAPTER_NINE_CONTEXTS: QaContext[] = [
+  {
+    id: 'ch09_q01',
+    chapterId: 9,
+    chapterTitle: '아키텍처와 설계',
+    title: '모놀리식과 마이크로서비스는 어떻게 다를까?',
+    summary: '하나의 배포 단위와 기능별 분산 배포 구조를 비교합니다.',
+    body: '모놀리식은 여러 기능이 하나의 코드베이스와 배포 단위 안에 함께 들어 있는 구조입니다. 시작과 개발은 단순하지만 규모가 커지면 전체 빌드와 배포가 무거워질 수 있습니다. 마이크로서비스는 기능을 여러 서비스로 나눠 독립 배포와 팀 분리를 돕지만, 서비스 간 통신과 운영 복잡도가 커집니다. 둘의 차이는 기술 유행보다 팀 규모와 운영 역량에 더 크게 좌우됩니다.',
+    keywords: ['모놀리식', '마이크로서비스', '배포', '분산'],
+    checkpoint: '모놀리식과 마이크로서비스의 차이를 배포 단위와 운영 복잡도 기준으로 설명할 수 있다.',
+  },
+  {
+    id: 'ch09_q02',
+    chapterId: 9,
+    chapterTitle: '아키텍처와 설계',
+    title: '레이어드 아키텍처는 왜 자주 쓰일까?',
+    summary: '화면, 비즈니스, 데이터 접근을 나눠 책임 경계를 만드는 이유를 설명합니다.',
+    body: '레이어드 아키텍처는 프레젠테이션, 서비스, 데이터 접근처럼 역할이 다른 코드를 층으로 나누는 방식입니다. MVC나 3-tier 구조가 대표 예시이며, 변경 이유가 다른 코드를 섞지 않게 도와줍니다. 화면을 고칠 때 저장 로직까지 흔들지 않고, 저장 방식을 바꿀 때 비즈니스 규칙을 최대한 지킬 수 있다는 점이 강점입니다. 핵심은 계층 수가 아니라 관심사 분리와 변경 영향 축소입니다.',
+    keywords: ['레이어드', 'MVC', '3-tier', '관심사 분리'],
+    checkpoint: '레이어드 아키텍처의 목적을 역할 분리와 변경 영향 축소 관점에서 설명할 수 있다.',
+  },
+  {
+    id: 'ch09_q03',
+    chapterId: 9,
+    chapterTitle: '아키텍처와 설계',
+    title: '디자인 패턴은 왜 반복해서 언급될까?',
+    summary: '반복되는 설계 문제에 이름 붙인 해법이라는 관점을 설명합니다.',
+    body: '디자인 패턴은 자주 되풀이되는 설계 문제를 풀 때 검증된 해법을 이름 붙여 정리한 것입니다. 싱글톤, 옵저버, 팩토리처럼 각 패턴은 특정 문제를 푸는 상황과 의도를 공유하게 해 줍니다. 중요한 것은 코드를 외우는 것이 아니라 어떤 문제에 왜 쓰이는지 이해하는 것입니다. 패턴은 만능 정답이 아니라 설계 대화를 빠르게 만드는 공통 언어에 가깝습니다.',
+    keywords: ['디자인 패턴', '싱글톤', '옵저버', '팩토리'],
+    checkpoint: '디자인 패턴을 반복 문제의 해법 이름으로 설명할 수 있다.',
+  },
+  {
+    id: 'ch09_q04',
+    chapterId: 9,
+    chapterTitle: '아키텍처와 설계',
+    title: '캐시는 어디에 두고 어떻게 비울까?',
+    summary: 'CDN, 메모리, 데이터 앞 캐시와 무효화 전략을 함께 설명합니다.',
+    body: '캐시는 자주 쓰는 결과를 더 빠른 위치에 잠깐 저장해 원본 접근을 줄이는 전략입니다. CDN 캐시는 정적 파일을 사용자 가까운 거점에 두고, 메모리 캐시는 설정값이나 계산 결과를 빠르게 재사용하게 하며, 데이터베이스 앞 캐시는 반복 조회 부담을 줄입니다. 하지만 원본이 바뀐 뒤 오래된 값이 남으면 문제가 되므로 TTL이나 이벤트 기반 삭제 같은 무효화 전략이 중요합니다. 캐싱의 핵심은 저장 자체보다 속도와 최신성의 균형입니다.',
+    keywords: ['캐시', 'CDN', '메모리 캐시', '무효화'],
+    checkpoint: '캐시의 종류와 무효화 전략을 함께 설명할 수 있다.',
+  },
+  {
+    id: 'ch09_q05',
+    chapterId: 9,
+    chapterTitle: '아키텍처와 설계',
+    title: '메시지 큐는 왜 시스템 사이에 들어갈까?',
+    summary: '후속 작업을 비동기로 넘기고 버퍼링하는 이유를 설명합니다.',
+    body: '메시지 큐는 요청 처리와 후속 작업을 분리하기 위한 중간 버퍼입니다. 생산자는 해야 할 일을 큐에 넣고, 소비자 워커는 나중에 꺼내 처리하므로 사용자 응답을 더 빠르게 돌려줄 수 있습니다. 또 갑자기 작업이 몰릴 때도 큐가 완충 역할을 해 시스템이 한꺼번에 무너지지 않게 돕습니다. 다만 적체, 재시도, 중복 처리 같은 운영 규칙도 함께 설계해야 합니다.',
+    keywords: ['메시지 큐', '비동기', '버퍼', '워커'],
+    checkpoint: '메시지 큐의 목적을 비동기 처리와 트래픽 완충 관점에서 설명할 수 있다.',
+  },
+  {
+    id: 'ch09_q06',
+    chapterId: 9,
+    chapterTitle: '아키텍처와 설계',
+    title: '확장성은 서버를 크게 하는 일만 뜻할까?',
+    summary: '수직 확장과 수평 확장의 차이와 병목 관리를 설명합니다.',
+    body: '확장성은 사용자가 늘어도 성능과 안정성을 유지하며 커질 수 있는 능력입니다. 수직 확장은 한 대의 서버 성능을 높이는 방식으로 빠르지만 한계가 있고, 수평 확장은 같은 역할의 서버를 여러 대로 늘려 부하를 나누는 방식으로 더 큰 규모에 유리합니다. 실제로는 둘을 섞어 쓰며, 어디가 병목인지 측정하는 일이 먼저입니다. 확장성은 장비 구매보다 구조와 운영 전략의 문제에 더 가깝습니다.',
+    keywords: ['확장성', '수직 확장', '수평 확장', '병목'],
+    checkpoint: '수직 확장과 수평 확장의 차이와 트레이드오프를 설명할 수 있다.',
+  },
+];
+
 function createPlaceholderQa(chapterId: number, order: number, chapterTitle: string): QaContext {
   const qaId = `ch${String(chapterId).padStart(2, '0')}_q${String(order).padStart(2, '0')}`;
   return {
@@ -295,6 +358,9 @@ export const QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
     }
     if (chapter.id === 8) {
       return CHAPTER_EIGHT_CONTEXTS.find((qa) => qa.id === `ch08_q${String(order).padStart(2, '0')}`) ?? createPlaceholderQa(chapter.id, order, chapter.title);
+    }
+    if (chapter.id === 9) {
+      return CHAPTER_NINE_CONTEXTS.find((qa) => qa.id === `ch09_q${String(order).padStart(2, '0')}`) ?? createPlaceholderQa(chapter.id, order, chapter.title);
     }
 
     if (chapter.id === 1 && order === 1) {
