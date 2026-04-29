@@ -345,6 +345,97 @@ export const QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
       };
     }
 
+    if (chapter.id === 5 && order === 1) {
+      return {
+        id: 'ch05_q01',
+        chapterId: 5,
+        chapterTitle: chapter.title,
+        title: '프론트엔드와 백엔드는 왜 나뉘어 있나?',
+        summary: '사용자가 보는 화면과 뒤에서 규칙을 처리하는 영역을 나누는 이유를 설명합니다.',
+        body: '프론트엔드는 버튼, 화면 흐름, 입력 경험처럼 사용자가 직접 만지는 부분입니다. 백엔드는 로그인 검사, 권한, 계산, 데이터 저장처럼 뒤에서 규칙을 처리합니다. 둘을 나누면 화면 변화와 비즈니스 규칙을 각자 더 안정적으로 개선할 수 있습니다. 홀과 주방을 나눠 운영하는 식당처럼, 역할을 분리해야 협업과 확장이 쉬워집니다.',
+        keywords: ['프론트엔드', '백엔드', '분리', '역할'],
+        checkpoint: '프론트엔드와 백엔드를 얼굴과 규칙의 차이로 설명할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 5 && order === 2) {
+      return {
+        id: 'ch05_q02',
+        chapterId: 5,
+        chapterTitle: chapter.title,
+        title: 'HTML, CSS, JavaScript는 각각 무슨 일을 하나?',
+        summary: '웹 화면의 뼈대, 꾸밈, 동작을 세 기술의 역할로 나눠 설명합니다.',
+        body: 'HTML은 제목, 본문, 버튼 같은 구조를 세우는 뼈대입니다. CSS는 색, 크기, 배치처럼 화면의 모양을 정합니다. JavaScript는 클릭 반응, 입력 검사, 데이터 불러오기처럼 실제 동작을 붙입니다. 즉, 구조와 꾸밈과 반응이 나뉘어 함께 웹페이지를 만듭니다.',
+        keywords: ['HTML', 'CSS', 'JavaScript', '구조'],
+        checkpoint: 'HTML·CSS·JavaScript를 뼈대·꾸밈·동작으로 구분할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 5 && order === 3) {
+      return {
+        id: 'ch05_q03',
+        chapterId: 5,
+        chapterTitle: chapter.title,
+        title: 'API와 REST는 무엇인가?',
+        summary: '화면과 서버가 데이터를 주고받는 창구와 그 창구를 정리하는 방식으로 설명합니다.',
+        body: 'API는 프론트엔드와 백엔드가 요청과 응답을 주고받는 약속된 창구입니다. REST는 사용자, 주문, 게시글 같은 자원을 주소와 메서드 규칙으로 비교적 정돈되게 다루려는 방식입니다. 주소만 봐도 무엇을 다루는지 짐작하기 쉬워지고, 요청마다 필요한 정보를 분명히 담는 흐름이 강조됩니다. 즉, API가 창구라면 REST는 그 창구 운영 규칙에 가깝습니다.',
+        keywords: ['API', 'REST', '자원', '메서드'],
+        checkpoint: 'API와 REST를 창구와 운영 규칙의 차이로 설명할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 5 && order === 4) {
+      return {
+        id: 'ch05_q04',
+        chapterId: 5,
+        chapterTitle: chapter.title,
+        title: 'SPA와 SSR은 화면을 보여주는 방식이 어떻게 다른가?',
+        summary: '브라우저에서 그릴지 서버에서 먼저 그릴지에 따라 사용자 경험이 달라지는 점을 설명합니다.',
+        body: 'SPA는 브라우저가 코드를 받아 화면을 바꿔 가며 앱처럼 움직이는 방식입니다. SSR은 서버가 먼저 완성된 HTML을 보내 첫 화면을 빨리 보여 주는 방식입니다. SPA는 이후 전환이 부드럽고, SSR은 첫 진입과 검색 노출에서 유리한 경우가 많습니다. 핵심 차이는 화면을 언제 어디서 만들어 보여 주느냐입니다.',
+        keywords: ['SPA', 'SSR', '렌더링', '첫 화면'],
+        checkpoint: 'SPA와 SSR의 차이를 렌더 시점과 사용자 첫 경험으로 설명할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 5 && order === 5) {
+      return {
+        id: 'ch05_q05',
+        chapterId: 5,
+        chapterTitle: chapter.title,
+        title: '상태 관리는 왜 필요한가?',
+        summary: '화면 여러 곳이 같은 정보를 바라볼 때 일관성을 지키는 문제로 상태 관리를 설명합니다.',
+        body: '로그인 정보, 장바구니 개수, 필터 조건처럼 여러 컴포넌트가 함께 보는 값은 따로 들고 있으면 쉽게 어긋납니다. 상태 관리는 이 공통 정보를 어디에 두고 누가 어떻게 바꾸는지 질서를 세우는 일입니다. Context, Redux, Zustand 같은 도구는 이런 흐름을 더 추적하기 쉽게 만듭니다. 결국 상태 관리는 여러 화면이 같은 현재 상황을 보게 하는 약속입니다.',
+        keywords: ['상태 관리', '공통 정보', '일관성', 'Context'],
+        checkpoint: '상태 관리의 목적을 화면 간 일관성 유지로 설명할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 5 && order === 6) {
+      return {
+        id: 'ch05_q06',
+        chapterId: 5,
+        chapterTitle: chapter.title,
+        title: '프레임워크와 라이브러리는 왜 쓰나?',
+        summary: '반복되는 화면 문제를 더 빠르게 풀기 위해 공통 규칙과 도구를 쓰는 이유를 설명합니다.',
+        body: '프레임워크와 라이브러리는 화면을 컴포넌트로 나누고 재사용하는 공통 규칙을 제공합니다. React, Vue, Svelte 같은 도구를 쓰면 반복되는 구조를 더 빠르고 일관되게 관리할 수 있습니다. 선택 기준은 유행보다 팀 경험, 생태계, 유지보수 기간, 필요한 기능입니다. 즉, 이 도구들은 맨손 개발을 대체하는 마법이 아니라 검증된 작업 방식입니다.',
+        keywords: ['프레임워크', '라이브러리', '컴포넌트', 'React'],
+        checkpoint: '프레임워크를 쓰는 이유를 재사용성과 공통 규칙 관점에서 설명할 수 있다.',
+      };
+    }
+
+    if (chapter.id === 5 && order === 7) {
+      return {
+        id: 'ch05_q07',
+        chapterId: 5,
+        chapterTitle: chapter.title,
+        title: '빌드 도구는 무엇을 하나?',
+        summary: '작성한 여러 파일을 브라우저가 빠르게 읽을 수 있는 결과물로 정리하는 과정을 설명합니다.',
+        body: '빌드 도구는 여러 소스 파일과 스타일, 이미지를 브라우저가 읽기 쉬운 결과물로 정리합니다. 개발 중에는 저장 직후 빠르게 화면을 갱신하고, 배포할 때는 파일을 묶고 최적화해 로딩을 돕습니다. Vite와 Webpack 같은 도구는 방식 차이는 있지만 공통으로 개발 편의와 배포 준비를 맡습니다. 즉, 빌드 도구는 개발 재료를 서비스용 포장으로 바꾸는 팀입니다.',
+        keywords: ['빌드 도구', 'Vite', 'Webpack', '번들링'],
+        checkpoint: '빌드 도구의 역할을 개발 편의와 배포 최적화로 나눠 설명할 수 있다.',
+      };
+    }
+
     return createPlaceholderQa(chapter.id, order, chapter.title);
   }),
 );

@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>웹페이지 조립 공방</title>
+    <style>
+      :root { --bg:#f5f7fb; --card:#ffffff; --text:#18212f; --muted:#667085; --border:#d9e1ee; --accent:#2563eb; --soft:#dbeafe; }
+      * { box-sizing:border-box; }
+      html, body { margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); font-family:'Pretendard Variable','Noto Sans KR',sans-serif; }
+      body { overflow:hidden; }
+      #app { width:100%; height:100%; overflow-y:auto; }
+      .screen { min-height:100%; padding:16px 14px 22px; }
+      .hero, .stage, .log { border:1px solid var(--border); border-radius:18px; background:var(--card); }
+      .hero { padding:16px; background:linear-gradient(135deg,#dbeafe,#ffffff); }
+      .eyebrow { margin:0 0 6px; font-size:11px; color:var(--muted); }
+      h1 { margin:0; font-size:18px; }
+      .summary { margin:8px 0 0; font-size:12px; line-height:1.7; }
+      .stage { margin-top:12px; padding:14px; display:grid; gap:10px; }
+      .card { padding:12px; border:1px solid var(--border); border-radius:14px; background:#fff; }
+      .card.active { border-color:var(--accent); background:var(--soft); }
+      .mock { margin-top:8px; padding:10px; border-radius:12px; background:#f8fafc; font-size:11px; line-height:1.6; }
+      .title { font-weight:700; font-size:12px; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:11px; }
+      .chip.hot { border-color:#93c5fd; background:var(--soft); color:#1d4ed8; }
+      .log { margin-top:12px; padding:12px 14px; background:#111827; color:#f8fafc; }
+      .line { font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; line-height:1.7; }
+      .time { color:#93c5fd; margin-right:6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#html': { title:'HTML — 방과 문을 세우는 골조', summary:'제목, 본문, 버튼, 입력칸이 어디 놓일지 구조를 적습니다.', active:0, hot:0, chips:['제목', '본문', '버튼', '입력칸'], mock:'<header>제목</header>\\n<main>본문</main>\\n<button>주문하기</button>', logs:[['11:10:01','element tree created'],['11:10:02','button node placed'],['11:10:03','form input registered']] },
+        '#css': { title:'CSS — 같은 골조를 다른 분위기로', summary:'색, 여백, 정렬, 글자 크기를 조절해 화면이 어떻게 보일지 정합니다.', active:1, hot:1, chips:['색상', '여백', '정렬', '반응형'], mock:'button { color: blue; }\\nmain { padding: 16px; }', logs:[['11:10:04','primary color applied'],['11:10:05','mobile spacing adjusted'],['11:10:06','card aligned to grid']] },
+        '#js': { title:'JavaScript — 눌렀을 때 움직이게', summary:'클릭, 입력 검사, 데이터 불러오기처럼 사용자의 행동에 반응을 붙입니다.', active:2, hot:2, chips:['클릭 반응', '검사', '데이터 요청', '재렌더'], mock:'click -> menu open\\nsubmit -> validate\\nfetch -> list update', logs:[['11:10:07','menu button clicked'],['11:10:08','input validated'],['11:10:09','list rerendered']] },
+        '#together': { title:'셋이 합쳐질 때 비로소 페이지가 된다', summary:'구조만 있거나, 모양만 있거나, 반응만 있어서는 완성된 웹 경험이 되기 어렵습니다.', active:3, hot:3, chips:['구조', '꾸밈', '동작', '완성'], mock:'HTML + CSS + JS = usable page', logs:[['11:10:10','skeleton styled'],['11:10:11','interaction connected'],['11:10:12','page became usable']] },
+      };
+      function render() {
+        const scene = scenes[scenes[location.hash] ? location.hash : '#html'];
+        const cards = [
+          ['HTML', '구조 만들기'],
+          ['CSS', '모양 다듬기'],
+          ['JavaScript', '반응 붙이기'],
+          ['Together', '합쳐진 결과'],
+        ].map((item, index) => '<div class="card' + (scene.active === index ? ' active' : '') + '"><div class="title">' + item[0] + '</div><div style="font-size:11px;color:var(--muted);margin-top:4px;">' + item[1] + '</div>' + (scene.active === index ? '<div class="mock">' + scene.mock.replace(/\\n/g, '<br/>') + '</div>' : '') + '</div>').join('');
+        const chips = scene.chips.map((chip, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + chip + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+        document.getElementById('app').innerHTML = '<div class="screen"><section class="hero"><p class="eyebrow">HTML · CSS · JavaScript</p><h1>' + scene.title + '</h1><p class="summary">' + scene.summary + '</p></section><section class="stage">' + cards + '<div class="chips">' + chips + '</div></section><section class="log"><p class="eyebrow" style="color:#bfdbfe;">빌드 로그</p>' + logs + '</section></div>';
+      }
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
