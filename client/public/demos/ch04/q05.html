@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>ACID 은행 창구</title>
+    <style>
+      :root { --bg:#f8f4ef; --card:#fffdf8; --text:#2a221c; --muted:#72665b; --border:#e8dccf; --accent:#c2410c; --soft:#ffedd5; }
+      * { box-sizing:border-box; }
+      html, body { margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); font-family:'Pretendard Variable','Noto Sans KR',sans-serif; }
+      body { overflow:hidden; }
+      #app { width:100%; height:100%; overflow-y:auto; }
+      .screen { min-height:100%; padding:16px 14px 22px; }
+      .hero, .grid, .log { border:1px solid var(--border); border-radius:18px; background:var(--card); }
+      .hero { padding:16px; background:linear-gradient(135deg,#fff7ed,#fffdf8); }
+      .eyebrow { margin:0 0 6px; font-size:11px; color:var(--muted); }
+      h1 { margin:0; font-size:18px; }
+      .summary { margin:8px 0 0; font-size:12px; line-height:1.7; }
+      .grid { margin-top:12px; padding:14px; display:grid; gap:10px; }
+      .item { padding:12px; border:1px solid var(--border); border-radius:14px; background:#fff; }
+      .item.active { border-color:var(--accent); background:var(--soft); }
+      .item h2 { margin:0 0 4px; font-size:12px; }
+      .item p { margin:0; font-size:11px; line-height:1.6; color:var(--muted); }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:11px; }
+      .chip.hot { border-color:#fdba74; background:var(--soft); color:#9a3412; }
+      .log { margin-top:12px; padding:12px 14px; background:#111827; color:#f8fafc; }
+      .line { font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; line-height:1.7; }
+      .time { color:#fdba74; margin-right:6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#atomic': { title:'Atomicity — 전부 또는 없음', summary:'출금과 입금은 둘 다 성공하거나 둘 다 취소돼야 합니다.', active:0, hot:0, chips:['부분 성공 금지', '롤백', '한 묶음', '이체'], logs:[['15:00:01','withdraw started'],['15:00:02','deposit failed'],['15:00:03','rollback complete']] },
+        '#consistent': { title:'Consistency — 규칙을 어기지 않는다', summary:'성공 후에도 잔액 규칙이나 참조 규칙이 깨지면 안 됩니다.', active:1, hot:1, chips:['규칙 유지', '제약 조건', '무결성', '검증'], logs:[['15:00:04','balance checked'],['15:00:05','foreign key valid'],['15:00:06','commit allowed']] },
+        '#isolated': { title:'Isolation — 중간 상태를 섞지 않는다', summary:'동시에 여러 작업이 돌아가도 서로의 미완성 상태를 함부로 보지 않게 합니다.', active:2, hot:2, chips:['동시성 제어', '중간 상태 차단', '충돌 완화', '순서 보장'], logs:[['15:00:07','txn A locked row'],['15:00:08','txn B waiting'],['15:00:09','safe read resumed']] },
+        '#durable': { title:'Durability — 완료 기록은 남는다', summary:'완료가 확정된 뒤에는 장애가 나도 결과가 사라지지 않아야 합니다.', active:3, hot:3, chips:['영속성', '복구 후 유지', 'commit 기록', '신뢰성'], logs:[['15:00:10','commit written'],['15:00:11','server restarted'],['15:00:12','order still present']] },
+      };
+      function render() {
+        const scene = scenes[scenes[location.hash] ? location.hash : '#atomic'];
+        const items = [
+          ['A', 'Atomicity'],
+          ['C', 'Consistency'],
+          ['I', 'Isolation'],
+          ['D', 'Durability'],
+        ].map((item, index) => '<div class="item' + (scene.active === index ? ' active' : '') + '"><h2>' + item[0] + ' — ' + item[1] + '</h2><p>' + (index === scene.active ? scene.summary : '트랜잭션 신뢰성을 위한 핵심 약속') + '</p></div>').join('');
+        const chips = scene.chips.map((chip, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + chip + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+        document.getElementById('app').innerHTML = '<div class="screen"><section class="hero"><p class="eyebrow">트랜잭션 속성</p><h1>' + scene.title + '</h1><p class="summary">' + scene.summary + '</p></section><section class="grid">' + items + '<div class="chips">' + chips + '</div></section><section class="log"><p class="eyebrow" style="color:#fed7aa;">창구 로그</p>' + logs + '</section></div>';
+      }
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
