@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>드라이버 통역 부스</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --border: #dbe4ee;
+        --text: #0f172a;
+        --muted: #64748b;
+        --accent: #dc2626;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; overflow-y: auto; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); line-height: 1.5; }
+      .flow { display: grid; gap: 8px; }
+      .box { border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 10px 12px; }
+      .box.active { border-color: var(--accent); background: #fef2f2; }
+      .arrow { text-align: center; color: var(--muted); }
+      .note { border-radius: 12px; background: #111827; color: #f9fafb; padding: 10px 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#request': ['운영체제', '문서 출력 요청', '드라이버', '프린터'],
+        '#translate': ['운영체제', '공통 명령', '드라이버*', '장치별 신호'],
+        '#device': ['운영체제', '드라이버', '그래픽 카드*', '화면 출력'],
+        '#feedback': ['장치 완료 신호', '드라이버*', '운영체제', '사용자 화면'],
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#request';
+        const seq = scenarioMap[hash]
+          .map((item, idx) => '<div class="box' + (item.includes('*') ? ' active' : '') + '">' + item.replace('*', '') + '</div>' + (idx < 3 ? '<div class="arrow">↓</div>' : ''))
+          .join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>드라이버 통역 부스</h4>' +
+          '<p class="sub">운영체제의 공통 요청은 드라이버를 거쳐 장치가 이해할 수 있는 신호로 바뀝니다.</p>' +
+          '<div class="flow">' + seq + '</div>' +
+          '<div class="note">▶ 드라이버가 있기에 운영체제는 장치마다 다른 세부 언어를 몰라도 화면 출력, 저장, 인쇄를 공통 방식으로 요청할 수 있습니다.</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>메모리 계층 창고</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --border: #dbe4ee;
+        --text: #0f172a;
+        --muted: #64748b;
+        --accent: #2563eb;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; overflow-y: auto; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); line-height: 1.5; }
+      .stack { display: grid; gap: 8px; }
+      .tier { border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 10px 12px; }
+      .tier.active { border-color: var(--accent); background: #eff6ff; }
+      .row { display: flex; justify-content: space-between; gap: 10px; }
+      .label { font-weight: 700; }
+      .meta { color: var(--muted); }
+      .pillbar { display: flex; gap: 6px; flex-wrap: wrap; }
+      .pill { padding: 4px 8px; border-radius: 999px; background: #fff; border: 1px solid var(--border); font-size: 11px; }
+      .note { border-radius: 12px; background: #0f172a; color: #f8fafc; padding: 10px 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#nearest': {
+          active: '레지스터/캐시',
+          tiers: [['레지스터·캐시', '가장 빠름', '아주 작음'], ['RAM', '빠름', '중간'], ['SSD/HDD', '느림', '매우 큼']],
+          note: 'CPU 바로 옆에는 가장 빠르지만 작은 공간이 놓입니다. 자주 쓰는 값을 손안 메모처럼 두는 셈입니다.',
+        },
+        '#workbench': {
+          active: 'RAM',
+          tiers: [['레지스터·캐시', '가장 빠름', '아주 작음'], ['RAM', '작업 공간', '실행 중 데이터'], ['SSD/HDD', '보관', '전원 꺼도 유지']],
+          note: 'RAM은 지금 일하는 재료를 펼쳐 두는 책상 역할입니다. 빠르지만 전원을 끄면 사라집니다.',
+        },
+        '#warehouse': {
+          active: 'SSD/HDD',
+          tiers: [['레지스터·캐시', '즉시 접근', '비쌈'], ['RAM', '작업 중', '휘발성'], ['SSD/HDD', '장기 보관', '용량 큼']],
+          note: 'SSD와 HDD는 넓은 창고처럼 오래 둘 내용을 맡습니다. 대신 CPU가 즉시 계산할 만큼 빠르지는 않습니다.',
+        },
+        '#tradeoff': {
+          active: '균형',
+          tiers: [['가까울수록', '더 빠름', '더 비쌈'], ['멀수록', '더 큼', '더 느림'], ['전체 설계', '속도·용량 균형', '계층 구조']],
+          note: '메모리 종류가 여럿인 이유는 한 장치로 모든 조건을 만족하기 어렵기 때문입니다. 계층 구조가 균형점을 만듭니다.',
+        },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#nearest';
+        const { active, tiers, note } = scenarioMap[hash];
+        const tierHtml = tiers.map(([name, speed, size]) => {
+          const isActive = active.includes(name) || name.includes(active);
+          return '<div class="tier' + (isActive ? ' active' : '') + '"><div class="row"><span class="label">' + name + '</span><span class="meta">' + speed + '</span></div><div class="pillbar"><span class="pill">' + size + '</span><span class="pill">' + speed + '</span></div></div>';
+        }).join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>메모리 계층 창고</h4>' +
+          '<p class="sub">가까울수록 빠르고 작고, 멀수록 크고 오래 남습니다.</p>' +
+          '<div class="stack">' + tierHtml + '</div>' +
+          '<div class="note">▶ ' + note + '</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
