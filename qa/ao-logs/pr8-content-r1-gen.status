@@ -1,0 +1,1 @@
+{"status":"done","step":"pr8-content-r1","role":"gen","model":"codex","session_id":"arch-41","ts":"2026-04-29T01:35:12Z","branch":"codex/pr8-chapter7","commit":"3ea551a641024eb34a990143eb5d169150d5141b","pr":"https://github.com/nyuoasis-cmd/architecture/pull/19","loc":"+885 -0","note":"챕터 7 데이터베이스 Q&A 6개 본문과 챗봇 컨텍스트를 추가했다. 시연 HTML 6개와 데모 메타, 퀴즈 18문항과 서버 채점 해설을 연결했다."}
