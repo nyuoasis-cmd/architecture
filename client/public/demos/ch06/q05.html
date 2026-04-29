@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>인터럽트 호출벨</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --border: #dbe4ee;
+        --text: #0f172a;
+        --muted: #64748b;
+        --accent: #0f766e;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; overflow-y: auto; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); line-height: 1.5; }
+      .list { display: grid; gap: 8px; }
+      .item { border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 10px 12px; }
+      .item.active { border-color: var(--accent); background: #f0fdfa; }
+      .tag { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+      .note { border-radius: 12px; background: #0f172a; color: #f8fafc; padding: 10px 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#polling': [['CPU', '계속 상태를 확인하느라 같은 질문을 반복합니다.'], ['장치', '아직 끝나지 않았습니다.'], ['문제', '쓸데없는 확인이 계속됩니다.']],
+        '#bell': [['장치*', '작업이 끝난 순간 신호를 보냅니다.'], ['CPU', '하던 일을 이어 가다가 알림을 받습니다.'], ['효과', '불필요한 확인 횟수가 줄어듭니다.']],
+        '#handler': [['CPU*', '현재 상태를 잠깐 저장합니다.'], ['ISR', '정해진 인터럽트 처리 루틴으로 이동합니다.'], ['장치', '필요한 응답을 빠르게 처리합니다.']],
+        '#resume': [['CPU*', '저장해 둔 위치로 돌아갑니다.'], ['프로세스', '원래 작업을 이어 실행합니다.'], ['운영체제', '필요한 경우 다음 스케줄링도 준비합니다.']],
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#polling';
+        const items = scenarioMap[hash]
+          .map(([title, desc]) => '<div class="item' + (title.includes('*') ? ' active' : '') + '"><div class="tag">' + title.replace('*', '') + '</div><div>' + desc + '</div></div>')
+          .join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>인터럽트 호출벨</h4>' +
+          '<p class="sub">장치가 끝났다고 먼저 알려 주면 CPU는 확인 낭비를 줄일 수 있습니다.</p>' +
+          '<div class="list">' + items + '</div>' +
+          '<div class="note">▶ 인터럽트는 CPU를 멈춰 세우는 장치가 아니라, 더 급한 사건을 잠깐 먼저 처리하게 만드는 호출벨입니다.</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

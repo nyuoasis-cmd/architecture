@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CPU 작업대 해부도</title>
+    <style>
+      :root {
+        --bg: #fffdf8;
+        --card: #ffffff;
+        --border: #e7e5e4;
+        --text: #1c1917;
+        --muted: #78716c;
+        --accent: #ea580c;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; overflow-y: auto; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); line-height: 1.5; }
+      .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .card { border: 1px solid var(--border); border-radius: 12px; background: var(--card); padding: 10px; }
+      .card.active { border-color: var(--accent); background: #fff7ed; box-shadow: 0 0 0 1px rgba(234, 88, 12, 0.08) inset; }
+      .eyebrow { margin: 0 0 6px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+      .value { font-weight: 700; }
+      .timeline { display: grid; gap: 6px; }
+      .step { display: flex; gap: 8px; align-items: flex-start; padding: 8px 10px; border-radius: 10px; background: #fafaf9; border: 1px solid var(--border); }
+      .step b { min-width: 48px; color: var(--accent); }
+      .note { border-radius: 12px; background: #1c1917; color: #fafaf9; padding: 10px 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#fetch': {
+          highlight: '제어 장치가 메모리에서 다음 명령을 읽어 옵니다.',
+          cards: ['제어 장치', '연산 장치', '레지스터'],
+          steps: [['PC', '다음 주소 확인'], ['MEM', '명령 가져오기'], ['IR', '레지스터에 적재']],
+        },
+        '#decode': {
+          highlight: '제어 장치가 명령의 의미를 해석해 어디가 움직일지 정합니다.',
+          cards: ['제어 장치*', '연산 장치', '레지스터'],
+          steps: [['IR', '명령 해석'], ['CTRL', 'ALU 호출'], ['REG', '피연산자 준비']],
+        },
+        '#execute': {
+          highlight: 'ALU가 덧셈과 비교 같은 실제 계산을 수행합니다.',
+          cards: ['제어 장치', '연산 장치*', '레지스터'],
+          steps: [['REG', '값 두 개 전달'], ['ALU', '연산 수행'], ['FLAG', '결과 상태 기록']],
+        },
+        '#store': {
+          highlight: '결과를 레지스터에 두고 필요하면 메모리로 다시 보냅니다.',
+          cards: ['제어 장치', '연산 장치', '레지스터*'],
+          steps: [['REG', '결과 보관'], ['CTRL', '다음 명령 준비'], ['MEM', '필요 시 다시 저장']],
+        },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#fetch';
+        const { highlight, cards, steps } = scenarioMap[hash];
+        const cardHtml = cards.map((label) => {
+          const active = label.includes('*');
+          return '<div class="card' + (active ? ' active' : '') + '"><p class="eyebrow">CPU 블록</p><div class="value">' + label.replace('*', '') + '</div></div>';
+        }).join('');
+        const stepHtml = steps.map(([k, v]) => '<div class="step"><b>' + k + '</b><span>' + v + '</span></div>').join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>CPU 작업대 해부도</h4>' +
+          '<p class="sub">명령 한 줄이 CPU 안에서 어떻게 흘러가는지 단계별로 봅니다.</p>' +
+          '<div class="grid">' + cardHtml + '</div>' +
+          '<div class="timeline">' + stepHtml + '</div>' +
+          '<div class="note">▶ ' + highlight + '</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
