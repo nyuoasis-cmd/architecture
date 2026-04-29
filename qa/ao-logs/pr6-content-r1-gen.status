@@ -1,0 +1,1 @@
+{"status":"done","step":"pr6-content-r1","role":"gen","model":"codex","session_id":"arch-35","ts":"2026-04-29T00:29:30Z","branch":"codex/pr6-chapter5","commit":"d53e3f8f0bd9d5fcdd4c6f9463699526dd06e38c","pr":"https://github.com/nyuoasis-cmd/architecture/pull/17","loc":"+996 -0","note":"챕터 5 Q&A 7개 본문 추가. 시연 HTML 7개와 데모 메타 연결. 퀴즈 21문항과 서버 해설 데이터 추가."}
