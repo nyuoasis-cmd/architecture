@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CDN 지도</title>
+    <style>
+      :root {
+        --bg: #fffdfa;
+        --card: #ffffff;
+        --line: #e7e5e4;
+        --text: #292524;
+        --muted: #78716c;
+        --accent: #ea580c;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.5; }
+      .map { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .point { border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; background: var(--card); text-align: center; font-size: 11px; line-height: 1.5; }
+      .point.active { border-color: var(--accent); background: #fff7ed; }
+      .card { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: var(--card); font-size: 12px; line-height: 1.7; }
+      .note { border-radius: 14px; background: #9a3412; color: #fff7ed; padding: 10px 12px; font-size: 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#origin': { active: 1, text: '원본 서버만 직접 응답하면 멀리 있는 사용자일수록 왕복 시간이 길어지고, 한곳에 요청이 몰리기 쉽습니다.' },
+        '#edge-kr': { active: 0, text: '한국 사용자는 한국과 가까운 엣지 서버에서 복사본을 받으면 체감 속도가 훨씬 빨라집니다.' },
+        '#edge-eu': { active: 2, text: '유럽 사용자는 유럽 거점에서 파일을 받게 해, 같은 콘텐츠도 멀리 본사까지 가지 않도록 만듭니다.' },
+        '#balance': { active: 1, text: '여러 거점이 요청을 나눠 받으면 원본 서버는 덜 바빠지고, 장애가 나도 우회할 여지가 늘어납니다.' },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#origin';
+        const scenario = scenarioMap[hash];
+        const labels = ['서울 엣지', '원본 서버', '유럽 엣지'];
+        const map = labels.map((label, idx) => '<div class="point' + (idx === scenario.active ? ' active' : '') + '">' + label + '</div>').join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>CDN 지도</h4>' +
+          '<p class="sub">빠름의 비밀은 파일이 더 빨리 달리는 것이 아니라, 사용자 가까운 곳에서 출발하게 만드는 데 있습니다.</p>' +
+          '<div class="map">' + map + '</div>' +
+          '<div class="card">' + scenario.text + '</div>' +
+          '<div class="note">▶ CDN은 가까운 복사본과 트래픽 분산으로 속도와 안정성을 함께 노립니다.</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

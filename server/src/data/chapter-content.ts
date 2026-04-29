@@ -185,6 +185,79 @@ const CHAPTER_SEVEN_CONTEXTS: QaContext[] = [
   },
 ];
 
+const CHAPTER_EIGHT_CONTEXTS: QaContext[] = [
+  {
+    id: 'ch08_q01',
+    chapterId: 8,
+    chapterTitle: '네트워크와 인터넷',
+    title: 'IP, TCP, UDP는 각각 어떤 역할인가?',
+    summary: '주소를 붙이는 역할과 연결을 맞추는 방식, 빠르게 던지는 방식을 나눠 설명합니다.',
+    body: 'IP는 데이터가 어디로 가야 하는지 주소를 붙이는 규칙입니다. TCP는 데이터를 순서대로 확인하며 도착시키는 연결 지향 방식이고, UDP는 확인 절차를 줄여 빠르게 보내는 비연결 방식입니다. 편지에 주소를 쓰는 일, 등기우편으로 확인받는 일, 안내 방송처럼 빨리 뿌리는 일을 나눠 생각하면 차이가 보입니다. 셋은 경쟁 관계라기보다 서로 다른 층에서 협력하는 규칙입니다.',
+    keywords: ['IP', 'TCP', 'UDP', '주소'],
+    checkpoint: 'IP와 TCP, UDP의 역할 차이를 주소·신뢰성·속도 기준으로 구분할 수 있다.',
+  },
+  {
+    id: 'ch08_q02',
+    chapterId: 8,
+    chapterTitle: '네트워크와 인터넷',
+    title: 'HTTP와 HTTPS는 무엇이 다른가?',
+    summary: '웹 요청 규칙 위에 암호화와 신원 확인이 추가되는 구조를 설명합니다.',
+    body: 'HTTP는 브라우저와 서버가 웹 문서를 주고받는 기본 약속입니다. HTTPS는 그 위에 TLS 암호화를 더해 중간에서 내용을 엿보거나 바꿔치기하기 어렵게 만듭니다. 또 인증서를 통해 지금 연결한 서버가 진짜인지 확인하는 절차도 포함합니다. 같은 길을 가더라도 봉인된 택배 상자와 신분 확인을 함께 붙인 셈입니다.',
+    keywords: ['HTTP', 'HTTPS', 'TLS', '인증서'],
+    checkpoint: 'HTTPS가 HTTP에 비해 추가하는 보안 요소를 암호화와 인증 관점에서 설명할 수 있다.',
+  },
+  {
+    id: 'ch08_q03',
+    chapterId: 8,
+    chapterTitle: '네트워크와 인터넷',
+    title: 'DNS는 이름을 어떻게 주소로 바꾸나?',
+    summary: '도메인 이름을 IP 주소로 찾아 주는 분산 전화번호부 구조를 설명합니다.',
+    body: '사람은 example.com 같은 이름을 기억하기 쉽지만, 컴퓨터는 결국 IP 주소를 알아야 통신할 수 있습니다. DNS는 이 이름을 IP로 바꿔 주는 분산 전화번호부입니다. 브라우저는 먼저 가까운 캐시를 확인하고, 없으면 상위 DNS 서버들을 차례로 물어 최종 주소를 찾습니다. 그래서 DNS가 느리거나 틀리면 인터넷이 끊긴 것처럼 느껴질 수 있습니다.',
+    keywords: ['DNS', '도메인', 'IP', '캐시'],
+    checkpoint: 'DNS가 이름을 IP 주소로 바꾸는 조회 흐름을 단계적으로 설명할 수 있다.',
+  },
+  {
+    id: 'ch08_q04',
+    chapterId: 8,
+    chapterTitle: '네트워크와 인터넷',
+    title: 'CDN은 왜 더 가까운 것처럼 빠를까?',
+    summary: '자주 보는 콘텐츠를 사용자 가까운 거점에 복사해 두는 이유를 설명합니다.',
+    body: 'CDN은 이미지, 영상, 스크립트 같은 정적 콘텐츠를 여러 지역 거점 서버에 미리 복사해 두는 네트워크입니다. 사용자는 원본 서버까지 멀리 가지 않고 가까운 거점에서 파일을 받아 지연 시간을 줄일 수 있습니다. 동시에 원본 서버 한곳에 트래픽이 몰리는 것도 완화됩니다. 즉 CDN은 데이터를 더 빨리 달리게 만들기보다, 출발점을 사용자 가까이 옮기는 전략입니다.',
+    keywords: ['CDN', '캐시', '엣지', '지연 시간'],
+    checkpoint: 'CDN이 빠른 이유를 지리적 분산과 캐시 관점에서 설명할 수 있다.',
+  },
+  {
+    id: 'ch08_q05',
+    chapterId: 8,
+    chapterTitle: '네트워크와 인터넷',
+    title: '방화벽과 VPN은 왜 목적이 다를까?',
+    summary: '접속을 걸러 내는 장치와 안전한 통로를 만드는 장치를 구분합니다.',
+    body: '방화벽은 들어오고 나가는 네트워크 트래픽을 규칙에 따라 허용하거나 차단하는 문지기입니다. VPN은 공용 인터넷 위에 암호화된 전용 터널을 만들어 먼 곳에서도 사내망처럼 안전하게 연결하게 합니다. 하나는 통과 여부를 통제하고, 다른 하나는 통신 경로를 보호합니다. 둘 다 보안에 쓰이지만 역할은 출입 통제와 보호된 이동 통로로 나뉩니다.',
+    keywords: ['방화벽', 'VPN', '차단', '터널'],
+    checkpoint: '방화벽과 VPN의 차이를 차단 규칙과 암호화 터널 관점에서 설명할 수 있다.',
+  },
+  {
+    id: 'ch08_q06',
+    chapterId: 8,
+    chapterTitle: '네트워크와 인터넷',
+    title: 'WebSocket은 왜 실시간 서비스에 자주 쓰일까?',
+    summary: '요청마다 새로 묻는 방식과 연결을 유지하며 양방향으로 주고받는 방식을 비교합니다.',
+    body: '일반적인 HTTP는 보통 요청이 있을 때만 응답이 돌아오는 짧은 왕복에 가깝습니다. WebSocket은 처음 연결을 연 뒤 그 통로를 유지하면서 서버와 클라이언트가 양방향으로 계속 메시지를 주고받을 수 있습니다. 그래서 채팅, 주식 호가, 협업 편집처럼 즉시성이 중요한 서비스에 잘 맞습니다. 핵심은 더 빠른 프로토콜이라기보다 연결을 계속 붙잡아 두는 통신 방식입니다.',
+    keywords: ['WebSocket', 'HTTP', '실시간', '양방향'],
+    checkpoint: 'WebSocket이 HTTP와 다른 점을 연결 유지와 양방향 통신 기준으로 설명할 수 있다.',
+  },
+  {
+    id: 'ch08_q07',
+    chapterId: 8,
+    chapterTitle: '네트워크와 인터넷',
+    title: '네트워크 보안의 기본 원칙은 무엇인가?',
+    summary: '누구인지 확인하고 내용을 숨기고 구역을 나누는 세 축을 중심으로 설명합니다.',
+    body: '네트워크 보안의 기본은 인증, 암호화, 격리입니다. 먼저 누가 접속하는지 확인해야 하고, 지나가는 데이터는 중간에서 읽히지 않도록 암호화해야 하며, 문제가 생겨도 전체로 번지지 않게 구역을 나눠야 합니다. 여기에 최소 권한과 로그 모니터링이 더해지면 피해를 줄이고 추적하기 쉬워집니다. 보안은 한 가지 장비보다 여러 원칙을 겹쳐 두는 층층의 방어에 가깝습니다.',
+    keywords: ['인증', '암호화', '격리', '최소 권한'],
+    checkpoint: '네트워크 보안의 기본 원칙을 인증·암호화·격리 세 축으로 설명할 수 있다.',
+  },
+];
+
 function createPlaceholderQa(chapterId: number, order: number, chapterTitle: string): QaContext {
   const qaId = `ch${String(chapterId).padStart(2, '0')}_q${String(order).padStart(2, '0')}`;
   return {
@@ -219,6 +292,9 @@ export const QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
     }
     if (chapter.id === 7) {
       return CHAPTER_SEVEN_CONTEXTS.find((qa) => qa.id === `ch07_q${String(order).padStart(2, '0')}`) ?? createPlaceholderQa(chapter.id, order, chapter.title);
+    }
+    if (chapter.id === 8) {
+      return CHAPTER_EIGHT_CONTEXTS.find((qa) => qa.id === `ch08_q${String(order).padStart(2, '0')}`) ?? createPlaceholderQa(chapter.id, order, chapter.title);
     }
 
     if (chapter.id === 1 && order === 1) {

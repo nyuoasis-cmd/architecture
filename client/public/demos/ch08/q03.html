@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DNS 조회 경로</title>
+    <style>
+      :root {
+        --bg: #fafafc;
+        --card: #ffffff;
+        --line: #d4d4d8;
+        --text: #18181b;
+        --muted: #71717a;
+        --accent: #7c3aed;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
+      .flow { display: flex; gap: 6px; align-items: stretch; }
+      .node { flex: 1; border: 1px solid var(--line); border-radius: 12px; background: var(--card); padding: 10px 8px; font-size: 11px; line-height: 1.5; text-align: center; }
+      .node.active { border-color: var(--accent); background: #f5f3ff; }
+      .card { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 12px; font-size: 12px; line-height: 1.7; }
+      .note { border-radius: 14px; background: #312e81; color: #eef2ff; padding: 10px 12px; font-size: 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#cache': { active: 0, text: '브라우저와 운영체제는 먼저 로컬 캐시에 같은 도메인의 답이 남아 있는지 확인합니다. 있으면 가장 빨리 끝납니다.' },
+        '#resolver': { active: 1, text: '캐시에 없으면 보통 재귀 DNS 서버에 질문을 보냅니다. 이 서버가 사용자를 대신해 다음 단계를 추적합니다.' },
+        '#root': { active: 2, text: '재귀 서버는 필요하면 루트, 최상위 도메인, 권한 네임서버를 차례로 물어가며 최종 IP 주소를 찾습니다.' },
+        '#answer': { active: 3, text: '최종 주소를 받으면 다시 캐시에 저장해 다음 요청을 더 빠르게 처리합니다. 그래서 DNS는 조회와 캐시가 함께 움직입니다.' },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#cache';
+        const scenario = scenarioMap[hash];
+        const labels = ['로컬 캐시', '재귀 서버', '상위 서버', '최종 응답'];
+        const flow = labels.map((label, idx) => '<div class="node' + (idx === scenario.active ? ' active' : '') + '">' + label + '</div>').join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>DNS 조회 경로</h4>' +
+          '<p class="sub">도메인 이름은 한 번에 마법처럼 바뀌는 것이 아니라, 여러 단계의 질문과 캐시를 거칩니다.</p>' +
+          '<div class="flow">' + flow + '</div>' +
+          '<div class="card">' + scenario.text + '</div>' +
+          '<div class="note">▶ 사람은 이름을 기억하고, 네트워크는 주소를 필요로 합니다. DNS는 그 둘을 이어 주는 전화번호부입니다.</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
