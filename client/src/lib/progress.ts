@@ -89,11 +89,32 @@ export function getAllProgress(): ProgressMap {
   return ensureCache();
 }
 
+function readDevUserId(): string | null {
+  if (typeof window === 'undefined') {
+    return null;
+  }
+  try {
+    const raw = window.localStorage.getItem('architecture-dev-user-v1');
+    if (!raw) {
+      return null;
+    }
+    const value = JSON.parse(raw) as { id?: string };
+    return value?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function syncProgressRemote(qaId: string, payload: { readAt?: string; quizScore?: number }) {
   try {
+    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+    const devId = readDevUserId();
+    if (devId && import.meta.env.DEV) {
+      headers['x-dev-teacher-id'] = devId;
+    }
     await fetch('/api/progress', {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers,
       credentials: 'include',
       body: JSON.stringify({
         qa_id: qaId,
