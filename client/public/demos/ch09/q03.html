@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>패턴 선택판</title>
+    <style>
+      :root {
+        --bg: #fafaf9;
+        --card: #ffffff;
+        --line: #d6d3d1;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --accent: #7c3aed;
+        --soft: #f3e8ff;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); line-height: 1.5; font-size: 12px; }
+      .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .item { border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; background: var(--card); text-align: center; font-size: 11px; line-height: 1.5; }
+      .item.active { border-color: var(--accent); background: var(--soft); }
+      .card { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: var(--card); font-size: 12px; line-height: 1.7; }
+      .note { border-radius: 14px; background: #581c87; color: #faf5ff; padding: 10px 12px; font-size: 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#problem': { active: 0, text: '패턴은 이름부터 외우는 것이 아니라, 반복되는 설계 문제를 먼저 보는 데서 출발합니다.' },
+        '#singleton': { active: 1, text: '싱글톤은 인스턴스를 하나만 두고 공유하고 싶을 때 언급됩니다. 다만 남용하면 테스트와 결합도가 나빠질 수 있습니다.' },
+        '#observer': { active: 2, text: '옵저버는 한쪽 상태 변화가 여러 구독자에게 전파되어야 할 때 잘 맞습니다. 이벤트 알림 구조를 떠올리면 쉽습니다.' },
+        '#factory': { active: 3, text: '팩토리는 객체 생성 책임을 감추고 싶을 때 쓰입니다. 어떤 구체 클래스를 만들지 호출부가 몰라도 되게 돕습니다.' },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#problem';
+        const scene = scenarioMap[hash];
+        const labels = ['문제 먼저', '싱글톤', '옵저버', '팩토리'];
+        const grid = labels.map((label, idx) => '<div class="item' + (idx === scene.active ? ' active' : '') + '">' + label + '</div>').join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>패턴 선택판</h4>' +
+          '<p class="sub">패턴 이름은 외우는 대상보다, 설계 대화를 짧게 만드는 공통 언어에 가깝습니다.</p>' +
+          '<div class="grid">' + grid + '</div>' +
+          '<div class="card">' + scene.text + '</div>' +
+          '<div class="note">▶ 패턴은 멋진 장식이 아니라, 같은 문제를 다시 발명하는 비용을 줄이는 설계 단축어입니다.</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

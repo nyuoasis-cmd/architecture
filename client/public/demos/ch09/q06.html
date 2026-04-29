@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>확장 선택</title>
+    <style>
+      :root {
+        --bg: #fbfbfd;
+        --card: #ffffff;
+        --line: #d4d4d8;
+        --text: #18181b;
+        --muted: #71717a;
+        --accent: #2563eb;
+        --soft: #dbeafe;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); line-height: 1.5; font-size: 12px; }
+      .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .cardbox { border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; background: var(--card); text-align: center; font-size: 11px; line-height: 1.5; }
+      .cardbox.active { border-color: var(--accent); background: var(--soft); }
+      .card { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: var(--card); font-size: 12px; line-height: 1.7; }
+      .note { border-radius: 14px; background: #1d4ed8; color: #dbeafe; padding: 10px 12px; font-size: 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#measure': { active: 0, text: '확장 논의는 먼저 어디가 병목인지 측정하는 데서 출발합니다. CPU, DB, 네트워크 중 어디가 먼저 꽉 차는지 알아야 합니다.' },
+        '#scale-up': { active: 1, text: '수직 확장은 한 대의 서버를 더 강하게 키우는 방식입니다. 빠르지만 결국 한계와 단일 장애점 문제가 남습니다.' },
+        '#scale-out': { active: 2, text: '수평 확장은 같은 역할의 서버를 여러 대로 늘려 요청을 분산합니다. 큰 규모에 유리하지만 분산 설계가 필요합니다.' },
+        '#mix': { active: 3, text: '실무에서는 둘을 섞어 씁니다. 먼저 수직으로 버티다가, 병목이 커지면 수평 확장 구조를 도입하는 식입니다.' },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#measure';
+        const scene = scenarioMap[hash];
+        const labels = ['병목 측정', '수직 확장', '수평 확장', '혼합 전략'];
+        const grid = labels.map((label, idx) => '<div class="cardbox' + (idx === scene.active ? ' active' : '') + '">' + label + '</div>').join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>확장 선택</h4>' +
+          '<p class="sub">확장성은 큰 서버를 사는 문제가 아니라, 성장할 때 어떤 병목을 어떤 방식으로 풀지 결정하는 일입니다.</p>' +
+          '<div class="grid">' + grid + '</div>' +
+          '<div class="card">' + scene.text + '</div>' +
+          '<div class="note">▶ 확장 방식의 정답은 하나가 아니라, 현재 병목과 운영 난이도에 맞는 조합을 찾는 데 있습니다.</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

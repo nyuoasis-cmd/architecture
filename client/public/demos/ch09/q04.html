@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>캐시 위치</title>
+    <style>
+      :root {
+        --bg: #f8fafc;
+        --card: #ffffff;
+        --line: #cbd5e1;
+        --text: #0f172a;
+        --muted: #64748b;
+        --accent: #0284c7;
+        --soft: #e0f2fe;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; background: var(--bg); color: var(--text); }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); line-height: 1.5; font-size: 12px; }
+      .track { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+      .step { border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; background: var(--card); text-align: center; font-size: 11px; line-height: 1.5; }
+      .step.active { border-color: var(--accent); background: var(--soft); }
+      .card { border: 1px solid var(--line); border-radius: 14px; padding: 12px; background: var(--card); font-size: 12px; line-height: 1.7; }
+      .note { border-radius: 14px; background: #0c4a6e; color: #e0f2fe; padding: 10px 12px; font-size: 12px; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#cdn': { active: 0, text: 'CDN 캐시는 정적 파일을 사용자 가까운 거점에 둬 네트워크 왕복 시간을 줄입니다.' },
+        '#app': { active: 1, text: '애플리케이션 메모리 캐시는 자주 보는 설정값이나 계산 결과를 프로세스 가까이에 둡니다.' },
+        '#db': { active: 2, text: 'DB 앞 캐시는 반복 조회를 줄여 원본 데이터베이스 부담을 낮춥니다. 인기 목록, 집계 화면에 자주 쓰입니다.' },
+        '#invalidate': { active: 3, text: '가장 어려운 질문은 언제 캐시를 비울지입니다. TTL 만료와 이벤트 기반 삭제를 상황에 맞게 섞어야 합니다.' },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#cdn';
+        const scene = scenarioMap[hash];
+        const labels = ['CDN', '메모리', 'DB 앞', '무효화'];
+        const steps = labels.map((label, idx) => '<div class="step' + (idx === scene.active ? ' active' : '') + '">' + label + '</div>').join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>캐시 위치</h4>' +
+          '<p class="sub">캐싱은 한 군데 기술이 아니라, 어디서 원본 접근을 줄일지에 대한 층별 전략입니다.</p>' +
+          '<div class="track">' + steps + '</div>' +
+          '<div class="card">' + scene.text + '</div>' +
+          '<div class="note">▶ 캐시는 빠르게 만드는 기술이면서, 잘못 비우면 오래된 값을 보여 주는 위험도 함께 갖습니다.</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
