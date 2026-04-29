@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>공용 게시판 상태실</title>
+    <style>
+      :root { --bg:#f5f8f4; --card:#fff; --text:#203223; --muted:#667a68; --border:#dce8d8; --accent:#4d7c0f; --soft:#ecfccb; }
+      * { box-sizing:border-box; }
+      html, body { margin:0; width:100%; height:100%; background:var(--bg); color:var(--text); font-family:'Pretendard Variable','Noto Sans KR',sans-serif; }
+      body { overflow:hidden; }
+      #app { width:100%; height:100%; overflow-y:auto; }
+      .screen { min-height:100%; padding:16px 14px 22px; }
+      .hero, .board, .log { border:1px solid var(--border); border-radius:18px; background:var(--card); }
+      .hero { padding:16px; background:linear-gradient(135deg,#ecfccb,#ffffff); }
+      .eyebrow { margin:0 0 6px; font-size:11px; color:var(--muted); }
+      h1 { margin:0; font-size:18px; }
+      .summary { margin:8px 0 0; font-size:12px; line-height:1.7; }
+      .board { margin-top:12px; padding:14px; display:grid; gap:10px; }
+      .ticket { padding:12px; border:1px solid var(--border); border-radius:14px; background:#fff; }
+      .ticket.active { border-color:var(--accent); background:var(--soft); }
+      .counter { margin-top:8px; display:flex; gap:8px; }
+      .box { flex:1; padding:8px; border-radius:10px; background:#f8fafc; font-size:11px; text-align:center; }
+      .chips { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+      .chip { padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:#fff; font-size:11px; }
+      .chip.hot { border-color:#bef264; background:var(--soft); color:#3f6212; }
+      .log { margin-top:12px; padding:12px 14px; background:#111827; color:#f8fafc; }
+      .line { font-family:'JetBrains Mono',ui-monospace,monospace; font-size:10px; line-height:1.7; }
+      .time { color:#bef264; margin-right:6px; }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script>
+      const scenes = {
+        '#local': { title:'각자 들고 있을 때 — 숫자가 쉽게 어긋난다', summary:'헤더, 목록, 결제 화면이 각자 장바구니 수량을 따로 들고 있으면 수정 때마다 다른 값이 남을 수 있습니다.', active:0, hot:0, chips:['중복 값', '어긋남', '수정 누락', '혼란'], counters:['헤더 3', '목록 2', '결제 3'], logs:[['14:00:01','item count changed in list'],['14:00:02','header not updated'],['14:00:03','checkout shows stale value']] },
+        '#shared': { title:'공용 상태 두기 — 한 기준점을 공유', summary:'모두가 한 저장소를 바라보면 값이 어디서 바뀌었는지와 무엇을 보여야 하는지가 훨씬 선명해집니다.', active:1, hot:1, chips:['한 기준점', '공유 읽기', '예측 가능', '질서'], counters:['헤더 3', '목록 3', '결제 3'], logs:[['14:00:04','shared store selected'],['14:00:05','all screens subscribed'],['14:00:06','single source aligned']] },
+        '#update': { title:'한 번 바꾸면 함께 반영', summary:'공용 상태에서 수량을 바꾸면 관련 화면들이 같은 최신 값으로 다시 그려집니다.', active:2, hot:2, chips:['한 번 갱신', '동시 반영', '재렌더', '일관성'], counters:['헤더 4', '목록 4', '결제 4'], logs:[['14:00:07','qty increment dispatched'],['14:00:08','header rerendered'],['14:00:09','checkout synced instantly']] },
+        '#tool': { title:'도구 선택 — 문제 크기에 맞춰 고르기', summary:'범위가 작으면 가벼운 방법이 낫고, 화면이 많고 흐름이 복잡하면 더 분명한 규칙이 필요합니다.', active:3, hot:3, chips:['Context', 'Redux', 'Zustand', '범위 맞춤'], counters:['작은 화면', '중간 규모', '복잡한 흐름'], logs:[['14:00:10','simple page used context'],['14:00:11','dashboard used store library'],['14:00:12','choice matched complexity']] },
+      };
+      function render() {
+        const scene = scenes[scenes[location.hash] ? location.hash : '#local'];
+        const tickets = [
+          ['분산 보관', '서로 다른 값'],
+          ['공용 기준', '한 저장소'],
+          ['동시 반영', '같은 최신값'],
+          ['도구 선택', '규모 대응'],
+        ].map((item, index) => '<div class="ticket' + (scene.active === index ? ' active' : '') + '"><strong style="font-size:12px;">' + item[0] + '</strong><div style="font-size:11px;color:var(--muted);margin-top:4px;">' + (scene.active === index ? scene.summary : item[1]) + '</div><div class="counter">' + scene.counters.map((value) => '<div class="box">' + value + '</div>').join('') + '</div></div>').join('');
+        const chips = scene.chips.map((chip, index) => '<span class="chip' + (scene.hot === index ? ' hot' : '') + '">' + chip + '</span>').join('');
+        const logs = scene.logs.map((row) => '<div class="line"><span class="time">' + row[0] + '</span>' + row[1] + '</div>').join('');
+        document.getElementById('app').innerHTML = '<div class="screen"><section class="hero"><p class="eyebrow">State Management</p><h1>' + scene.title + '</h1><p class="summary">' + scene.summary + '</p></section><section class="board">' + tickets + '<div class="chips">' + chips + '</div></section><section class="log"><p class="eyebrow" style="color:#d9f99d;">상태 로그</p>' + logs + '</section></div>';
+      }
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>
