@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>API 요금 계산대</title>
+    <style>
+      :root {
+        --bg: #f8fff8;
+        --card: #ffffff;
+        --border: #d8ead8;
+        --text: #1b2e1b;
+        --muted: #627662;
+        --accent: #4a9d58;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; width: 100%; height: 100%; background: var(--bg); color: var(--text); font-family: 'Pretendard Variable', 'Noto Sans KR', sans-serif; }
+      body { overflow: hidden; }
+      .demo { height: 100%; padding: 18px 16px 16px; display: flex; flex-direction: column; gap: 10px; font-size: 12px; overflow-y: auto; }
+      h4 { margin: 0; font-size: 14px; }
+      .sub { margin: 0; color: var(--muted); line-height: 1.5; }
+      .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+      .card { border: 1px solid var(--border); border-radius: 12px; padding: 10px; background: var(--card); }
+      .card.active { border-color: var(--accent); background: #ecf9ee; }
+      .eyebrow { margin: 0 0 6px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+      .lines { display: flex; flex-direction: column; gap: 6px; }
+      .line { padding: 5px 7px; border-radius: 8px; background: #f1f8f1; }
+      .note { border-radius: 12px; padding: 10px 12px; background: #1b2e1b; color: #f8fff8; line-height: 1.6; }
+    </style>
+  </head>
+  <body>
+    <div id="screen"></div>
+    <script>
+      const scenarioMap = {
+        '#percall': {
+          left: ['요청 1회마다 비용', '짧아도 많이 보내면 누적'],
+          right: ['호출 수 최적화', '불필요한 재시도 줄이기'],
+          note: '호출당 과금은 얼마나 자주 요청을 보내는지가 핵심 비용 변수입니다.',
+        },
+        '#pertoken': {
+          left: ['입력 길이', '출력 길이', '문맥 길이'],
+          right: ['짧고 정확한 프롬프트', '장황한 답변 줄이기'],
+          note: '토큰당 과금은 질문과 답변의 길이가 곧 비용으로 이어집니다.',
+        },
+        '#cache': {
+          left: ['반복 질문 재사용', '중복 호출 감소'],
+          right: ['응답 속도 향상', '비용 절감'],
+          note: '자주 같은 결과가 필요한 경우 캐시를 쓰면 비용과 지연을 함께 줄일 수 있습니다.',
+        },
+        '#batch': {
+          left: ['여러 건 묶기', '요청 수 감소'],
+          right: ['오버헤드 절감', '운영 효율 개선'],
+          note: '배치 처리는 여러 작업을 한 번에 보내 요청 수와 관리 비용을 줄이는 데 도움이 됩니다.',
+        },
+      };
+
+      function render() {
+        const hash = scenarioMap[location.hash] ? location.hash : '#percall';
+        const { left, right, note } = scenarioMap[hash];
+        const lines = (items) => items.map((item) => '<div class="line">' + item + '</div>').join('');
+        document.getElementById('screen').innerHTML =
+          '<div class="demo">' +
+          '<h4>API 요금 계산대</h4>' +
+          '<p class="sub">과금 기준이 호출 수인지, 토큰 수인지에 따라 절감 전략이 달라집니다.</p>' +
+          '<div class="cols">' +
+          '<div class="card active"><p class="eyebrow">비용 요인</p><div class="lines">' + lines(left) + '</div></div>' +
+          '<div class="card"><p class="eyebrow">절감 포인트</p><div class="lines">' + lines(right) + '</div></div>' +
+          '</div>' +
+          '<div class="note">▶ ' + note + '</div>' +
+          '</div>';
+      }
+
+      window.addEventListener('hashchange', render);
+      render();
+    </script>
+  </body>
+</html>

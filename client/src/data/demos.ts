@@ -555,6 +555,90 @@ export const DEMOS: DemoMeta[] = [
       { id: 'serial', label: 'Serializable' },
     ],
   },
+  {
+    qaId: 'ch10_q01',
+    title: '클라우드 책임 층계',
+    url: '/demos/ch10/q01.html',
+    description: 'IaaS, PaaS, SaaS가 책임 경계를 어디서 나누는지 계단처럼 보여줍니다.',
+    scenarios: [
+      { id: 'iaas', label: 'IaaS - 인프라' },
+      { id: 'paas', label: 'PaaS - 실행 기반' },
+      { id: 'saas', label: 'SaaS - 완성 서비스' },
+      { id: 'boundary', label: '책임 경계' },
+    ],
+  },
+  {
+    qaId: 'ch10_q02',
+    title: '컨테이너 표준 상자',
+    url: '/demos/ch10/q02.html',
+    description: '이미지와 컨테이너, 격리와 이동성이 어떻게 연결되는지 보여줍니다.',
+    scenarios: [
+      { id: 'bundle', label: '앱 묶기' },
+      { id: 'image', label: '이미지 설계도' },
+      { id: 'run', label: '실행 컨테이너' },
+      { id: 'share', label: '커널 공유' },
+    ],
+  },
+  {
+    qaId: 'ch10_q03',
+    title: '쿠버네티스 관제실',
+    url: '/demos/ch10/q03.html',
+    description: '복제본 유지, 자동 복구, 스케일링, 롤링 업데이트를 운영 화면처럼 보여줍니다.',
+    scenarios: [
+      { id: 'desired', label: '원하는 상태' },
+      { id: 'heal', label: '자가 복구' },
+      { id: 'scale', label: '자동 확장' },
+      { id: 'rollout', label: '점진 배포' },
+    ],
+  },
+  {
+    qaId: 'ch10_q04',
+    title: 'AI 가족 트리',
+    url: '/demos/ch10/q04.html',
+    description: 'AI 안에 ML, ML 안에 DL이 들어가는 포함 관계를 카드로 설명합니다.',
+    scenarios: [
+      { id: 'ai', label: 'AI 큰 목표' },
+      { id: 'ml', label: 'ML 학습 방식' },
+      { id: 'dl', label: 'DL 신경망' },
+      { id: 'scope', label: '포함 관계' },
+    ],
+  },
+  {
+    qaId: 'ch10_q05',
+    title: 'LLM 다음 토큰 예측기',
+    url: '/demos/ch10/q05.html',
+    description: '문맥, 다음 토큰 예측, 생성 반복, 검증 한계를 흐름으로 보여줍니다.',
+    scenarios: [
+      { id: 'context', label: '문맥 읽기' },
+      { id: 'predict', label: '다음 토큰' },
+      { id: 'repeat', label: '반복 생성' },
+      { id: 'limit', label: '검증 한계' },
+    ],
+  },
+  {
+    qaId: 'ch10_q06',
+    title: 'API 요금 계산대',
+    url: '/demos/ch10/q06.html',
+    description: '호출당 과금과 토큰당 과금, 캐시와 배치 절감을 비교합니다.',
+    scenarios: [
+      { id: 'percall', label: '호출당 과금' },
+      { id: 'pertoken', label: '토큰당 과금' },
+      { id: 'cache', label: '캐시 절감' },
+      { id: 'batch', label: '배치 절감' },
+    ],
+  },
+  {
+    qaId: 'ch10_q07',
+    title: '클라우드 보안 성문',
+    url: '/demos/ch10/q07.html',
+    description: 'IAM, 암호화, 네트워크 격리, 로그 감시를 성문과 구역으로 설명합니다.',
+    scenarios: [
+      { id: 'iam', label: 'IAM 권한' },
+      { id: 'encrypt', label: '암호화' },
+      { id: 'segment', label: '네트워크 격리' },
+      { id: 'monitor', label: '로그 감시' },
+    ],
+  },
 ];
 
 export function getDemoByQaId(qaId: string) {
