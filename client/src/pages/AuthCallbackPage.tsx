@@ -67,9 +67,9 @@ export default function AuthCallbackPage() {
     <>
       <main className="mx-auto flex min-h-[calc(100vh-56px)] w-full max-w-[920px] items-center justify-center px-6 py-10">
         <section className="w-full rounded-[28px] border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">OAuth Callback</p>
-          <h1 className="mt-3 text-3xl font-medium text-stone-950">로그인 정보를 확인하는 중입니다</h1>
-          <p className="mt-4 text-sm leading-7 text-stone-600">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--color-text-quaternary)]">OAuth Callback</p>
+          <h1 className="mt-3 text-3xl font-medium text-[var(--color-text-primary)]">로그인 정보를 확인하는 중입니다</h1>
+          <p className="mt-4 text-sm leading-7 text-[var(--color-text-body)]">
             카카오 인증 결과를 Supabase 세션으로 저장한 뒤 교사 화면으로 이동합니다.
           </p>
           {error ? <p className="mt-5 text-sm text-rose-700">{error}</p> : null}
@@ -77,7 +77,7 @@ export default function AuthCallbackPage() {
       </main>
 
       {showToast ? (
-        <div className="fixed bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-stone-950 px-4 py-2 text-sm text-white shadow-lg">
+        <div className="fixed bottom-6 left-1/2 z-10 -translate-x-1/2 rounded-full bg-[var(--color-btn-primary-hover)] px-4 py-2 text-sm text-white shadow-lg">
           {error
             ? '인증 정보를 확인하지 못했습니다. 잠시 후 다시 시도해주세요.'
             : '인증 처리에 시간이 걸리면 브라우저가 자동으로 이동할 때까지 기다려주세요.'}

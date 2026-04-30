@@ -1,0 +1,51 @@
+{
+  "pr": "#10",
+  "phase": "eval-visual",
+  "round": 2,
+  "model": "codex",
+  "evaluated_commit": "53ebe76add31a7fde5481e5ae435d75feeba2cd8",
+  "screenshots": [
+    "/tmp/arch-pr7-eval-visual-r2/login-desktop.png",
+    "/tmp/arch-pr7-eval-visual-r2/auth-callback-desktop.png",
+    "/tmp/arch-pr7-eval-visual-r2/forbidden-desktop.png",
+    "/tmp/arch-pr7-eval-visual-r2/teacher-redirect-desktop.png",
+    "/tmp/arch-pr7-eval-visual-r2/login-mobile.png",
+    "/tmp/arch-pr7-eval-visual-r2/library-desktop.png",
+    "/tmp/arch-pr7-eval-visual-r2/library-learn-desktop.png"
+  ],
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /login. evaluated_commit 53ebe76에서 pageErrors=0, bodyTextLength=284로 더 이상 흰 화면이 재현되지 않았다. 카카오 노란색 primary와 DEV secondary가 함께 렌더되고 h1='교사로 시작'이 정상 표시됐다. Screenshot: /tmp/arch-pr7-eval-visual-r2/login-desktop.png"
+    },
+    {
+      "id": "V2",
+      "verdict": "REVISE",
+      "evidence": "Desktop 1440x900, /auth/callback. 흰 화면은 사라졌고 h1='로그인 정보를 확인하는 중입니다', 안내 본문, error='OAuth 콜백 토큰을 찾지 못했습니다.'가 정상 렌더됐다. 다만 1.5초 대기 후에도 hasToast=false여서 '1초 이상 머무르면 토스트' 기준은 충족하지 못했다. Screenshot: /tmp/arch-pr7-eval-visual-r2/auth-callback-desktop.png"
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /forbidden. pageErrors=0, bodyTextLength=119이며 403 안내 문구와 CTA 2개('로그인으로 이동', '홈으로 이동')가 모두 렌더됐다. 흰 화면 재현 없음. Screenshot: /tmp/arch-pr7-eval-visual-r2/forbidden-desktop.png"
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /teacher. 미인증 진입 시 최종 URL이 http://127.0.0.1:5176/login?from=%2Fteacher 로 바뀌었고 빈 화면 없이 로그인 화면이 즉시 렌더됐다. pageErrors=0. Screenshot: /tmp/arch-pr7-eval-visual-r2/teacher-redirect-desktop.png"
+    },
+    {
+      "id": "V5",
+      "verdict": "REVISE",
+      "evidence": "Mobile 375x667, /login. pageErrors=0, scrollWidth=clientWidth=375로 가로 스크롤은 없고 텍스트 가독성도 유지됐다. 그러나 카카오 버튼 rect.width=135.39px로 카드 폭을 채우지 않아 '카카오 버튼 풀폭' 기준은 미달이다. Screenshot: /tmp/arch-pr7-eval-visual-r2/login-mobile.png"
+    },
+    {
+      "id": "V6",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /library 및 /library/6/ch06_q03. 두 경로 모두 bodyTextLength>0(/library=405, /library/6/ch06_q03=625), pageErrors=0으로 PR #5/#6 자율학습 화면이 다시 열린다. 라이브러리 목록과 Q&A 본문/시연 패널 텍스트가 실제 렌더에서 확인됐다. Screenshots: /tmp/arch-pr7-eval-visual-r2/library-desktop.png, /tmp/arch-pr7-eval-visual-r2/library-learn-desktop.png"
+    }
+  ],
+  "overall": "REVISE",
+  "summary": "Round 1의 import.meta.env 및 useSyncExternalStore 관련 흰 화면 회귀는 evaluated_commit 53ebe76에서 재현되지 않았다. /login, /forbidden, /teacher redirect, /library 계열은 정상 렌더됐다. 다만 /auth/callback의 1초 토스트 조건과 모바일 /login의 카카오 버튼 풀폭은 아직 기준 미달이다.",
+  "next_action": "Generator 후속 라운드가 있다면 AuthCallbackPage의 장기 대기 토스트 노출 조건과 LoginPage 모바일 CTA 레이아웃(width/full-width) 보완이 필요하다."
+}

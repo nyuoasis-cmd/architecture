@@ -1,0 +1,45 @@
+{
+  "step": "qa-prod-r1",
+  "role": "eval-interaction",
+  "model": "master-direct-curl",
+  "ts": "2026-04-30T07:55:00Z",
+  "verdict": "PASS",
+  "checked": ["I1", "I2", "I3", "I4", "I6", "I7", "I8"],
+  "passed": {
+    "I1_health": "GET /api/health 200 + {status:ok,ts}",
+    "I2_chat_ch01_q01": "POST /api/chat 200 + 4문장 + claude-haiku-4-5-20251001 + cached:false (1차)",
+    "I3_cache_hit": "동일 질문 2회차 cached:true 적중 확인",
+    "I4_chat_ch10_q07": "POST /api/chat 200 + 한글 응답",
+    "I6_quiz_correct": "POST /api/quiz/grade {qaId:ch01_q01,answers:[0,1,0]} score:3 3/3 correct:true",
+    "I7_quiz_wrong": "POST /api/quiz/grade answers:[1,0,1] score:0 3/3 correct:false 해설 반환",
+    "I8_regression_10chapters": "ch01..ch10 각 1건 모두 200 한글 응답 (length 142~270)"
+  },
+  "na_items": [
+    {
+      "id": "I5_quiz_fetch",
+      "reason": "server-side endpoint 없음 — client/src/data/quizzes.ts 정적 데이터 직접 사용. /api/quiz/:qaId GET 라우트 없음.",
+      "actual_routes": ["POST /api/quiz/grade only"]
+    },
+    {
+      "id": "I9_dev_sessions",
+      "reason": "운영 NODE_ENV=production이라 server/src/lib/auth.ts:46 env.NODE_ENV !== development 차단 — 보안상 정상. Bearer Supabase token 필요.",
+      "evidence": "GET /api/sessions with x-dev-teacher-id 헤더 HTTP 401 unauthorized"
+    },
+    { "id": "I10_dev_session_create", "reason": "I9와 동일 — 운영 DEV bypass 차단" },
+    { "id": "I11_progress_sync", "reason": "I9와 동일 — Bearer 또는 participant token 필요" },
+    { "id": "I12_a11y_keyboard", "reason": "T3 Puppeteer 영역 (시각/키보드 navigation)" },
+    { "id": "I13_iframe_sandbox", "reason": "T3 Puppeteer 영역 (콘솔 에러 확인)" },
+    {
+      "id": "I14_kakao_oauth",
+      "reason": "백엔드 라우트 없음. client/src/lib/auth.ts가 supabaseClient.auth.signInWithOAuth({provider:'kakao'}) 호출 — Supabase Auth가 카카오 OAuth URL 생성·redirect.",
+      "evidence": "GET /auth/kakao/start 200 text/html (SPA fallback). server/src/routes/ 어디에도 kakao 라우트 없음."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "handoff_corrections": [
+    "I5: GET /api/quiz/:qaId endpoint 가정 오류 — 클라이언트 정적 데이터로 변경 또는 N/A 표기",
+    "I9~I11: 운영 NODE_ENV=production 환경에서 DEV 헤더 차단됨 — Bearer Supabase 토큰 검증 시나리오 또는 사용자 브라우저 카카오 로그인 후 검증으로 변경",
+    "I14: 백엔드 /auth/kakao/start 라우트 가정 오류 — client signInWithOAuth Supabase 흐름으로 변경"
+  ]
+}

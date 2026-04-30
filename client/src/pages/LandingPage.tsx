@@ -32,11 +32,11 @@ export default function LandingPage() {
       <section className="overflow-hidden rounded-[36px] border border-[var(--color-border)] bg-white shadow-[0_24px_80px_rgba(28,25,23,0.08)]">
         <div className="grid gap-8 px-6 py-8 sm:px-10 sm:py-12 lg:grid-cols-[minmax(0,1.25fr)_320px] lg:items-end">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">Architecture</p>
-            <h1 className="mt-4 max-w-4xl text-4xl font-medium tracking-[-0.04em] text-stone-950 sm:text-5xl lg:text-6xl">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-quaternary)]">Architecture</p>
+            <h1 className="mt-4 max-w-4xl text-4xl font-medium tracking-[-0.04em] text-[var(--color-text-primary)] sm:text-5xl lg:text-6xl">
               책 한 권의 구조를 수업 현장에서 바로 쓰는 IT 입문 플로우로 바꿨습니다.
             </h1>
-            <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-600 sm:text-base">
+            <p className="mt-5 max-w-3xl text-sm leading-7 text-[var(--color-text-body)] sm:text-base">
               알렉의 『기술노트(With 알렉)』에서 영감을 받아 10개 챕터, 71개 Q&amp;A를 교사 세션과 학생
               참여 흐름에 맞게 다시 구성했습니다. 비전공자도 전체 그림을 빠르게 연결하도록 본문, 시연,
               AI 챗봇을 한 화면에 묶었습니다.
@@ -49,10 +49,10 @@ export default function LandingPage() {
                 수업 코드로 참여
               </Link>
             </div>
-            <div className="mt-8 flex flex-wrap gap-3 text-xs text-stone-500 sm:text-sm">
-              <span className="rounded-full bg-stone-100 px-3 py-1.5">10개 챕터</span>
-              <span className="rounded-full bg-stone-100 px-3 py-1.5">71개 Q&amp;A</span>
-              <span className="rounded-full bg-stone-100 px-3 py-1.5">교사 세션 + 학생 참여</span>
+            <div className="mt-8 flex flex-wrap gap-3 text-xs text-[var(--color-text-muted)] sm:text-sm">
+              <span className="rounded-full bg-[var(--color-surface-hover)] px-3 py-1.5">10개 챕터</span>
+              <span className="rounded-full bg-[var(--color-surface-hover)] px-3 py-1.5">71개 Q&amp;A</span>
+              <span className="rounded-full bg-[var(--color-surface-hover)] px-3 py-1.5">교사 세션 + 학생 참여</span>
             </div>
             {!hasSupabaseEnv ? (
               <p className="mt-5 text-sm font-medium text-amber-700">
@@ -61,9 +61,9 @@ export default function LandingPage() {
             ) : null}
           </div>
 
-          <aside className="rounded-[28px] border border-stone-200 bg-[linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-6">
-            <p className="text-sm font-medium text-stone-950">한눈에 보는 수업 흐름</p>
-            <div className="mt-5 space-y-4 text-sm leading-7 text-stone-600">
+          <aside className="rounded-[28px] border border-[var(--color-border)] bg-[linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-6">
+            <p className="text-sm font-medium text-[var(--color-text-primary)]">한눈에 보는 수업 흐름</p>
+            <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--color-text-body)]">
               <p>교사는 대시보드에서 세션을 열고, 학생은 코드로 바로 입장합니다.</p>
               <p>학생 화면은 본문, 시연, 챗봇을 분리하지 않고 같은 학습 맥락으로 연결합니다.</p>
             </div>
@@ -85,16 +85,16 @@ export default function LandingPage() {
             key={step.label}
             className="rounded-[24px] border border-[var(--color-border)] bg-white p-6 shadow-sm"
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-stone-950 text-sm font-semibold text-white">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-btn-primary-hover)] text-sm font-semibold text-white">
               {step.label}
             </div>
-            <h2 className="mt-5 text-lg font-medium text-stone-950">{step.title}</h2>
-            <p className="mt-3 text-sm leading-7 text-stone-600">{step.description}</p>
+            <h2 className="mt-5 text-lg font-medium text-[var(--color-text-primary)]">{step.title}</h2>
+            <p className="mt-3 text-sm leading-7 text-[var(--color-text-body)]">{step.description}</p>
           </article>
         ))}
       </section>
 
-      <footer className="flex flex-col gap-2 rounded-[24px] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-5 py-4 text-sm text-stone-600 sm:flex-row sm:items-center sm:justify-between">
+      <footer className="flex flex-col gap-2 rounded-[24px] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-5 py-4 text-sm text-[var(--color-text-body)] sm:flex-row sm:items-center sm:justify-between">
         <span>architecture.teachermate.co.kr</span>
         <Link className="underline-offset-2 hover:underline" to="/about">
           참고 도서: 알렉 『기술노트(With 알렉)』(2026) — 출처 보기

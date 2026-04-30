@@ -48,16 +48,16 @@ export default function TeacherDashboardPage() {
     <main className="mx-auto w-full max-w-6xl px-6 py-10">
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Teacher Dashboard</p>
-          <h1 className="mt-3 text-4xl font-medium text-stone-950">내 세션 관리</h1>
-          <p className="mt-3 text-sm leading-7 text-stone-600">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--color-text-quaternary)]">Teacher Dashboard</p>
+          <h1 className="mt-3 text-4xl font-medium text-[var(--color-text-primary)]">내 세션 관리</h1>
+          <p className="mt-3 text-sm leading-7 text-[var(--color-text-body)]">
             {(auth.displayName ?? '교사')} 계정의 세션을 관리합니다. 진행 중 세션을 먼저 보여주고, 종료 세션은 아래로
             분리합니다.
           </p>
         </div>
         <div className="flex items-end">
           <button
-            className="inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white"
+            className="inline-flex min-h-11 items-center rounded-2xl bg-[var(--color-btn-primary-hover)] px-5 text-sm font-medium text-white"
             onClick={() => setIsModalOpen(true)}
             type="button"
           >
@@ -70,18 +70,18 @@ export default function TeacherDashboardPage() {
 
       <section className="mt-8">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-stone-900">진행 중</h2>
-          <span className="text-sm text-stone-500">{activeSessions.length}개</span>
+          <h2 className="text-lg font-medium text-[var(--color-text-primary)]">진행 중</h2>
+          <span className="text-sm text-[var(--color-text-muted)]">{activeSessions.length}개</span>
         </div>
         <div className="space-y-4">
           {isLoading ? (
-            <div className="rounded-[24px] border border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
+            <div className="rounded-[24px] border border-[var(--color-border)] bg-white p-5 text-sm text-[var(--color-text-muted)]">
               세션 목록을 불러오는 중입니다.
             </div>
           ) : activeSessions.length > 0 ? (
             activeSessions.map((session) => <SessionCard key={session.id} session={session} />)
           ) : (
-            <div className="rounded-[24px] border border-dashed border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
+            <div className="rounded-[24px] border border-dashed border-[var(--color-border)] bg-white p-5 text-sm text-[var(--color-text-muted)]">
               진행 중 세션이 없습니다. 새 세션을 만들어 수업을 시작하세요.
             </div>
           )}
@@ -90,14 +90,14 @@ export default function TeacherDashboardPage() {
 
       <section className="mt-10">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-stone-900">종료된 세션</h2>
-          <span className="text-sm text-stone-500">{endedSessions.length}개</span>
+          <h2 className="text-lg font-medium text-[var(--color-text-primary)]">종료된 세션</h2>
+          <span className="text-sm text-[var(--color-text-muted)]">{endedSessions.length}개</span>
         </div>
         <div className="space-y-4">
           {endedSessions.length > 0 ? (
             endedSessions.map((session) => <SessionCard key={session.id} session={session} />)
           ) : (
-            <div className="rounded-[24px] border border-dashed border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
+            <div className="rounded-[24px] border border-dashed border-[var(--color-border)] bg-white p-5 text-sm text-[var(--color-text-muted)]">
               종료된 세션이 아직 없습니다.
             </div>
           )}

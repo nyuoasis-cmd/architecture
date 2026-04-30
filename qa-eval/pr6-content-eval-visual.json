@@ -1,0 +1,47 @@
+{
+  "pr": "#17",
+  "scope": "PR #6 content round1",
+  "phase": "eval-visual",
+  "model": "codex",
+  "evaluated_commit": "61c0440",
+  "screenshots": [
+    "/home/claude/architecture/qa-screenshots/pr6-content-r1/V1-library-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr6-content-r1/V2-ch05_q01-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr6-content-r1/V2-ch05_q07-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr6-content-r1/V3-ch05_q04-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr6-content-r1/V4-ch05_q01-quiz.png",
+    "/home/claude/architecture/qa-screenshots/pr6-content-r1/V5-ch05_q07-mobile.png",
+    "/home/claude/architecture/qa-screenshots/pr6-content-r1/V5-ch06-regression-desktop.png"
+  ],
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "Desktop 1280x800, /library. Chapter card 10개가 렌더됐고 ch05 카드 href는 /library/5/ch05_q01, 카드 텍스트는 'Chapter 5 ... 프론트엔드와 백엔드 ... Q&A 7개 ... 진도 0/7'로 확인됐다. 라이브러리 상단 요약도 '10개 챕터, 71개 Q&A.'로 유지됐다. Screenshot: /home/claude/architecture/qa-screenshots/pr6-content-r1/V1-library-desktop.png"
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "ch05_q01~q07를 모두 순회한 결과 7개 문항 전부 제목/본문/키워드/체크포인트가 렌더됐다. 각 문항의 본문 단락 수는 전부 5, 키워드 수는 전부 4였고 '준비중입니다', '콘텐츠 PR에서 연결됩니다', 'placeholder' 매치는 0건이었다. 대표 스크린샷: /home/claude/architecture/qa-screenshots/pr6-content-r1/V2-ch05_q01-desktop.png, /home/claude/architecture/qa-screenshots/pr6-content-r1/V2-ch05_q07-desktop.png"
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "ch05_q01~q07의 PreviewPanel을 모두 확인했다. 7개 문항 모두 시나리오 버튼 4개, 하단 dot 4개, iframe src가 /demos/ch05/q0N.html#<scenario> 형태로 연결됐다. 마지막 시나리오 클릭 후 src hash는 front->scale, html->together, request->stateless, spa-start->mix, local->tool, repeat->team, dev->ship으로 갱신됐다. 대표 스크린샷: /home/claude/architecture/qa-screenshots/pr6-content-r1/V3-ch05_q04-desktop.png"
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "ch05_q01~q07의 퀴즈 탭을 모두 열어 확인했다. 각 문항마다 questionCount=3, optionCounts=[4,4,4]로 21문항이 정상 렌더됐다. 임의 응답 후에는 총점 텍스트와 정답/오답 배지 3개, 해설 박스 3개가 매번 나타났다. 대표 측정값: ch05_q01 scoreText='총점 1 / 3', ch05_q06 scoreText='총점 2 / 3'. Screenshot: /home/claude/architecture/qa-screenshots/pr6-content-r1/V4-ch05_q01-quiz.png"
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "Mobile 375x812, /library/5/ch05_q07. viewport width=375, document scrollWidth=375로 가로 스크롤이 없었고 제목/본문/키워드/하단 네비게이션이 모두 화면 폭 안에 유지됐다. 회귀 확인으로 /library/4/ch04_q07 title='데이터 시각화의 기본 원칙은 무엇인가?', /library/6/ch06_q03 title='프로그램, 프로세스, 프로세서의 차이가 뭔가요?' 가 정상 렌더됐고 두 페이지 모두 시나리오 버튼 4개와 퀴즈 탭을 유지했다. Screenshots: /home/claude/architecture/qa-screenshots/pr6-content-r1/V5-ch05_q07-mobile.png, /home/claude/architecture/qa-screenshots/pr6-content-r1/V5-ch06-regression-desktop.png"
+    }
+  ],
+  "overall": "PASS",
+  "summary": "챕터 5 콘텐츠 7개 문항은 라이브러리 진입, 본문 렌더, 시연 7종, 퀴즈 21문항, 모바일 레이아웃까지 시각 기준을 충족했다. 기존 챕터 4와 챕터 6 학습 화면도 시각 회귀 없이 유지됐다.",
+  "next_action": "Visual 기준에서는 blocking 수정 사항이 없다. T4 Eval-Interaction에서는 self 모드 채팅의 401 콘솔 노이즈나 학습 흐름 상태 저장 같은 기능성 항목만 별도로 보면 된다.",
+  "generated_at": "2026-04-29T00:45:00Z"
+}

@@ -18,8 +18,8 @@ export default function QrInline({ code, size = 132, className }: QrInlineProps)
     >
       <QRCodeSVG bgColor="#ffffff" fgColor="#111827" includeMargin size={size} value={joinUrl} />
       <div className="text-center">
-        <div className="text-[11px] uppercase tracking-[0.18em] text-stone-400">Join URL</div>
-        <div className="mt-1 text-xs text-stone-600">{joinUrl}</div>
+        <div className="text-[11px] uppercase tracking-[0.18em] text-[var(--color-text-quaternary)]">Join URL</div>
+        <div className="mt-1 text-xs text-[var(--color-text-body)]">{joinUrl}</div>
       </div>
     </div>
   );

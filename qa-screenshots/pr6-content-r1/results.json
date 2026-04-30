@@ -1,0 +1,239 @@
+{
+  "base": "http://127.0.0.1:5177",
+  "outDir": "/home/claude/architecture/qa-screenshots/pr6-content-r1",
+  "qas": {
+    "ch05_q01": {
+      "qaId": "ch05_q01",
+      "title": "프론트엔드와 백엔드는 왜 나뉘어 있나?",
+      "paragraphCount": 5,
+      "keywordCount": 4,
+      "checkpoint": "프론트엔드와 백엔드를 얼굴과 규칙의 차이로 설명할 수 있다.",
+      "placeholderMatches": [],
+      "launcherButtons": [
+        "01홀 화면 — 프론트엔드▶",
+        "02주방 규칙 — 백엔드▶",
+        "03주문 약속 — API▶",
+        "04분리의 이점▶"
+      ],
+      "dotCount": 4,
+      "firstSrc": "/demos/ch05/q01.html#front",
+      "lastSrc": "/demos/ch05/q01.html#scale",
+      "questionCount": 3,
+      "optionCounts": [
+        4,
+        4,
+        4
+      ],
+      "scoreText": "총점 1 / 3",
+      "explanationCount": 3,
+      "badgeCount": 3
+    },
+    "ch05_q02": {
+      "qaId": "ch05_q02",
+      "title": "HTML, CSS, JavaScript는 각각 무슨 일을 하나?",
+      "paragraphCount": 5,
+      "keywordCount": 4,
+      "checkpoint": "HTML·CSS·JavaScript를 뼈대·꾸밈·동작으로 구분할 수 있다.",
+      "placeholderMatches": [],
+      "launcherButtons": [
+        "01HTML — 구조 세우기▶",
+        "02CSS — 모양 다듬기▶",
+        "03JS — 반응 붙이기▶",
+        "04셋이 합쳐질 때▶"
+      ],
+      "dotCount": 4,
+      "firstSrc": "/demos/ch05/q02.html#html",
+      "lastSrc": "/demos/ch05/q02.html#together",
+      "questionCount": 3,
+      "optionCounts": [
+        4,
+        4,
+        4
+      ],
+      "scoreText": "총점 1 / 3",
+      "explanationCount": 3,
+      "badgeCount": 3
+    },
+    "ch05_q03": {
+      "qaId": "ch05_q03",
+      "title": "API와 REST는 무엇인가?",
+      "paragraphCount": 5,
+      "keywordCount": 4,
+      "checkpoint": "API와 REST를 창구와 운영 규칙의 차이로 설명할 수 있다.",
+      "placeholderMatches": [],
+      "launcherButtons": [
+        "01요청 보내기▶",
+        "02자원 구분▶",
+        "03메서드 역할▶",
+        "04한 번에 담기▶"
+      ],
+      "dotCount": 4,
+      "firstSrc": "/demos/ch05/q03.html#request",
+      "lastSrc": "/demos/ch05/q03.html#stateless",
+      "questionCount": 3,
+      "optionCounts": [
+        4,
+        4,
+        4
+      ],
+      "scoreText": "총점 1 / 3",
+      "explanationCount": 3,
+      "badgeCount": 3
+    },
+    "ch05_q04": {
+      "qaId": "ch05_q04",
+      "title": "SPA와 SSR은 화면을 보여주는 방식이 어떻게 다른가?",
+      "paragraphCount": 5,
+      "keywordCount": 4,
+      "checkpoint": "SPA와 SSR의 차이를 렌더 시점과 사용자 첫 경험으로 설명할 수 있다.",
+      "placeholderMatches": [],
+      "launcherButtons": [
+        "01SPA 첫 준비▶",
+        "02SPA 이후 이동▶",
+        "03SSR 첫 응답▶",
+        "04혼합 전략▶"
+      ],
+      "dotCount": 4,
+      "firstSrc": "/demos/ch05/q04.html#spa-start",
+      "lastSrc": "/demos/ch05/q04.html#mix",
+      "questionCount": 3,
+      "optionCounts": [
+        4,
+        4,
+        4
+      ],
+      "scoreText": "총점 1 / 3",
+      "explanationCount": 3,
+      "badgeCount": 3
+    },
+    "ch05_q05": {
+      "qaId": "ch05_q05",
+      "title": "상태 관리는 왜 필요한가?",
+      "paragraphCount": 5,
+      "keywordCount": 4,
+      "checkpoint": "상태 관리의 목적을 화면 간 일관성 유지로 설명할 수 있다.",
+      "placeholderMatches": [],
+      "launcherButtons": [
+        "01각자 들고 있기▶",
+        "02공용 상태 두기▶",
+        "03한 번 바꾸기▶",
+        "04도구 선택▶"
+      ],
+      "dotCount": 4,
+      "firstSrc": "/demos/ch05/q05.html#local",
+      "lastSrc": "/demos/ch05/q05.html#tool",
+      "questionCount": 3,
+      "optionCounts": [
+        4,
+        4,
+        4
+      ],
+      "scoreText": "총점 0 / 3",
+      "explanationCount": 3,
+      "badgeCount": 3
+    },
+    "ch05_q06": {
+      "qaId": "ch05_q06",
+      "title": "프레임워크와 라이브러리는 왜 쓰나?",
+      "paragraphCount": 5,
+      "keywordCount": 4,
+      "checkpoint": "프레임워크를 쓰는 이유를 재사용성과 공통 규칙 관점에서 설명할 수 있다.",
+      "placeholderMatches": [],
+      "launcherButtons": [
+        "01반복 공사 줄이기▶",
+        "02컴포넌트 조립▶",
+        "03도구 고르기▶",
+        "04팀 규칙 맞추기▶"
+      ],
+      "dotCount": 4,
+      "firstSrc": "/demos/ch05/q06.html#repeat",
+      "lastSrc": "/demos/ch05/q06.html#team",
+      "questionCount": 3,
+      "optionCounts": [
+        4,
+        4,
+        4
+      ],
+      "scoreText": "총점 2 / 3",
+      "explanationCount": 3,
+      "badgeCount": 3
+    },
+    "ch05_q07": {
+      "qaId": "ch05_q07",
+      "title": "빌드 도구는 무엇을 하나?",
+      "paragraphCount": 5,
+      "keywordCount": 4,
+      "checkpoint": "빌드 도구의 역할을 개발 편의와 배포 최적화로 나눠 설명할 수 있다.",
+      "placeholderMatches": [],
+      "launcherButtons": [
+        "01개발 즉시 반영▶",
+        "02파일 묶기▶",
+        "03최적화▶",
+        "04배포 준비▶"
+      ],
+      "dotCount": 4,
+      "firstSrc": "/demos/ch05/q07.html#dev",
+      "lastSrc": "/demos/ch05/q07.html#ship",
+      "questionCount": 3,
+      "optionCounts": [
+        4,
+        4,
+        4
+      ],
+      "scoreText": "총점 2 / 3",
+      "explanationCount": 3,
+      "badgeCount": 3
+    }
+  },
+  "regressions": {
+    "ch04": {
+      "title": "데이터 시각화의 기본 원칙은 무엇인가?",
+      "scenarioButtons": 4,
+      "hasQuizTab": true,
+      "pageTextLength": 1084
+    },
+    "ch06": {
+      "title": "프로그램, 프로세스, 프로세서의 차이가 뭔가요?",
+      "scenarioButtons": 4,
+      "hasQuizTab": true,
+      "pageTextLength": 591
+    }
+  },
+  "library": {
+    "cardCount": 10,
+    "ch5Href": "/library/5/ch05_q01",
+    "ch5Text": "Chapter 5🧩 프론트엔드와 백엔드Q&A 7개진도 0/7",
+    "h1": "기술노트 아카데미 라이브러리",
+    "summary": "10개 챕터, 71개 Q&A."
+  },
+  "mobile": {
+    "title": "빌드 도구는 무엇을 하나?",
+    "scrollWidth": 375,
+    "clientWidth": 375,
+    "scenarioButtons": 4,
+    "quizTabs": [
+      "📖 학습",
+      "💬 채팅",
+      "📱 시연",
+      "✅ 퀴즈",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "01개발 즉시 반영▶",
+      "02파일 묶기▶",
+      "03최적화▶",
+      "04배포 준비▶",
+      "확인 완료",
+      "다음 →",
+      "전송",
+      "시연",
+      "퀴즈",
+      "↺",
+      "⛶"
+    ]
+  }
+}

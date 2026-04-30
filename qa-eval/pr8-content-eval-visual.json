@@ -1,0 +1,44 @@
+{
+  "pr": "#19",
+  "phase": "eval-visual",
+  "model": "codex",
+  "evaluated_commit": "6310c8c",
+  "screenshots": [
+    "/home/claude/architecture/qa-screenshots/pr8-content/library-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr8-content/ch07-q01-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr8-content/ch07-q01-quiz-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr8-content/ch07-q06-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr8-content/ch07-q06-quiz-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr8-content/ch07-q01-mobile.png"
+  ],
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /library. 챕터 카드 10개가 모두 렌더됐고 chapter 7 카드가 `/library/7/ch07_q01` 로 연결되며 텍스트 `Q&A 6개` 와 `진도 0/6` 를 함께 표시했다. scrollWidth=clientWidth=1440, screenshot=/home/claude/architecture/qa-screenshots/pr8-content/library-desktop.png"
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /library/7/ch07_q01. 좌측 GuidePanel 제목이 `RDBMS와 NoSQL은 무엇이 다른가?`, 단계 점 6개, 시연 런처 4개(`정해진 칸`, `유연한 문서`, `관계 연결`, `분산 확장`)로 렌더됐다. iframe src는 초기 `/demos/ch07/q01.html#schema` 였고 3번째 런처 클릭 후 `/demos/ch07/q01.html#join` 으로 바뀌며 active dot index=2로 동기화됐다. screenshot=/home/claude/architecture/qa-screenshots/pr8-content/ch07-q01-desktop.png"
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "챕터 7의 나머지 학습 라우트 `ch07_q02~q05` 도 모두 정상 렌더됐다. 각 페이지에서 guide title, 본문 길이(bodyLen 991~1200), 시연 런처 4개, iframe src(`/demos/ch07/q02.html#select`, `/q03.html#atomic`, `/q04.html#scan`, `/q05.html#mixed`)가 확인되어 placeholder/404 없이 연결됐다."
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "퀴즈 탭 구조가 콘텐츠 규약과 맞다. `/library/7/ch07_q01` 퀴즈 탭은 3문항, 1번 문항 `RDBMS의 특징으로 가장 알맞은 것은 무엇인가요?`, 선택지 4개, `채점하기` CTA를 렌더했다. `/library/7/ch07_q06` 도 3문항이며 각 문항 선택지 수가 `[4,4,4]` 로 맞았다. screenshots=/home/claude/architecture/qa-screenshots/pr8-content/ch07-q01-quiz-desktop.png, /home/claude/architecture/qa-screenshots/pr8-content/ch07-q06-quiz-desktop.png"
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "모바일 375x667, /library/7/ch07_q01. 상단 탭 `📖 학습 / 💬 채팅 / 📱 시연 / ✅ 퀴즈` 가 한 줄로 유지됐고 scrollWidth=clientWidth=375라 가로 스크롤이 없었다. 직접 연 6개 데모 HTML(`/demos/ch07/q01~q06.html`)도 모두 200 응답, clientWidth=scrollWidth=430으로 프레임 내부 overflow가 없었고 hash별 텍스트가 바뀌었다. 예: `q01.html#schema` 는 `고정 스키마`/`관계형 모델...` 문구, `#document` 는 `문서별 속성 차이 허용`/`NoSQL은...유연하게 대응` 문구로 변했다. screenshot=/home/claude/architecture/qa-screenshots/pr8-content/ch07-q01-mobile.png"
+    }
+  ],
+  "overall": "PASS",
+  "summary": "PR #19의 챕터 7 콘텐츠 시각 검증 범위에서는 6개 Q&A 라우트, 6개 데모 연결, 퀴즈 탭 구조, 모바일 폭이 모두 정상이다. 수집 중 콘솔에 `/api/progress` 401 과 favicon 404 가 보였지만, 챕터 7 콘텐츠 렌더와 데모 시각 품질을 막지는 않았다.",
+  "next_action": "T3 기준 PASS. T4는 채점/챗봇/진도 저장 같은 상호작용 경로를 별도로 검증하면 된다."
+}

@@ -1,0 +1,155 @@
+{
+  "library": {
+    "title": "기술노트 아카데미 라이브러리",
+    "subtitle": "10개 챕터, 71개 Q&A.",
+    "chapter7": {
+      "href": "/library/7/ch07_q01",
+      "text": "Chapter 7🗄️ 데이터베이스Q&A 6개진도 0/6"
+    },
+    "cardCount": 10,
+    "scrollWidth": 1440,
+    "clientWidth": 1440
+  },
+  "q01": {
+    "guideTitle": "RDBMS와 NoSQL은 무엇이 다른가?",
+    "paragraphCount": 8,
+    "firstParagraph": "데이터베이스를 고를 때 이름부터 외우면 비슷해 보이지만, 실제 차이는 데이터를 얼마나 일정한 틀에 넣어 다룰 것인가에서 시작됩니다. RDBMS는 행과 열이 있는 표 구조를 기본으로 삼고, 각 표 사이의 관계를 명확히 정의해 일관성 있게 관리하는 데 강합니다. 반면 NoSQL은 문서, 키-값, 컬럼, 그래프처럼 더 다양한 형태를 허용하며, 구조 변화와 분산 환경에 더 유연하게 대응하는 경우가 많습니다.",
+    "launcherCount": 4,
+    "launchers": [
+      "01정해진 칸▶",
+      "02유연한 문서▶",
+      "03관계 연결▶",
+      "04분산 확장▶"
+    ],
+    "scenarioDotCount": 4,
+    "iframeTitle": "DB 창고 고르기",
+    "iframeSrc": "/demos/ch07/q01.html#schema",
+    "stepCount": 6
+  },
+  "q01AfterClick": {
+    "iframeSrc": "/demos/ch07/q01.html#join",
+    "activeLauncher": "03관계 연결▶",
+    "activeDotIndex": 2
+  },
+  "q01Quiz": {
+    "questionCount": 3,
+    "firstQuestion": "RDBMS의 특징으로 가장 알맞은 것은 무엇인가요?",
+    "optionCountQ1": 4,
+    "gradeButton": "채점하기"
+  },
+  "q06QuizBefore": {
+    "questionCount": 3,
+    "optionCounts": [
+      4,
+      4,
+      4
+    ],
+    "submitDisabled": false
+  },
+  "q06QuizAfter": {
+    "scoreText": null,
+    "explanationCount": 2,
+    "correctnessBadges": []
+  },
+  "mobileQ01": {
+    "scrollWidth": 375,
+    "clientWidth": 375,
+    "tabLabels": [
+      "📖 학습",
+      "💬 채팅",
+      "📱 시연",
+      "✅ 퀴즈"
+    ],
+    "textareaVisible": true
+  },
+  "demos": [
+    {
+      "id": "q01",
+      "sceneButtons": [],
+      "activeScene": null,
+      "bodyText": "DB 창고 고르기 데이터를 얼마나 엄격한 칸에 넣을지에 따라 선택이 달라집니다. RDBMS 고정 스키마 관계/조인 제약 조건 NOSQL 속성 변경 느림 설계 먼저 ▶ RDBMS는 칸과 규칙을 먼저 정해 두고, 그 질서를 오래 유지하는 데 강합니다.",
+      "scrollWidth": 430,
+      "clientWidth": 430,
+      "after": {
+        "activeScene": null,
+        "bodyText": "DB 창고 고르기 데이터를 얼마나 엄격한 칸에 넣을지에 따라 선택이 달라집니다. RDBMS 고정 스키마 관계/조인 제약 조건 NOSQL 속성 변경 느림 설계 먼저 ▶ RDBMS는 칸과 규칙을 먼저 정해 두고, 그 질서를 오래 유지하는 데 강합니다."
+      },
+      "errors": []
+    },
+    {
+      "id": "q02",
+      "sceneButtons": [],
+      "activeScene": null,
+      "bodyText": "SQL 주문서 데이터베이스에 무엇을 하고 싶은지 문장으로 정확히 적어 보냅니다. SELECT INSERT UPDATE DELETE SELECT name FROM students WHERE score >= 90; ▶ 조회는 원하는 열과 조건을 적어 필요한 행만 찾는 작업입니다.",
+      "scrollWidth": 430,
+      "clientWidth": 430,
+      "after": {
+        "activeScene": null,
+        "bodyText": "SQL 주문서 데이터베이스에 무엇을 하고 싶은지 문장으로 정확히 적어 보냅니다. SELECT INSERT UPDATE DELETE SELECT name FROM students WHERE score >= 90; ▶ 조회는 원하는 열과 조건을 적어 필요한 행만 찾는 작업입니다."
+      },
+      "errors": []
+    },
+    {
+      "id": "q03",
+      "sceneButtons": [],
+      "activeScene": null,
+      "bodyText": "ACID 금고 거래가 안전하게 끝나려면 네 가지 약속이 함께 지켜져야 합니다. ACID Atomicity ACID Consistency ACID Isolation ACID Durability ▶ 출금과 입금이 한 묶음으로 움직여, 하나라도 실패하면 전체를 취소합니다.",
+      "scrollWidth": 430,
+      "clientWidth": 430,
+      "after": {
+        "activeScene": null,
+        "bodyText": "ACID 금고 거래가 안전하게 끝나려면 네 가지 약속이 함께 지켜져야 합니다. ACID Atomicity ACID Consistency ACID Isolation ACID Durability ▶ 출금과 입금이 한 묶음으로 움직여, 하나라도 실패하면 전체를 취소합니다."
+      },
+      "errors": []
+    },
+    {
+      "id": "q04",
+      "sceneButtons": [],
+      "activeScene": null,
+      "bodyText": "인덱스 색인대 검색 속도는 어디까지 한 번에 건너뛸 수 있느냐에서 큰 차이가 납니다. 전체 스캔 트리 탐색 범위 검색 유지 비용 인덱스가 없으면 첫 행부터 끝 행까지 하나씩 비교하는 전체 스캔이 일어날 수 있습니다. ▶ 인덱스는 읽기를 빠르게 하지만, 쓰기와 저장 공간에는 추가 비용을 요구합니다.",
+      "scrollWidth": 430,
+      "clientWidth": 430,
+      "after": {
+        "activeScene": null,
+        "bodyText": "인덱스 색인대 검색 속도는 어디까지 한 번에 건너뛸 수 있느냐에서 큰 차이가 납니다. 전체 스캔 트리 탐색 범위 검색 유지 비용 인덱스가 없으면 첫 행부터 끝 행까지 하나씩 비교하는 전체 스캔이 일어날 수 있습니다. ▶ 인덱스는 읽기를 빠르게 하지만, 쓰기와 저장 공간에는 추가 비용을 요구합니다."
+      },
+      "errors": []
+    },
+    {
+      "id": "q05",
+      "sceneButtons": [],
+      "activeScene": null,
+      "bodyText": "정규화 분리함 중복을 줄이면 수정과 삭제 때 생기는 모순도 함께 줄어듭니다. 주문번호 고객명 고객주소 상품명 같은 주소 반복 행마다 중복 ▶ 한 표에 다 넣으면 보기엔 편해도 같은 정보가 여러 줄에 반복되기 쉽습니다.",
+      "scrollWidth": 430,
+      "clientWidth": 430,
+      "after": {
+        "activeScene": null,
+        "bodyText": "정규화 분리함 중복을 줄이면 수정과 삭제 때 생기는 모순도 함께 줄어듭니다. 주문번호 고객명 고객주소 상품명 같은 주소 반복 행마다 중복 ▶ 한 표에 다 넣으면 보기엔 편해도 같은 정보가 여러 줄에 반복되기 쉽습니다."
+      },
+      "errors": []
+    },
+    {
+      "id": "q06",
+      "sceneButtons": [],
+      "activeScene": null,
+      "bodyText": "격리 수준 신호등 정확성을 높일수록 대기와 잠금 비용도 함께 커질 수 있습니다. Read Uncommitted Read Committed Repeatable Read Serializable 아직 확정되지 않은 값을 읽어 버리는 더티 리드는 가장 약한 수준에서 생길 수 있습니다. ▶ 격리 수준은 무조건 최고를 고르는 문제가 아니라, 업무별 정확성과 처리량 사이의 균형을 정하는 선택입니다.",
+      "scrollWidth": 430,
+      "clientWidth": 430,
+      "after": {
+        "activeScene": null,
+        "bodyText": "격리 수준 신호등 정확성을 높일수록 대기와 잠금 비용도 함께 커질 수 있습니다. Read Uncommitted Read Committed Repeatable Read Serializable 아직 확정되지 않은 값을 읽어 버리는 더티 리드는 가장 약한 수준에서 생길 수 있습니다. ▶ 격리 수준은 무조건 최고를 고르는 문제가 아니라, 업무별 정확성과 처리량 사이의 균형을 정하는 선택입니다."
+      },
+      "errors": []
+    }
+  ],
+  "errors": [
+    "console:Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "console:Failed to load resource: the server responded with a status of 400 (Bad Request)",
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)",
+    "console:Failed to load resource: the server responded with a status of 401 (Unauthorized)"
+  ]
+}

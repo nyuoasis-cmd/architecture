@@ -1,0 +1,42 @@
+{
+  "pr": "#12",
+  "phase": "eval-visual",
+  "model": "codex",
+  "evaluated_commit": "1f0454f",
+  "artifacts": {
+    "screenshots_dir": "/tmp/arch-pr8-eval-visual",
+    "results_json": "/tmp/arch-pr8-eval-visual/results.json"
+  },
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /. 히어로 H1이 첫 화면의 대부분을 차지하고 주 CTA 2개가 본문 바로 아래에 좌우 배치됐다. 보조 액션은 우측 요약 카드 안의 2개 링크로 제한되어 BUILDER-UX §9의 집중형 랜딩 구조에 맞는다. screenshot=/tmp/arch-pr8-eval-visual/landing-desktop.png"
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /about. 본문과 운영 메모 모두에서 알렉 『기술노트(With 알렉)』 출처가 명시됐고, AI 운영 정책 카드에 Claude Haiku 4.5와 Anthropic prompt caching, 답변 캐시가 함께 표시된다. screenshot=/tmp/arch-pr8-eval-visual/about-desktop.png"
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900, /random/404. 404 숫자, 미존재 경로 안내 문구, 홈/라이브러리 CTA 2개가 중앙 카드에 선명하게 배치됐다. 공백 화면이나 레이아웃 붕괴 없이 의도한 NotFoundPage가 렌더됐다. screenshot=/tmp/arch-pr8-eval-visual/notfound-desktop.png"
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "Mobile 375x667, /. 두 핵심 CTA가 세로 스택으로 풀폭에 가깝게 렌더됐고 큰 히어로 타이포와 본문 줄간격이 모바일에서도 읽기 어렵지 않았다. document.documentElement.scrollWidth=375, clientWidth=375로 가로 스크롤도 없었다. screenshot=/tmp/arch-pr8-eval-visual/landing-mobile.png"
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "회귀 점검: /teacher는 비인증 상태에서 /login?from=%2Fteacher 로 정상 리다이렉트되어 로그인 카드가 깨지지 않았고, /library는 10개 챕터 카드 그리드를 안정적으로 렌더했으며, /library/6/ch06_q03 학습 화면도 가이드/채팅/시연 3컬럼과 시뮬레이터 iframe이 정상 표시됐다. 세 경로 모두 pageerror 없음. screenshots=/tmp/arch-pr8-eval-visual/teacher-desktop.png, /tmp/arch-pr8-eval-visual/library-desktop.png, /tmp/arch-pr8-eval-visual/learn-desktop.png"
+    }
+  ],
+  "overall": "PASS",
+  "notes": [
+    "Landing desktop 첫 진입 시 console에 404 1건이 있었지만 후속 페이지 재현은 없었고 실제 렌더 결과에는 영향이 없었다.",
+    "평가는 dev 서버 http://localhost:5176 기준 Puppeteer 1440x900, 375x667로 수행했다."
+  ]
+}

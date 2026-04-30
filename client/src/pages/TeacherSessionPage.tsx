@@ -93,7 +93,7 @@ export default function TeacherSessionPage() {
   if (!currentSession || currentSession.id !== id) {
     return (
       <main className="mx-auto w-full max-w-5xl px-6 py-10">
-        <div className="rounded-[24px] border border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
+        <div className="rounded-[24px] border border-[var(--color-border)] bg-white p-5 text-sm text-[var(--color-text-muted)]">
           {error ?? '세션 정보를 불러오는 중입니다.'}
         </div>
       </main>
@@ -110,14 +110,14 @@ export default function TeacherSessionPage() {
     <main className="mx-auto w-full max-w-6xl px-6 py-10">
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-6 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Live Session</p>
-          <h1 className="mt-3 text-4xl font-medium text-stone-950">{currentSession.name}</h1>
-          <p className="mt-3 text-sm text-stone-600">{chapterLabels}</p>
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--color-text-quaternary)]">Live Session</p>
+          <h1 className="mt-3 text-4xl font-medium text-[var(--color-text-primary)]">{currentSession.name}</h1>
+          <p className="mt-3 text-sm text-[var(--color-text-body)]">{chapterLabels}</p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
-            <span className="rounded-[18px] bg-stone-950 px-5 py-3 font-mono text-[32px] tracking-[0.5em] text-white">
+            <span className="rounded-[18px] bg-[var(--color-btn-primary-hover)] px-5 py-3 font-mono text-[32px] tracking-[0.5em] text-white">
               {currentSession.code}
             </span>
-            <span className="rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-600">
+            <span className="rounded-full bg-[var(--color-surface-hover)] px-3 py-1 text-sm text-[var(--color-text-body)]">
               참여자 {participants.length}명
             </span>
           </div>
@@ -152,8 +152,8 @@ export default function TeacherSessionPage() {
 
       <section className="mt-8">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-medium text-stone-900">참여자 진도</h2>
-          <span className="text-sm text-stone-500">총 {totalQas}개 문항</span>
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)]">참여자 진도</h2>
+          <span className="text-sm text-[var(--color-text-muted)]">총 {totalQas}개 문항</span>
         </div>
         <ParticipantList participants={participants} totalQas={totalQas} />
       </section>

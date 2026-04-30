@@ -22,9 +22,9 @@ export default function LoginPage() {
     <main className="mx-auto flex w-full max-w-5xl flex-1 items-center px-4 py-8 sm:px-6 sm:py-12">
       <section className="grid w-full gap-8 rounded-[32px] border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-8 lg:grid-cols-[minmax(0,1.2fr)_380px] lg:p-10">
         <div>
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Teacher Access</p>
-          <h1 className="mt-3 text-4xl font-medium text-stone-950">교사로 시작</h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-stone-600">
+          <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--color-text-quaternary)]">Teacher Access</p>
+          <h1 className="mt-3 text-4xl font-medium text-[var(--color-text-primary)]">교사로 시작</h1>
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-[var(--color-text-body)]">
             카카오 OAuth 또는 개발용 DEV 로그인으로 교사 대시보드에 진입합니다. 로그인 후에는 내 세션 생성,
             진행 현황 확인, 세션 종료까지 같은 계정으로 이어집니다.
           </p>
@@ -51,7 +51,7 @@ export default function LoginPage() {
 
             {isDevBuild ? (
               <Link
-                className="flex w-full min-h-12 items-center justify-center rounded-2xl border border-[var(--color-border)] px-5 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-50 sm:w-auto"
+                className="flex w-full min-h-12 items-center justify-center rounded-2xl border border-[var(--color-border)] px-5 text-sm font-medium text-[var(--color-text-body)] transition hover:border-[var(--color-text-quaternary)] hover:bg-[var(--color-surface-alt)] sm:w-auto"
                 to={`/dev-login?from=${encodeURIComponent(target)}`}
               >
                 DEV 로그인
@@ -65,12 +65,12 @@ export default function LoginPage() {
           ) : null}
         </div>
 
-        <aside className="rounded-[28px] bg-stone-50 p-6">
-          <p className="text-sm font-medium text-stone-900">진입 경로</p>
-          <p className="mt-3 text-sm leading-7 text-stone-600">
-            로그인 완료 후 <span className="font-mono text-stone-900">{target}</span> 로 이동합니다.
+        <aside className="rounded-[28px] bg-[var(--color-surface-alt)] p-6">
+          <p className="text-sm font-medium text-[var(--color-text-primary)]">진입 경로</p>
+          <p className="mt-3 text-sm leading-7 text-[var(--color-text-body)]">
+            로그인 완료 후 <span className="font-mono text-[var(--color-text-primary)]">{target}</span> 로 이동합니다.
           </p>
-          <div className="mt-6 space-y-3 text-sm text-stone-600">
+          <div className="mt-6 space-y-3 text-sm text-[var(--color-text-body)]">
             <p>1. 카카오 OAuth는 Supabase Auth Provider 설정을 사용합니다.</p>
             <p>2. DEV 로그인은 개발 빌드에서만 노출됩니다.</p>
             <p>3. 권한이 없는 세션은 `/forbidden`으로 이동합니다.</p>

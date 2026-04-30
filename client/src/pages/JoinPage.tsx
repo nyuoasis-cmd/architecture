@@ -62,17 +62,17 @@ export default function JoinPage() {
   return (
     <main className="mx-auto flex w-full max-w-lg flex-1 items-center px-6 py-12">
       <section className="w-full rounded-[28px] border border-[var(--color-border)] bg-white p-7 shadow-sm">
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Join Session</p>
-        <h1 className="mt-3 text-3xl font-medium text-stone-950">학생 참여</h1>
-        <p className="mt-3 text-sm leading-7 text-stone-600">교사가 알려준 6자리 코드와 닉네임을 입력하세요.</p>
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-[var(--color-text-quaternary)]">Join Session</p>
+        <h1 className="mt-3 text-3xl font-medium text-[var(--color-text-primary)]">학생 참여</h1>
+        <p className="mt-3 text-sm leading-7 text-[var(--color-text-body)]">교사가 알려준 6자리 코드와 닉네임을 입력하세요.</p>
 
         {banner ? <div className="mt-5 rounded-2xl bg-amber-50 px-4 py-3 text-sm text-amber-800">{banner}</div> : null}
 
         <div className="mt-6 space-y-4">
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-stone-700">6자리 코드</span>
+            <span className="mb-2 block text-sm font-medium text-[var(--color-text-body)]">6자리 코드</span>
             <input
-              className="w-full rounded-2xl border border-[var(--color-border)] bg-stone-50 px-4 py-3 font-mono text-2xl tracking-[0.45em] uppercase outline-none focus:border-stone-400"
+              className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-4 py-3 font-mono text-2xl tracking-[0.45em] uppercase outline-none focus:border-[var(--color-text-quaternary)]"
               maxLength={6}
               onChange={(event) => setCode(event.target.value.toUpperCase())}
               placeholder="ABC123"
@@ -81,9 +81,9 @@ export default function JoinPage() {
           </label>
 
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-stone-700">닉네임</span>
+            <span className="mb-2 block text-sm font-medium text-[var(--color-text-body)]">닉네임</span>
             <input
-              className="w-full rounded-2xl border border-[var(--color-border)] bg-stone-50 px-4 py-3 outline-none focus:border-stone-400"
+              className="w-full rounded-2xl border border-[var(--color-border)] bg-[var(--color-surface-alt)] px-4 py-3 outline-none focus:border-[var(--color-text-quaternary)]"
               maxLength={20}
               onChange={(event) => setNickname(event.target.value)}
               placeholder="예: 3조 민지"
@@ -95,7 +95,7 @@ export default function JoinPage() {
         {error ? <div className="mt-5 text-sm text-rose-600">{error}</div> : null}
 
         <button
-          className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-stone-300"
+          className="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-2xl bg-[var(--color-btn-primary-hover)] px-5 text-sm font-medium text-white disabled:cursor-not-allowed disabled:bg-[var(--color-border-hover)]"
           disabled={isSubmitting}
           onClick={handleSubmit}
           type="button"

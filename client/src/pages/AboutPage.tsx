@@ -23,11 +23,11 @@ export default function AboutPage() {
     <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 px-4 py-8 sm:px-6 sm:py-12">
       <section className="overflow-hidden rounded-[32px] border border-[var(--color-border)] bg-white shadow-sm">
         <div className="bg-[linear-gradient(135deg,#f7f5f1_0%,#ffffff_60%,#ecf7f3_100%)] px-6 py-8 sm:px-10 sm:py-12">
-          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-stone-400">About Architecture</p>
-          <h1 className="mt-3 max-w-3xl text-3xl font-medium tracking-[-0.03em] text-stone-950 sm:text-5xl">
+          <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-quaternary)]">About Architecture</p>
+          <h1 className="mt-3 max-w-3xl text-3xl font-medium tracking-[-0.03em] text-[var(--color-text-primary)] sm:text-5xl">
             책 기반 흐름을 교실에서 바로 쓰는 학습 서비스로 옮겼습니다.
           </h1>
-          <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-600 sm:text-base">
+          <p className="mt-5 max-w-3xl text-sm leading-7 text-[var(--color-text-body)] sm:text-base">
             Architecture는 알렉의 『기술노트(With 알렉)』에서 받은 학습 구조의 영감을 바탕으로,
             교사가 세션을 열고 학생이 코드로 참여해 개념을 빠르게 따라올 수 있게 설계한 서비스입니다.
           </p>
@@ -36,8 +36,8 @@ export default function AboutPage() {
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1.3fr)_minmax(320px,0.7fr)]">
         <article className="rounded-[28px] border border-[var(--color-border)] bg-white p-6 shadow-sm sm:p-8">
-          <h2 className="text-xl font-medium text-stone-950">서비스 정체성</h2>
-          <div className="mt-5 space-y-4 text-sm leading-7 text-stone-600">
+          <h2 className="text-xl font-medium text-[var(--color-text-primary)]">서비스 정체성</h2>
+          <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--color-text-body)]">
             <p>
               학생 화면은 본문, 시연, AI 챗봇을 같은 흐름으로 묶어 비전공자도 개념을 단번에 연결하도록
               구성했습니다. 교사는 세션을 만들고, 학생은 수업 코드로 들어와 같은 챕터를 함께 따라갑니다.
@@ -49,20 +49,20 @@ export default function AboutPage() {
           </div>
         </article>
 
-        <aside className="rounded-[28px] border border-[var(--color-border)] bg-stone-950 p-6 text-stone-50 shadow-sm sm:p-8">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-stone-300">운영 메모</p>
+        <aside className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-btn-primary-hover)] p-6 text-[var(--color-surface-alt)] shadow-sm sm:p-8">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--color-border-hover)]">운영 메모</p>
           <dl className="mt-5 space-y-4 text-sm leading-7">
             <div>
               <dt className="font-medium text-white">책 출처</dt>
-              <dd className="text-stone-300">알렉 『기술노트(With 알렉)』(2026)</dd>
+              <dd className="text-[var(--color-border-hover)]">알렉 『기술노트(With 알렉)』(2026)</dd>
             </div>
             <div>
               <dt className="font-medium text-white">도메인</dt>
-              <dd className="text-stone-300">architecture.teachermate.co.kr</dd>
+              <dd className="text-[var(--color-border-hover)]">architecture.teachermate.co.kr</dd>
             </div>
             <div>
               <dt className="font-medium text-white">문의</dt>
-              <dd className="text-stone-300">hitouchsoft@gmail.com</dd>
+              <dd className="text-[var(--color-border-hover)]">hitouchsoft@gmail.com</dd>
             </div>
           </dl>
         </aside>
@@ -74,15 +74,15 @@ export default function AboutPage() {
             key={item.title}
             className="rounded-[24px] border border-[var(--color-border)] bg-white p-6 shadow-sm"
           >
-            <h2 className="text-base font-medium text-stone-950">{item.title}</h2>
-            <p className="mt-3 text-sm leading-7 text-stone-600">{item.description}</p>
+            <h2 className="text-base font-medium text-[var(--color-text-primary)]">{item.title}</h2>
+            <p className="mt-3 text-sm leading-7 text-[var(--color-text-body)]">{item.description}</p>
           </article>
         ))}
       </section>
 
       <section className="rounded-[28px] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] p-6 sm:p-8">
-        <h2 className="text-xl font-medium text-stone-950">운영 원칙</h2>
-        <div className="mt-5 grid gap-4 text-sm leading-7 text-stone-600 md:grid-cols-2">
+        <h2 className="text-xl font-medium text-[var(--color-text-primary)]">운영 원칙</h2>
+        <div className="mt-5 grid gap-4 text-sm leading-7 text-[var(--color-text-body)] md:grid-cols-2">
           <p>
             챗봇은 rate limit과 캐시 정책을 함께 사용합니다. 같은 질문은 서버 캐시를 먼저 조회하고,
             챕터 단위 프롬프트는 prompt caching으로 반복 비용을 낮춥니다.

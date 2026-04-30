@@ -1,0 +1,60 @@
+{
+  "pr": "#8",
+  "phase": "eval-interaction-round1",
+  "round": 1,
+  "model": "codex",
+  "evaluated_commit": "1f0454f056584254d0eb21217366858fa5f340d7",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "Playwright on http://127.0.0.1:3103/ clicked the landing CTA \"교사로 시작\" and moved to http://127.0.0.1:3103/login. The rendered anchor href was /login, matching the non-authenticated routing contract."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "Playwright on the landing page clicked \"수업 코드로 참여\" and moved to http://127.0.0.1:3103/join. The rendered anchor href was /join."
+    },
+    {
+      "id": "I3",
+      "verdict": "REVISE",
+      "evidence": "Client-side navigation from / to /about works, but direct production navigation fails: Playwright goto(http://127.0.0.1:3103/about) and curl http://127.0.0.1:3103/about both returned plain \"Not Found\" instead of the About page. Also, LandingPage's footer contains only static spans for the source attribution, not a clickable source/about link as requested in HANDOFF §C I3."
+    },
+    {
+      "id": "I4",
+      "verdict": "REVISE",
+      "evidence": "Direct navigation to http://127.0.0.1:3103/random/404path returned Express 404 text \"Not Found\". Playwright saw body text \"Not Found\" rather than the custom NotFoundPage copy and CTAs, so the production 404 route is not wired through the SPA fallback."
+    },
+    {
+      "id": "I5",
+      "verdict": "REVISE",
+      "evidence": "render.yaml is not valid YAML. python3 + yaml.safe_load('render.yaml') raised ParserError at lines 6-8, where buildCommand is split across mis-indented lines. That means Render cannot reliably parse the deployment config even before build/start command validation."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "npm run build completed successfully on detached HEAD. client/dist contains index.html plus hashed JS/CSS assets, server/dist contains index.js and route/data bundles, and curl http://127.0.0.1:3103/ returned index.html referencing /assets/index-TVMfxEgW.js and /assets/index-CDT1mGgg.css. The asset URL itself returned 200."
+    },
+    {
+      "id": "I7",
+      "verdict": "REVISE",
+      "evidence": "Production deep-link regression blocks the broader session/OAuth flows. Direct Playwright loads of /login, /join, and /teacher each rendered plain \"Not Found\" on the production server, so bookmarked links, refreshes, OAuth callback continuations, and public join entry are broken outside client-side in-app navigation. Sample API regressions still looked sane: GET /api/sessions returned 401 {\"error\":\"unauthorized\"}, POST /api/join with code ZZZZZZ returned 404 {\"error\":\"session_not_found\"}, and GET /api/health returned 200 with Cache-Control: no-store."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "Playwright on the landing page found the custom element <teachermate-nav> with attribute active=\"Architecture\". ServiceHeader also injects https://teachermate.co.kr/service-nav.js and sets that active value."
+    }
+  ],
+  "critical_findings": [
+    "Production SPA fallback is broken for direct routes. /about, /login, /join, /teacher, and arbitrary unknown paths return server-side Not Found instead of the React app, which breaks 공개 페이지 deep links and session/OAuth entry on refresh.",
+    "render.yaml is syntactically invalid because buildCommand is split across malformed indentation, so the deployment manifest cannot be trusted by Render."
+  ],
+  "overall": "REVISE",
+  "summary": "Round 1 T4 on detached HEAD 1f0454f is not shippable as-is. Landing CTA clicks and service-nav integration work inside the SPA, and the build artifacts are produced correctly, but production direct-route handling is broken and render.yaml does not parse. Those issues block /about, custom 404, /login, /join, /teacher, and therefore broader PR5/6/7 session and OAuth entry flows after deployment or refresh.",
+  "notes": [
+    "Evaluation used a production-style local server started with NODE_ENV=production PORT=3103 node server/dist/index.js to avoid a port 3003 conflict with another local workspace.",
+    "No code was modified in this T4 session."
+  ],
+  "next_action": "REVISE. Generator should fix production SPA fallback/static routing and repair render.yaml syntax, then rerun T4."
+}

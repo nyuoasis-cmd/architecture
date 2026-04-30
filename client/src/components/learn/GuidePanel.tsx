@@ -63,8 +63,8 @@ export default function GuidePanel({
                 key={sessionChapter.id}
                 className={`rounded-full px-2.5 py-1 text-[11px] ${
                   sessionChapter.id === chapter.id
-                    ? 'bg-stone-950 text-white'
-                    : 'border border-[var(--color-border)] bg-white text-stone-600'
+                    ? 'bg-[var(--color-btn-primary-hover)] text-white'
+                    : 'border border-[var(--color-border)] bg-white text-[var(--color-text-body)]'
                 }`}
                 onClick={() => navigateTo(sessionChapter.firstQaId)}
                 type="button"

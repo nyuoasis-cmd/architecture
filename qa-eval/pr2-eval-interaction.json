@@ -1,0 +1,56 @@
+{
+  "pr": "#2",
+  "phase": "eval-interaction",
+  "model": "codex-gpt-5",
+  "evaluated_commit": "d0fa703",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "FAIL",
+      "evidence": "Detached eval worktree on http://127.0.0.1:5179/library/1/ch01_q01 with a real Supabase session showed localStorage architecture-progress-v1 updated to {\"ch01_q01\":{\"read\":true,...}} after 6.5s, but no /api/progress request was emitted and Supabase architecture_progress remained empty for the authenticated user."
+    },
+    {
+      "id": "I2",
+      "verdict": "FAIL",
+      "evidence": "The same self-mode run graded ch01_q01 at 100% (HTTP 200 from /api/quiz/grade, scoreText '총점 3 / 3'), and localStorage updated to {\"ch01_q01\":{\"read\":true,\"quizScore\":3,...}}, but architecture_progress still had zero rows for the user, so quiz_score=100 was not persisted server-side."
+    },
+    {
+      "id": "I3",
+      "verdict": "FAIL",
+      "evidence": "On /library/1/ch01_q01, clicking the scenario dots triggered a page error: 'Failed to set a named property \"hash\" on \"Location\": Blocked a frame with origin \"http://127.0.0.1:5179\" from accessing a cross-origin frame.' The iframe hash was not readable and the PreviewPanel hash-write path is blocked by the sandboxed opaque origin."
+    },
+    {
+      "id": "I4",
+      "verdict": "FAIL",
+      "evidence": "POST /api/chat with qaId=ch01_q01 and question='비유 더 들어줘' returned 200 in 3357ms, but the answer was a generic multi-paragraph clarification prompt with emoji and bullet list, not a chapter-grounded answer constrained to 4 sentences or fewer."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "Repeating the exact same chat request returned 200 in 117ms with cached=true and the same answer body, confirming the DB cache regression target from PR #5 is still working."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "Detached eval worktree on /library/6/ch06_q03 loaded the expected legacy title, served /demos/ch06/q03.html with HTTP 200, and rendered 12 quiz option buttons (3 questions x 4 choices), so the existing ch06_q03 content path still functions."
+    },
+    {
+      "id": "I7",
+      "verdict": "PASS",
+      "evidence": "npm run build succeeded on detached commit d0fa703, producing client/dist and server/dist. A production server on port 3104 returned index.html for direct route /library/1/ch01_q01 and served /demos/ch01/q01.html with HTTP 200, so the SPA build artifact path is structurally sound."
+    },
+    {
+      "id": "I8",
+      "verdict": "FAIL",
+      "evidence": "chat-service injects getChapterContext(input.qaId) into Anthropic system blocks, but server/src/data/corpus.ts is still empty and server/src/data/chapter-content.ts still defines chapter 1 as count=7 with placeholder QA_CONTEXTS except ch06_q03. The actual chapter 1 bodies from the PR are not present in the chatbot corpus/context source."
+    }
+  ],
+  "critical_findings": [],
+  "code_review_notes": [
+    "I1/I2 are not flaky test artifacts: client/src/pages/LearnPage.tsx only calls markRead() in self mode and only calls patchProgress() in session mode, so authenticated /library progress is intentionally local-only in this commit.",
+    "I3 is a real runtime break, not just a test harness limitation: PreviewPanel writes iframe.contentWindow.location.hash while the iframe uses sandbox='allow-scripts' without allow-same-origin, which makes the frame cross-origin to the parent.",
+    "I8 explains I4's generic answer quality: the chatbot prompt path exists, but the source context for chapter 1 is still placeholder data rather than the authored chapter 1 content."
+  ],
+  "overall": "REVISE",
+  "summary": "T4 on detached commit d0fa703 is not ready to pass. The cache regression target (I5), legacy ch06_q03 path (I6), and build artifacts (I7) are intact, but the self-study progress contract is broken server-side (I1/I2), demo scenario hash switching is blocked by iframe sandboxing (I3), the chatbot response contract is not met for chapter 1 (I4), and the intended chapter 1 corpus/context was not actually wired into the server prompt source (I8)."
+}

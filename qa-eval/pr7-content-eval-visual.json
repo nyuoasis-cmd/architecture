@@ -1,0 +1,47 @@
+{
+  "pr": "#18",
+  "scope": "PR #7 content round1",
+  "phase": "eval-visual",
+  "model": "codex",
+  "evaluated_commit": "2b5d636",
+  "screenshots": [
+    "/home/claude/architecture/qa-screenshots/pr7-content-r1/V1-library-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr7-content-r1/V2-ch06_q01-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr7-content-r1/V2-ch06_q10-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr7-content-r1/V3-ch06_q04-desktop.png",
+    "/home/claude/architecture/qa-screenshots/pr7-content-r1/V4-ch06_q01-quiz.png",
+    "/home/claude/architecture/qa-screenshots/pr7-content-r1/V5-ch06_q10-mobile.png",
+    "/home/claude/architecture/qa-screenshots/pr7-content-r1/V5-ch06_q03-regression-desktop.png"
+  ],
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "Desktop 1280x800, /library. Chapter card 10개가 렌더됐고 ch06 카드 href는 /library/6/ch06_q01, 카드 텍스트는 'Chapter 6 ... 컴퓨터 구조와 운영체제 ... Q&A 10개 ... 진도 0/10'으로 확인됐다. 상단 요약도 '10개 챕터, 71개 Q&A.'를 유지했다. Screenshot: /home/claude/architecture/qa-screenshots/pr7-content-r1/V1-library-desktop.png"
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "ch06_q01~q10을 전수 확인했다. 신규 9개 문항(q01/q02/q04~q10)은 모두 제목/본문/키워드/체크포인트가 렌더됐고 본문 단락 수는 각 5, 키워드 수는 각 4였다. 보존 대상 ch06_q03도 title='프로그램, 프로세스, 프로세서의 차이가 뭔가요?'와 checkpoint를 유지했고 placeholder 문구 매치는 전 문항 0건이었다. 대표 스크린샷: /home/claude/architecture/qa-screenshots/pr7-content-r1/V2-ch06_q01-desktop.png, /home/claude/architecture/qa-screenshots/pr7-content-r1/V2-ch06_q10-desktop.png"
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "ch06_q01~q10의 PreviewPanel을 전수 확인했다. 10개 문항 모두 iframe src가 /demos/ch06/q0N.html#<scenario> 형태로 연결됐고 시나리오 버튼 수와 하단 dot 수가 정확히 일치했다(4개 또는 5개). 마지막 시나리오 클릭 후 hash는 q01=store, q02=tradeoff, q03=kill, q04=levels, q05=resume, q06=illusion, q07=protect, q08=journal, q09=feedback, q10=login으로 갱신됐다. 대표 스크린샷: /home/claude/architecture/qa-screenshots/pr7-content-r1/V3-ch06_q04-desktop.png"
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "ch06_q01~q10의 퀴즈 탭을 전수 확인했다. 각 문항마다 questionCount=3, optionCounts=[4,4,4]로 총 30개 신규 퀴즈와 기존 ch06_q03 퀴즈가 모두 정상 렌더됐다. 임의 응답 후에는 총점 텍스트와 정답/오답 배지, 해설 박스 3개가 매번 노출됐다. 대표 측정값: ch06_q01 scoreText='총점 2 / 3', ch06_q07 scoreText='총점 3 / 3', ch06_q10 scoreText='총점 3 / 3'. Screenshot: /home/claude/architecture/qa-screenshots/pr7-content-r1/V4-ch06_q01-quiz.png"
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "Mobile 375x812, /library/6/ch06_q10. viewport width=375, document scrollWidth=375로 가로 스크롤이 없었고 제목/본문/키워드/하단 네비게이션이 모두 화면 폭 안에 유지됐다. 회귀 확인으로 /library/6/ch06_q03 title='프로그램, 프로세스, 프로세서의 차이가 뭔가요?', scenarioCount=4, quiz questionCount=3이 유지돼 보존 요구를 충족했다. Screenshots: /home/claude/architecture/qa-screenshots/pr7-content-r1/V5-ch06_q10-mobile.png, /home/claude/architecture/qa-screenshots/pr7-content-r1/V5-ch06_q03-regression-desktop.png"
+    }
+  ],
+  "overall": "PASS",
+  "summary": "챕터 6 콘텐츠 round1은 라이브러리 진입, 신규 9개 본문 렌더, 시연 10종, 퀴즈 10세트, 모바일 레이아웃, ch06_q03 보존 회귀까지 시각 기준을 충족했다.",
+  "next_action": "Visual 기준에서 blocking 수정 사항은 없다. 콘솔의 self-mode 401 노이즈는 보였지만 이번 T3 범위의 렌더/레이아웃 회귀로 이어지지는 않았다.",
+  "generated_at": "2026-04-29T00:00:00Z"
+}
