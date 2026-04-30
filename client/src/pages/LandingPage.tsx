@@ -1,105 +1,162 @@
-import { Link } from 'react-router-dom';
+/**
+ * Architecture Academy 랜딩페이지 — 한결 v1.3 정합
+ * mockup: architecture/mockups/hangyeol-landing.html
+ * §9.F.1 hero 6요소 + §9.F.4 결과 서술형
+ * §9-A2 학습형 CTA: Primary "학습 시작하기" / Secondary "이어 학습하기" / Ghost 미적용
+ */
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 
-const hasSupabaseEnv = Boolean(
-  import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY,
-);
-
-const steps = [
-  {
-    label: '1',
-    title: '교사 세션 만들기',
-    description: '교사가 챕터를 고르고 세션을 열면 수업 코드와 QR이 바로 생성됩니다.',
-  },
-  {
-    label: '2',
-    title: '학생 코드 참여',
-    description: '학생은 로그인 없이 닉네임과 수업 코드만으로 같은 학습 화면에 들어옵니다.',
-  },
-  {
-    label: '3',
-    title: 'AI 챗봇 학습',
-    description: '본문과 시연을 본 뒤 AI 챗봇으로 비유 설명을 이어가며 이해를 고정합니다.',
-  },
-];
+const LAST_QA_KEY = 'architecture:last-qa-id';
 
 export default function LandingPage() {
+  const navigate = useNavigate();
   const auth = useAuth();
-  const teacherEntryPath = auth.isAuthenticated ? '/teacher' : '/login';
+
+  const handleStart = () => {
+    // 학생: 라이브러리 진입. 교사: /teacher 진입.
+    navigate(auth.isAuthenticated ? '/teacher' : '/library');
+  };
+
+  const handleResume = () => {
+    // §9-A2.4: 마지막 학습 위치 = localStorage 또는 서버 진도 (현재 localStorage만)
+    const lastQaId = (() => {
+      try {
+        return localStorage.getItem(LAST_QA_KEY);
+      } catch {
+        return null;
+      }
+    })();
+    if (lastQaId) {
+      // ch01_q01 형식 → /library/1/ch01_q01
+      const match = lastQaId.match(/^ch(\d{2})_q(\d{2})$/);
+      if (match) {
+        const chapter = String(parseInt(match[1], 10));
+        navigate(`/library/${chapter}/${lastQaId}`);
+        return;
+      }
+    }
+    navigate('/library');
+  };
+
+  const hasResume = (() => {
+    try {
+      return Boolean(localStorage.getItem(LAST_QA_KEY));
+    } catch {
+      return false;
+    }
+  })();
 
   return (
-    <main className="mx-auto flex w-full max-w-6xl flex-1 flex-col gap-6 px-4 py-8 sm:px-6 sm:py-12">
-      <section className="overflow-hidden rounded-[36px] border border-[var(--color-border)] bg-white shadow-[0_24px_80px_rgba(28,25,23,0.08)]">
-        <div className="grid gap-8 px-6 py-8 sm:px-10 sm:py-12 lg:grid-cols-[minmax(0,1.25fr)_320px] lg:items-end">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--color-text-quaternary)]">Architecture</p>
-            <h1 className="mt-4 max-w-4xl text-4xl font-medium tracking-[-0.04em] text-[var(--color-text-primary)] sm:text-5xl lg:text-6xl">
-              책 한 권의 구조를 수업 현장에서 바로 쓰는 IT 입문 플로우로 바꿨습니다.
-            </h1>
-            <p className="mt-5 max-w-3xl text-sm leading-7 text-[var(--color-text-body)] sm:text-base">
-              알렉의 『기술노트(With 알렉)』에서 영감을 받아 10개 챕터, 71개 Q&amp;A를 교사 세션과 학생
-              참여 흐름에 맞게 다시 구성했습니다. 비전공자도 전체 그림을 빠르게 연결하도록 본문, 시연,
-              AI 챗봇을 한 화면에 묶었습니다.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link className="primary-button sm:min-w-[180px]" to={teacherEntryPath}>
-                교사로 시작
-              </Link>
-              <Link className="secondary-link sm:min-w-[180px]" to="/join">
-                수업 코드로 참여
-              </Link>
-            </div>
-            <div className="mt-8 flex flex-wrap gap-3 text-xs text-[var(--color-text-muted)] sm:text-sm">
-              <span className="rounded-full bg-[var(--color-surface-hover)] px-3 py-1.5">10개 챕터</span>
-              <span className="rounded-full bg-[var(--color-surface-hover)] px-3 py-1.5">71개 Q&amp;A</span>
-              <span className="rounded-full bg-[var(--color-surface-hover)] px-3 py-1.5">교사 세션 + 학생 참여</span>
-            </div>
-            {!hasSupabaseEnv ? (
-              <p className="mt-5 text-sm font-medium text-amber-700">
-                VITE_SUPABASE_URL 또는 VITE_SUPABASE_ANON_KEY가 비어 있어 교사 로그인은 아직 동작하지 않습니다.
-              </p>
-            ) : null}
-          </div>
+    <main
+      className="flex flex-col items-center justify-center"
+      style={{
+        minHeight: 'calc(100vh - 56px)',
+        padding: '64px 32px',
+        background: 'var(--color-surface)',
+        textAlign: 'center',
+      }}
+    >
+      <div className="w-full" style={{ maxWidth: '880px' }}>
 
-          <aside className="rounded-[28px] border border-[var(--color-border)] bg-[linear-gradient(180deg,#fafaf9_0%,#f5f5f4_100%)] p-6">
-            <p className="text-sm font-medium text-[var(--color-text-primary)]">한눈에 보는 수업 흐름</p>
-            <div className="mt-5 space-y-4 text-sm leading-7 text-[var(--color-text-body)]">
-              <p>교사는 대시보드에서 세션을 열고, 학생은 코드로 바로 입장합니다.</p>
-              <p>학생 화면은 본문, 시연, 챗봇을 분리하지 않고 같은 학습 맥락으로 연결합니다.</p>
-            </div>
-            <div className="mt-6 flex flex-col gap-3">
-              <Link className="secondary-link" to="/about">
-                서비스와 정책 보기
-              </Link>
-              <Link className="secondary-link" to="/library">
-                라이브러리 둘러보기
-              </Link>
-            </div>
-          </aside>
+        {/* 1. 영문 라벨 (§9.C-5) */}
+        <div
+          style={{
+            fontSize: '13px',
+            fontWeight: 700,
+            letterSpacing: '0.08em',
+            textTransform: 'uppercase',
+            color: 'var(--color-text-muted)',
+            marginBottom: '24px',
+            wordBreak: 'keep-all',
+          }}
+        >
+          ARCHITECTURE ACADEMY
         </div>
-      </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
-        {steps.map((step) => (
-          <article
-            key={step.label}
-            className="rounded-[24px] border border-[var(--color-border)] bg-white p-6 shadow-sm"
+        {/* 2. Hero 제목 — 결과 서술형 (§9.F.4) */}
+        <h1
+          style={{
+            fontFamily: 'var(--font-heading, var(--font-body))',
+            fontSize: 'clamp(48px, 7vw, 88px)',
+            fontWeight: 600,
+            letterSpacing: '-0.025em',
+            lineHeight: 1.05,
+            color: 'var(--color-text-primary)',
+            wordBreak: 'keep-all',
+            marginBottom: '28px',
+          }}
+        >
+          낯선 IT 용어가<br />
+          한눈에 들어오는 지도가 됩니다.
+        </h1>
+
+        {/* 3. 캡션 */}
+        <p
+          style={{
+            fontSize: '18px',
+            fontWeight: 400,
+            lineHeight: 1.55,
+            color: 'var(--color-text-body)',
+            maxWidth: '640px',
+            wordBreak: 'keep-all',
+            margin: '0 auto 56px',
+          }}
+        >
+          71개의 질문과 답으로 만든 학습 코스. 비전공자도 컴퓨터 · 개발 · 데이터베이스 · 네트워크 · 아키텍처를 한 흐름으로 이해해요.
+        </p>
+
+        {/* 4. CTA Cluster — Secondary 왼쪽 / Primary 오른쪽 (§9-A2.3) */}
+        <div
+          className="flex flex-col sm:flex-row gap-3 justify-center"
+          role="group"
+          aria-label="학습 시작 또는 이어 학습하기"
+        >
+          {hasResume && (
+            <button
+              type="button"
+              onClick={handleResume}
+              data-cta="secondary"
+              className="cursor-pointer transition-colors"
+              style={{
+                height: '56px',
+                padding: '0 32px',
+                background: 'var(--color-surface)',
+                color: 'var(--color-text-body)',
+                border: '1px solid var(--color-border)',
+                borderRadius: 'var(--radius-btn-landing, 9999px)',
+                fontSize: '16px',
+                fontWeight: 600,
+                letterSpacing: '-0.005em',
+              }}
+            >
+              이어 학습하기
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={handleStart}
+            data-cta="primary"
+            className="cursor-pointer transition-colors"
+            style={{
+              height: '56px',
+              padding: '0 32px',
+              background: 'var(--color-btn-primary, var(--color-text-primary))',
+              color: 'var(--color-surface)',
+              border: 'none',
+              borderRadius: 'var(--radius-btn-landing, 9999px)',
+              fontSize: '16px',
+              fontWeight: 600,
+              letterSpacing: '-0.005em',
+            }}
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-[var(--color-btn-primary-hover)] text-sm font-semibold text-white">
-              {step.label}
-            </div>
-            <h2 className="mt-5 text-lg font-medium text-[var(--color-text-primary)]">{step.title}</h2>
-            <p className="mt-3 text-sm leading-7 text-[var(--color-text-body)]">{step.description}</p>
-          </article>
-        ))}
-      </section>
+            학습 시작하기
+          </button>
+        </div>
 
-      <footer className="flex flex-col gap-2 rounded-[24px] border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-5 py-4 text-sm text-[var(--color-text-body)] sm:flex-row sm:items-center sm:justify-between">
-        <span>architecture.teachermate.co.kr</span>
-        <Link className="underline-offset-2 hover:underline" to="/about">
-          참고 도서: 알렉 『기술노트(With 알렉)』(2026) — 출처 보기
-        </Link>
-      </footer>
+        {/* 5. Ghost CTA: §9-A2 학습형은 Ghost 미적용 */}
+
+      </div>
     </main>
   );
 }
