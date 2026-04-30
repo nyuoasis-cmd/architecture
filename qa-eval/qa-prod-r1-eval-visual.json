@@ -1,0 +1,84 @@
+{
+  "step": "qa-prod-r1",
+  "phase": "eval-visual",
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-50",
+  "target_url": "https://architecture.teachermate.co.kr",
+  "branch": "codex/qa-prod-r1-eval-visual",
+  "evaluated_commit": "6c5116fac2e31ec318ec73a1d97e2d3f2cab2b8e",
+  "evaluated_at": "2026-04-30T07:55:36Z",
+  "verdict": "REVISE",
+  "checked": [
+    "V1",
+    "V2",
+    "V3",
+    "V4",
+    "V5",
+    "V6",
+    "V7",
+    "V8"
+  ],
+  "fail_items": [],
+  "revise_items": [
+    "V1",
+    "V2",
+    "V5",
+    "V6",
+    "V8"
+  ],
+  "screenshots": [
+    "screenshots/v1-landing-desktop.png",
+    "screenshots/v2-library-desktop.png",
+    "screenshots/v4-ch01-q01-desktop.png",
+    "screenshots/v4-ch05-q01-desktop.png",
+    "screenshots/v4-ch10-q01-desktop.png",
+    "screenshots/v5-ch08-q01-desktop.png",
+    "screenshots/v6-library-mobile.png",
+    "screenshots/v6-ch01-q01-mobile.png"
+  ],
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "REVISE",
+      "evidence": "GET / = 200, but desktop header/nav links rendered as 0 instead of the expected 7 tabs. Footer source text is present. Screenshot: screenshots/v1-landing-desktop.png"
+    },
+    {
+      "id": "V2",
+      "verdict": "REVISE",
+      "evidence": "/library shows the summary line '10개 챕터, 71개 Q&A' but only 10 linked cards render, one per chapter start page. Distinct Q&A cards rendered on the page: 10, not 71. Screenshot: screenshots/v2-library-desktop.png"
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "/about includes 알렉, 영감, and 출처 wording in the rendered content."
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "Preview tab loads demo iframes successfully for all sampled pages: ch01_q01 -> /demos/ch01/q01.html#input (200), ch05_q01 -> /demos/ch05/q01.html#front (200), ch10_q01 -> /demos/ch10/q01.html#iaas (200). Chat panel and quiz tab are also present. Screenshots: screenshots/v4-ch01-q01-desktop.png, screenshots/v4-ch05-q01-desktop.png, screenshots/v4-ch10-q01-desktop.png"
+    },
+    {
+      "id": "V5",
+      "verdict": "REVISE",
+      "evidence": "ch08_q01 preview tab does not load an iframe. iframeCount=0 and the page falls back to '이 문항의 시연은 콘텐츠 PR에서 연결됩니다.', so scenario switching for IP/TCP/UDP cannot be exercised. Screenshot: screenshots/v5-ch08-q01-desktop.png"
+    },
+    {
+      "id": "V6",
+      "verdict": "REVISE",
+      "evidence": "Mobile 375x667 has horizontal overflow 0 on /library and /library/1/ch01_q01, and no obvious text clipping was observed. However, no fixed chatbot FAB is rendered on the mobile learn page. Screenshots: screenshots/v6-library-mobile.png, screenshots/v6-ch01-q01-mobile.png"
+    },
+    {
+      "id": "V7",
+      "verdict": "PASS",
+      "evidence": "No dark/light toggle was rendered in the inspected production UI, so there was no toggle-specific contrast regression to report."
+    },
+    {
+      "id": "V8",
+      "verdict": "REVISE",
+      "evidence": "Radii are present (primary CTA 10px, library cards 12px), but expected shadow treatment is missing: landing primary button boxShadow='none', library card boxShadow='none' before hover and after hover."
+    }
+  ],
+  "summary": "Production visual QA on 2026-04-30 found the sampled learning pages largely readable and the sampled demo iframes working for ch01/ch05/ch10, but the landing header, library card rendering, ch08_q01 preview, mobile chatbot FAB, and shadow treatment need follow-up.",
+  "next_action": "Hotfix visual follow-up should restore the desktop header tabs, decide whether /library must expose all 71 Q&A cards, wire ch08_q01 preview content, add the expected mobile chatbot FAB, and align button/card shadow treatment with the design policy."
+}
