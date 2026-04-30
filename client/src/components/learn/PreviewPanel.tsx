@@ -80,7 +80,7 @@ export default function PreviewPanel({
             className="rounded-md px-3 py-1 text-xs font-medium"
             onClick={() => setPreviewTab('demo')}
             style={{
-              background: isDemo ? '#f5f5f4' : 'transparent',
+              background: isDemo ? 'var(--color-surface-hover)' : 'transparent',
               color: isDemo ? 'var(--color-text-primary)' : 'var(--color-text-muted)',
             }}
             type="button"
@@ -91,7 +91,7 @@ export default function PreviewPanel({
             className="rounded-md px-3 py-1 text-xs font-medium"
             onClick={() => setPreviewTab('quiz')}
             style={{
-              background: isDemo ? 'transparent' : '#f5f5f4',
+              background: isDemo ? 'transparent' : 'var(--color-surface-hover)',
               color: isDemo ? 'var(--color-text-muted)' : 'var(--color-text-primary)',
             }}
             type="button"

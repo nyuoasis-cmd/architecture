@@ -21,7 +21,7 @@ type GradeResult = {
 const OPTION_LABELS = ['A', 'B', 'C', 'D'] as const;
 const CORRECT_INDEX_KEY = ['correct', 'Idx'].join('');
 const baseBorder = { borderWidth: '1px', borderColor: 'var(--color-border)', borderStyle: 'solid' as const };
-const correctBorder = { borderWidth: '2px', borderColor: '#10b981', borderStyle: 'solid' as const };
+const correctBorder = { borderWidth: '2px', borderColor: 'var(--color-success)', borderStyle: 'solid' as const };
 const wrongBorder = { borderWidth: '2px', borderColor: '#ef4444', borderStyle: 'solid' as const };
 
 export default function QuizTab({ qaId, onScore }: QuizTabProps) {

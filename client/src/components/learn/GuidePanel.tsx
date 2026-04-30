@@ -158,7 +158,7 @@ export default function GuidePanel({
             <span
               key={keyword}
               className="rounded px-1.5 py-0.5 text-[10px]"
-              style={{ background: '#f5f5f4', color: 'var(--color-text-muted)' }}
+              style={{ background: 'var(--color-surface-hover)', color: 'var(--color-text-muted)' }}
             >
               {keyword}
             </span>
