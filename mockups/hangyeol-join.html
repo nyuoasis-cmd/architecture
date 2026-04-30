@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — 한결 v1 학생 참여 목업 (2단계)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --color-text-primary: #1c1917;
+    --color-text-body: #57534e;
+    --color-text-muted: #78716c;
+    --color-text-quaternary: #a8a29e;
+    --color-border: #e7e5e4;
+    --color-border-hover: #d6d3d1;
+    --color-surface: #ffffff;
+    --color-surface-alt: #fafaf9;
+    --color-surface-hover: #f5f5f4;
+    --color-btn-primary: #1c1917;
+    --color-btn-primary-hover: #292524;
+    --color-success: #10b981;
+    --color-info: #0ea5e9;
+    --color-focus-ring: #0ea5e9;
+    --color-accent-mint: #C9E0D4;
+
+    --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Noto Sans KR', system-ui, sans-serif;
+    --font-heading: var(--font-body);
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    --radius-card-workspace: 12px;
+    --radius-btn-workspace: 10px;
+    --radius-input: 10px;
+
+    --type-page-title-size: 28px;
+    --type-body-workspace-size: 14px;
+    --type-meta-size: 13px;
+
+    --ease-smooth: cubic-bezier(.2, .8, .2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: var(--font-body); }
+  body {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.7;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 1024px) { body { font-weight: 300; } }
+
+  .join-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 24px;
+  }
+  .join-card {
+    width: 100%;
+    max-width: 384px;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .join-icon-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: var(--color-accent-mint);
+    color: #2d4a3e;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+  }
+  .join-title {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+  }
+  @media (min-width: 768px) {
+    .join-title { font-size: 32px; }
+  }
+  .join-subtitle {
+    font-size: var(--type-body-workspace-size);
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin-bottom: 32px;
+    word-break: keep-all;
+  }
+
+  /* Step 1 코드 입력 */
+  .code-input {
+    width: 100%;
+    height: 56px;
+    min-height: 56px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-input);
+    background: var(--color-surface);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 32px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.25em;
+    color: var(--color-text-primary);
+    outline: none;
+    transition: border-color 150ms var(--ease-smooth);
+    margin-bottom: 16px;
+  }
+  .code-input::placeholder { color: var(--color-text-quaternary); }
+  .code-input:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--color-focus-ring);
+  }
+
+  .name-input {
+    width: 100%;
+    max-width: 320px;
+    height: 48px;
+    margin: 0 auto 12px;
+    padding: 0 16px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-input);
+    background: var(--color-surface);
+    font-family: var(--font-body);
+    font-size: 16px;
+    color: var(--color-text-primary);
+    outline: none;
+    transition: border-color 150ms var(--ease-smooth);
+  }
+  .name-input:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--color-focus-ring);
+  }
+
+  .btn-primary {
+    width: 100%;
+    height: 48px;
+    border-radius: var(--radius-btn-workspace);
+    background: var(--color-btn-primary);
+    color: var(--color-surface);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: background 150ms var(--ease-smooth);
+  }
+  .btn-primary:hover { background: var(--color-btn-primary-hover); }
+  .btn-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .ghost-link {
+    margin-top: 16px;
+    background: none;
+    border: none;
+    font-size: var(--type-meta-size);
+    color: var(--color-text-muted);
+    cursor: pointer;
+    text-decoration: none;
+    padding: 8px;
+  }
+  .ghost-link:hover { color: var(--color-text-primary); }
+
+  .helper {
+    font-size: 12px;
+    color: var(--color-text-quaternary);
+    margin-top: 8px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+
+  /* Step 디비전 */
+  .step-divider {
+    margin: 80px 0;
+    border: 0;
+    border-top: 1px dashed var(--color-border);
+  }
+  .step-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-quaternary);
+    letter-spacing: 0.08em;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+
+  /* Step 3 완료 */
+  .complete-icon-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #ecfdf5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 24px;
+  }
+  .complete-greeting {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .complete-subtitle {
+    font-size: var(--type-body-workspace-size);
+    color: var(--color-text-muted);
+  }
+
+  /* Container — 3 steps stacked for review */
+  .review-container {
+    max-width: 384px;
+    margin: 0 auto;
+    padding: 64px 24px;
+  }
+  .review-container .join-card {
+    margin-bottom: 0;
+  }
+</style>
+</head>
+<body>
+
+<main class="review-container" role="main">
+
+  <!-- ==== Step 1: 코드 입력 ==== -->
+  <div class="step-label">STEP 1 / 코드 입력</div>
+  <div class="join-card" aria-label="참여 코드 입력">
+    <h1 class="join-title">수업 참여하기</h1>
+    <p class="join-subtitle">선생님이 알려준 6자리 코드를 입력하세요</p>
+
+    <input class="code-input" type="text" maxlength="6" inputmode="text" autocapitalize="characters" placeholder="ABC123" aria-label="참여 코드 6자리" />
+    <p class="helper" role="status">숫자와 영문 대문자만 입력해요</p>
+
+    <button class="btn-primary" type="button">참여하기</button>
+    <button class="ghost-link" type="button">돌아가기</button>
+  </div>
+
+  <hr class="step-divider" aria-hidden="true">
+
+  <!-- ==== Step 2: 이름 입력 ==== -->
+  <div class="step-label">STEP 2 / 이름 입력</div>
+  <div class="join-card" aria-label="이름 입력">
+    <div class="join-icon-badge" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21 C4 16.5 7.5 14 12 14 C16.5 14 20 16.5 20 21"/></svg>
+    </div>
+    <h1 class="join-title">이름을 알려주세요</h1>
+    <p class="join-subtitle">선생님이 누가 만들었는지 알 수 있어요</p>
+
+    <input class="name-input" type="text" placeholder="이름을 입력하세요" aria-label="학생 이름" />
+    <button class="btn-primary" type="button" style="max-width:320px;margin:8px auto 0;">참여하기</button>
+    <button class="ghost-link" type="button">돌아가기</button>
+  </div>
+
+  <hr class="step-divider" aria-hidden="true">
+
+  <!-- ==== Step 3: 완료 ==== -->
+  <div class="step-label">STEP 3 / 완료 (1.2초 후 자동 이동)</div>
+  <div class="join-card" aria-label="참여 완료">
+    <div class="complete-icon-badge" aria-hidden="true">
+      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--color-success)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12 L10 17 L20 7"/></svg>
+    </div>
+    <div class="complete-greeting">지우님, 시작해볼까요</div>
+    <div class="complete-subtitle">잠시 후 이동해요</div>
+  </div>
+
+</main>
+
+</body>
+</html>

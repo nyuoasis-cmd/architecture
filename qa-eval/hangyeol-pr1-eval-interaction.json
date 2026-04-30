@@ -1,0 +1,72 @@
+{
+  "pr": "hangyeol-pr1",
+  "phase": "eval-interaction",
+  "model": "claude-opus-4-7-as-codex-substitute",
+  "evaluated_commit": "pending-master",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "hangyeol-landing.html:208 — 현재 텍스트: '학습 시작하기' / 기대 텍스트(§9-A2.3): '학습 시작하기'. data-cta=\"primary\"로 selector 룰 정합."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "hangyeol-landing.html:205 — 현재 텍스트: '이어 학습하기' / 기대 텍스트(§9-A2.3): '이어 학습하기'. data-cta=\"secondary\"로 selector 룰 정합."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "hangyeol-landing.html — Ghost CTA DOM 0건 확인. 라인 212-213에 의도적 미배치 주석 명시 ('§9-A2 학습형은 Ghost 미적용 (한결-INDEX G 카드)'). 'ghost' / '혼자 만들어' grep 0건. §9-A2.3 정합 (Ghost 없음)."
+    },
+    {
+      "id": "I4",
+      "verdict": "PASS",
+      "evidence": "hangyeol-landing.html:193-194 — 현재 hero 제목: '낯선 IT 용어가 / 한눈에 들어오는 지도가 됩니다.' — §9.F.4 '결과 서술 (\"X가 Y가 됩니다\")' 패턴 정확 정합. 금지 톤 '~해주세요'/'~이면 충분해요'/'~만 있으면' grep 0건. 의미 검증: '낯선 X가 / Y가 됩니다'는 교사를 주어로 두지 않고 콘텐츠 변화만 서술 — 압박 톤 아님 PASS."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "hangyeol-landing.html — DOM scan 결과 카드 그리드(grid-cols 0건) / 캐러셀 / how-it-works / 후기 / 통계 / 보조 그리드 모두 0건. body 단일 <main class='hero-page'> + .hero-inner 6요소(label/title/caption/cta-cluster) 외 콘텐츠 없음. §9.F.2 정합."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "전체 7 mockup 정규식 [✅⚠️❌🎉🌟😀🔥👍✨💡🚀] + 1F300-1F9FF / 2600-27BF emoji 범위 grep 0건. system message 영역(toast/모달/error)에 unicode emoji 0건. 모든 아이콘 SVG inline (예: hangyeol-teacher-dashboard.html status-pill dot, hangyeol-learn.html qa-status SVG checkmark). §9.E v1.1 정합."
+    },
+    {
+      "id": "I7",
+      "verdict": "REVISE",
+      "evidence": "hangyeol-teacher-session.html:424-433 — confirm() 0건 PASS (커스텀 모달 패턴). 그러나 DESIGN-POLICY §7 '닫기 방식: 백드롭 클릭 + ESC 키 + X 버튼 (3가지 모두 지원)' 중 X 버튼 DOM 미존재. 현재 모달: backdrop(line 270-277) + role='dialog' + aria-modal='true' + 취소/종료 버튼만. 기대값: 모달 우상단 X 버튼(<button aria-label='닫기'> + close icon SVG) DOM 추가. 정적 mockup이므로 ESC 핸들러 JS는 미요구하나, X 버튼은 DOM 요소라 추가 필요."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "hangyeol-join.html — Step 1(line 234-245): 코드 입력 단독 화면 (.join-card '참여 코드 입력' aria-label, code-input + helper + 참여하기 + 돌아가기). Step 2(line 249-261): 이름 입력 단독 화면 (.join-card '이름 입력' aria-label). 두 화면이 hr.step-divider로 분리되어 mockup review 컨테이너에 stacked 표시. 단일 화면 동시 입력 0건 — BUILDER-UX §3 정합."
+    },
+    {
+      "id": "I9",
+      "verdict": "PASS",
+      "evidence": "hangyeol-learn.html — line 486 GuidePanel: <aside role='complementary' aria-label='학습 목차와 진도'> / line 537 ChatPanel: <section role='region' aria-label='질문과 대답'> / line 578 PreviewPanel: <aside role='complementary' aria-label='시연과 퀴즈'>. 3패널 모두 의미 라벨 명시 PASS."
+    },
+    {
+      "id": "I10",
+      "verdict": "REVISE",
+      "evidence": "ui-glossary.md '~어요 체 통일' 위반 4건 발견 (1건은 정책 면제 의심):\n  (1) hangyeol-join.html:272 — 현재 '잠시 후 이동합니다' / 기대 '잠시 후 이동해요' (BUILDER-UX §3.스펙 본문은 '잠시 후 이동합니다'로 표기되어 있으나 ui-glossary.md ~어요 체 우선)\n  (2) hangyeol-learn.html:550 — 현재 '핵심 기준이 됩니다' / 기대 '핵심 기준이 돼요'\n  (3) hangyeol-learn.html:562 — 현재 '혼합 방식도 흔하답니다' / 기대 '혼합 방식도 흔해요' (~답니다 어투 금지)\n  (4) hangyeol-system.html:291 — 현재 '한눈에 들어옵니다' / 기대 '한눈에 들어와요'\n  (5) hangyeol-landing.html:194 — '지도가 됩니다' (※§9.F.4 hero 톤 '결과 서술형 \"X가 Y가 됩니다\"' 정책 명시 허용 패턴이라 정책 면제 — REVISE 대상 아님)\n  hero 외 본문 4건은 ~어요 체 정합 위해 수정 필요."
+    },
+    {
+      "id": "I11",
+      "verdict": "PASS",
+      "evidence": "hangyeol-teacher-dashboard.html:399 — 제목 '내 수업' / line 400 — 서브텍스트 '3개 수업 · 진행 중 1개'. spec I11에서 명시한 architecture 변형 'Q&A {N}개 · 진행 중 {M}명 학생' 대신 BUILDER-UX §4 표준 카피 '{N}개 수업 · 진행 중 {M}개'를 그대로 사용 — spec은 'architecture 변형 OK'를 허용했고, 표준 카피 사용도 허용 범위 내. 의미: architecture 컨텍스트에서 '수업'은 학습 세션을 의미하므로 모호하지 않음. PASS."
+    },
+    {
+      "id": "I12",
+      "verdict": "PASS",
+      "evidence": "hangyeol-library.html:218-223 — 5 챕터군 필터 pill 모두 표시: '컴퓨터 기초 15' / '개발 12' / '데이터베이스 12' / '네트워크 17' / '아키텍처 · 클라우드 15'. 합계 71. SDD §14.3 P9 분류 정합. 챕터별 섹션도 라인 226·281에서 'aria-label=\"컴퓨터 기초 챕터\"' / '데이터베이스 챕터' 의미 라벨 명시. PASS."
+    }
+  ],
+  "overall": "REVISE",
+  "summary": "12 항목 중 10 PASS / 2 REVISE. 핵심 차단 요소(I1~I6, I8, I9, I12)는 모두 정합. I7(M5 모달 X 버튼 DOM 누락) + I10(본문 ~합니다/~답니다 4건) 마이너 수정만 남음. landing hero(I4)는 §9.F.4 '결과 서술형' 패턴 정확 적용. 캐릭터 압박 톤·금지 요소·이모지·confirm() 모두 0건.",
+  "next_action": "Generator 인터랙션 부분 수정 → Eval-Interaction 재돌입. 수정 사항: (1) hangyeol-teacher-session.html 모달에 우상단 X 버튼 DOM 추가 (aria-label='닫기' + 24×24 close icon SVG, position absolute top-right); (2) hangyeol-join.html:272 '잠시 후 이동합니다' → '잠시 후 이동해요'; (3) hangyeol-learn.html:550 '됩니다' → '돼요'; (4) hangyeol-learn.html:562 '흔하답니다' → '흔해요'; (5) hangyeol-system.html:291 '들어옵니다' → '들어와요'. landing hero(line 194)는 §9.F.4 정책 면제 — 수정 금지. 시각 Eval(GLM)와 머지 규칙은 PR-1 마스터 SDD §3.4 (REVISE+? → Generator 통합 수정).",
+  "generated_at": "2026-04-30T12:31:11Z"
+}

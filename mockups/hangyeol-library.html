@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — 한결 v1 라이브러리 목업 (71 Q&A)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --color-text-primary: #1c1917;
+    --color-text-body: #57534e;
+    --color-text-muted: #78716c;
+    --color-text-quaternary: #a8a29e;
+    --color-border: #e7e5e4;
+    --color-border-hover: #d6d3d1;
+    --color-surface: #ffffff;
+    --color-surface-alt: #fafaf9;
+    --color-surface-hover: #f5f5f4;
+    --color-btn-primary: #1c1917;
+    --color-btn-primary-hover: #292524;
+    --color-success: #10b981;
+    --color-info: #0ea5e9;
+    --color-accent-mint: #C9E0D4;
+    --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Noto Sans KR', system-ui, sans-serif;
+    --font-heading: var(--font-body);
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+    --radius-card-workspace: 12px;
+    --radius-btn-workspace: 10px;
+    --radius-input: 10px;
+    --radius-badge: 6px;
+    --type-page-title-size: 28px;
+    --type-section-size: 20px;
+    --type-card-title-size: 16px;
+    --type-body-workspace-size: 14px;
+    --type-meta-size: 13px;
+    --type-label-en-size: 13px;
+    --type-label-en-tracking: 0.08em;
+    --ease-smooth: cubic-bezier(.2, .8, .2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: var(--font-body); }
+  body {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.7;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 1024px) { body { font-weight: 300; } }
+
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex; align-items: center;
+    padding: 0 24px;
+  }
+  .topbar-brand {
+    font-size: 15px; font-weight: 600; color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+  }
+
+  .container {
+    max-width: 1184px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .page-header {
+    margin-bottom: 32px;
+  }
+  .page-title {
+    font-family: var(--font-heading);
+    font-size: var(--type-page-title-size);
+    font-weight: 500;
+    letter-spacing: -0.015em;
+    line-height: 1.3;
+    margin-bottom: 8px;
+  }
+  .page-subtitle {
+    font-size: var(--type-body-workspace-size);
+    color: var(--color-text-muted);
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--color-border);
+  }
+  .filter-pill {
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 9999px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    font-size: var(--type-meta-size);
+    color: var(--color-text-body);
+    cursor: pointer;
+    transition: all 150ms var(--ease-smooth);
+    display: inline-flex; align-items: center; gap: 6px;
+  }
+  .filter-pill:hover { background: var(--color-surface-hover); border-color: var(--color-border-hover); }
+  .filter-pill.active {
+    background: var(--color-text-primary);
+    color: var(--color-surface);
+    border-color: var(--color-text-primary);
+  }
+  .filter-count {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--color-text-quaternary);
+  }
+  .filter-pill.active .filter-count { color: var(--color-text-quaternary); opacity: 0.7; }
+
+  .chapter-section { margin-bottom: 40px; }
+  .chapter-header {
+    display: flex; align-items: baseline; gap: 12px;
+    margin-bottom: 16px;
+  }
+  .chapter-num {
+    font-family: var(--font-body);
+    font-size: var(--type-label-en-size);
+    font-weight: 700;
+    letter-spacing: var(--type-label-en-tracking);
+    color: var(--color-text-quaternary);
+    text-transform: uppercase;
+  }
+  .chapter-title {
+    font-size: var(--type-section-size);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+  }
+  .chapter-progress {
+    margin-left: auto;
+    font-size: var(--type-meta-size);
+    color: var(--color-text-muted);
+  }
+
+  .qa-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+  }
+  .qa-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card-workspace);
+    padding: 18px;
+    background: var(--color-surface);
+    cursor: pointer;
+    transition: all 200ms var(--ease-smooth);
+    display: flex; flex-direction: column; gap: 10px;
+    text-align: left;
+  }
+  .qa-card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  }
+  .qa-card-meta {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px;
+    color: var(--color-text-quaternary);
+  }
+  .qa-num {
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    font-size: 12.5px;
+    letter-spacing: 0.04em;
+  }
+  .qa-card-title {
+    font-size: var(--type-card-title-size);
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--color-text-primary);
+    word-break: keep-all;
+    letter-spacing: -0.01em;
+  }
+  .qa-card-summary {
+    font-size: var(--type-meta-size);
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    word-break: keep-all;
+  }
+  .qa-card-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11.5px;
+    color: var(--color-text-quaternary);
+  }
+  .qa-card-status.done { color: #059669; }
+  .qa-card-status .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--color-text-quaternary);
+  }
+  .qa-card-status.done .dot { background: var(--color-success); }
+</style>
+</head>
+<body>
+
+<header class="topbar" role="banner">
+  <div class="topbar-brand">Architecture Academy</div>
+</header>
+
+<main class="container" role="main">
+
+  <header class="page-header">
+    <h1 class="page-title">라이브러리</h1>
+    <p class="page-subtitle">71개 질문으로 IT 전체 그림이 보여요</p>
+  </header>
+
+  <nav class="filter-row" role="tablist" aria-label="챕터 필터">
+    <button class="filter-pill active" role="tab" aria-selected="true" type="button">전체 <span class="filter-count">71</span></button>
+    <button class="filter-pill" role="tab" type="button">컴퓨터 기초 <span class="filter-count">15</span></button>
+    <button class="filter-pill" role="tab" type="button">개발 <span class="filter-count">12</span></button>
+    <button class="filter-pill" role="tab" type="button">데이터베이스 <span class="filter-count">12</span></button>
+    <button class="filter-pill" role="tab" type="button">네트워크 <span class="filter-count">17</span></button>
+    <button class="filter-pill" role="tab" type="button">아키텍처 · 클라우드 <span class="filter-count">15</span></button>
+  </nav>
+
+  <section class="chapter-section" aria-label="컴퓨터 기초 챕터">
+    <header class="chapter-header">
+      <span class="chapter-num">CHAPTER 01</span>
+      <h2 class="chapter-title">컴퓨터 기초</h2>
+      <span class="chapter-progress">2 / 15 완료</span>
+    </header>
+
+    <div class="qa-grid">
+      <button class="qa-card" type="button">
+        <div class="qa-card-meta">
+          <span class="qa-num">Q1</span>
+          <span>· 5분</span>
+        </div>
+        <div class="qa-card-title">컴퓨터는 어떻게 0과 1만으로 모든 일을 하나요?</div>
+        <div class="qa-card-summary">전기 신호의 켜짐과 꺼짐이 숫자가 되고, 숫자가 명령이 되는 흐름을 따라가요.</div>
+        <div class="qa-card-status done">
+          <span class="dot"></span>완료
+        </div>
+      </button>
+      <button class="qa-card" type="button">
+        <div class="qa-card-meta">
+          <span class="qa-num">Q2</span>
+          <span>· 4분</span>
+        </div>
+        <div class="qa-card-title">CPU와 GPU는 무엇이 다른가요?</div>
+        <div class="qa-card-summary">소수의 똑똑한 일꾼(CPU)과 다수의 단순한 일꾼(GPU)이라는 비유로 풀어요.</div>
+        <div class="qa-card-status done">
+          <span class="dot"></span>완료
+        </div>
+      </button>
+      <button class="qa-card" type="button">
+        <div class="qa-card-meta">
+          <span class="qa-num">Q3</span>
+          <span>· 4분</span>
+        </div>
+        <div class="qa-card-title">메모리와 저장장치는 왜 따로 있나요?</div>
+        <div class="qa-card-summary">속도와 용량의 균형. 책상 위 노트와 책장의 역할 차이로 설명해요.</div>
+        <div class="qa-card-status">
+          <span class="dot"></span>대기
+        </div>
+      </button>
+      <button class="qa-card" type="button">
+        <div class="qa-card-meta">
+          <span class="qa-num">Q4</span>
+          <span>· 6분</span>
+        </div>
+        <div class="qa-card-title">운영체제는 무슨 일을 하나요?</div>
+        <div class="qa-card-summary">하드웨어와 앱 사이의 통역사. 자원 분배자이자 살림꾼 역할이에요.</div>
+        <div class="qa-card-status">
+          <span class="dot"></span>대기
+        </div>
+      </button>
+    </div>
+  </section>
+
+  <section class="chapter-section" aria-label="데이터베이스 챕터">
+    <header class="chapter-header">
+      <span class="chapter-num">CHAPTER 04</span>
+      <h2 class="chapter-title">데이터베이스</h2>
+      <span class="chapter-progress">3 / 12 완료</span>
+    </header>
+
+    <div class="qa-grid">
+      <button class="qa-card" type="button">
+        <div class="qa-card-meta">
+          <span class="qa-num">Q1</span>
+          <span>· 4분</span>
+        </div>
+        <div class="qa-card-title">데이터베이스가 왜 필요한가요?</div>
+        <div class="qa-card-summary">Excel로 충분한 일과 그렇지 않은 일을 구분하면 자연스럽게 답이 나와요.</div>
+        <div class="qa-card-status done"><span class="dot"></span>완료</div>
+      </button>
+      <button class="qa-card" type="button">
+        <div class="qa-card-meta">
+          <span class="qa-num">Q2</span>
+          <span>· 5분</span>
+        </div>
+        <div class="qa-card-title">관계형 DB와 NoSQL은 무엇이 다른가요?</div>
+        <div class="qa-card-summary">표 모양 데이터와 자유로운 모양 데이터. 모양이 정해진 정도로 갈려요.</div>
+        <div class="qa-card-status done"><span class="dot"></span>완료</div>
+      </button>
+      <button class="qa-card" type="button">
+        <div class="qa-card-meta">
+          <span class="qa-num">Q3</span>
+          <span>· 5분</span>
+        </div>
+        <div class="qa-card-title">SQL과 NoSQL의 선택 기준은 무엇인가요?</div>
+        <div class="qa-card-summary">데이터 모양 + 관계 복잡도 두 축으로 결정해요. 학교 도서관 예시로 확인해요.</div>
+        <div class="qa-card-status"><span class="dot"></span>진행 중</div>
+      </button>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>

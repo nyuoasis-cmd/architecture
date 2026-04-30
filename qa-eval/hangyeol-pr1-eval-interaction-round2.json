@@ -1,0 +1,74 @@
+{
+  "pr": "hangyeol-pr1",
+  "phase": "eval-interaction",
+  "round": 2,
+  "model": "claude-opus-4-7-as-codex-substitute",
+  "evaluated_commit": "pending-master",
+  "based_on_round1": "/home/claude/architecture/qa-eval/hangyeol-pr1-eval-interaction.json",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). hangyeol-landing.html:208 — '학습 시작하기' / data-cta='primary'. §9-A2.3 정합."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). hangyeol-landing.html:205 — '이어 학습하기' / data-cta='secondary'. §9-A2.3 정합."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). Ghost CTA DOM 0건. §9-A2.3 학습형 Ghost 미적용 정합."
+    },
+    {
+      "id": "I4",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). hangyeol-landing.html:193-194 hero '낯선 IT 용어가 / 한눈에 들어오는 지도가 됩니다.' — §9.F.4 결과 서술형 패턴 정합. 금지 톤 grep 0건."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). 카드 그리드/캐러셀/how-it-works/후기/통계/보조 그리드 0건. §9.F.2 정합."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). 7 mockup 전체 emoji 정규식 grep 0건. 모든 아이콘 SVG inline. §9.E v1.1 정합."
+    },
+    {
+      "id": "I7",
+      "verdict": "PASS",
+      "evidence": "Round 1 REVISE → 패치 검증 완료. hangyeol-teacher-session.html:447-449 — `<button class=\"modal-close\" type=\"button\" aria-label=\"닫기\">` + 16×16 X 아이콘 SVG (path 'M4 4 L12 12 M12 4 L4 12'). CSS line 287-302 — `.modal-close { position: absolute; top: 12px; right: 12px; width: 32px; height: 32px; border-radius: 9999px; background: transparent; }` — 우상단 32px 원형 버튼. hover state(line 303-306)도 정의. DESIGN-POLICY §7 X 버튼 DOM 요건 충족."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). Step 1/Step 2 단독 화면 분리, hr.step-divider 분리. BUILDER-UX §3 정합."
+    },
+    {
+      "id": "I9",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). 3패널 의미 라벨 (line 486/537/578) 모두 정합."
+    },
+    {
+      "id": "I10",
+      "verdict": "PASS",
+      "evidence": "Round 1 REVISE → 패치 4건 모두 검증 완료. (1) hangyeol-join.html:274 — '잠시 후 이동해요' ✓ (Round 1 line 272 → STEP 3 카드 재배치 후 line 274). (2) hangyeol-learn.html:551 — '핵심 기준이 돼요' ✓ (Round 1 line 550 → 1줄 시프트 후 551). (3) hangyeol-learn.html:563 — '혼합 방식도 흔해요' ✓ (Round 1 line 562 → 시프트 후 563). (4) hangyeol-system.html:292 — '한눈에 들어와요' ✓ (Round 1 line 291 → 시프트 후 292). 회귀 점검: 7 mockup 전체 `~합니다`/`~답니다` grep 0건. 잔존 1건 hangyeol-landing.html:194 '지도가 됩니다'는 §9.F.4 hero 결과 서술 정책 면제 (Round 1 결정 그대로 유지). ui-glossary.md ~어요 체 정합."
+    },
+    {
+      "id": "I11",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). hangyeol-teacher-dashboard.html:399-400 — '내 수업' / '3개 수업 · 진행 중 1개'. BUILDER-UX §4 표준 카피 정합."
+    },
+    {
+      "id": "I12",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirmed (회귀 점검). hangyeol-library.html 5 챕터군 필터 pill (15+12+12+17+15=71). 챕터 섹션 의미 라벨 정합. SDD §14.3 P9 정합."
+    }
+  ],
+  "overall": "PASS",
+  "summary": "Round 2 재검증 결과 12 항목 12 PASS. Round 1 REVISE 2건(I7/I10) 패치 모두 정합. (1) I7: hangyeol-teacher-session.html 종료 모달에 .modal-close 버튼 DOM 추가됨 — line 447-449 button + aria-label='닫기' + X 아이콘 SVG + CSS line 287-302 position absolute top:12px right:12px 우상단 원형 버튼. (2) I10: 4건 모두 ~어요 체로 변경됨 (join:274 이동해요 / learn:551 돼요 / learn:563 흔해요 / system:292 들어와요). 7 mockup 전체 ~합니다/~답니다 grep 0건 회귀 없음. landing:194 '됩니다'는 §9.F.4 hero 면제 그대로 유지. I1~I6, I8, I9, I11, I12 회귀 없음 PASS 유지.",
+  "next_action": "PR-1 인터랙션 검증 완결. 시각 Eval(GLM)도 PASS면 머지 가능. 시각 Eval 결과 대기 후 PR-1 머지 진행. (마스터 SDD §3.4 PASS+PASS → 머지)",
+  "generated_at": "2026-04-30T13:00:00Z"
+}

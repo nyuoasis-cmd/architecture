@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — 한결 v1 세션 상세 목업 (max-w-[900px])</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --color-text-primary: #1c1917;
+    --color-text-body: #57534e;
+    --color-text-muted: #78716c;
+    --color-text-quaternary: #a8a29e;
+    --color-border: #e7e5e4;
+    --color-border-hover: #d6d3d1;
+    --color-surface: #ffffff;
+    --color-surface-alt: #fafaf9;
+    --color-surface-hover: #f5f5f4;
+    --color-btn-primary: #1c1917;
+    --color-btn-primary-hover: #292524;
+    --color-success: #10b981;
+    --color-danger: #f43f5e;
+    --color-info: #0ea5e9;
+
+    --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Noto Sans KR', system-ui, sans-serif;
+    --font-heading: var(--font-body);
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    --radius-card-workspace: 12px;
+    --radius-btn-workspace: 10px;
+    --radius-input: 10px;
+
+    --type-page-title-size: 22px;
+    --type-card-title-size: 16px;
+    --type-body-workspace-size: 14px;
+    --type-meta-size: 13px;
+
+    --ease-smooth: cubic-bezier(.2, .8, .2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: var(--font-body); }
+  body {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.7;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 1024px) { body { font-weight: 300; } }
+
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--color-border);
+    display: flex; align-items: center;
+    padding: 0 24px;
+  }
+  .topbar-brand {
+    font-size: 15px; font-weight: 600; color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+  }
+
+  .container {
+    max-width: 900px;        /* BUILDER-UX §4-A */
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: var(--type-body-workspace-size);
+    color: var(--color-text-muted);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    margin-bottom: 20px;
+    text-decoration: none;
+  }
+  .back-link:hover { color: var(--color-text-primary); }
+
+  .session-header {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card-workspace);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    background: var(--color-surface);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .session-header-row {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .session-title-line {
+    flex: 1;
+    display: flex; align-items: center; gap: 10px;
+    font-size: var(--type-page-title-size);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 9px;
+    border-radius: 9999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    background: #ecfdf5;
+    color: #059669;
+  }
+  .status-pill .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--color-success);
+    animation: pulse 2s var(--ease-smooth) infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .session-meta-row {
+    display: flex; align-items: center; gap: 16px;
+    font-size: var(--type-body-workspace-size);
+    color: var(--color-text-muted);
+  }
+  .session-meta-row .code-badge {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    color: var(--color-text-primary);
+    padding: 4px 10px;
+    background: var(--color-surface-hover);
+    border-radius: var(--radius-input);
+    font-size: 14px;
+  }
+  .session-meta-icon {
+    display: inline-flex; align-items: center; gap: 4px;
+  }
+  .session-actions-row {
+    display: flex; gap: 8px; align-items: center;
+  }
+  .icon-btn {
+    width: 36px; height: 36px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-btn-workspace);
+    background: var(--color-surface);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    color: var(--color-text-body);
+    transition: all 150ms var(--ease-smooth);
+  }
+  .icon-btn:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+  }
+  .ghost-btn {
+    height: 36px;
+    padding: 0 12px;
+    border-radius: var(--radius-btn-workspace);
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: var(--type-body-workspace-size);
+    cursor: pointer;
+    transition: all 150ms var(--ease-smooth);
+  }
+  .ghost-btn:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+  }
+  .ghost-btn-danger:hover { color: var(--color-danger); }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card-workspace);
+    padding: 16px;
+    text-align: center;
+    background: var(--color-surface);
+  }
+  .stat-num {
+    font-family: var(--font-heading);
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    letter-spacing: -0.015em;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .stat-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-quaternary);
+  }
+
+  .student-section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+    margin-bottom: 12px;
+  }
+
+  .student-list {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card-workspace);
+    overflow: hidden;
+    background: var(--color-surface);
+  }
+  .student-row {
+    display: flex; align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    transition: background 150ms var(--ease-smooth);
+  }
+  .student-row:not(:last-child) {
+    border-bottom: 1px solid var(--color-surface-hover);
+  }
+  .student-row:hover {
+    background: var(--color-surface-alt);
+  }
+  .student-name {
+    font-size: var(--type-body-workspace-size);
+    font-weight: 500;
+    color: var(--color-text-primary);
+    min-width: 80px;
+  }
+  .student-status-pill {
+    padding: 3px 10px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .ssp-done { background: #ecfdf5; color: #059669; }
+  .ssp-progress { background: #eff6ff; color: #2563eb; }
+  .ssp-wait { background: var(--color-surface-hover); color: var(--color-text-quaternary); }
+  .student-progress-text {
+    flex: 1;
+    text-align: right;
+    font-size: var(--type-meta-size);
+    color: var(--color-text-muted);
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .secondary-btn {
+    height: 32px;
+    padding: 0 12px;
+    border-radius: var(--radius-btn-workspace);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-body);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 150ms var(--ease-smooth);
+    flex-shrink: 0;
+  }
+  .secondary-btn:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+  }
+
+  /* === 종료 확인 모달 === */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(2px);
+    z-index: 50;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .modal {
+    position: relative;
+    background: var(--color-surface);
+    border-radius: var(--radius-card-workspace);
+    padding: 24px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+  }
+  .modal-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 32px;
+    height: 32px;
+    border-radius: 9999px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-muted);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 150ms var(--ease-smooth);
+  }
+  .modal-close:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+  }
+  .modal-title {
+    font-size: 17px; font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+  }
+  .modal-desc {
+    font-size: var(--type-body-workspace-size);
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    word-break: keep-all;
+  }
+  .modal-actions {
+    display: flex; gap: 8px; justify-content: flex-end;
+  }
+  .btn-secondary {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--radius-btn-workspace);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-body);
+    font-size: var(--type-body-workspace-size);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 150ms var(--ease-smooth);
+  }
+  .btn-secondary:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+  }
+  .btn-destructive {
+    height: 40px;
+    padding: 0 16px;
+    border-radius: var(--radius-btn-workspace);
+    background: var(--color-danger);
+    color: var(--color-surface);
+    border: none;
+    font-size: var(--type-body-workspace-size);
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn-destructive:hover { background: #e11d48; }
+
+  /* 모달은 레이아웃 데모 — 본 mockup에서는 비활성 (display:none) */
+  .modal-backdrop { display: none; }
+  .modal-backdrop.demo-show { display: flex; }
+</style>
+</head>
+<body>
+
+<header class="topbar" role="banner">
+  <div class="topbar-brand">Architecture Academy</div>
+</header>
+
+<main class="container" role="main">
+
+  <button class="back-link" type="button">
+    <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 12 L6 8 L10 4"/></svg>
+    <span>내 수업</span>
+  </button>
+
+  <header class="session-header" aria-label="수업 정보">
+    <div class="session-header-row">
+      <h1 class="session-title-line">
+        <span>3학년 정보 선택 — 데이터베이스</span>
+        <span class="status-pill" role="status"><span class="status-dot"></span>진행 중</span>
+      </h1>
+      <div class="session-actions-row">
+        <button class="icon-btn" type="button" aria-label="QR코드">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><path d="M15 12 L21 12 M15 15 L18 15 L18 21 L15 21 L15 18"/></svg>
+        </button>
+        <button class="ghost-btn ghost-btn-danger" type="button">종료</button>
+      </div>
+    </div>
+    <div class="session-meta-row">
+      <span class="code-badge" aria-label="참여 코드">K8DM2A</span>
+      <span class="session-meta-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21 C4 16.5 7.5 14 12 14 C16.5 14 20 16.5 20 21"/></svg>
+        <span>학생 12명</span>
+      </span>
+      <span class="session-meta-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7 V17 A2 2 0 0 0 5 19 H19 A2 2 0 0 0 21 17 V7 A2 2 0 0 0 19 5 H5 A2 2 0 0 0 3 7"/><path d="M8 12 H16 M8 16 H13"/></svg>
+        <span>완료 Q&amp;A 8개</span>
+      </span>
+      <span style="margin-left:auto;font-size:12px;color:var(--color-text-quaternary);">오늘 14:30 시작</span>
+    </div>
+  </header>
+
+  <div class="stat-grid" aria-label="수업 통계">
+    <div class="stat-card">
+      <div class="stat-num">12</div>
+      <div class="stat-label">참여 학생</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">8</div>
+      <div class="stat-label">완료 Q&amp;A</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">4</div>
+      <div class="stat-label">진행 중</div>
+    </div>
+  </div>
+
+  <h2 class="student-section-title">학생 현황</h2>
+  <div class="student-list" role="list">
+
+    <div class="student-row" role="listitem">
+      <span class="student-name">김지우</span>
+      <span class="student-status-pill ssp-done">완성</span>
+      <span class="student-progress-text">Q3 — SQL과 NoSQL의 선택 기준</span>
+      <button class="secondary-btn" type="button">보기</button>
+    </div>
+    <div class="student-row" role="listitem">
+      <span class="student-name">이서연</span>
+      <span class="student-status-pill ssp-progress">진행 중</span>
+      <span class="student-progress-text">Q2 — 관계형 DB와 NoSQL 차이</span>
+      <button class="secondary-btn" type="button" disabled style="opacity:0.45;cursor:not-allowed;">보기</button>
+    </div>
+    <div class="student-row" role="listitem">
+      <span class="student-name">박지호</span>
+      <span class="student-status-pill ssp-progress">진행 중</span>
+      <span class="student-progress-text">Q3 — SQL과 NoSQL의 선택 기준</span>
+      <button class="secondary-btn" type="button" disabled style="opacity:0.45;cursor:not-allowed;">보기</button>
+    </div>
+    <div class="student-row" role="listitem">
+      <span class="student-name">최서윤</span>
+      <span class="student-status-pill ssp-wait">대기</span>
+      <span class="student-progress-text">아직 시작하지 않았어요</span>
+      <button class="secondary-btn" type="button" disabled style="opacity:0.45;cursor:not-allowed;">보기</button>
+    </div>
+
+  </div>
+
+</main>
+
+<!-- 종료 확인 모달 (BUILDER-UX §6, confirm() 금지 — 커스텀 모달 패턴) -->
+<div class="modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="modal-title-end">
+  <div class="modal">
+    <button class="modal-close" type="button" aria-label="닫기">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4 L12 12 M12 4 L4 12"/></svg>
+    </button>
+    <h2 class="modal-title" id="modal-title-end">이 수업을 종료할까요?</h2>
+    <p class="modal-desc">학생들이 더 이상 참여할 수 없어요. 이미 학습한 내용은 그대로 남아 있어요.</p>
+    <div class="modal-actions">
+      <button class="btn-secondary" type="button">취소</button>
+      <button class="btn-destructive" type="button">종료</button>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — 한결 v1 시스템 화면 모음 (404·403·about·dev-login)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --color-text-primary: #1c1917;
+    --color-text-body: #57534e;
+    --color-text-muted: #78716c;
+    --color-text-quaternary: #a8a29e;
+    --color-border: #e7e5e4;
+    --color-border-hover: #d6d3d1;
+    --color-surface: #ffffff;
+    --color-surface-alt: #fafaf9;
+    --color-surface-hover: #f5f5f4;
+    --color-btn-primary: #1c1917;
+    --color-btn-primary-hover: #292524;
+    --color-info: #0ea5e9;
+    --color-link: #0284c7;
+    --color-focus-ring: #0ea5e9;
+
+    --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Noto Sans KR', system-ui, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    --radius-card-workspace: 12px;
+    --radius-btn-workspace: 10px;
+    --radius-input: 10px;
+
+    --type-page-title-size: 28px;
+    --type-card-title-size: 16px;
+    --type-body-workspace-size: 14px;
+    --type-meta-size: 13px;
+
+    --ease-smooth: cubic-bezier(.2, .8, .2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: var(--font-body); }
+  body {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.7;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 1024px) { body { font-weight: 300; } }
+
+  .review-container {
+    max-width: 1184px;
+    margin: 0 auto;
+    padding: 40px 24px;
+  }
+  .review-section { margin-bottom: 80px; }
+  .review-label {
+    font-family: var(--font-body);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-text-quaternary);
+    letter-spacing: 0.08em;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+  }
+
+  /* ===== Generic system screen ===== */
+  .sys-screen {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card-workspace);
+    padding: 80px 32px;
+    display: flex; flex-direction: column;
+    align-items: center; text-align: center;
+    min-height: 480px;
+    justify-content: center;
+  }
+  .sys-icon-wrap {
+    width: 64px; height: 64px;
+    border-radius: 50%;
+    background: var(--color-surface-hover);
+    color: var(--color-text-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    margin-bottom: 24px;
+  }
+  .sys-code-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--color-text-quaternary);
+    margin-bottom: 12px;
+  }
+  .sys-title {
+    font-size: var(--type-page-title-size);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    color: var(--color-text-primary);
+    margin-bottom: 12px;
+    word-break: keep-all;
+  }
+  .sys-desc {
+    font-size: 16px;
+    color: var(--color-text-body);
+    line-height: 1.7;
+    max-width: 480px;
+    margin-bottom: 32px;
+    word-break: keep-all;
+  }
+  .sys-actions {
+    display: flex; gap: 8px; justify-content: center;
+  }
+  .btn-primary {
+    height: 48px;
+    padding: 0 24px;
+    border-radius: var(--radius-btn-workspace);
+    background: var(--color-btn-primary);
+    color: var(--color-surface);
+    border: none;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 150ms var(--ease-smooth);
+    text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .btn-primary:hover { background: var(--color-btn-primary-hover); }
+  .btn-secondary {
+    height: 48px;
+    padding: 0 24px;
+    border-radius: var(--radius-btn-workspace);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    color: var(--color-text-body);
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 150ms var(--ease-smooth);
+    text-decoration: none;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .btn-secondary:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+  }
+
+  /* ===== About 화면 (간단) ===== */
+  .about-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card-workspace);
+    padding: 40px;
+    background: var(--color-surface);
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .about-title {
+    font-size: var(--type-page-title-size);
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 24px;
+  }
+  .about-section {
+    margin-bottom: 24px;
+  }
+  .about-section h3 {
+    font-size: var(--type-card-title-size);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .about-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--color-text-body);
+    word-break: keep-all;
+  }
+  .about-link {
+    color: var(--color-link);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .about-link:hover { text-decoration-thickness: 2px; }
+
+  /* ===== DEV 로그인 ===== */
+  .dev-login-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card-workspace);
+    padding: 40px;
+    background: var(--color-surface);
+    max-width: 384px;
+    margin: 0 auto;
+  }
+  .dev-tag {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-input);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--color-info);
+    background: #f0f9ff;
+    letter-spacing: 0.05em;
+    margin-bottom: 16px;
+  }
+  .dev-login-card h1 {
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+    margin-bottom: 8px;
+  }
+  .dev-login-card p {
+    font-size: var(--type-body-workspace-size);
+    color: var(--color-text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+  .form-row {
+    display: flex; flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .form-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--color-text-muted);
+  }
+  .form-input {
+    height: 44px;
+    padding: 0 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-input);
+    background: var(--color-surface);
+    font-family: var(--font-body);
+    font-size: var(--type-body-workspace-size);
+    color: var(--color-text-primary);
+    outline: none;
+    transition: border-color 150ms var(--ease-smooth);
+  }
+  .form-input:focus {
+    border-color: transparent;
+    box-shadow: 0 0 0 2px var(--color-focus-ring);
+  }
+</style>
+</head>
+<body>
+
+<main class="review-container" role="main">
+
+  <!-- ===== 404 ===== -->
+  <section class="review-section" aria-label="404 페이지">
+    <div class="review-label">SCREEN 1 / 404 NOT FOUND</div>
+    <div class="sys-screen">
+      <div class="sys-icon-wrap" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+      </div>
+      <div class="sys-code-label">404</div>
+      <h1 class="sys-title">페이지를 찾지 못했어요</h1>
+      <p class="sys-desc">주소가 바뀌었거나 더 이상 존재하지 않는 페이지예요. 아래 버튼으로 안전한 곳으로 이동해보세요.</p>
+      <div class="sys-actions">
+        <a class="btn-secondary" href="/" role="button">홈으로 돌아가기</a>
+        <a class="btn-primary" href="/library" role="button">라이브러리 보기</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 403 Forbidden ===== -->
+  <section class="review-section" aria-label="403 접근 권한 없음">
+    <div class="review-label">SCREEN 2 / 403 FORBIDDEN</div>
+    <div class="sys-screen">
+      <div class="sys-icon-wrap" aria-hidden="true">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11 V7 A4 4 0 0 1 16 7 V11"/></svg>
+      </div>
+      <div class="sys-code-label">403</div>
+      <h1 class="sys-title">접근 권한이 없어요</h1>
+      <p class="sys-desc">이 페이지는 선생님 계정으로만 볼 수 있어요. 로그인 후 다시 시도해주세요.</p>
+      <div class="sys-actions">
+        <a class="btn-secondary" href="/" role="button">홈으로 돌아가기</a>
+        <a class="btn-primary" href="/login" role="button">로그인</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== About ===== -->
+  <section class="review-section" aria-label="서비스 소개">
+    <div class="review-label">SCREEN 3 / ABOUT</div>
+    <article class="about-card">
+      <h1 class="about-title">Architecture Academy 소개</h1>
+      <div class="about-section">
+        <h3>북극성</h3>
+        <p>비전공자도 IT 전체 그림이 한눈에 들어와요. 71개 질문 한 흐름을 따라가면 컴퓨터부터 클라우드까지 자연스럽게 연결돼요.</p>
+      </div>
+      <div class="about-section">
+        <h3>학습 방식</h3>
+        <p>각 질문마다 짧은 답 + 시각 시연 + 추가 질문을 위한 챗봇이 함께 있어요. 모르는 부분은 직접 물어볼 수 있고, 선생님이 함께 학습 흐름을 안내해줘요.</p>
+      </div>
+      <div class="about-section">
+        <h3>출처</h3>
+        <p>책 <strong>『기술노트(With 알렉)』</strong>(2026)에서 영감을 받아 만들었어요. 본문은 직접 인용 없이 새로 작성한 내용이며, 책에 흥미가 생긴다면 <a class="about-link" href="#">여기</a>에서 더 알아볼 수 있어요.</p>
+      </div>
+    </article>
+  </section>
+
+  <!-- ===== DEV 로그인 ===== -->
+  <section class="review-section" aria-label="DEV 로그인">
+    <div class="review-label">SCREEN 4 / DEV LOGIN (개발용)</div>
+    <article class="dev-login-card">
+      <span class="dev-tag">DEV</span>
+      <h1>개발자 로그인</h1>
+      <p>운영자/QA 계정으로 빠르게 로그인해요. 이 화면은 개발 환경에서만 보여요.</p>
+
+      <div class="form-row">
+        <label class="form-label" for="dev-email">이메일</label>
+        <input class="form-input" id="dev-email" type="email" placeholder="example@teachermate.co.kr">
+      </div>
+      <div class="form-row">
+        <label class="form-label" for="dev-pw">비밀번호</label>
+        <input class="form-input" id="dev-pw" type="password" placeholder="비밀번호 입력">
+      </div>
+      <button class="btn-primary" type="button" style="width:100%;">로그인</button>
+    </article>
+  </section>
+
+</main>
+
+</body>
+</html>

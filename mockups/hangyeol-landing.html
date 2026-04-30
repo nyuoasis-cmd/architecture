@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — 한결 v1 랜딩 목업</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --color-text-primary: #1c1917;
+    --color-text-body: #57534e;
+    --color-text-muted: #78716c;
+    --color-text-quaternary: #a8a29e;
+    --color-border: #e7e5e4;
+    --color-border-hover: #d6d3d1;
+    --color-surface: #ffffff;
+    --color-surface-alt: #fafaf9;
+    --color-surface-hover: #f5f5f4;
+    --color-btn-primary: #1c1917;
+    --color-btn-primary-hover: #292524;
+    --color-accent-mint: #C9E0D4;
+    --color-focus-ring: #0ea5e9;
+
+    --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Noto Sans KR', system-ui, sans-serif;
+    --font-heading: var(--font-body);
+
+    --radius-card-landing: 24px;
+    --radius-panel-landing: 32px;
+    --radius-btn-landing: 9999px;
+    --radius-btn-workspace: 10px;
+
+    --type-hero-size: clamp(48px, 7vw, 88px);
+    --type-hero-weight: 600;
+    --type-hero-tracking: -0.025em;
+    --type-hero-leading: 1.05;
+
+    --type-body-landing-size: 18px;
+    --type-body-landing-weight: 400;
+    --type-body-landing-leading: 1.55;
+    --type-body-landing-tracking: -0.005em;
+
+    --type-label-en-size: 13px;
+    --type-label-en-weight: 700;
+    --type-label-en-tracking: 0.08em;
+
+    --ease-smooth: cubic-bezier(.2, .8, .2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: var(--font-body); }
+  body {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.7;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 1024px) {
+    body { font-weight: 300; }
+  }
+
+  /* === Hero page (§9.F.3) === */
+  .hero-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 64px 32px;
+    text-align: center;
+    background: var(--color-surface);
+  }
+  .hero-inner {
+    width: 100%;
+    max-width: 880px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* 1. 영문 라벨 */
+  .hero-label {
+    font-size: var(--type-label-en-size);
+    font-weight: var(--type-label-en-weight);
+    letter-spacing: var(--type-label-en-tracking);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    margin-bottom: 24px;
+    word-break: keep-all;
+  }
+
+  /* 2. Hero 제목 */
+  .hero-title {
+    font-family: var(--font-heading);
+    font-size: var(--type-hero-size);
+    font-weight: var(--type-hero-weight);
+    letter-spacing: var(--type-hero-tracking);
+    line-height: var(--type-hero-leading);
+    color: var(--color-text-primary);
+    word-break: keep-all;
+    margin-bottom: 28px;
+  }
+
+  /* 3. 캡션 */
+  .hero-caption {
+    font-size: var(--type-body-landing-size);
+    font-weight: var(--type-body-landing-weight);
+    line-height: var(--type-body-landing-leading);
+    letter-spacing: var(--type-body-landing-tracking);
+    color: var(--color-text-body);
+    max-width: 640px;
+    word-break: keep-all;
+    margin-bottom: 56px;
+  }
+
+  /* 4. CTA Cluster (Secondary 왼쪽 / Primary 오른쪽 — §9.F.1) */
+  .hero-cta-cluster {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .cta {
+    height: 56px;
+    padding: 0 32px;
+    border-radius: var(--radius-btn-landing);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition: all 200ms var(--ease-smooth);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    word-break: keep-all;
+  }
+  .cta-primary {
+    background: var(--color-btn-primary);
+    color: var(--color-surface);
+  }
+  .cta-primary:hover {
+    background: var(--color-btn-primary-hover);
+    transform: translateY(-1px);
+  }
+  .cta-secondary {
+    background: var(--color-surface);
+    color: var(--color-text-body);
+    border: 1px solid var(--color-border);
+  }
+  .cta-secondary:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+  }
+
+  /* 5. Ghost CTA — architecture는 §9-A2 학습형이라 미적용 (의도적 누락) */
+
+  /* 모바일 분기 */
+  @media (max-width: 640px) {
+    .hero-cta-cluster {
+      flex-direction: column;
+      width: 100%;
+      max-width: 320px;
+      gap: 12px;
+    }
+    .cta { width: 100%; }
+    .hero-page { padding: 64px 20px; }
+  }
+
+  /* 정합 점검 시 시각 디버그용 (배포 전 제거) */
+  .debug-meta {
+    position: fixed;
+    bottom: 16px;
+    left: 16px;
+    font-size: 11px;
+    color: var(--color-text-quaternary);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<main class="hero-page" role="main">
+  <div class="hero-inner">
+
+    <!-- 1. 영문 라벨 (§9.C-5 영문 라벨) -->
+    <div class="hero-label">ARCHITECTURE ACADEMY</div>
+
+    <!-- 2. 제목 — 결과 서술형 (§9.F.4) -->
+    <h1 class="hero-title">
+      낯선 IT 용어가<br>
+      한눈에 들어오는 지도가 됩니다.
+    </h1>
+
+    <!-- 3. 캡션 -->
+    <p class="hero-caption">
+      71개의 질문과 답으로 만든 학습 코스. 비전공자도 컴퓨터 · 개발 · 데이터베이스 · 네트워크 · 아키텍처를 한 흐름으로 이해해요.
+    </p>
+
+    <!-- 4. CTA Cluster — Secondary 왼쪽 / Primary 오른쪽 (§9.F.1) -->
+    <div class="hero-cta-cluster" role="group" aria-label="학습 시작 또는 이어 학습하기">
+      <button class="cta cta-secondary" type="button" data-cta="secondary">
+        이어 학습하기
+      </button>
+      <button class="cta cta-primary" type="button" data-cta="primary">
+        학습 시작하기
+      </button>
+    </div>
+
+    <!-- 5. Ghost CTA: §9-A2 학습형은 Ghost 미적용 (한결-INDEX G 카드) -->
+    <!-- (의도적 미배치) -->
+
+  </div>
+</main>
+
+<!-- 정합 메타 (정책 점검용 / 배포 시 제거) -->
+<div class="debug-meta" aria-hidden="true">한결 v1.2 §9.F · architecture · landing</div>
+
+</body>
+</html>

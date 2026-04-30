@@ -1,0 +1,73 @@
+{
+  "pr": "hangyeol-pr1",
+  "phase": "eval-visual",
+  "round": 2,
+  "model": "claude-opus-4-7-as-glm-substitute",
+  "evaluated_commit": "pending-master",
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirm. hangyeol-landing.html:42-45 토큰(--type-label-en-size:13px / weight:700 / tracking:0.08em) + line 82-90 .hero-label 적용 + DOM 'ARCHITECTURE ACADEMY' uppercase. 회귀 없음."
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirm. landing.html:32 --type-hero-size: clamp(48px, 7vw, 88px) + line 95 .hero-title 적용 + DOM <h1> 안 <br>로 명시 2줄. 회귀 없음."
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirm. landing.html:37 --type-body-landing-size:18px + line 106-111 .hero-caption font-size:18px / max-width:640px. 회귀 없음."
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirm. landing.html:29 --radius-btn-landing:9999px + line 123-138 .cta { height:56px; font-size:16px; font-weight:600; border-radius:9999px }. 4개 기대값 정확 일치. 회귀 없음."
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirm. 7개 mockup --radius-card-workspace:12px 일관 정의 + 카드 클래스 적용 (library qa-card, learn chat-bubble/preview/quiz, dashboard session-card, session session-header/stat-card/student-list, system sys-screen/about-card/dev-login-card). 회귀 없음."
+    },
+    {
+      "id": "V6",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirm. dashboard.html:90-96 .dashboard-header { display:flex; align-items:flex-end; gap:16px; margin-bottom:32px }. items-end + 양 끝 정렬 + 통계 3셀 V7로 분리. 회귀 없음."
+    },
+    {
+      "id": "V7",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirm. dashboard.html:269-275 .session-stats grid-cols-3 + border-top/bottom + .stat-cell + .stat-cell border-left stone-100. --color-surface-hover=#f5f5f4=stone-100. 회귀 없음."
+    },
+    {
+      "id": "V8",
+      "verdict": "PASS",
+      "evidence": "Round 2 재검증: 7개 mockup grep -E 'text-stone-|bg-stone-|border-stone-|ring-stone-|text-zinc-|text-neutral-|text-gray-|text-slate-' 결과 0건. semantic 토큰만 사용. 회귀 없음."
+    },
+    {
+      "id": "V9",
+      "verdict": "PASS",
+      "evidence": "Round 1 PASS confirm. 카드/입력 보더 var(--color-border)=stone-200 사용 다수 (grep '1px solid var(--color-border)' 7개 파일 합 23건). 임의 hex 보더 0건. 회귀 없음."
+    },
+    {
+      "id": "V10",
+      "verdict": "PASS",
+      "evidence": "패치 정합 확인. hangyeol-join.html:51 추가됨 — '@media (min-width: 1024px) { body { font-weight: 300; } }'. 7개 mockup 전부 (landing.html:59-61, library.html:51, learn.html:73, join.html:51, dashboard.html:59, session.html:51, system.html:50) PC weight 300 미디어 쿼리 일관 적용. Round 1 누락 항목 정확히 보강."
+    },
+    {
+      "id": "V11",
+      "verdict": "PASS",
+      "evidence": "패치 정합 확인 — 5건 모두 1.6/1.7로 통일됨. (1) library.html:186 .qa-card-summary line-height:1.6 (기존 1.55→1.6). (2) learn.html:340 .chat-bubble-text line-height:1.6 (기존 1.65→1.6). (3) learn.html:402 .quiz-card p line-height:1.6 (기존 1.55→1.6). (4) system.html:106 .sys-desc line-height:1.7 (기존 1.65→1.7). (5) join.html:177 .helper line-height:1.6 (기존 1.5→1.6). §9.C-4 본문 LH 화이트리스트(1.6/1.7) 100% 정합. 회귀 없음 — 카드 제목 LH 1.3~1.45는 §9.C-4 본문 룰 외 정상 유지."
+    },
+    {
+      "id": "V12",
+      "verdict": "PASS",
+      "evidence": "패치 정합 확인 — Round 1 5건 mono 위반 모두 sans 전환. (1) library.html:124-130 .chapter-num: var(--font-body) + weight 700 + tracking var(--type-label-en-tracking)=0.08em ✓ 영문 라벨 토큰 패턴 정확 일치. (2) library.html:168-174 .qa-num: var(--font-body) + weight 700 + tracking 0.04em (mono 제거 ✓; 인라인 카드 제목 옆 짧은 'Q1' 라벨이라 0.04em 선택 — 시각 인상 일관 유지). (3) learn.html:196-202 .qa-num: var(--font-body) + weight 600 (mono 제거 ✓; 24px width 제약 list-item 내 라벨이라 weight 600 선택 — 인접 .qa-title weight과 시각 균형). (4) join.html:187-195 .step-label: var(--font-body) + weight 700 + tracking 0.08em + uppercase ✓ 정확 일치. (5) system.html:58-64 .review-label: var(--font-body) + weight 700 + tracking 0.08em + uppercase ✓ 정확 일치. §9.C-1.2 mono 화이트리스트 위반 0건. 잔존 mono 사용은 모두 화이트리스트 적합 — session-code-badge(dashboard:172, session:130 6자리 세션코드), code-input(join:108 6자리 입력), filter-count(library:113 'Q 71/15/12' 순수 KPI), topbar-progress(learn:111 '3/12' 진도 KPI), qa-body code(learn:258 코드 블록), sys-code-label(system:88 '404'/'403' HTTP 상태), dev-tag(system:199 'DEV' debug 인디케이터, 비배포 화면 한정). 라벨 토큰 일관성 — 5건 중 3건(chapter-num, step-label, review-label) 영문 라벨 토큰 정확 일치, 2건(library qa-num, learn qa-num) 인라인 폭/밀도 제약상 변형 적용 — 시각 회귀 없음."
+    }
+  ],
+  "overall": "PASS",
+  "summary": "Round 1 REVISE 3건(V10/V11/V12) 패치 정합 모두 PASS. V10 join.html PC weight 300 미디어 정확 추가 (7파일 일관). V11 본문 LH 5건(1.55/1.65/1.5) → 1.6/1.7 정확 통일. V12 mono 화이트리스트 위반 5건 모두 sans 전환 (3건 영문 라벨 토큰 패턴 정확 일치, 2건 폭 제약상 weight/tracking 미세 변형 — §9.C-1.2 위반 100% 해소). V1~V9 회귀 0건. 한결 v1.2 §9 시각 정책 12 항목 전체 통과.",
+  "next_action": "Master에 PASS 통보. Generator 추가 패치 불필요. 다음 단계: Eval-Interaction round 2 (V13+ 인터랙션 항목) 또는 Master 머지 결정.",
+  "generated_at": "2026-04-30T01:30:00Z"
+}

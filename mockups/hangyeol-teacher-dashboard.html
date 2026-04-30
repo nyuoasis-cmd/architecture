@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture — 한결 v1 교사 대시보드 목업 (D안)</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable.min.css">
+<style>
+  :root {
+    --color-text-primary: #1c1917;
+    --color-text-body: #57534e;
+    --color-text-muted: #78716c;
+    --color-text-quaternary: #a8a29e;
+    --color-border: #e7e5e4;
+    --color-border-hover: #d6d3d1;
+    --color-surface: #ffffff;
+    --color-surface-alt: #fafaf9;
+    --color-surface-hover: #f5f5f4;
+    --color-btn-primary: #1c1917;
+    --color-btn-primary-hover: #292524;
+    --color-success: #10b981;
+    --color-danger: #f43f5e;
+    --color-info: #0ea5e9;
+    --color-accent-mint: #C9E0D4;
+
+    --font-body: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Noto Sans KR', system-ui, sans-serif;
+    --font-heading: var(--font-body);
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+    --radius-card-workspace: 12px;
+    --radius-btn-workspace: 10px;
+    --radius-input: 10px;
+    --radius-badge: 6px;
+
+    --type-page-title-size: 28px;
+    --type-page-title-weight: 600;
+    --type-page-title-tracking: -0.015em;
+    --type-page-title-leading: 1.3;
+
+    --type-card-title-size: 16px;
+    --type-card-title-weight: 600;
+
+    --type-body-workspace-size: 14px;
+    --type-meta-size: 13px;
+
+    --ease-smooth: cubic-bezier(.2, .8, .2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { font-family: var(--font-body); }
+  body {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    letter-spacing: -0.005em;
+    line-height: 1.7;
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+  @media (min-width: 1024px) { body { font-weight: 300; } }
+
+  /* === Top bar === */
+  .topbar {
+    height: 56px;
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+  }
+  .topbar-brand {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+  }
+  .topbar-spacer { flex: 1; }
+  .topbar-user {
+    font-size: var(--type-meta-size);
+    color: var(--color-text-muted);
+  }
+
+  /* === 대시보드 컨테이너 (한결 §9.D-5 예외 2: max-w-4xl) === */
+  .dashboard-container {
+    max-width: 896px;
+    margin: 0 auto;
+    padding: 32px 24px 56px;
+  }
+
+  /* === 헤더 D안 (BUILDER-UX §4) === */
+  .dashboard-header {
+    display: flex;
+    align-items: flex-end;          /* §4 D안: items-end */
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 32px;
+  }
+  .dashboard-header-text {
+    flex: 1;
+    min-width: 0;
+  }
+  .dashboard-title {
+    font-family: var(--font-heading);
+    font-size: var(--type-page-title-size);
+    font-weight: 500;
+    letter-spacing: var(--type-page-title-tracking);
+    line-height: var(--type-page-title-leading);
+    color: var(--color-text-primary);
+  }
+  .dashboard-subtitle {
+    font-size: var(--type-body-workspace-size);
+    color: var(--color-text-muted);
+    margin-top: 8px;
+    word-break: keep-all;
+  }
+  .dashboard-cta {
+    height: 40px;
+    padding: 0 20px;
+    border-radius: var(--radius-btn-workspace);
+    background: var(--color-btn-primary);
+    color: var(--color-surface);
+    font-size: var(--type-body-workspace-size);
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background 150ms var(--ease-smooth);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .dashboard-cta:hover { background: var(--color-btn-primary-hover); }
+  .dashboard-cta-icon {
+    width: 14px; height: 14px;
+  }
+
+  /* === 세션 카드 D안 (BUILDER-UX §4 미니 대시보드) === */
+  .sessions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .session-card {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-card-workspace);
+    background: var(--color-surface);
+    padding: 20px;
+    cursor: pointer;
+    transition: all 200ms var(--ease-smooth);
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .session-card:hover {
+    border-color: var(--color-border-hover);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05);
+  }
+
+  /* 카드 상단 */
+  .session-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .session-code-badge {
+    width: 82px;
+    height: 50px;
+    border-radius: var(--radius-input);
+    background: var(--color-surface-hover);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: 0.06em;
+    color: var(--color-text-primary);
+    flex-shrink: 0;
+  }
+  .session-title-block {
+    flex: 1;
+    min-width: 0;
+  }
+  .session-title {
+    font-size: var(--type-card-title-size);
+    font-weight: var(--type-card-title-weight);
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+    word-break: keep-all;
+    margin-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .session-meta-row {
+    font-size: var(--type-meta-size);
+    color: var(--color-text-muted);
+  }
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 9px;
+    border-radius: 9999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .status-pill-active {
+    background: #ecfdf5;
+    color: #059669;
+  }
+  .status-pill-active .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--color-success);
+    animation: pulse 2s var(--ease-smooth) infinite;
+  }
+  .status-pill-ended {
+    background: var(--color-surface-hover);
+    color: var(--color-text-muted);
+  }
+  .status-pill-ended .status-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--color-text-quaternary);
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+  .session-actions {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .icon-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-btn-workspace);
+    background: var(--color-surface);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 150ms var(--ease-smooth);
+    color: var(--color-text-body);
+  }
+  .icon-btn:hover {
+    background: var(--color-surface-hover);
+    border-color: var(--color-border-hover);
+  }
+  .ghost-btn {
+    height: 40px;
+    padding: 0 12px;
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-btn-workspace);
+    color: var(--color-text-muted);
+    font-size: var(--type-body-workspace-size);
+    cursor: pointer;
+    transition: all 150ms var(--ease-smooth);
+  }
+  .ghost-btn:hover {
+    background: var(--color-surface-hover);
+    color: var(--color-text-primary);
+  }
+
+  /* 카드 통계 3셀 */
+  .session-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--color-surface-hover);
+    border-bottom: 1px solid var(--color-surface-hover);
+    padding: 12px 0;
+  }
+  .stat-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-align: center;
+  }
+  .stat-cell + .stat-cell {
+    border-left: 1px solid var(--color-surface-hover);
+  }
+  .stat-num {
+    font-family: var(--font-heading);
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--color-text-primary);
+    letter-spacing: -0.01em;
+  }
+  .stat-label {
+    font-size: 11.5px;
+    color: var(--color-text-quaternary);
+    font-weight: 500;
+  }
+
+  /* 카드 하단 활동 피드 */
+  .session-activity {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: var(--type-meta-size);
+    color: var(--color-text-muted);
+  }
+  .avatar-stack {
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+  .avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--color-surface);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+  .avatar + .avatar { margin-left: -8px; }
+  .avatar-1 { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+  .avatar-2 { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; }
+  .avatar-3 { background: linear-gradient(135deg, #dcfce7, #bbf7d0); color: #166534; }
+  .avatar-4 { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #9f1239; }
+  .avatar-overflow {
+    margin-left: -8px;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--color-surface-hover);
+    color: var(--color-text-muted);
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 10.5px; font-weight: 500;
+    border: 2px solid var(--color-surface);
+  }
+  .activity-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .activity-text .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .activity-text strong {
+    color: var(--color-text-primary);
+    font-weight: 600;
+  }
+  .activity-time {
+    font-size: 12px;
+    color: var(--color-text-quaternary);
+    flex-shrink: 0;
+  }
+  .activity-empty {
+    color: var(--color-text-quaternary);
+    font-size: 12.5px;
+  }
+
+  /* 종료된 수업 섹션 */
+  .ended-section {
+    margin-top: 32px;
+  }
+  .ended-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--color-text-quaternary);
+    margin-bottom: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--color-border);
+  }
+  .session-card.ended {
+    opacity: 0.55;
+  }
+  .session-card.ended:hover {
+    opacity: 0.75;
+  }
+
+  /* 빈 상태 (수업 0개) — 참조용 (이번 mockup에는 데모 카드 표시) */
+</style>
+</head>
+<body>
+
+<header class="topbar" role="banner">
+  <div class="topbar-brand">Architecture Academy</div>
+  <div class="topbar-spacer"></div>
+  <div class="topbar-user">선생님</div>
+</header>
+
+<main class="dashboard-container" role="main">
+
+  <!-- 헤더 D안 (items-end) -->
+  <header class="dashboard-header">
+    <div class="dashboard-header-text">
+      <h1 class="dashboard-title">내 수업</h1>
+      <p class="dashboard-subtitle">3개 수업 · 진행 중 1개</p>
+    </div>
+    <button class="dashboard-cta" type="button" aria-label="새 수업 만들기">
+      <svg class="dashboard-cta-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3 L8 13 M3 8 L13 8"/></svg>
+      <span>수업 만들기</span>
+    </button>
+  </header>
+
+  <!-- 진행 중 수업 -->
+  <section class="sessions-list" aria-label="진행 중 수업">
+
+    <article class="session-card" tabindex="0">
+      <div class="session-top">
+        <div class="session-code-badge" aria-label="참여 코드 K8DM2A">K8DM2A</div>
+        <div class="session-title-block">
+          <div class="session-title">
+            <span>3학년 정보 선택 — 데이터베이스</span>
+            <span class="status-pill status-pill-active" role="status" aria-label="진행 중"><span class="status-dot"></span>진행 중</span>
+          </div>
+          <div class="session-meta-row">오늘 14:30 시작</div>
+        </div>
+        <div class="session-actions">
+          <button class="icon-btn" type="button" aria-label="QR코드 열기" title="QR코드">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><path d="M15 12 L21 12 M15 15 L18 15 L18 21 L15 21 L15 18"/></svg>
+          </button>
+          <button class="ghost-btn" type="button">종료</button>
+        </div>
+      </div>
+
+      <div class="session-stats" role="group" aria-label="수업 통계">
+        <div class="stat-cell">
+          <span class="stat-num">12</span>
+          <span class="stat-label">참여 학생</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-num">8</span>
+          <span class="stat-label">완료 Q&amp;A</span>
+        </div>
+        <div class="stat-cell">
+          <span class="stat-num">4</span>
+          <span class="stat-label">진행 중</span>
+        </div>
+      </div>
+
+      <div class="session-activity">
+        <div class="avatar-stack" aria-hidden="true">
+          <span class="avatar avatar-1">김</span>
+          <span class="avatar avatar-2">이</span>
+          <span class="avatar avatar-3">박</span>
+          <span class="avatar avatar-4">최</span>
+          <span class="avatar-overflow">+8</span>
+        </div>
+        <div class="activity-text">
+          <span class="truncate"><strong>김지우</strong>님이 "SQL과 NoSQL의 선택 기준" 완료</span>
+          <span class="activity-time">2분 전</span>
+        </div>
+      </div>
+    </article>
+
+  </section>
+
+  <!-- 종료된 수업 -->
+  <section class="ended-section" aria-label="종료된 수업">
+    <div class="ended-section-label">종료됨</div>
+    <div class="sessions-list">
+
+      <article class="session-card ended" tabindex="0">
+        <div class="session-top">
+          <div class="session-code-badge" aria-label="참여 코드 J3RP9X">J3RP9X</div>
+          <div class="session-title-block">
+            <div class="session-title">
+              <span>2학년 자율 — 컴퓨터 기초</span>
+              <span class="status-pill status-pill-ended" role="status" aria-label="종료"><span class="status-dot"></span>종료</span>
+            </div>
+            <div class="session-meta-row">어제</div>
+          </div>
+        </div>
+
+        <div class="session-stats">
+          <div class="stat-cell">
+            <span class="stat-num">18</span>
+            <span class="stat-label">참여 학생</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-num">15</span>
+            <span class="stat-label">완료 Q&amp;A</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-num">0</span>
+            <span class="stat-label">진행 중</span>
+          </div>
+        </div>
+
+        <div class="session-activity">
+          <div class="avatar-stack" aria-hidden="true">
+            <span class="avatar avatar-2">이</span>
+            <span class="avatar avatar-3">박</span>
+            <span class="avatar avatar-1">김</span>
+            <span class="avatar avatar-4">한</span>
+            <span class="avatar-overflow">+14</span>
+          </div>
+          <div class="activity-text">
+            <span class="truncate">종료된 수업이에요</span>
+          </div>
+        </div>
+      </article>
+
+      <article class="session-card ended" tabindex="0">
+        <div class="session-top">
+          <div class="session-code-badge" aria-label="참여 코드 P2WK4M">P2WK4M</div>
+          <div class="session-title-block">
+            <div class="session-title">
+              <span>방과후 IT — 네트워크 입문</span>
+              <span class="status-pill status-pill-ended" role="status" aria-label="종료"><span class="status-dot"></span>종료</span>
+            </div>
+            <div class="session-meta-row">3일 전</div>
+          </div>
+        </div>
+
+        <div class="session-stats">
+          <div class="stat-cell">
+            <span class="stat-num">9</span>
+            <span class="stat-label">참여 학생</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-num">7</span>
+            <span class="stat-label">완료 Q&amp;A</span>
+          </div>
+          <div class="stat-cell">
+            <span class="stat-num">0</span>
+            <span class="stat-label">진행 중</span>
+          </div>
+        </div>
+
+        <div class="session-activity">
+          <div class="activity-text">
+            <span class="activity-empty">종료된 수업이에요</span>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>
