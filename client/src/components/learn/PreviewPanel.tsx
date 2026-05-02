@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { DemoMeta } from '../../data/demos';
+import { getDemoComponent } from '../../demos/registry';
+import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
 import { useLearnStore } from '../../store/learn-store';
 import QuizTab from './QuizTab';
 
@@ -23,6 +25,7 @@ export default function PreviewPanel({
   quizProps,
 }: PreviewPanelProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const inlineHostRef = useRef<HTMLDivElement>(null);
   const previewTab = useLearnStore((state) => state.previewTab);
   const setPreviewTab = useLearnStore((state) => state.setPreviewTab);
 
@@ -31,18 +34,24 @@ export default function PreviewPanel({
   }, [initialTab, setPreviewTab]);
 
   const isDemo = previewTab === 'demo';
+  const inlineMeta = qaId ? getDemoComponent(qaId) : undefined;
 
   const handleScenarioHash = (nextScenarioId: string) => {
-    const iframe = iframeRef.current;
-    if (iframe && demo) {
-      // sandbox iframe은 cross-origin location.hash 쓰기를 차단하므로
-      // src 자체를 #scenario 으로 재할당하여 시나리오를 바꾼다.
-      iframe.src = `${demo.url}#${nextScenarioId}`;
+    if (!inlineMeta) {
+      const iframe = iframeRef.current;
+      if (iframe && demo) {
+        iframe.src = `${demo.url}#${nextScenarioId}`;
+      }
     }
     onScenarioChange(nextScenarioId);
   };
 
   const handleReload = () => {
+    if (inlineMeta) {
+      onScenarioChange(scenarioId);
+      return;
+    }
+
     const iframe = iframeRef.current;
     if (!iframe) {
       return;
@@ -62,8 +71,10 @@ export default function PreviewPanel({
   };
 
   const handleFullscreen = async () => {
-    const host = iframeRef.current?.closest('.phone-frame');
-    if (host instanceof HTMLElement && host.requestFullscreen) {
+    const host = inlineMeta
+      ? inlineHostRef.current
+      : (iframeRef.current?.closest('.phone-frame') as HTMLElement | null);
+    if (host && host.requestFullscreen) {
       try {
         await host.requestFullscreen();
       } catch {
@@ -71,6 +82,9 @@ export default function PreviewPanel({
       }
     }
   };
+
+  const InlineComponent = inlineMeta?.Component;
+  const inlineMaxWidth = inlineMeta ? DEMO_LAYOUT_MAX_WIDTH[inlineMeta.layout] : '';
 
   return (
     <section className="flex h-full flex-1 flex-col bg-[var(--color-surface-alt)]">
@@ -111,9 +125,21 @@ export default function PreviewPanel({
       </div>
 
       {isDemo ? (
-        <div className="flex flex-1 flex-col items-center justify-center overflow-auto p-6 lg:p-8">
-          {demo ? (
+        <div className="flex flex-1 flex-col overflow-auto px-4 py-6 lg:px-8">
+          {demo && InlineComponent ? (
             <>
+              <div ref={inlineHostRef} className={`mx-auto w-full ${inlineMaxWidth}`}>
+                <InlineComponent key={`${qaId}:${scenarioId}`} scenarioId={scenarioId} />
+              </div>
+              <ScenarioPicker
+                demo={demo}
+                scenarioId={scenarioId}
+                onChange={handleScenarioHash}
+                description={demo.description}
+              />
+            </>
+          ) : demo ? (
+            <div className="flex flex-1 flex-col items-center justify-center">
               <div className="phone-frame">
                 <div className="phone-notch" />
                 <div className="phone-screen">
@@ -142,7 +168,7 @@ export default function PreviewPanel({
                 ▶ <strong>{demo.scenarios.find((scenario) => scenario.id === scenarioId)?.label}</strong> —{' '}
                 {demo.description}
               </p>
-            </>
+            </div>
           ) : (
             <div className="rounded-xl border border-[var(--color-border)] bg-white p-6 text-center text-sm">
               이 문항의 시연은 콘텐츠 PR에서 연결됩니다.
@@ -155,5 +181,53 @@ export default function PreviewPanel({
         </div>
       )}
     </section>
+  );
+}
+
+function ScenarioPicker({
+  demo,
+  scenarioId,
+  onChange,
+  description,
+}: {
+  demo: DemoMeta;
+  scenarioId: string;
+  onChange: (scenarioId: string) => void;
+  description: string;
+}) {
+  const activeLabel = demo.scenarios.find((scenario) => scenario.id === scenarioId)?.label;
+
+  return (
+    <div className="mx-auto mt-6 flex w-full max-w-[860px] flex-col gap-3">
+      <div
+        className="flex flex-wrap gap-1.5 rounded-full border bg-white p-1"
+        style={{ borderColor: 'var(--color-border)' }}
+        aria-label="시연 시나리오 선택"
+        role="tablist"
+      >
+        {demo.scenarios.map((scenario) => {
+          const active = scenarioId === scenario.id;
+          return (
+            <button
+              key={scenario.id}
+              className="rounded-full px-3 py-1.5 text-[12px] font-medium transition"
+              onClick={() => onChange(scenario.id)}
+              style={{
+                background: active ? 'var(--color-text-primary)' : 'transparent',
+                color: active ? '#fff' : 'var(--color-text-muted)',
+              }}
+              role="tab"
+              aria-selected={active}
+              type="button"
+            >
+              {scenario.label}
+            </button>
+          );
+        })}
+      </div>
+      <p className="text-[12px] leading-[1.7]" style={{ color: 'var(--color-text-muted)' }}>
+        ▶ <strong style={{ color: 'var(--color-text-body)' }}>{activeLabel}</strong> — {description}
+      </p>
+    </div>
   );
 }
