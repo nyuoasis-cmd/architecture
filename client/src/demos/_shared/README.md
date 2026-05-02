@@ -74,7 +74,7 @@ const it = [
 validatePairSet(metaphor, it, { layout: 'wide', subPolicy: 'all' });
 ```
 
-## DO / DON'T
+## DO/DON'T
 
 DO
 - `import { ... } from '../_shared'` 만 사용한다.

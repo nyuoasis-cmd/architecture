@@ -62,7 +62,7 @@ const SCENES: Record<string, Scene> = {
   checkout: {
     title: '결제 확인 — 권한과 인터페이스',
     summary: '운영체제는 누가 무엇을 열 수 있는지 확인하고, 사람에게는 버튼과 창으로 결과를 보여 줍니다.',
-    active: 3,
+    active: 1,
     lanes: [
       ['앱 권한 확인', '로그인 상태 점검'],
       ['결제 버튼 표시', '확인 창 띄우기'],
