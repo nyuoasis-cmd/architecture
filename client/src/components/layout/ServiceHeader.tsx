@@ -19,5 +19,5 @@ export default function ServiceHeader() {
     };
   }, []);
 
-  return createElement('teachermate-nav', { active: 'Architecture' });
+  return createElement('teachermate-nav', { active: '앱 구조' });
 }
