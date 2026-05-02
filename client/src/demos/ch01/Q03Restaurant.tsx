@@ -1,17 +1,4 @@
-import {
-  CheckoutIcon,
-  GroupBadge,
-  IconCard,
-  OrdersIcon,
-  OsAllocateIcon,
-  OsFileIcon,
-  OsLockIcon,
-  OsScheduleIcon,
-  PairConnector,
-  SeatsIcon,
-  StorageBoxIcon,
-  type Tone,
-} from './_shared';
+import { Hero, Icons, LogBox, PairMatch, validatePairSet } from '../_shared';
 import type { DemoComponentProps } from '../types';
 
 type Scene = {
@@ -90,25 +77,27 @@ const SCENES: Record<string, Scene> = {
   },
 };
 
-const TONE: Tone = {
-  accent: '#0f766e',
-  accentSoft: '#ecfeff',
-  accentBorder: '#5eead4',
+const TONE = {
+  accent: 'var(--demo-accent-q03)',
+  accentSoft: 'var(--demo-accent-soft-q03)',
+  accentBorder: 'var(--demo-accent-border-q03)',
 };
 
 const RESTAURANT_PAIR = [
-  { icon: <SeatsIcon />, label: '자리 배치', sub: '손님에게 좌석 배정' },
-  { icon: <OrdersIcon />, label: '주문 나누기', sub: '먼저·나중 순서 조정' },
-  { icon: <StorageBoxIcon />, label: '영수증 보관', sub: '폴더에 정리' },
-  { icon: <CheckoutIcon />, label: '결제 확인', sub: '권한·승인' },
+  { icon: <Icons.SeatsIcon />, label: '자리 배치', sub: '손님에게 좌석 배정' },
+  { icon: <Icons.OrdersIcon />, label: '주문 나누기', sub: '먼저·나중 순서 조정' },
+  { icon: <Icons.StorageBoxIcon />, label: '영수증 보관', sub: '폴더에 정리' },
+  { icon: <Icons.CheckoutIcon />, label: '결제 확인', sub: '권한·승인' },
 ];
 
 const OS_PAIR = [
-  { icon: <OsAllocateIcon />, label: '자원 분배', sub: 'CPU·메모리 나눔' },
-  { icon: <OsScheduleIcon />, label: '작업 조정', sub: '스케줄링' },
-  { icon: <OsFileIcon />, label: '파일 관리', sub: '저장소 규칙' },
-  { icon: <OsLockIcon />, label: '권한·UI', sub: '승인·인터페이스' },
+  { icon: <Icons.OsAllocateIcon />, label: '자원 분배', sub: 'CPU·메모리 나눔' },
+  { icon: <Icons.OsScheduleIcon />, label: '작업 조정', sub: '스케줄링' },
+  { icon: <Icons.OsFileIcon />, label: '파일 관리', sub: '저장소 규칙' },
+  { icon: <Icons.OsLockIcon />, label: '권한·UI', sub: '승인·인터페이스' },
 ];
+
+validatePairSet(RESTAURANT_PAIR, OS_PAIR, { layout: 'wide', subPolicy: 'all' });
 
 export default function Q03Restaurant({ scenarioId }: DemoComponentProps) {
   const scene = SCENES[scenarioId] ?? SCENES.seats;
@@ -116,62 +105,20 @@ export default function Q03Restaurant({ scenarioId }: DemoComponentProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <section
-        className="rounded-2xl border p-5"
-        style={{
-          borderColor: 'var(--color-border)',
-          background: 'linear-gradient(135deg, #f0fdfa, #ffffff)',
-        }}
-      >
-        <p className="m-0 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-          운영체제의 역할
-        </p>
-        <h2 className="mt-1.5 text-[20px] font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
-          {scene.title}
-        </h2>
-        <p className="mt-2 text-[13px] leading-[1.7]" style={{ color: 'var(--color-text-body)' }}>
-          {scene.summary}
-        </p>
-      </section>
+      <Hero eyebrow="운영체제의 역할" title={scene.title} summary={scene.summary} tone={TONE} />
 
-      <section
-        className="rounded-2xl border p-5"
-        style={{ borderColor: 'var(--color-border)', background: '#fff' }}
-      >
-        <GroupBadge label="식당 운영" sub="비유" tone={TONE} />
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {RESTAURANT_PAIR.map((step, idx) => (
-            <IconCard
-              key={step.label}
-              icon={step.icon}
-              label={step.label}
-              sub={step.sub}
-              active={lastIdx === idx}
-              tone={TONE}
-            />
-          ))}
-        </div>
-
-        <PairConnector tone={TONE} />
-
-        <GroupBadge label="운영체제" sub="실제" tone={TONE} />
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {OS_PAIR.map((step, idx) => (
-            <IconCard
-              key={step.label}
-              icon={step.icon}
-              label={step.label}
-              sub={step.sub}
-              active={lastIdx === idx}
-              tone={TONE}
-            />
-          ))}
-        </div>
-      </section>
+      <PairMatch
+        metaphorTitle="식당 운영"
+        itTitle="운영체제"
+        metaphor={RESTAURANT_PAIR}
+        it={OS_PAIR}
+        activeIndex={lastIdx}
+        tone={TONE}
+      />
 
       <section
         className="rounded-2xl border p-4"
-        style={{ borderColor: 'var(--color-border)', background: '#fff' }}
+        style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg)' }}
       >
         <h3 className="m-0 text-[14px] font-semibold">식당 흐름 보드</h3>
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
@@ -185,7 +132,7 @@ export default function Q03Restaurant({ scenarioId }: DemoComponentProps) {
                 style={{
                   minHeight: 120,
                   borderColor: active ? TONE.accent : 'var(--color-border)',
-                  background: active ? TONE.accentSoft : '#f8fafc',
+                  background: active ? TONE.accentSoft : 'var(--demo-card-bg-alt)',
                 }}
               >
                 <p
@@ -199,7 +146,7 @@ export default function Q03Restaurant({ scenarioId }: DemoComponentProps) {
                     <div
                       key={item}
                       className="rounded-xl border bg-white px-2.5 py-2 text-[11px] leading-[1.5]"
-                      style={{ borderColor: 'var(--color-border)' }}
+                      style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg)' }}
                     >
                       {item}
                     </div>
@@ -211,26 +158,13 @@ export default function Q03Restaurant({ scenarioId }: DemoComponentProps) {
         </div>
         <div
           className="mt-3 rounded-2xl border px-3 py-2.5 text-[12px] leading-[1.7]"
-          style={{ borderColor: 'var(--color-border)', background: '#f8fafc', color: '#334155' }}
+          style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg-alt)', color: 'var(--demo-summary-text-stone)' }}
         >
           {scene.note}
         </div>
       </section>
 
-      <section
-        className="rounded-2xl border px-4 py-3"
-        style={{ borderColor: 'var(--color-border)', background: '#102a43', color: '#f8fafc' }}
-      >
-        <p className="m-0 text-[11px]" style={{ color: '#bfdbfe' }}>
-          매니저 로그
-        </p>
-        {scene.logs.map(([time, msg]) => (
-          <div key={time} className="font-mono text-[11px] leading-[1.8]">
-            <span style={{ color: '#93c5fd', marginRight: 6 }}>{time}</span>
-            {msg}
-          </div>
-        ))}
-      </section>
+      <LogBox logs={scene.logs} variant="blue" title="매니저 로그" lineTimeColor="var(--demo-log-time-cyan)" />
     </div>
   );
 }

@@ -1,0 +1,75 @@
+/* client/src/demos/_shared/design-tokens.css
+ * DESIGN-POLICY §9.B-3 예외 — raw hex 의 유일한 거주지.
+ * 컴포넌트는 var(--demo-...) 로만 참조. */
+
+:root {
+  /* Chapter accents */
+  --demo-accent-ch01: #ea580c;
+  --demo-accent-soft-ch01: #fff7ed;
+  --demo-accent-border-ch01: #fdba74;
+  --demo-accent-ch02: #0891b2;
+  --demo-accent-soft-ch02: #ecfeff;
+  --demo-accent-border-ch02: #67e8f9;
+  --demo-accent-ch03: #16a34a;
+  --demo-accent-soft-ch03: #f0fdf4;
+  --demo-accent-border-ch03: #86efac;
+  --demo-accent-ch04: #b45309;
+  --demo-accent-soft-ch04: #fef3c7;
+  --demo-accent-border-ch04: #fcd34d;
+  --demo-accent-ch05: #0284c7;
+  --demo-accent-soft-ch05: #f0f9ff;
+  --demo-accent-border-ch05: #7dd3fc;
+  --demo-accent-ch06: #dc2626;
+  --demo-accent-soft-ch06: #fef2f2;
+  --demo-accent-border-ch06: #fca5a5;
+  --demo-accent-ch07: #9333ea;
+  --demo-accent-soft-ch07: #faf5ff;
+  --demo-accent-border-ch07: #d8b4fe;
+  --demo-accent-ch08: #0d9488;
+  --demo-accent-soft-ch08: #f0fdfa;
+  --demo-accent-border-ch08: #5eead4;
+  --demo-accent-ch09: #4f46e5;
+  --demo-accent-soft-ch09: #eef2ff;
+  --demo-accent-border-ch09: #a5b4fc;
+  --demo-accent-ch10: #db2777;
+  --demo-accent-soft-ch10: #fdf2f8;
+  --demo-accent-border-ch10: #f9a8d4;
+
+  /* ch01 preserved accents */
+  --demo-accent-q02: #1d4ed8;
+  --demo-accent-soft-q02: #eff6ff;
+  --demo-accent-border-q02: #93c5fd;
+  --demo-accent-q03: #0f766e;
+  --demo-accent-soft-q03: #ecfeff;
+  --demo-accent-border-q03: #5eead4;
+  --demo-accent-q04: #7c3aed;
+  --demo-accent-soft-q04: #f5f3ff;
+  --demo-accent-border-q04: #c4b5fd;
+
+  /* Card + surfaces */
+  --demo-card-bg: #ffffff;
+  --demo-card-bg-alt: #f8fafc;
+  --demo-card-bg-soft-orange: #ffedd5;
+
+  /* Hero summary text */
+  --demo-summary-text-orange: #7c2d12;
+  --demo-summary-text-slate: #475569;
+  --demo-summary-text-stone: #334155;
+
+  /* Hot chip foregrounds */
+  --demo-chip-hot-orange-fg: #9a3412;
+  --demo-chip-hot-purple-fg: #5b21b6;
+
+  /* Log variants */
+  --demo-log-bg-stone: #111827;
+  --demo-log-bg-navy: #0f172a;
+  --demo-log-bg-blue: #102a43;
+  --demo-log-fg: #f8fafc;
+  --demo-log-time-stone: #94a3b8;
+  --demo-log-time-neutral: #a8a29e;
+  --demo-log-time-blue: #bfdbfe;
+  --demo-log-time-cyan: #93c5fd;
+  --demo-log-time-purple: #c4b5fd;
+
+  --demo-arrow-purple: #a78bfa;
+}

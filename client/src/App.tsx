@@ -13,6 +13,7 @@ import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import TeacherSessionPage from './pages/TeacherSessionPage';
+import ShowcasePage from './demos/_preview/ShowcasePage';
 
 export default function App() {
   return (
@@ -46,6 +47,7 @@ export default function App() {
           <Route path="/library" element={<LibraryPage />} />
           <Route path="/library/:chapterId/:qaId" element={<LearnPage mode="self" />} />
           <Route path="/learn/:sessionId" element={<LearnPage mode="session" />} />
+          <Route path="/demos-preview/showcase" element={<ShowcasePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </div>

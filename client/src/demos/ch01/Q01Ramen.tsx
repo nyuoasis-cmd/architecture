@@ -1,18 +1,4 @@
-import {
-  ArrowRight,
-  BowlIcon,
-  CpuIcon,
-  FlameIcon,
-  GroupBadge,
-  IconCard,
-  IngredientsIcon,
-  KeyboardIcon,
-  MonitorIcon,
-  PairConnector,
-  PotIcon,
-  RamIcon,
-  type Tone,
-} from './_shared';
+import { Hero, Icons, LogBox, PairFlow, StateChips, getTone, validatePairSet } from '../_shared';
 import type { DemoComponentProps } from '../types';
 
 type Scene = {
@@ -75,136 +61,59 @@ const SCENES: Record<string, Scene> = {
   },
 };
 
-const TONE: Tone = {
-  accent: '#ea580c',
-  accentSoft: '#fff7ed',
-  accentBorder: '#fdba74',
-};
+const TONE = getTone(1);
 
 const RAMEN_PAIR = [
-  { icon: <IngredientsIcon />, label: '재료', sub: '면·물·스프' },
-  { icon: <PotIcon />, label: '냄비', sub: '잠깐 올려두기' },
-  { icon: <FlameIcon />, label: '불', sub: '익혀서 변화' },
-  { icon: <BowlIcon />, label: '그릇', sub: '담아 내놓기' },
+  { icon: <Icons.IngredientsIcon />, label: '재료', sub: '면·물·스프' },
+  { icon: <Icons.PotIcon />, label: '냄비', sub: '잠깐 올려두기' },
+  { icon: <Icons.FlameIcon />, label: '불', sub: '익혀서 변화' },
+  { icon: <Icons.BowlIcon />, label: '그릇', sub: '담아 내놓기' },
 ];
 
 const COMPUTER_PAIR = [
-  { icon: <KeyboardIcon />, label: '입력', sub: '바깥에서 들어옴' },
-  { icon: <RamIcon />, label: '메모리', sub: '작업 중 보관' },
-  { icon: <CpuIcon />, label: '처리', sub: 'CPU가 계산' },
-  { icon: <MonitorIcon />, label: '출력', sub: '화면·스피커' },
+  { icon: <Icons.KeyboardIcon />, label: '입력', sub: '바깥에서 들어옴' },
+  { icon: <Icons.RamIcon />, label: '메모리', sub: '작업 중 보관' },
+  { icon: <Icons.CpuIcon />, label: '처리', sub: 'CPU가 계산' },
+  { icon: <Icons.MonitorIcon />, label: '출력', sub: '화면·스피커' },
 ];
+
+validatePairSet(RAMEN_PAIR, COMPUTER_PAIR, { layout: 'wide', subPolicy: 'all' });
 
 export default function Q01Ramen({ scenarioId }: DemoComponentProps) {
   const scene = SCENES[scenarioId] ?? SCENES.input;
 
   return (
     <div className="flex flex-col gap-3">
-      <section
-        className="rounded-2xl border p-5"
-        style={{
-          borderColor: 'var(--color-border)',
-          background: 'linear-gradient(135deg, #fff7ed, #ffedd5 58%, #ffffff)',
-        }}
-      >
-        <p className="m-0 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-          컴퓨터의 큰 그림
-        </p>
-        <h2 className="mt-1.5 text-[20px] font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
-          {scene.title}
-        </h2>
-        <p className="mt-2 text-[13px] leading-[1.7]" style={{ color: '#7c2d12' }}>
-          {scene.summary}
-        </p>
-      </section>
+      <Hero
+        eyebrow="컴퓨터의 큰 그림"
+        title={scene.title}
+        summary={scene.summary}
+        tone={TONE}
+        summaryTone="orange"
+        accentMix="var(--demo-card-bg-soft-orange)"
+      />
 
-      <section
-        className="rounded-2xl border p-5"
-        style={{ borderColor: 'var(--color-border)', background: '#fff' }}
-      >
-        <GroupBadge label="라면 만들기" sub="비유" tone={TONE} />
-        <div className="grid grid-cols-4 items-stretch gap-2">
-          {RAMEN_PAIR.map((step, idx) => (
-            <RowCell key={step.label} step={step} active={scene.active === idx} tone={TONE} showArrow={idx < 3} />
-          ))}
-        </div>
+      <PairFlow
+        metaphorTitle="라면 만들기"
+        itTitle="컴퓨터의 동작"
+        metaphor={RAMEN_PAIR}
+        it={COMPUTER_PAIR}
+        activeIndex={scene.active}
+        tone={TONE}
+      />
 
-        <PairConnector tone={TONE} />
+      <StateChips
+        title="지금 화면의 재료"
+        items={scene.items.map((item, idx) => ({
+          label: item,
+          active: idx === 0,
+          color: idx === 0 ? 'var(--demo-chip-hot-orange-fg)' : undefined,
+        }))}
+        tone={TONE}
+        description={scene.focus}
+      />
 
-        <GroupBadge label="컴퓨터의 동작" sub="실제" tone={TONE} />
-        <div className="grid grid-cols-4 items-stretch gap-2">
-          {COMPUTER_PAIR.map((step, idx) => (
-            <RowCell key={step.label} step={step} active={scene.active === idx} tone={TONE} showArrow={idx < 3} />
-          ))}
-        </div>
-      </section>
-
-      <section
-        className="rounded-2xl border p-4"
-        style={{ borderColor: 'var(--color-border)', background: '#fff' }}
-      >
-        <h3 className="m-0 text-[14px] font-semibold">지금 화면의 재료</h3>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {scene.items.map((item, idx) => (
-            <span
-              key={item}
-              className="rounded-full border px-3 py-1.5 text-[12px]"
-              style={
-                idx === 0
-                  ? { background: TONE.accentSoft, borderColor: TONE.accentBorder, color: '#9a3412' }
-                  : { background: '#f8fafc', borderColor: 'var(--color-border)' }
-              }
-            >
-              {item}
-            </span>
-          ))}
-        </div>
-        <p className="mt-3 text-[12px] leading-[1.7]" style={{ color: '#475569' }}>
-          {scene.focus}
-        </p>
-      </section>
-
-      <section
-        className="rounded-2xl border px-4 py-3"
-        style={{ borderColor: 'var(--color-border)', background: '#111827', color: '#f8fafc' }}
-      >
-        <p className="m-0 text-[11px]" style={{ color: '#94a3b8' }}>
-          실시간 로그
-        </p>
-        {scene.logs.map(([time, msg]) => (
-          <div key={time} className="font-mono text-[11px] leading-[1.8]">
-            <span style={{ color: '#94a3b8', marginRight: 6 }}>{time}</span>
-            {msg}
-          </div>
-        ))}
-      </section>
-    </div>
-  );
-}
-
-function RowCell({
-  step,
-  active,
-  tone,
-  showArrow,
-}: {
-  step: { icon: React.ReactNode; label: string; sub?: string };
-  active: boolean;
-  tone: Tone;
-  showArrow: boolean;
-}) {
-  return (
-    <div className="relative flex flex-col">
-      <IconCard icon={step.icon} label={step.label} sub={step.sub} active={active} tone={tone} />
-      {showArrow && (
-        <div
-          className="pointer-events-none absolute right-[-13px] top-1/2 -translate-y-1/2"
-          style={{ color: 'var(--color-text-faint)' }}
-          aria-hidden
-        >
-          <ArrowRight />
-        </div>
-      )}
+      <LogBox logs={scene.logs} variant="stone" title="실시간 로그" />
     </div>
   );
 }

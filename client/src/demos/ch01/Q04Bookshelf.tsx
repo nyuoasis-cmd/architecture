@@ -1,17 +1,4 @@
-import {
-  CacheIcon,
-  CheckBookIcon,
-  CpuIcon,
-  DeskIcon,
-  GroupBadge,
-  PenIcon,
-  RamIcon,
-  ResultIcon,
-  ShelfIcon,
-  StickyIcon,
-  StorageDiskIcon,
-  type Tone,
-} from './_shared';
+import { Hero, Icons, LogBox, PairVertical, StateChips, validatePairSet } from '../_shared';
 import type { DemoComponentProps } from '../types';
 
 type Scene = {
@@ -86,227 +73,95 @@ const SCENES: Record<string, Scene> = {
   },
 };
 
-const TONE: Tone = {
-  accent: '#7c3aed',
-  accentSoft: '#f5f3ff',
-  accentBorder: '#c4b5fd',
+const TONE = {
+  accent: 'var(--demo-accent-q04)',
+  accentSoft: 'var(--demo-accent-soft-q04)',
+  accentBorder: 'var(--demo-accent-border-q04)',
 };
 
-const PAIRS: Array<{
-  metaIcon: React.ReactNode;
-  metaLabel: string;
-  metaSub: string;
-  itIcon: React.ReactNode;
-  itLabel: string;
-  itSub: string;
-}> = [
+const METAPHOR = [
   {
-    metaIcon: <ShelfIcon />,
-    metaLabel: '책장',
-    metaSub: '오래 보관',
-    itIcon: <StorageDiskIcon />,
-    itLabel: '저장소',
-    itSub: 'SSD·HDD',
+    icon: <Icons.ShelfIcon />,
+    label: '책장',
+    sub: '오래 보관',
   },
   {
-    metaIcon: <DeskIcon />,
-    metaLabel: '책상',
-    metaSub: '지금 펼친 자료',
-    itIcon: <RamIcon />,
-    itLabel: 'RAM',
-    itSub: '작업 메모리',
+    icon: <Icons.DeskIcon />,
+    label: '책상',
+    sub: '지금 펼친 자료',
   },
   {
-    metaIcon: <StickyIcon />,
-    metaLabel: '포스트잇',
-    metaSub: 'CPU 가까이',
-    itIcon: <CacheIcon />,
-    itLabel: '캐시',
-    itSub: 'L1·L2·L3',
+    icon: <Icons.StickyIcon />,
+    label: '포스트잇',
+    sub: 'CPU 가까이',
   },
   {
-    metaIcon: <PenIcon />,
-    metaLabel: '펜',
-    metaSub: '실제 계산',
-    itIcon: <CpuIcon />,
-    itLabel: 'CPU',
-    itSub: '연산·판단',
+    icon: <Icons.PenIcon />,
+    label: '펜',
+    sub: '실제 계산',
   },
   {
-    metaIcon: <CheckBookIcon />,
-    metaLabel: '다시 꽂기',
-    metaSub: '결과 보관·출력',
-    itIcon: <ResultIcon />,
-    itLabel: '결과 저장',
-    itSub: '저장·화면',
+    icon: <Icons.CheckBookIcon />,
+    label: '다시 꽂기',
+    sub: '결과 보관·출력',
   },
 ];
+
+const IT = [
+  {
+    icon: <Icons.StorageDiskIcon />,
+    label: '저장소',
+    sub: 'SSD·HDD',
+  },
+  {
+    icon: <Icons.RamIcon />,
+    label: 'RAM',
+    sub: '작업 메모리',
+  },
+  {
+    icon: <Icons.CacheIcon />,
+    label: '캐시',
+    sub: 'L1·L2·L3',
+  },
+  {
+    icon: <Icons.CpuIcon />,
+    label: 'CPU',
+    sub: '연산·판단',
+  },
+  {
+    icon: <Icons.ResultIcon />,
+    label: '결과 저장',
+    sub: '저장·화면',
+  },
+];
+
+validatePairSet(METAPHOR, IT, { layout: 'square', subPolicy: 'all' });
 
 export default function Q04Bookshelf({ scenarioId }: DemoComponentProps) {
   const scene = SCENES[scenarioId] ?? SCENES.storage;
 
   return (
     <div className="flex flex-col gap-3">
-      <section
-        className="rounded-2xl border p-5"
-        style={{
-          borderColor: 'var(--color-border)',
-          background: 'linear-gradient(135deg, #f5f3ff, #ffffff)',
-        }}
-      >
-        <p className="m-0 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-          데이터 흐름
-        </p>
-        <h2 className="mt-1.5 text-[20px] font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
-          {scene.title}
-        </h2>
-        <p className="mt-2 text-[13px] leading-[1.7]" style={{ color: 'var(--color-text-body)' }}>
-          {scene.summary}
-        </p>
-      </section>
+      <Hero eyebrow="데이터 흐름" title={scene.title} summary={scene.summary} tone={TONE} />
 
-      <section
-        className="rounded-2xl border p-4"
-        style={{ borderColor: 'var(--color-border)', background: '#fff' }}
-      >
-        <div className="grid grid-cols-[1fr_auto_1fr] gap-3">
-          <div>
-            <GroupBadge label="도서관 작업" sub="비유" tone={TONE} />
-          </div>
-          <div />
-          <div>
-            <GroupBadge label="컴퓨터 메모리" sub="실제" tone={TONE} />
-          </div>
+      <PairVertical
+        metaphorTitle="도서관 작업"
+        itTitle="컴퓨터 메모리"
+        pairs={METAPHOR.map((metaphor, index) => ({ metaphor, it: IT[index] }))}
+        activeIndex={scene.active}
+        tone={TONE}
+      />
 
-          {PAIRS.map((pair, idx) => {
-            const active = scene.active === idx;
-            return (
-              <FragmentRow
-                key={pair.metaLabel}
-                pair={pair}
-                active={active}
-                tone={TONE}
-                showDivider={idx < PAIRS.length - 1}
-              />
-            );
-          })}
-        </div>
-      </section>
+      <StateChips
+        items={scene.chips.map((chip, idx) => ({
+          label: chip,
+          active: scene.hot === idx,
+          color: scene.hot === idx ? 'var(--demo-chip-hot-purple-fg)' : undefined,
+        }))}
+        tone={TONE}
+      />
 
-      <section
-        className="rounded-2xl border p-4"
-        style={{ borderColor: 'var(--color-border)', background: '#fff' }}
-      >
-        <h3 className="m-0 text-[14px] font-semibold">현재 상태</h3>
-        <div className="mt-2 flex flex-wrap gap-2">
-          {scene.chips.map((chip, idx) => {
-            const hot = scene.hot === idx;
-            return (
-              <span
-                key={chip}
-                className="rounded-full border px-3 py-1.5 text-[11px]"
-                style={
-                  hot
-                    ? { background: TONE.accentSoft, borderColor: TONE.accentBorder, color: '#5b21b6' }
-                    : { background: '#fff', borderColor: 'var(--color-border)' }
-                }
-              >
-                {chip}
-              </span>
-            );
-          })}
-        </div>
-      </section>
-
-      <section
-        className="rounded-2xl border px-4 py-3"
-        style={{ borderColor: 'var(--color-border)', background: '#111827', color: '#f8fafc' }}
-      >
-        <p className="m-0 text-[11px]" style={{ color: '#c4b5fd' }}>
-          흐름 로그
-        </p>
-        {scene.logs.map(([time, msg]) => (
-          <div key={time} className="font-mono text-[11px] leading-[1.8]">
-            <span style={{ color: '#c4b5fd', marginRight: 6 }}>{time}</span>
-            {msg}
-          </div>
-        ))}
-      </section>
+      <LogBox logs={scene.logs} variant="stone" title="흐름 로그" lineTimeColor="var(--demo-log-time-purple)" />
     </div>
-  );
-}
-
-function FragmentRow({
-  pair,
-  active,
-  tone,
-}: {
-  pair: {
-    metaIcon: React.ReactNode;
-    metaLabel: string;
-    metaSub: string;
-    itIcon: React.ReactNode;
-    itLabel: string;
-    itSub: string;
-  };
-  active: boolean;
-  tone: Tone;
-  showDivider: boolean;
-}) {
-  const cellStyle: React.CSSProperties = {
-    borderColor: active ? tone.accent : 'var(--color-border)',
-    background: active ? tone.accentSoft : '#fff',
-    boxShadow: active ? `0 8px 18px ${tone.accent}1f` : undefined,
-  };
-  const labelColor = active ? tone.accent : 'var(--color-text-primary)';
-
-  return (
-    <>
-      <div className="rounded-2xl border px-3 py-2.5 transition" style={cellStyle}>
-        <div className="flex items-center gap-2.5">
-          <span
-            className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center"
-            style={{ color: active ? tone.accent : 'var(--color-text-muted)' }}
-          >
-            {pair.metaIcon}
-          </span>
-          <div className="min-w-0">
-            <p className="m-0 text-[12px] font-bold leading-tight" style={{ color: labelColor }}>
-              {pair.metaLabel}
-            </p>
-            <p className="mt-0.5 text-[10px] leading-tight" style={{ color: 'var(--color-text-muted)' }}>
-              {pair.metaSub}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div
-        className="flex items-center justify-center text-[14px] font-bold"
-        style={{ color: active ? tone.accent : 'var(--color-text-faint)' }}
-        aria-hidden
-      >
-        ≈
-      </div>
-
-      <div className="rounded-2xl border px-3 py-2.5 transition" style={cellStyle}>
-        <div className="flex items-center gap-2.5">
-          <span
-            className="inline-flex h-9 w-9 flex-shrink-0 items-center justify-center"
-            style={{ color: active ? tone.accent : 'var(--color-text-muted)' }}
-          >
-            {pair.itIcon}
-          </span>
-          <div className="min-w-0">
-            <p className="m-0 text-[12px] font-bold leading-tight" style={{ color: labelColor }}>
-              {pair.itLabel}
-            </p>
-            <p className="mt-0.5 text-[10px] leading-tight" style={{ color: 'var(--color-text-muted)' }}>
-              {pair.itSub}
-            </p>
-          </div>
-        </div>
-      </div>
-    </>
   );
 }
