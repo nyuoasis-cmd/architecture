@@ -1,0 +1,67 @@
+{
+  "step": "pr15b",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-91",
+  "ts": "2026-05-03T22:18:45Z",
+  "branch": "feat/preview-inline-ch04-q5-q7",
+  "commit": "428d0a9f35aa6fe1409871888d11737dceaa35bf",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-frame-inline",
+      "verdict": "PASS",
+      "evidence": "`ch04_q05`~`ch04_q07` desktop/mobile 모두 `.phone-frame` / `.phone-notch` count 가 `0` 이다. 새 ch04 데모 3개는 iframe 폰 셸 없이 인라인 React preview 로 렌더링된다."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "PASS",
+      "evidence": "1440x900 에서 세 route 모두 section count 가 `4` 이고 top 좌표가 오름차순이다. q05 `129 < 264.78 < 613.84 < 874.81`, q06 `129 < 264.78 < 613.84 < 874.81`, q07 `129 < 264.78 < 613.84 < 753.52`."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "시나리오 탭 4개를 순회 클릭했을 때 hash, hero, pair active 가 모두 동기화됐다. 예: q05 `atomic→consistent→isolated→durable`, q06 `backup→rpo→rto→drill`, q07 `goal→chart→axis→focus` 순서로 이동하며 각 단계의 메타포/IT active 카드가 함께 바뀌었다."
+    },
+    {
+      "id": "V4-contrast",
+      "verdict": "PASS",
+      "evidence": "활성 카드 라벨 색은 `rgb(180, 83, 9)`, 활성 배경은 `rgb(254, 243, 199)` 로 측정됐다. 대비비는 `4.51:1` 이고 WCAG AA `4.5:1` 이상을 만족한다."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "PASS",
+      "evidence": "세 route 모두 wide layout 컨테이너 폭은 `776px` 로 `max-w-[860px]` 안에 있고, pair row grid template 는 양쪽 row 모두 `177.5px 177.5px 177.5px 177.5px` 로 4열 균등 분할이다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "세 route 의 pair row 8개 카드 모두 SVG 를 포함한다. row별 `querySelectorAll('svg').length` 는 공통으로 `[2,2,2,1] / [2,2,2,1]` 이라 메타포/IT 아이콘이 양쪽 모두 렌더링된다."
+    },
+    {
+      "id": "V7-baseline-spotcheck",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check 로 `/library/4/ch04_q04` 를 확인했다. `.phone-frame` count `0`, 시나리오 tablist count `1`, 루트 CSS token `--demo-accent-ch04 = #b45309` 로 기존 ch04 amber-700 baseline 이 유지된다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852 에서 세 route 모두 시나리오 tablist bottom 이 viewport 안에 있다. q05/q06 은 `276.78px`, q07 은 `238.39px` 이고 wrapper flex-direction 도 모두 `column-reverse` 라서 chips 가 데모 위에 먼저 노출된다. hero/pair 시작점도 q05 `341.56/521.53`, q06 `341.56/499.44`, q07 `303.17/483.14` 로 첫 화면 안에 들어온다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "393x852 에서 세 route 의 pair row grid template 가 모두 `155.5px 155.5px` 로 2열 변환됐다. `document.documentElement.scrollWidth` 는 전 route 공통 `393px` 로 가로 스크롤이 없다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr15b-round1.md` §B 만 따랐다.",
+    "Generator 센티넬 SHA `428d0a9f35aa6fe1409871888d11737dceaa35bf` 와 동일 커밋에서 평가했다.",
+    "공유 환경에서 Vite dev server 는 `http://127.0.0.1:5187` 에서 검증했다.",
+    "브라우저 자동화는 `puppeteer-core` + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "캡처 산출물: `/tmp/pr15b-r1-eval-visual/ch04_q05-desktop.png`, `/tmp/pr15b-r1-eval-visual/ch04_q06-desktop.png`, `/tmp/pr15b-r1-eval-visual/ch04_q07-desktop.png`, `/tmp/pr15b-r1-eval-visual/ch04_q05-mobile.png`, `/tmp/pr15b-r1-eval-visual/ch04_q06-mobile.png`, `/tmp/pr15b-r1-eval-visual/ch04_q07-mobile.png`, `/tmp/pr15b-r1-eval-visual/ch04_q04-baseline-desktop.png`."
+    ]
+}

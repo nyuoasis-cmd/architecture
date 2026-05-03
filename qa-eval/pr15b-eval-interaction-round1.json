@@ -1,0 +1,107 @@
+{
+  "step": "pr15b",
+  "round": 1,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-92",
+  "ts": "2026-05-03T22:12:11Z",
+  "verdict": "PASS",
+  "branch": "feat/preview-inline-ch04-q5-q7",
+  "commit_under_test": "428d0a9f35aa6fe1409871888d11737dceaa35bf",
+  "generator_commit": "428d0a9f35aa6fe1409871888d11737dceaa35bf",
+  "scope": {
+    "focus": "§C interaction static verification for ch04_q05~q07 plus regression spot-check",
+    "build": "PASS",
+    "raw_hex_grep": "PASS (0 matches in client/src/demos/ch04/*.tsx)",
+    "shared_import_grep": "PASS (0 forbidden imports in Q05/Q06/Q07)",
+    "validate_pair_set": [
+      "Q05Acid layout=wide subPolicy=all",
+      "Q06Backup layout=wide subPolicy=all",
+      "Q07Visualization layout=wide subPolicy=all"
+    ],
+    "deep_link_guards": [
+      "client/src/pages/LearnPage.tsx:145-147 reads window.location.hash and falls back only when hash is invalid",
+      "client/src/components/learn/PreviewPanel.tsx:62 and :152 preserve scenario hash on reload and iframe src"
+    ],
+    "unchanged_paths": [
+      "client/src/demos/ch01/**",
+      "client/src/demos/ch02/**",
+      "client/src/demos/ch03/**",
+      "client/src/demos/ch04/Q01DataShape.tsx",
+      "client/src/demos/ch04/Q02DataFormat.tsx",
+      "client/src/demos/ch04/Q03DataDup.tsx",
+      "client/src/demos/ch04/Q04DataIndex.tsx",
+      "client/src/components/learn/PreviewPanel.tsx",
+      "client/src/pages/LearnPage.tsx"
+    ]
+  },
+  "checks": [
+    {
+      "route": "/library/4/ch04_q05#atomic",
+      "expected": "SCENES.atomic <-> demos.ts atomic",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q05#consistent",
+      "expected": "SCENES.consistent <-> demos.ts consistent",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q05#isolated",
+      "expected": "SCENES.isolated <-> demos.ts isolated",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q05#durable",
+      "expected": "SCENES.durable <-> demos.ts durable",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q06#backup",
+      "expected": "SCENES.backup <-> demos.ts backup",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q06#rpo",
+      "expected": "SCENES.rpo <-> demos.ts rpo",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q06#rto",
+      "expected": "SCENES.rto <-> demos.ts rto",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q06#drill",
+      "expected": "SCENES.drill <-> demos.ts drill",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q07#goal",
+      "expected": "SCENES.goal <-> demos.ts goal",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q07#chart",
+      "expected": "SCENES.chart <-> demos.ts chart",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q07#axis",
+      "expected": "SCENES.axis <-> demos.ts axis",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q07#focus",
+      "expected": "SCENES.focus <-> demos.ts focus",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/3/ch03_q04#staging",
+      "expected": "existing deep-link regression spot-check remains valid on unchanged LearnPage/PreviewPanel path",
+      "result": "PASS"
+    }
+  ],
+  "fail_items": [],
+  "revise_items": []
+}
