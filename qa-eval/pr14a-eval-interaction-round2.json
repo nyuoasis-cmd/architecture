@@ -1,0 +1,63 @@
+{
+  "step": "pr14a",
+  "phase": "eval-interaction-round2",
+  "round": 2,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-73",
+  "ts": "2026-05-03T11:28:20Z",
+  "branch": "feat/preview-inline-ch03-q1-q4",
+  "evaluated_commit": "b8d1a60f80e38e5bfcfc30f343252fbd065fc616",
+  "overall": "PASS",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "`client/` and `server/` both completed `npm run build` successfully after installing the branch dependencies in each workspace."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "`grep -rE \"['\\\"]#[0-9a-fA-F]{3,8}['\\\"]\" client/src/demos/ch03 --include='*.tsx' --include='*.ts'` returned no matches, so the raw-hex ban still holds for the ch03 inline demos."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "`grep -RE \"from ['\\\"]\\.\\.?/_shared/[^i]\" client/src/demos/ch03/*.tsx` returned no matches, so the ch03 demos still avoid forbidden direct `_shared/*` imports beyond the allowed barrel usage and `../types` type imports."
+    },
+    {
+      "id": "I4",
+      "verdict": "PASS",
+      "evidence": "The round-2 delta is limited to `client/src/components/learn/PreviewPanel.tsx`, while `client/src/demos/registry.ts` still registers `ch03_q01` through `ch03_q04` and each ch03 demo source still contains its `validatePairSet(...)` setup from the round-1 pass state."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "`git diff --name-only HEAD^..HEAD` shows only `client/src/components/learn/PreviewPanel.tsx`, so the ch03 content files and `_shared` primitives that satisfied the round-1 content/shape contract were not touched in round 2."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "Runtime replay on `/library/2/ch02_q01` clicked all four scenario tabs in the inline preview. Each click set the clicked tab to `aria-selected=\"true\"` and kept the preview on the inline React path with zero `iframe` and zero `.phone-frame` nodes."
+    },
+    {
+      "id": "I7",
+      "verdict": "PASS",
+      "evidence": "Static inspection shows `window.history.replaceState(null, '', `#${nextScenarioId}`)` inside `handleScenarioHash` for the inline branch in `PreviewPanel.tsx`. Browser replay on `/library/2/ch02_q01` then confirmed the hash changed in sequence to `#os`, `#driver`, `#app`, and `#middleware` on the corresponding tab clicks."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "Iframe fallback behavior outside the inline path remains intact. On `/library/4/ch04_q01`, the preview rendered a `.phone-frame iframe`, and clicking the second scenario updated its `src` from `/demos/ch04/q01.html#structured` to `/demos/ch04/q01.html#semi`."
+    }
+  ],
+  "critical_findings": [],
+  "summary": "PR14a round-2 interaction evaluation passed. The inline scenario chip path now synchronizes `window.location.hash` without regressing the pre-existing inline rendering contract or the iframe fallback flow.",
+  "notes": [
+    "The evaluated branch head was `b8d1a60f80e38e5bfcfc30f343252fbd065fc616` from `origin/feat/preview-inline-ch03-q1-q4`.",
+    "Runtime interaction checks were executed against a local Vite dev server at `http://127.0.0.1:5183` because port 5182 was already occupied in the shared environment.",
+    "Browser verification used temporary Playwright execution via `npx -p playwright@1.52.0` with the system Chrome binary at `/usr/bin/google-chrome-stable`.",
+    "No page-level JavaScript exceptions were emitted during the inline hash-sync replay or the iframe fallback spot check."
+  ],
+  "next_action": "PASS. No generator follow-up is required from T4."
+}
