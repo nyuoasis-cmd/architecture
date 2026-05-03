@@ -605,6 +605,135 @@ export function CdIcon() {
   );
 }
 
+export function AtomicityIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="14" cy="20" r="5" />
+      <circle cx="26" cy="20" r="5" />
+      <path d="M19 20h2M12 20h4M24 20h4" />
+    </svg>
+  );
+}
+
+export function ConsistencyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 10h20v20H10z" />
+      <path d="M16 16h8M16 21h8M16 26h8" />
+      <path d="M13 16h1M13 21h1M13 26h1" />
+    </svg>
+  );
+}
+
+export function IsolationIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="9" height="20" rx="2" />
+      <rect x="23" y="10" width="9" height="20" rx="2" />
+      <path d="M17 20h6" />
+      <path d="M19 14v12" />
+      <path d="M21 14v12" />
+    </svg>
+  );
+}
+
+export function DurabilityIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 11h20v18H10z" />
+      <path d="M15 11V8h10v3" />
+      <path d="M15 24l3 3 7-7" />
+    </svg>
+  );
+}
+
+export function BackupItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <ellipse cx="20" cy="11" rx="9" ry="3.5" />
+      <path d="M11 11v12a9 3.5 0 0 0 18 0V11" />
+      <path d="M20 16v8" />
+      <path d="m16 20 4 4 4-4" />
+    </svg>
+  );
+}
+
+export function RpoIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 14v7l4 2" />
+      <path d="M11 11l3 3M29 11l-3 3" />
+    </svg>
+  );
+}
+
+export function RtoIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="17" cy="17" r="7" />
+      <path d="m22 22 7 7" />
+      <path d="M17 14v4l3 2" />
+      <path d="M28 11v6h-6" />
+    </svg>
+  );
+}
+
+export function DrillItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 30V13l11-5 11 5v17H9z" />
+      <path d="M15 20h10M20 15v10" />
+      <path d="M14 30v-5h12v5" />
+    </svg>
+  );
+}
+
+export function GoalIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="11" />
+      <circle cx="20" cy="20" r="6" />
+      <circle cx="20" cy="20" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M29 11l-4 4" />
+    </svg>
+  );
+}
+
+export function ChartIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 30V12" />
+      <path d="M10 30h20" />
+      <rect x="14" y="20" width="3" height="10" />
+      <rect x="19" y="16" width="3" height="14" />
+      <rect x="24" y="12" width="3" height="18" />
+    </svg>
+  );
+}
+
+export function AxisIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 30V11" />
+      <path d="M10 30h20" />
+      <path d="M14 25l4-6 4 3 5-8" />
+      <path d="M13 15h2M13 20h2M18 29v-2M23 29v-2" />
+    </svg>
+  );
+}
+
+export function SimplifyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 13h20" />
+      <path d="M10 20h14" />
+      <path d="M10 27h8" />
+      <path d="m24 25 3 3 5-6" />
+    </svg>
+  );
+}
+
 export function RollbackIcon() {
   return (
     <svg {...ICON_BASE} aria-hidden>
