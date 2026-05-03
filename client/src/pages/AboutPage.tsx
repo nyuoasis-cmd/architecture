@@ -28,8 +28,7 @@ export default function AboutPage() {
             책 기반 흐름을 교실에서 바로 쓰는 학습 서비스로 옮겼습니다.
           </h1>
           <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-600 sm:text-base">
-            Architecture는 알렉의 『기술노트(With 알렉)』에서 받은 학습 구조의 영감을 바탕으로,
-            교사가 세션을 열고 학생이 코드로 참여해 개념을 빠르게 따라올 수 있게 설계한 서비스입니다.
+            교사가 세션을 열고 학생이 코드로 참여해 IT 개념을 빠르게 따라올 수 있게 설계한 학습 서비스입니다.
           </p>
         </div>
       </section>
@@ -43,8 +42,7 @@ export default function AboutPage() {
               구성했습니다. 교사는 세션을 만들고, 학생은 수업 코드로 들어와 같은 챕터를 함께 따라갑니다.
             </p>
             <p>
-              출처 표기는 공개적으로 유지합니다. 참고 도서는 알렉 『기술노트(With 알렉)』이며, 서비스 안의
-              설명 문장과 Q&A 본문은 그대로 옮기지 않고 새로 작성된 학습용 텍스트만 사용합니다.
+              모든 학습 콘텐츠는 자체 작성된 학습용 텍스트로 제공합니다.
             </p>
           </div>
         </article>
@@ -52,10 +50,6 @@ export default function AboutPage() {
         <aside className="rounded-[28px] border border-[var(--color-border)] bg-stone-950 p-6 text-stone-50 shadow-sm sm:p-8">
           <p className="text-sm font-semibold uppercase tracking-[0.16em] text-stone-300">운영 메모</p>
           <dl className="mt-5 space-y-4 text-sm leading-7">
-            <div>
-              <dt className="font-medium text-white">책 출처</dt>
-              <dd className="text-stone-300">알렉 『기술노트(With 알렉)』(2026)</dd>
-            </div>
             <div>
               <dt className="font-medium text-white">도메인</dt>
               <dd className="text-stone-300">architecture.teachermate.co.kr</dd>

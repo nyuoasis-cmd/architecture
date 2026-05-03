@@ -179,6 +179,102 @@
   }
 }
 
+/* ====================================================================
+   Hero LandingPage — 한결 v1 §9.F 6요소 (영문 라벨 / 제목 / 캡션 / CTA cluster)
+   ai-app-builder 표준 정합 (2026-05-03)
+   ==================================================================== */
+.hero-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 64px 32px;
+  text-align: center;
+  background: var(--color-surface);
+}
+.hero-inner {
+  width: 100%;
+  max-width: 880px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hero-label {
+  font-size: var(--type-label-en-size);
+  font-weight: var(--type-label-en-weight);
+  letter-spacing: var(--type-label-en-tracking);
+  text-transform: uppercase;
+  color: var(--color-text-muted);
+  margin-bottom: 24px;
+  word-break: keep-all;
+}
+.hero-title {
+  font-family: var(--font-heading);
+  font-size: var(--type-hero-size);
+  font-weight: 600;
+  letter-spacing: var(--type-hero-tracking);
+  line-height: 1.05;
+  color: var(--color-text-primary);
+  word-break: keep-all;
+  margin: 0 0 28px;
+}
+.hero-caption {
+  font-size: var(--type-body-landing-size);
+  font-weight: 400;
+  line-height: var(--type-body-landing-leading);
+  color: var(--color-text-body);
+  max-width: 640px;
+  word-break: keep-all;
+  margin: 0 0 56px;
+}
+.hero-cta-cluster {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.cta {
+  height: 56px;
+  padding: 0 32px;
+  border-radius: var(--radius-btn-landing);
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  cursor: pointer;
+  transition: all 200ms var(--ease-smooth);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  text-decoration: none;
+  word-break: keep-all;
+}
+.cta-primary {
+  background: var(--color-btn-primary);
+  color: var(--color-surface);
+}
+.cta-primary:hover { background: var(--color-btn-primary-hover); }
+.cta-secondary {
+  background: var(--color-surface);
+  color: var(--color-text-body);
+  border: 1px solid var(--color-border);
+}
+.cta-secondary:hover {
+  background: var(--color-surface-hover);
+  border-color: var(--color-border-hover);
+}
+@media (max-width: 640px) {
+  .hero-cta-cluster {
+    flex-direction: column;
+    width: 100%;
+    max-width: 320px;
+    gap: 12px;
+  }
+  .cta { width: 100%; }
+  .hero-page { padding: 64px 20px; }
+}
+
 @layer components {
   .mtab {
     color: var(--color-text-muted);
