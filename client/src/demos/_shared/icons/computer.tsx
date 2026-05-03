@@ -142,3 +142,131 @@ export function ResultIcon() {
     </svg>
   );
 }
+
+export function OsIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="7" width="28" height="26" rx="3" />
+      <path d="M6 13h28" />
+      <circle cx="11" cy="10" r="1" fill="currentColor" stroke="none" />
+      <circle cx="15" cy="10" r="1" fill="currentColor" stroke="none" />
+      <path d="M12 19h8M12 24h16M12 29h12" />
+    </svg>
+  );
+}
+
+export function DriverIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="13" width="26" height="14" rx="2" />
+      <path d="M11 13V9h18v4" />
+      <path d="M13 20h4M23 20h4" />
+      <path d="M16 27v4M24 27v4" />
+    </svg>
+  );
+}
+
+export function AppIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="8" width="24" height="24" rx="5" />
+      <path d="M15 14h10v10H15z" />
+      <path d="M15 27h10" />
+    </svg>
+  );
+}
+
+export function MiddlewareIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="8" width="24" height="7" rx="2" />
+      <rect x="8" y="17" width="24" height="7" rx="2" />
+      <rect x="8" y="26" width="24" height="7" rx="2" />
+      <path d="M20 15v2M20 24v2" />
+    </svg>
+  );
+}
+
+export function OpenSourceIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 8a8 8 0 0 0-8 8c0 6 8 16 8 16s8-10 8-16a8 8 0 0 0-8-8z" />
+      <path d="M20 13v8M16 17h8" />
+    </svg>
+  );
+}
+
+export function CommercialIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M24 15c-1-1-2.5-2-4.5-2-2.5 0-4.5 1.3-4.5 3.5s1.8 3 4.4 3.6 4.6 1.3 4.6 3.9-2.3 4-5 4c-2 0-3.9-.7-5.1-2" />
+      <path d="M20 11v18" />
+    </svg>
+  );
+}
+
+export function GplIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 14a10 10 0 1 1 4 18" />
+      <path d="M20 20h7" />
+      <path d="M20 15h8" />
+      <path d="M20 25h5" />
+    </svg>
+  );
+}
+
+export function StudentLicenseIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M7 14h26v18H7z" />
+      <path d="M11 14V9h18v5" />
+      <path d="M13 23h7M13 27h11" />
+      <circle cx="27" cy="24" r="3" />
+    </svg>
+  );
+}
+
+export function ModuleIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="8" width="10" height="10" rx="1" />
+      <rect x="22" y="8" width="10" height="10" rx="1" />
+      <rect x="15" y="22" width="10" height="10" rx="1" />
+      <path d="M18 13h4M20 18v4" />
+    </svg>
+  );
+}
+
+export function PackageIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7 31 13v14L20 33 9 27V13z" />
+      <path d="M20 7v12M9 13l11 6 11-6" />
+      <path d="M20 19v14" />
+    </svg>
+  );
+}
+
+export function DependencyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="9" height="9" rx="1" />
+      <rect x="24" y="10" width="9" height="9" rx="1" />
+      <rect x="15" y="23" width="10" height="9" rx="1" />
+      <path d="M16 14h8M20 19v4" />
+    </svg>
+  );
+}
+
+export function ItInstallIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 8v14" />
+      <path d="M14 16l6 6 6-6" />
+      <rect x="9" y="25" width="22" height="7" rx="2" />
+      <path d="M15 28h10" />
+    </svg>
+  );
+}
