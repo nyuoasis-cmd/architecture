@@ -1,0 +1,74 @@
+{
+  "step": "pr16a",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-94",
+  "ts": "2026-05-03T22:42:18Z",
+  "branch": "codex/pr16a-r1",
+  "commit": "e8df7e4b0f03903f2e7a7a1918a90310a28c7bc9",
+  "verdict": "FAIL",
+  "fail_items": [
+    "V1/V2/V3/V4/V5/V6/V8/V9 blocked at runtime: `client/src/demos/ch05/Q02WebStack.tsx` passes raw acronym labels `HTML`, `CSS`, and `JS` into `validatePairSet()`. `_shared/labels.ts` rejects those values with `[validateLabel] 영어 raw 약자 단독 금지 — 한+영 병기`, and because `registry` imports the ch05 demo module eagerly, `/library/5/ch05_q01`~`ch05_q04` all fail before the scenario tablist or inline preview renders.",
+    "V7 baseline spot-check also fails for the same reason: `/library/4/ch04_q04` now crashes with the identical `HTML` validation exception even though the ch04 demo itself was not changed, so the required ch04 regression check cannot complete."
+  ],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-frame-inline",
+      "verdict": "FAIL",
+      "evidence": "Neither `ch05_q01` nor the ch04 spot-check route reaches the inline preview DOM. Playwright captured `pageerror [validateLabel] 영어 raw 약자 단독 금지 — 한+영 병기 (예: \"운영체제 OS\") (text: \"HTML\")` immediately after loading `/library/5/ch05_q01`, and `.phone-frame` / `.phone-notch` checks cannot proceed because PreviewPanel never mounts."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900 validation is blocked. The expected Hero -> Pair Block -> State/board -> Log structure never renders because the eager import of `Q02WebStack.tsx` throws before the library page paints the demo stack."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "FAIL",
+      "evidence": "The scenario `tablist` never appears on `ch05_q01`~`ch05_q04`, so the required chip-click sync check cannot start. Automated navigation timed out waiting for `[role=\"tablist\"][aria-label=\"시연 시나리오 선택\"]` after the same `validateLabel(... \"HTML\")` exception."
+    },
+    {
+      "id": "V4-contrast",
+      "verdict": "FAIL",
+      "evidence": "No active Pair card is mounted, so the sky-600 contrast measurement cannot be collected. The blocking runtime exception prevents any accent state from rendering."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "FAIL",
+      "evidence": "The inline host never mounts for `ch05_q01`~`ch05_q04`, so there is no rendered `max-w-[640px]` / `max-w-[860px]` container to measure."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "FAIL",
+      "evidence": "Because the Pair components never render, none of the expected metaphor/IT SVG icon cells become available for inspection."
+    },
+    {
+      "id": "V7-baseline-spotcheck",
+      "verdict": "FAIL",
+      "evidence": "The required `/library/4/ch04_q04` regression spot-check is also blocked by the same global import-time exception. Playwright reproduced the identical `validateLabel(... \"HTML\")` pageerror on the ch04 route and saved `/tmp/pr16a-r1-eval-visual/ch04_q04-crash-desktop.png`."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "FAIL",
+      "evidence": "Mobile 393x852 verification cannot run because the preview never renders and the scenario tablist is absent from the DOM."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "FAIL",
+      "evidence": "Responsive grid checks are blocked for the same reason. No PairBinary or PairFlow grid is mounted on mobile because the route crashes before render."
+    }
+  ],
+  "artifacts": {
+    "desktop_crash_screenshots": "/tmp/pr16a-r1-eval-visual/ch05_q01-crash-desktop.png,/tmp/pr16a-r1-eval-visual/ch04_q04-crash-desktop.png",
+    "raw_capture_dir": "/tmp/pr16a-r1-eval-visual"
+  },
+  "notes": [
+    "Evaluation followed `/home/claude/architecture/HANDOFF-pr16a-round1.md` §B only.",
+    "The visual evaluation targeted generator commit `e8df7e4b0f03903f2e7a7a1918a90310a28c7bc9` on branch `codex/pr16a-r1`.",
+    "The branch already contained the separate interaction-eval artifact commit `fe8da861472415202e9905ab55b1e8e8add0b20c`; no application code changed during this visual evaluation session.",
+    "Dev server verification ran on `http://127.0.0.1:5187` with Playwright + system Chrome (`/usr/bin/google-chrome`).",
+    "Static scan confirms additional violating labels in `Q02WebStack.tsx`: `HTML`, `CSS`, and `JS`. Fixing only the first thrown label will not clear the route."
+  ]
+}
