@@ -127,7 +127,7 @@ export default function PreviewPanel({
       {isDemo ? (
         <div className="flex flex-1 flex-col overflow-auto px-4 py-6 lg:px-8">
           {demo && InlineComponent ? (
-            <>
+            <div className="flex flex-col-reverse gap-3 sm:flex-col sm:gap-0">
               <div ref={inlineHostRef} className={`mx-auto w-full ${inlineMaxWidth}`}>
                 <InlineComponent key={`${qaId}:${scenarioId}`} scenarioId={scenarioId} />
               </div>
@@ -137,7 +137,7 @@ export default function PreviewPanel({
                 onChange={handleScenarioHash}
                 description={demo.description}
               />
-            </>
+            </div>
           ) : demo ? (
             <div className="flex flex-1 flex-col items-center justify-center">
               <div className="phone-frame">
