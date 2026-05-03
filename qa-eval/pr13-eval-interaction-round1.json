@@ -1,0 +1,32 @@
+{
+  "step": "pr13",
+  "round": 1,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-61",
+  "ts": "2026-05-03T09:10:19Z",
+  "branch": "feat/preview-inline-ch02",
+  "commit": "ac7331d8601a428eaf8aa1cef23cbd3e5186c166",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": {
+    "client_build": "PASS",
+    "server_build": "PASS",
+    "raw_hex": "PASS",
+    "import_contract": "PASS",
+    "label_validation_path": "PASS",
+    "content_mapping": "PASS",
+    "shape_mapping": "PASS",
+    "tone_consistency": "PASS",
+    "registry_inline_mapping": "PASS",
+    "iframe_fallback_for_ch02": "PASS"
+  },
+  "notes": [
+    "client `npm run build` and server `npm run build` passed.",
+    "No raw hex literals were found under client/src/demos.",
+    "Only the allowed `../types` imports were found in ch02 demo files.",
+    "Each ch02 demo calls validatePairSet at module scope and uses getTone(2).",
+    "PreviewPanel resolves ch02 qaIds through DEMO_REGISTRY and renders inline components instead of iframe fallback."
+  ]
+}

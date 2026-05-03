@@ -1,0 +1,62 @@
+{
+  "step": "pr13",
+  "phase": "eval-interaction-round2",
+  "round": 2,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-64",
+  "ts": "2026-05-03T10:26:54Z",
+  "branch": "feat/preview-inline-ch02",
+  "evaluated_commit": "2c6480532e242237dd63e1049351200d8c5e5288",
+  "overall": "PASS",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "`client/` and `server/` both completed `npm run build` successfully on the round-2 branch state."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "`grep -rE \"['\\\"]#[0-9a-fA-F]{3,8}['\\\"]\" client/src/demos --include='*.tsx' --include='*.ts' | grep -v design-tokens.css` returned no matches, so the raw-hex ban still holds."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "ch02 demo files still import shared UI only through `from '../_shared'`, with the expected `DemoComponentProps` type imports from `../types` and no direct `_shared/*` path regressions."
+    },
+    {
+      "id": "I4",
+      "verdict": "PASS",
+      "evidence": "All four ch02 demos still call `validatePairSet(...)` at module scope and keep `getTone(2)`, so the round-1 label-validation and chapter-tone contracts remain intact."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "Content and shape mapping remain aligned with the SDD: q01/q02 use `PairMatch`, q03 uses `PairFlow`, q04 uses `PairVertical`, and the expected metaphor/IT labels are still present in each source file."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "Browser interaction replay on `/library/2/ch02_q01` through `q04` covered all 16 scenario-tab clicks. Each click set `aria-selected=\"true\"`, rendered inline React content with no iframe fallback, and activated the paired metaphor/IT labels with the same accent color."
+    },
+    {
+      "id": "I7",
+      "verdict": "PASS",
+      "evidence": "`PreviewPanel` still resolves ch02 qaIds through the inline registry path, and runtime inspection on the library routes showed zero iframe elements in the preview area."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "`git diff origin/main..2c6480532e242237dd63e1049351200d8c5e5288 -- client/src/demos/_shared/pair-block.tsx` shows only internal responsive layout changes. Exported `PairFlow`/`PairBinary`/`PairMatch`/`PairVertical` function signatures and their props types remain unchanged, preserving the API-surface lock."
+    }
+  ],
+  "critical_findings": [],
+  "summary": "PR13 round-2 interaction evaluation passed. The responsive `pair-block` changes did not regress buildability, imports, content mapping, inline registry rendering, or synchronized pair activation across the four ch02 demos.",
+  "notes": [
+    "Runtime interaction checks were executed against a local Vite dev server at `http://127.0.0.1:5181` because ports 5176-5180 were already occupied in the shared environment.",
+    "Browser verification used temporary Playwright execution via `npx -p playwright@1.52.0` with the system Chrome binary.",
+    "The app emits unrelated `Failed to load resource` console messages for background 401/404 requests on the library pages, but no page exceptions or interaction-level validation errors occurred during the evaluation flow."
+  ],
+  "next_action": "PASS. No generator follow-up is required from T4."
+}

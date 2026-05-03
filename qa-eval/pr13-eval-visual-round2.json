@@ -1,0 +1,72 @@
+{
+  "step": "pr13",
+  "round": 2,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-63",
+  "ts": "2026-05-03T10:24:10Z",
+  "branch": "feat/preview-inline-ch02",
+  "commit": "2c6480532e242237dd63e1049351200d8c5e5288",
+  "verdict": "FAIL",
+  "fail_items": [
+    "V8-mobile-first-viewport: all four ch02 demos still miss the 393x852 first-screen contract after the round 2 responsive fix. The hero card and the top of the Pair Block are visible, but the scenario chip tablist remains below the fold at initial load: q01 chip top 1582px, q02 1582px, q03 1195px, q04 1249px against an 852px viewport."
+  ],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-frame-inline",
+      "verdict": "PASS",
+      "evidence": "All four `/library/2/ch02_q0x` routes render inline React demos without `.phone-frame` or `.phone-notch` on both desktop and mobile."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900 captures preserve the expected order across the four demos: hero card, Pair Block, state section, log panel, then scenario chip row."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "Scenario switching still updates the paired highlight states together. Spot checks on q01 and q04 kept the metaphor-side active cell and IT-side active cell synchronized after chip clicks."
+    },
+    {
+      "id": "V4-accent-contrast",
+      "verdict": "PASS",
+      "evidence": "The cyan accent token usage is unchanged from round 1 and remains legible in the sampled active cards and labels."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "PASS",
+      "evidence": "Desktop DOM inspection still resolves the content wrappers as `max-w-[860px]` for q01~q03 and `max-w-[640px]` for q04, with even left/right margins in the 1440px captures."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "SVG icons remain visible in all observed pair cells on desktop and mobile. The active cards keep the cyan accent stroke while inactive cards stay muted."
+    },
+    {
+      "id": "V7-baseline-ch01",
+      "verdict": "PASS",
+      "evidence": "The shared pair-block responsive changes do not alter the established ch01 visual language; spacing, stroke weight, and chapter-tone separation remain aligned with the existing inline baseline."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "FAIL",
+      "evidence": "Initial mobile captures at 393x852 show the hero and the first portion of the Pair Block, but not the scenario chips, for every ch02 demo. Artifacts: `/tmp/pr13-r2-eval-visual-initial/ch02_q01-mobile-initial.png`, `.../ch02_q02-mobile-initial.png`, `.../ch02_q03-mobile-initial.png`, `.../ch02_q04-mobile-initial.png`."
+    },
+    {
+      "id": "V9-mobile-grid-transform",
+      "verdict": "PASS",
+      "evidence": "The responsive grid fix itself is working. On 393px, q01~q03 now compute `gridTemplateColumns: 155.5px 155.5px` for both metaphor and IT rows, and q04 stacks into a single 327px column with the `≈` connector hidden (`display: none`). Desktop regression checks keep q01 at four columns and q04 at the two-column square layout."
+    }
+  ],
+  "artifacts": {
+    "desktop_screenshots": "/tmp/pr13-r2-eval-visual/ch02_q01-desktop.png,/tmp/pr13-r2-eval-visual/ch02_q02-desktop.png,/tmp/pr13-r2-eval-visual/ch02_q03-desktop.png,/tmp/pr13-r2-eval-visual/ch02_q04-desktop.png",
+    "mobile_initial_screenshots": "/tmp/pr13-r2-eval-visual-initial/ch02_q01-mobile-initial.png,/tmp/pr13-r2-eval-visual-initial/ch02_q02-mobile-initial.png,/tmp/pr13-r2-eval-visual-initial/ch02_q03-mobile-initial.png,/tmp/pr13-r2-eval-visual-initial/ch02_q04-mobile-initial.png",
+    "mobile_followup_screenshots": "/tmp/pr13-r2-eval-visual/ch02_q01-mobile.png,/tmp/pr13-r2-eval-visual/ch02_q02-mobile.png,/tmp/pr13-r2-eval-visual/ch02_q03-mobile.png,/tmp/pr13-r2-eval-visual/ch02_q04-mobile.png",
+    "raw_capture_dirs": "/tmp/pr13-r2-eval-visual,/tmp/pr13-r2-eval-visual-initial"
+  },
+  "notes": [
+    "Evaluation followed `/home/claude/architecture/HANDOFF-pr13-round2.md` §B together with `/home/claude/architecture/HANDOFF-pr13-eval-visual.md`.",
+    "Round 2 resolves the mobile grid collapse contract but does not yet satisfy the mobile first-viewport requirement, so the overall verdict remains FAIL."
+  ]
+}

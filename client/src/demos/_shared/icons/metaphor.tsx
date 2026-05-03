@@ -154,3 +154,164 @@ export function CheckBookIcon() {
     </svg>
   );
 }
+
+export function HomeApplianceIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="10" y="6" width="20" height="28" rx="3" />
+      <path d="M10 14h20" />
+      <circle cx="16" cy="10" r="1" fill="currentColor" stroke="none" />
+      <circle cx="20" cy="10" r="1" fill="currentColor" stroke="none" />
+      <path d="M16 20h8M16 25h8" />
+    </svg>
+  );
+}
+
+export function StationeryIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 30 28 12l4 4-18 18H10z" />
+      <path d="M24 8l8 8" />
+      <path d="M14 26l4 4" />
+    </svg>
+  );
+}
+
+export function BookIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 8h18a4 4 0 0 1 4 4v20H13a4 4 0 0 0-4 4z" />
+      <path d="M13 8v28" />
+      <path d="M17 14h9M17 19h9M17 24h7" />
+    </svg>
+  );
+}
+
+export function ToolIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M14 10a5 5 0 0 0 6 6l8 8-4 4-8-8a5 5 0 0 1-6-6l4 4 3-3z" />
+      <path d="M25 25l4 4" />
+    </svg>
+  );
+}
+
+export function FreedomIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 33V10" />
+      <path d="M11 11c3-3 8-3 11 0s8 3 11 0v11c-3 3-8 3-11 0s-8-3-11 0z" />
+    </svg>
+  );
+}
+
+export function PurchaseIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="12" width="26" height="18" rx="2" />
+      <path d="M7 18h26" />
+      <circle cx="15" cy="24" r="2" />
+      <path d="M23 24h4M25 22v4" />
+    </svg>
+  );
+}
+
+export function DutyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M12 6h16l4 6v20H8V12z" />
+      <path d="M16 6v8h8" />
+      <path d="M14 21h12M14 26h8" />
+    </svg>
+  );
+}
+
+export function StudentIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M6 16l14-6 14 6-14 6z" />
+      <path d="M12 19v6c2 2 5 3 8 3s6-1 8-3v-6" />
+      <path d="M34 16v8" />
+    </svg>
+  );
+}
+
+export function BlockIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="10" height="10" rx="1" />
+      <rect x="22" y="10" width="10" height="10" rx="1" />
+      <rect x="15" y="22" width="10" height="10" rx="1" />
+    </svg>
+  );
+}
+
+export function BoxIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7 31 13v14L20 33 9 27V13z" />
+      <path d="M20 7v12M9 13l11 6 11-6" />
+    </svg>
+  );
+}
+
+export function LinkIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M15 24l-3 3a5 5 0 1 1-7-7l6-6a5 5 0 0 1 7 0" />
+      <path d="M25 16l3-3a5 5 0 1 1 7 7l-6 6a5 5 0 0 1-7 0" />
+      <path d="M14 26l12-12" />
+    </svg>
+  );
+}
+
+export function InstallIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7v16" />
+      <path d="M14 17l6 6 6-6" />
+      <path d="M8 27h24v6H8z" />
+    </svg>
+  );
+}
+
+export function HandIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M13 20V9a2 2 0 1 1 4 0v8" />
+      <path d="M17 17V7a2 2 0 1 1 4 0v10" />
+      <path d="M21 18V9a2 2 0 1 1 4 0v11" />
+      <path d="M25 20v-7a2 2 0 1 1 4 0v12c0 5-3 8-8 8h-4c-4 0-7-2-8-6l-2-7a2 2 0 1 1 4-2l2 5" />
+    </svg>
+  );
+}
+
+export function RentIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 18h24v12H8z" />
+      <path d="M12 18v-4a8 8 0 0 1 16 0v4" />
+      <path d="M15 24h10M15 28h6" />
+    </svg>
+  );
+}
+
+export function CompleteIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="13" />
+      <path d="M14 20l4 4 8-8" />
+    </svg>
+  );
+}
+
+export function SubscribeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="26" height="20" rx="3" />
+      <path d="M7 17h26" />
+      <path d="M14 24h12" />
+      <path d="M20 10V6" />
+    </svg>
+  );
+}
