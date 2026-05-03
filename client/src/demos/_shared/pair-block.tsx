@@ -68,13 +68,15 @@ function StepRow({
   tone: Tone;
 }) {
   const gridClass =
-    items.length === 4
-      ? 'grid grid-cols-2 items-stretch gap-2 sm:grid-cols-4'
-      : items.length === 3
-        ? 'grid grid-cols-1 items-stretch gap-2 sm:grid-cols-3'
-        : items.length === 2
-          ? 'grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2'
-          : 'grid grid-cols-1 items-stretch gap-2';
+    items.length === 5
+      ? 'grid grid-cols-2 items-stretch gap-2 sm:grid-cols-5'
+      : items.length === 4
+        ? 'grid grid-cols-2 items-stretch gap-2 sm:grid-cols-4'
+        : items.length === 3
+          ? 'grid grid-cols-1 items-stretch gap-2 sm:grid-cols-3'
+          : items.length === 2
+            ? 'grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2'
+            : 'grid grid-cols-1 items-stretch gap-2';
 
   return (
     <div className={gridClass} data-step-row-cols={items.length}>
