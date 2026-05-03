@@ -447,6 +447,147 @@ export function ConfusionIcon() {
   );
 }
 
+export function ReadIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 10h18a4 4 0 0 1 4 4v18H12a4 4 0 0 0-4 4z" />
+      <path d="M12 10v26" />
+      <path d="M16 16h9M16 21h9M16 26h6" />
+    </svg>
+  );
+}
+
+export function InterpretIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="17" cy="17" r="8" />
+      <path d="M22.5 22.5 31 31" />
+      <path d="M14 17h6M17 14v6" />
+    </svg>
+  );
+}
+
+export function CalcIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="10" y="7" width="20" height="26" rx="3" />
+      <path d="M14 13h12" />
+      <path d="M15 19h4M15 25h4M21 19h4M21 25h4" />
+      <path d="M27 21h4M29 19v4M27 27h4" />
+    </svg>
+  );
+}
+
+export function SaveIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 8h18l4 4v20H9z" />
+      <path d="M13 8v8h10V8" />
+      <rect x="14" y="22" width="12" height="7" rx="1" />
+    </svg>
+  );
+}
+
+export function WarehouseIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M6 17 20 8l14 9" />
+      <path d="M8 15v17h24V15" />
+      <path d="M14 20v12M20 20v12M26 20v12" />
+      <path d="M6 32h28" />
+    </svg>
+  );
+}
+
+export function ExecuteMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="m18 15 8 5-8 5z" />
+    </svg>
+  );
+}
+
+export function CloneIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="11" width="12" height="15" rx="2" />
+      <rect x="18" y="14" width="12" height="15" rx="2" />
+    </svg>
+  );
+}
+
+export function TaskIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="9" width="24" height="22" rx="2" />
+      <path d="M14 15h12M14 21h12M14 27h8" />
+      <path d="m10 15 1.5 1.5L13 14" />
+      <path d="m10 21 1.5 1.5L13 20" />
+    </svg>
+  );
+}
+
+export function EndIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M16 16l8 8M24 16l-8 8" />
+    </svg>
+  );
+}
+
+export function RecentIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 13v8l5 3" />
+      <path d="M11 13H8v-3" />
+      <path d="M8 10a13 13 0 0 1 22 4" />
+    </svg>
+  );
+}
+
+export function NearbyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="14" cy="20" r="4" />
+      <circle cx="26" cy="20" r="4" />
+      <path d="M18 20h4" />
+      <path d="M20 12v4M20 24v4" />
+    </svg>
+  );
+}
+
+export function HitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <circle cx="20" cy="20" r="5" />
+      <path d="M20 8v4M20 28v4M8 20h4M28 20h4" />
+    </svg>
+  );
+}
+
+export function MissIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M15 15l10 10M25 15 15 25" />
+    </svg>
+  );
+}
+
+export function LayerIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 9 31 15 20 21 9 15z" />
+      <path d="M9 21l11 6 11-6" />
+      <path d="M9 27l11 6 11-6" />
+    </svg>
+  );
+}
+
 export function SplitIcon() {
   return (
     <svg {...ICON_BASE} aria-hidden>
