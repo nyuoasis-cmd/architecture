@@ -1,0 +1,66 @@
+{
+  "step": "pr16b",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-98",
+  "ts": "2026-05-03T23:20:07Z",
+  "branch": "feat/preview-inline-ch05-q5-q7",
+  "commit": "5463c7861b2bd54a58b266ab1bec095979f1170a",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-frame-inline",
+      "verdict": "PASS",
+      "evidence": "`ch05_q05`~`ch05_q07` desktop/mobile 모두 `iframe`, `.phone-frame`, `.phone-notch` count 가 `0` 이고 `pageerror` 도 `0` 건이다. 신규 3개 route 모두 인라인 렌더로 정상 진입했다."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "PASS",
+      "evidence": "1440x900 에서 3개 route 모두 hero → pair block → detail/log 섹션이 순차 배치됐다. top 좌표는 q05 `118.69 < 229.78 < 574.84 < 831.81`, q06 `174.69 < 285.78 < 630.84 < 887.81`, q07 `174.69 < 307.88 < 652.94 < 909.91` 이다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "시나리오 탭 클릭 시 hash, hero, active pair 카드가 함께 바뀌었다. q05 `#local → #shared → #update → #tool`, q06 `#repeat → #component → #choice → #team`, q07 `#dev → #bundle → #optimize → #ship` 순으로 이동했고 각 단계에서 hero title 과 active 카드 2개가 모두 대응 장면으로 바뀌었다."
+    },
+    {
+      "id": "V4-contrast",
+      "verdict": "PASS",
+      "evidence": "활성 카드 accent 는 `rgb(3, 105, 161)` (`#0369a1`), 활성 배경은 `rgb(240, 249, 255)` 이며 대비비는 3개 route 모두 `5.57:1` 로 WCAG AA `4.5:1` 을 넘겼다. `Q07BuildDeploy.tsx` 의 IT 라벨도 `개발 dev` 로 렌더링돼 raw 약자 단독 라벨 문제가 없다."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "PASS",
+      "evidence": "wide 인 `ch05_q05`~`ch05_q07` pair block 폭은 모두 `776px` 으로 측정됐다. `max-w-[860px]` 범위 안에서 세 route 모두 동일 폭과 중앙 정렬을 유지했다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "pair block 내부 SVG 수는 q05~q07 모두 `16` 이다. 활성 카드 수도 각 route 에서 항상 `2` 개로 유지되어 메타포/IT 아이콘이 양쪽 모두 보이는 상태에서 비교가 가능했다."
+    },
+    {
+      "id": "V7-baseline-spotcheck",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check 로 `/library/5/ch05_q01` 을 확인했다. `iframe`/`.phone-frame` count 는 `0`, `role=\"tablist\"` count 는 `1`, root token `--demo-accent-ch05` 는 `#0369a1` 로 유지됐다. ch05 기존 demo 도 신규 import 영향 없이 정상 렌더링됐다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852 모바일에서 outer `📱 시연` 탭 전환 후 scenario tablist bottom 이 q05 `238.39px`, q06 `276.78px`, q07 `238.39px` 로 first viewport 안에 들어왔다. hero/pair 시작점도 q05 `303.17/483.14`, q06 `341.56/521.53`, q07 `303.17/483.14` 으로 첫 화면에서 연속 확인 가능했다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "393x852 에서 q05~q07 의 step row 는 모두 `155.5px 155.5px` 2열로 축소됐다. `document.documentElement.scrollWidth` 도 세 route 모두 `393px` 로 가로 스크롤이 없었다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr16b-round1.md` §B 만 따랐다.",
+    "평가 대상 구현 커밋은 `5463c7861b2bd54a58b266ab1bec095979f1170a` (`feat/preview-inline-ch05-q5-q7`) 이다.",
+    "Vite dev server 는 `http://127.0.0.1:5187` 에서 구동했고 브라우저 자동화는 `playwright` + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "캡처 산출물: `/tmp/pr16b-r1-eval-visual/ch05_q05-desktop.png`, `/tmp/pr16b-r1-eval-visual/ch05_q06-desktop.png`, `/tmp/pr16b-r1-eval-visual/ch05_q07-desktop.png`, `/tmp/pr16b-r1-eval-visual/ch05_q05-mobile.png`, `/tmp/pr16b-r1-eval-visual/ch05_q06-mobile.png`, `/tmp/pr16b-r1-eval-visual/ch05_q07-mobile.png`, `/tmp/pr16b-r1-eval-visual/ch05_q01-baseline-desktop.png`."
+  ]
+}
