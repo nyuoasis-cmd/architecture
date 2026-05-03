@@ -67,8 +67,17 @@ function StepRow({
   activeIndex: number;
   tone: Tone;
 }) {
+  const gridClass =
+    items.length === 4
+      ? 'grid grid-cols-2 items-stretch gap-2 sm:grid-cols-4'
+      : items.length === 3
+        ? 'grid grid-cols-1 items-stretch gap-2 sm:grid-cols-3'
+        : items.length === 2
+          ? 'grid grid-cols-1 items-stretch gap-2 sm:grid-cols-2'
+          : 'grid grid-cols-1 items-stretch gap-2';
+
   return (
-    <div className="grid items-stretch gap-2" style={{ gridTemplateColumns: `repeat(${items.length}, minmax(0, 1fr))` }}>
+    <div className={gridClass} data-step-row-cols={items.length}>
       {items.map((step, idx) => (
         <div key={`${step.label}-${idx}`} className="relative flex flex-col">
           <IconCard icon={step.icon} label={step.label} sub={step.sub} active={activeIndex === idx} tone={tone} />
@@ -113,13 +122,13 @@ export function PairBinary({
   return (
     <section className="rounded-2xl border p-5" style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg)' }}>
       <GroupBadge label={metaphorTitle} sub="비유" tone={tone} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <ZonePanel icon={metaphorLeft.icon} title={metaphorLeft.label} cards={metaphorLeft.cards ?? []} active={leftActive} tone={tone} />
         <ZonePanel icon={metaphorRight.icon} title={metaphorRight.label} cards={metaphorRight.cards ?? []} active={rightActive} tone={tone} />
       </div>
       <PairConnector tone={tone} />
       <GroupBadge label={itTitle} sub="실제" tone={tone} />
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <IconCard icon={itLeft.icon} label={itLeft.label} sub={itLeft.sub} active={leftActive} tone={tone} />
         <IconCard icon={itRight.icon} label={itRight.label} sub={itRight.sub} active={rightActive} tone={tone} />
       </div>
@@ -134,11 +143,11 @@ export function PairMatch(props: PairMatchProps) {
 export function PairVertical({ metaphorTitle, itTitle, pairs, activeIndex, tone }: PairVerticalProps) {
   return (
     <section className="rounded-2xl border p-4" style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg)' }}>
-      <div className="grid grid-cols-[1fr_auto_1fr] gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto_1fr]">
         <div>
           <GroupBadge label={metaphorTitle} sub="비유" tone={tone} />
         </div>
-        <div />
+        <div className="hidden sm:block" />
         <div>
           <GroupBadge label={itTitle} sub="실제" tone={tone} />
         </div>
@@ -173,7 +182,7 @@ export function PairVertical({ metaphorTitle, itTitle, pairs, activeIndex, tone 
               </div>
 
               <div
-                className="flex items-center justify-center text-[14px] font-bold"
+                className="hidden items-center justify-center text-[14px] font-bold sm:flex"
                 style={{ color: active ? tone.accent : 'var(--demo-arrow-purple)' }}
                 aria-hidden
               >
