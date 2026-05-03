@@ -315,3 +315,124 @@ export function SubscribeIcon() {
     </svg>
   );
 }
+
+export function EmergencyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7 34 31H6z" />
+      <path d="M20 15v8" />
+      <circle cx="20" cy="28" r="1.4" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function NewStageIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M6 29h28" />
+      <path d="M10 29V13l10-5 10 5v16" />
+      <path d="M15 18h10" />
+      <path d="M20 13v10" />
+    </svg>
+  );
+}
+
+export function DemoIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="26" height="16" rx="2" />
+      <path d="m18 16 8 4-8 4z" />
+      <path d="M15 31h10" />
+      <path d="M20 26v5" />
+    </svg>
+  );
+}
+
+export function DecisionIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 6v24" />
+      <path d="M20 10h10l-4 5 4 5H20" />
+      <path d="M20 22H10l4 5-4 5h10" />
+    </svg>
+  );
+}
+
+export function FlowIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M7 13h10" />
+      <path d="M13 9l4 4-4 4" />
+      <path d="M23 13h10" />
+      <path d="M27 9l6 4-6 4" />
+      <path d="M7 27h20" />
+      <path d="M23 23l4 4-4 4" />
+    </svg>
+  );
+}
+
+export function DelayIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 13v8l5 4" />
+      <path d="M10 10l4 4" />
+    </svg>
+  );
+}
+
+export function ErrorIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7 34 31H6z" />
+      <path d="m15 17 10 10M25 17 15 27" />
+    </svg>
+  );
+}
+
+export function NotificationIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M14 28h12" />
+      <path d="M16 29a4 4 0 0 0 8 0" />
+      <path d="M12 24h16l-2-4v-4a6 6 0 1 0-12 0v4z" />
+      <path d="M29 13h4M31 9v8" />
+    </svg>
+  );
+}
+
+export function SubmitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 31 33 20 8 9l4 9 10 2-10 2z" />
+    </svg>
+  );
+}
+
+export function CommentIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 10h22v14H18l-7 6v-6H9z" />
+      <path d="M14 16h12M14 20h8" />
+    </svg>
+  );
+}
+
+export function EditIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M28 8l4 4-16 16-6 2 2-6z" />
+      <path d="M24 12l4 4" />
+      <path d="M10 32h20" />
+    </svg>
+  );
+}
+
+export function ApproveIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="13" />
+      <path d="m14 20 4 4 8-8" />
+    </svg>
+  );
+}
