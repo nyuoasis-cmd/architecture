@@ -1,4 +1,4 @@
-import { Hero, Icons, LogBox, PairMatch, validatePairSet } from '../_shared';
+import { Hero, Icons, LogBox, PairMatch, getTone, validatePairSet } from '../_shared';
 import type { DemoComponentProps } from '../types';
 
 type Scene = {
@@ -77,11 +77,7 @@ const SCENES: Record<string, Scene> = {
   },
 };
 
-const TONE = {
-  accent: 'var(--demo-accent-q03)',
-  accentSoft: 'var(--demo-accent-soft-q03)',
-  accentBorder: 'var(--demo-accent-border-q03)',
-};
+const TONE = getTone(1);
 
 const RESTAURANT_PAIR = [
   { icon: <Icons.SeatsIcon />, label: '자리 배치', sub: '손님에게 좌석 배정' },

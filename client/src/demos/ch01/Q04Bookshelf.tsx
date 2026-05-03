@@ -1,4 +1,4 @@
-import { Hero, Icons, LogBox, PairVertical, StateChips, validatePairSet } from '../_shared';
+import { Hero, Icons, LogBox, PairVertical, StateChips, getTone, validatePairSet } from '../_shared';
 import type { DemoComponentProps } from '../types';
 
 type Scene = {
@@ -73,11 +73,7 @@ const SCENES: Record<string, Scene> = {
   },
 };
 
-const TONE = {
-  accent: 'var(--demo-accent-q04)',
-  accentSoft: 'var(--demo-accent-soft-q04)',
-  accentBorder: 'var(--demo-accent-border-q04)',
-};
+const TONE = getTone(1);
 
 const METAPHOR = [
   {
