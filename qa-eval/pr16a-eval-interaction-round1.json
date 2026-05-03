@@ -1,0 +1,148 @@
+{
+  "step": "pr16a",
+  "round": 1,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-95",
+  "ts": "2026-05-03T22:37:52Z",
+  "verdict": "PASS",
+  "pr_number": 45,
+  "pr_url": "https://github.com/nyuoasis-cmd/architecture/pull/45",
+  "branch": "codex/pr16a-r1",
+  "commit_under_test": "e8df7e4b0f03903f2e7a7a1918a90310a28c7bc9",
+  "generator_commit": "e8df7e4b0f03903f2e7a7a1918a90310a28c7bc9",
+  "scope": {
+    "focus": "HANDOFF-pr16a-round1.md §C interaction static verification for ch05_q01~q04 plus existing deep-link guard regression check",
+    "build": {
+      "client": "PASS (npm run build)",
+      "server": "PASS (npm run build)"
+    },
+    "raw_hex_grep": "PASS (0 matches in client/src/demos/ch05 and client/src/data/demos.ts)",
+    "shared_import_grep": "PASS (0 forbidden imports in client/src/demos/ch05/*.tsx)",
+    "validate_pair_set": [
+      "Q02WebStack layout=wide subPolicy=all",
+      "Q03Rest layout=wide subPolicy=all",
+      "Q04SpaSsr layout=wide subPolicy=all"
+    ],
+    "pair_binary": "Q01HallKitchen uses PairBinary square layout with scene booleans only; no shared contract drift detected",
+    "registry_entries": [
+      "ch05_q01 -> Q01HallKitchen (square)",
+      "ch05_q02 -> Q02WebStack (wide)",
+      "ch05_q03 -> Q03Rest (wide)",
+      "ch05_q04 -> Q04SpaSsr (wide)"
+    ],
+    "scenario_alignment": [
+      "ch05_q01 demos.ts ids match SCENES: hall, kitchen, promise, separate",
+      "ch05_q02 demos.ts ids match SCENES: skeleton, shape, react, unite",
+      "ch05_q03 demos.ts ids match SCENES: request, resource, method, stateless",
+      "ch05_q04 demos.ts ids match SCENES: start, move, respond, mix"
+    ],
+    "deep_link_guards": [
+      "client/src/pages/LearnPage.tsx:145-147 reads window.location.hash and only falls back when the hash is invalid",
+      "client/src/components/learn/PreviewPanel.tsx:35-43 updates window.history hash for inline demos",
+      "client/src/components/learn/PreviewPanel.tsx:62 and :152 preserve scenario hash on reload and iframe src for non-inline demos"
+    ],
+    "unchanged_paths": [
+      "client/src/components/learn/PreviewPanel.tsx",
+      "client/src/pages/LearnPage.tsx",
+      "client/src/demos/ch01/**",
+      "client/src/demos/ch02/**",
+      "client/src/demos/ch03/**",
+      "client/src/demos/ch04/**",
+      "client/src/demos/_shared/pair-block.tsx",
+      "client/src/demos/_shared/index.ts",
+      "client/src/demos/_shared/labels.ts",
+      "client/src/demos/_shared/design-tokens.css",
+      "client/src/demos/_shared/types.ts"
+    ]
+  },
+  "checks": [
+    {
+      "route": "/library/5/ch05_q01#hall",
+      "expected": "SCENES.hall <-> demos.ts hall",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q01#kitchen",
+      "expected": "SCENES.kitchen <-> demos.ts kitchen",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q01#promise",
+      "expected": "SCENES.promise <-> demos.ts promise",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q01#separate",
+      "expected": "SCENES.separate <-> demos.ts separate",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q02#skeleton",
+      "expected": "SCENES.skeleton <-> demos.ts skeleton",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q02#shape",
+      "expected": "SCENES.shape <-> demos.ts shape",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q02#react",
+      "expected": "SCENES.react <-> demos.ts react",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q02#unite",
+      "expected": "SCENES.unite <-> demos.ts unite",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q03#request",
+      "expected": "SCENES.request <-> demos.ts request",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q03#resource",
+      "expected": "SCENES.resource <-> demos.ts resource",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q03#method",
+      "expected": "SCENES.method <-> demos.ts method",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q03#stateless",
+      "expected": "SCENES.stateless <-> demos.ts stateless",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q04#start",
+      "expected": "SCENES.start <-> demos.ts start",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q04#move",
+      "expected": "SCENES.move <-> demos.ts move",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q04#respond",
+      "expected": "SCENES.respond <-> demos.ts respond",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/5/ch05_q04#mix",
+      "expected": "SCENES.mix <-> demos.ts mix",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/3/ch03_q04#staging",
+      "expected": "existing hash deep-link guard remains valid on unchanged LearnPage/PreviewPanel path",
+      "result": "PASS"
+    }
+  ],
+  "fail_items": [],
+  "revise_items": []
+}
