@@ -1,0 +1,70 @@
+{
+  "step": "pr17a",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-102",
+  "ts": "2026-05-03T23:53:42Z",
+  "branch": "codex/pr17a",
+  "commit": "ac83469c6b05d047e1d7126be2e84913c6fc605a",
+  "verdict": "REVISE",
+  "fail_items": [],
+  "revise_items": [
+    "V4-contrast: active-card contrast itself passes at 5.91:1, but all ch06 routes resolve `--demo-accent-ch06` to `#b91c1c`. HANDOFF-pr17a-round1 §B requires the chapter accent to stay on red-600 `#dc2626`.",
+    "V9-mobile-grid: `ch06_q04` keeps the custom 5-step pair rows as a single mobile column (`gridTemplateColumns = 319px` for both rows) instead of collapsing the wide layout to the standard 2-column mobile grid."
+  ],
+  "checks": [
+    {
+      "id": "V1-frame-inline",
+      "verdict": "PASS",
+      "evidence": "`ch06_q01`~`ch06_q04` desktop/mobile 모두 `iframe`, `.phone-frame`, `.phone-notch` count 가 `0` 이다. 새 ch06 데모 4개는 인라인 React preview 로만 렌더링된다."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "PASS",
+      "evidence": "1440x900 에서 네 route 모두 Hero → Pair Block → StateChips → LogBox 순서가 유지된다. section top 좌표는 q01 `129 < 264.78 < 613.84 < 753.52`, q02 `129 < 264.78 < 621.47 < 761.14`, q03 `129 < 264.78 < 613.84 < 753.52`, q04 `129 < 264.78 < 613.84 < 753.52` 로 오름차순이다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "Playwright 로 `ch06_q01` `#fetch → #decode → #execute → #store`, `ch06_q02` `#register → #cache → #ram → #disk`, `ch06_q03` `#execute → #clone → #task → #end`, `ch06_q04` `#recent → #nearby → #hit → #miss → #levels` 를 순회했다. 각 단계마다 `window.location.hash`, GuidePanel active launcher, ScenarioPicker active tab, preview Hero title 이 모두 같은 시나리오로 함께 이동했다."
+    },
+    {
+      "id": "V4-contrast",
+      "verdict": "REVISE",
+      "evidence": "활성 카드 라벨 색은 `rgb(185, 28, 28)`, 활성 배경은 `rgb(254, 242, 242)` 이고 대비비는 네 route 공통 `5.91:1` 로 WCAG AA `4.5:1` 을 넘긴다. 다만 실제 accent token 은 `#b91c1c` 로 측정되어, 핸드오프가 요구한 ch06 red-600 `#dc2626` 톤과 일치하지 않는다."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "PASS",
+      "evidence": "`ch06_q01`, `ch06_q03`, `ch06_q04` pair block 폭은 모두 `776px` 로 wide 계약 안에 있고, `ch06_q02` 는 정확히 `640px` 로 square max-width 와 일치한다. `ch06_q04` 는 desktop grid template 가 `140.391px 140.406px 140.391px 140.406px 140.391px` 로 5열 균등 분할되어 5칸 wide 요구도 충족한다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "preview demo root 내 SVG 수는 q01 `16`, q02 `8`, q03 `16`, q04 `12` 로 모두 양수다. 활성 카드 수도 각 route 공통 `2` 개로 유지되어 메타포/IT 양쪽 아이콘이 모두 보이는 상태에서 비교가 가능했다."
+    },
+    {
+      "id": "V7-baseline-spotcheck",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check 로 `/library/5/ch05_q01` 을 확인했다. `iframe`/`.phone-frame` count 는 `0`, 시나리오 `tablist` count 는 `1`, 루트 token `--demo-accent-ch05` 는 `#0369a1` 로 유지된다. 기존 ch05 인라인 preview 는 이번 ch06 추가 후에도 정상이다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852 모바일에서 `시연` 탭 전환 직후 scenario tablist bottom 이 q01 `238.39px`, q02 `238.39px`, q03 `238.39px`, q04 `276.78px` 로 모두 first viewport 안에 들어온다. hero/pair 시작점도 q01 `303.17/461.05`, q02 `303.17/461.05`, q03 `303.17/461.05`, q04 `341.56/521.53` 으로 첫 화면에서 연속 확인 가능했다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "REVISE",
+      "evidence": "393x852 에서 `ch06_q01` 과 `ch06_q03` 의 pair row 는 `155.5px 155.5px` 2열로 축소되고 `ch06_q02` PairVertical grid 는 `327px` 단일 열로 stack 된다. 그러나 `ch06_q04` 의 커스텀 5-step pair row 2개는 모두 `319px` 단일 열로 렌더되어, wide 레이아웃의 표준 모바일 2열 변환 계약을 따르지 못한다. 가로 스크롤 자체는 네 route 모두 `scrollWidth == 393px` 로 없다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr17a-round1.md` §B 만 따랐다.",
+    "평가 대상 구현 커밋은 `ac83469c6b05d047e1d7126be2e84913c6fc605a` (`codex/pr17a`) 이다.",
+    "client 빌드는 `npm install --include=dev && npm run build` 로 통과했다.",
+    "Vite dev server 는 `http://127.0.0.1:5187` 에서 구동했고 브라우저 자동화는 `npx -y -p playwright@1.52.0` + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "캡처 산출물: `/tmp/pr17a-r1-eval-visual/ch06_q01-desktop.png`, `/tmp/pr17a-r1-eval-visual/ch06_q02-desktop.png`, `/tmp/pr17a-r1-eval-visual/ch06_q03-desktop.png`, `/tmp/pr17a-r1-eval-visual/ch06_q04-desktop.png`, `/tmp/pr17a-r1-eval-visual/ch06_q01-mobile.png`, `/tmp/pr17a-r1-eval-visual/ch06_q02-mobile.png`, `/tmp/pr17a-r1-eval-visual/ch06_q03-mobile.png`, `/tmp/pr17a-r1-eval-visual/ch06_q04-mobile.png`, `/tmp/pr17a-r1-eval-visual/ch05_q01-desktop.png`."
+  ]
+}
