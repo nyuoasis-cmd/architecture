@@ -1,0 +1,70 @@
+{
+  "step": "pr13",
+  "round": 3,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-66",
+  "ts": "2026-05-03T10:40:00Z",
+  "branch": "feat/preview-inline-ch02",
+  "commit": "07df5bfb795fbb61d188e8af7269c2866b513c25",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-frame-inline",
+      "verdict": "PASS",
+      "evidence": "All four ch02 preview routes render inline React demos with no `.phone-frame` or `.phone-notch` in either viewport."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900 captures keep the demo content above the scenario chip row. q01~q03 place the chip row below the fold (`tabTop` 1003/1003/882), and q04 keeps the same content-first order with the chip row resting at the bottom edge (`tabTop` 857, `tabBottom` 899)."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "Across all four demos on both desktop and mobile, forced clicks on the four scenario chips updated `aria-selected=\"true\"` to the clicked chip each time, confirming the active scenario state stayed synchronized with the preview."
+    },
+    {
+      "id": "V4-accent-contrast",
+      "verdict": "PASS",
+      "evidence": "The round 3 change only reorders the `ScenarioPicker` wrapper. The ch02 demo surfaces still render the same cyan accent treatment and typography as round 2, and screenshot spot checks show no contrast regression."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "PASS",
+      "evidence": "Desktop grid measurements remain unchanged from the prior passing state: q01~q03 use the wide layout and q04 keeps the square layout, with even horizontal gutters in the 1440px captures."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "Screenshot review confirms SVG icons remain visible in every observed card on desktop and mobile after the wrapper reorder."
+    },
+    {
+      "id": "V7-baseline-ch01",
+      "verdict": "PASS",
+      "evidence": "The `PreviewPanel.tsx` round 3 change is scoped to the ch02 inline demo wrapper order only. No shared demo primitives changed, and the visual language remains aligned with the existing ch01 inline baseline."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "At 393x852 after opening the mobile `시연` tab, all four ch02 demos place the 4-chip `ScenarioPicker` fully inside the first viewport. Measured chip row bounds are q01 `196..277`, q02 `196..238`, q03 `196..238`, q04 `196..277`, all within the 852px viewport. Screenshots show the chips first, with the hero card beginning immediately below."
+    },
+    {
+      "id": "V9-mobile-grid-transform",
+      "verdict": "PASS",
+      "evidence": "Mobile grid transforms from round 2 still hold. q01~q03 compute `155.5px 155.5px` 2-column grids; q04 computes a single `327px` column and hides all `≈` connectors (`display: none` for all four markers)."
+    }
+  ],
+  "artifacts": {
+    "desktop_screenshots": "/tmp/pr13-r3-eval-visual-final/ch02_q01-desktop.png,/tmp/pr13-r3-eval-visual-final/ch02_q02-desktop.png,/tmp/pr13-r3-eval-visual-final/ch02_q03-desktop.png,/tmp/pr13-r3-eval-visual-final/ch02_q04-desktop.png",
+    "mobile_screenshots": "/tmp/pr13-r3-eval-visual-final/ch02_q01-mobile.png,/tmp/pr13-r3-eval-visual-final/ch02_q02-mobile.png,/tmp/pr13-r3-eval-visual-final/ch02_q03-mobile.png,/tmp/pr13-r3-eval-visual-final/ch02_q04-mobile.png",
+    "raw_capture_dir": "/tmp/pr13-r3-eval-visual-final"
+  },
+  "notes": [
+    "Evaluation followed `/home/claude/architecture/HANDOFF-pr13-round3.md` §B together with `/home/claude/architecture/HANDOFF-pr13-eval-visual.md`.",
+    "Runtime verification used a local Vite dev server at `http://localhost:5179` because ports 5176-5178 were already occupied in the shared environment.",
+    "Browser automation used `npx -p playwright@1.52.0` with the system Chrome binary at `/usr/bin/google-chrome`."
+  ]
+}

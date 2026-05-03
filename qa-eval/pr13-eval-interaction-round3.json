@@ -1,0 +1,62 @@
+{
+  "step": "pr13",
+  "phase": "eval-interaction-round3",
+  "round": 3,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-67",
+  "ts": "2026-05-03T10:40:53Z",
+  "branch": "feat/preview-inline-ch02",
+  "evaluated_commit": "07df5bfb795fbb61d188e8af7269c2866b513c25",
+  "overall": "PASS",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "`client/` and `server/` both completed `npm run build` successfully on the round-3 branch state."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "`grep -rE \"['\\\"]#[0-9a-fA-F]{3,8}['\\\"]\" client/src/demos --include='*.tsx' --include='*.ts' | grep -v design-tokens.css` returned no matches, so the raw-hex ban still holds."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "ch02 demo files still import shared UI through `../_shared`, and the only direct sibling import is the allowed `../types` `DemoComponentProps` import in each file."
+    },
+    {
+      "id": "I4",
+      "verdict": "PASS",
+      "evidence": "All four ch02 demos still call `validatePairSet(...)` at module scope and use `getTone(2)`, so the label-validation and chapter-tone contracts remain intact."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "Content and shape mapping remain aligned with the handoff: q01/q02 use `PairMatch`, q03 uses `PairFlow`, q04 uses `PairVertical`, and the expected metaphor/IT labels are still present in each source file."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "Browser interaction replay on `/library/2/ch02_q01` through `q04` covered all 16 scenario-tab clicks. Every click flipped the clicked tab to `aria-selected=\"true\"` and kept the paired metaphor/IT cards on the same accent color `rgb(14, 116, 144)` with the same active background `rgb(236, 254, 255)`."
+    },
+    {
+      "id": "I7",
+      "verdict": "PASS",
+      "evidence": "Inline registry rendering still holds for ch02: the preview area rendered zero `iframe` and zero `.phone-frame` nodes for `ch02_q01`~`q04`, while the mobile wrapper computed to `flex-direction: column-reverse` and the desktop wrapper computed to `column` for `ch02_q01`."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "Iframe fallback paths were unaffected outside ch02. Spot checks on `/library/3/ch03_q01` and `/library/4/ch04_q01` both rendered one `.phone-frame iframe` with 4 scenario dots, and clicking the second dot updated the iframe hash from `#unit` to `#integration` and from `#structured` to `#semi` respectively."
+    }
+  ],
+  "critical_findings": [],
+  "summary": "PR13 round-3 interaction evaluation passed. The mobile-only `flex-col-reverse` wrapper in `PreviewPanel` preserved all prior ch02 interaction contracts, kept scenario activation synchronized across 16 clicks, and did not regress iframe fallback behavior in later chapters.",
+  "notes": [
+    "Runtime interaction checks were executed against a local Vite dev server at `http://127.0.0.1:5182`.",
+    "Browser verification used a temporary Playwright install in `/tmp/pw-eval` with the system Chrome binary at `/usr/bin/google-chrome-stable`.",
+    "No page-level JavaScript exceptions were emitted during the ch02 and fallback interaction replay."
+  ],
+  "next_action": "PASS. No generator follow-up is required from T4."
+}
