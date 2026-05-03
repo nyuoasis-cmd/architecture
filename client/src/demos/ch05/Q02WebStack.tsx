@@ -87,9 +87,9 @@ const METAPHOR = [
 ];
 
 const IT = [
-  { icon: <Icons.HtmlIcon />, label: 'HTML', sub: '구조 마크업' },
-  { icon: <Icons.CssIcon />, label: 'CSS', sub: '스타일' },
-  { icon: <Icons.JsIcon />, label: 'JS', sub: '동작' },
+  { icon: <Icons.HtmlIcon />, label: '구조 HTML', sub: '마크업' },
+  { icon: <Icons.CssIcon />, label: '스타일 CSS', sub: '꾸미기' },
+  { icon: <Icons.JsIcon />, label: '동작 JS', sub: '인터랙션' },
   { icon: <Icons.IntegrationItIcon />, label: '통합', sub: '브라우저 렌더' },
 ];
 
