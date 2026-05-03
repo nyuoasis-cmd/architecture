@@ -1022,3 +1022,123 @@ export function HybridIcon() {
     </svg>
   );
 }
+
+export function LocalIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="26" height="18" rx="3" />
+      <path d="M13 28v4M27 28v4M11 32h18" />
+      <path d="M12 18h10M12 22h6" />
+    </svg>
+  );
+}
+
+export function SharedIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 11h18v18H11z" />
+      <path d="M15 15h10M15 20h10M15 25h6" />
+      <path d="M7 15h4M29 20h4M20 29v4" />
+    </svg>
+  );
+}
+
+export function UpdateIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 18a9 9 0 0 1 15-5" />
+      <path d="M29 22a9 9 0 0 1-15 5" />
+      <path d="M24 9h3v3" />
+      <path d="M13 28h3v3" />
+    </svg>
+  );
+}
+
+export function ToolPickIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="9" width="28" height="22" rx="3" />
+      <path d="M12 16h10M12 21h7" />
+      <path d="m24 24 3 3 6-6" />
+    </svg>
+  );
+}
+
+export function DryIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="10" height="16" rx="2" />
+      <rect x="22" y="10" width="10" height="16" rx="2" />
+      <path d="M18 18h4" />
+      <path d="m17 14 3 4-3 4" />
+    </svg>
+  );
+}
+
+export function ComponentIcon() {
+  return <IntegrationIcon />;
+}
+
+export function PickItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="9" width="26" height="22" rx="2" />
+      <path d="M14 16h12M14 21h8" />
+      <path d="M25 25l3 3 5-5" />
+    </svg>
+  );
+}
+
+export function TeamRuleIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="13" cy="14" r="3" />
+      <circle cx="27" cy="14" r="3" />
+      <path d="M8 30c0-4 2-7 5-7s5 3 5 7" />
+      <path d="M22 30c0-4 2-7 5-7s5 3 5 7" />
+      <path d="M18 10h4M20 8v4" />
+    </svg>
+  );
+}
+
+export function DevServerIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="8" width="24" height="24" rx="3" />
+      <path d="M14 19l4-4-4-4M23 24h5" />
+      <path d="M23 15h3" />
+    </svg>
+  );
+}
+
+export function BundleItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7 31 13v14L20 33 9 27V13z" />
+      <path d="M20 7v12M9 13l11 6 11-6" />
+      <path d="M20 19v14" />
+    </svg>
+  );
+}
+
+export function OptimizeItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="10" />
+      <path d="M20 20l6-8" />
+      <path d="M20 10v10l6 4" />
+      <path d="M20 20h8" />
+    </svg>
+  );
+}
+
+export function DeployItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 8v13" />
+      <path d="M14 16l6 6 6-6" />
+      <rect x="8" y="25" width="24" height="7" rx="2" />
+      <path d="M14 28h12" />
+    </svg>
+  );
+}

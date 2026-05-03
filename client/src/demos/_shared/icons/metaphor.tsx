@@ -1026,3 +1026,111 @@ export function MixIcon() {
     </svg>
   );
 }
+
+export function DistributedIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="9" width="8" height="8" rx="2" />
+      <rect x="26" y="9" width="8" height="8" rx="2" />
+      <rect x="16" y="23" width="8" height="8" rx="2" />
+      <path d="M14 13h12M20 17v6" />
+    </svg>
+  );
+}
+
+export function ShareIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="11" cy="20" r="3" />
+      <circle cx="29" cy="12" r="3" />
+      <circle cx="29" cy="28" r="3" />
+      <path d="M14 19l12-6M14 21l12 6" />
+    </svg>
+  );
+}
+
+export function ChangeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 14h16l-3-3" />
+      <path d="M30 26H14l3 3" />
+      <path d="M26 11v6M14 23v6" />
+    </svg>
+  );
+}
+
+export function ToolMetaIcon() {
+  return <ToolIcon />;
+}
+
+export function RepeatMetaIcon() {
+  return <RepeatIcon />;
+}
+
+export function PartMetaIcon() {
+  return <PartIcon />;
+}
+
+export function PickComponentIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="26" height="18" rx="2" />
+      <path d="M15 16h10M15 21h6" />
+      <path d="m24 27 3 3 6-6" />
+    </svg>
+  );
+}
+
+export function TeamIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="12" cy="15" r="3" />
+      <circle cx="28" cy="15" r="3" />
+      <circle cx="20" cy="11" r="3" />
+      <path d="M7 30c0-4 2-7 5-7s5 3 5 7" />
+      <path d="M23 30c0-4 2-7 5-7s5 3 5 7" />
+      <path d="M13 30c0-4 3-7 7-7s7 3 7 7" />
+    </svg>
+  );
+}
+
+export function DevMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="8" width="26" height="24" rx="3" />
+      <path d="M13 19l4-4-4-4M23 23h4" />
+      <path d="M23 17h6" />
+    </svg>
+  );
+}
+
+export function BundleMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7 31 13v14L20 33 9 27V13z" />
+      <path d="M20 7v12M9 13l11 6 11-6" />
+      <path d="M14 19h12" />
+    </svg>
+  );
+}
+
+export function OptimizeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="11" />
+      <path d="M20 9v11l7 4" />
+      <path d="M20 20l5-8" />
+    </svg>
+  );
+}
+
+export function DeployMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7v14" />
+      <path d="M14 15l6 6 6-6" />
+      <path d="M9 26h22" />
+      <path d="M12 31h16" />
+    </svg>
+  );
+}
