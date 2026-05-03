@@ -13,6 +13,10 @@ import Q04Deploy from './ch03/Q04Deploy';
 import Q05Rollback from './ch03/Q05Rollback';
 import Q06Monitor from './ch03/Q06Monitor';
 import Q07CodeReview from './ch03/Q07CodeReview';
+import Q01DataShape from './ch04/Q01DataShape';
+import Q02DataFormat from './ch04/Q02DataFormat';
+import Q03DataDup from './ch04/Q03DataDup';
+import Q04DataIndex from './ch04/Q04DataIndex';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -31,6 +35,10 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch03_q05: { Component: Q05Rollback, layout: 'wide' },
   ch03_q06: { Component: Q06Monitor, layout: 'wide' },
   ch03_q07: { Component: Q07CodeReview, layout: 'wide' },
+  ch04_q01: { Component: Q01DataShape, layout: 'square' },
+  ch04_q02: { Component: Q02DataFormat, layout: 'wide' },
+  ch04_q03: { Component: Q03DataDup, layout: 'wide' },
+  ch04_q04: { Component: Q04DataIndex, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {

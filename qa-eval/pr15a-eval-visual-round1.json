@@ -1,0 +1,69 @@
+{
+  "step": "pr15a",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-84",
+  "ts": "2026-05-03T12:45:55+00:00",
+  "branch": "feat/preview-inline-ch04-q1-q4",
+  "commit": "9e27b5b409a3ebe2fec8315d0f3ef81dbda4e11c",
+  "verdict": "FAIL",
+  "fail_items": [
+    "V3-active-sync: ch04 4개 데모 모두에서 시나리오 탭과 실제 active 카드/hero가 완전히 동기화되지 않는다. `ch04_q01`은 `#semi`·`#unstructured`가 첫 장면(`칸`/`정형`)으로 fallback되고, `ch04_q02`는 `#pick`이 첫 장면(`표`/`CSV`)으로 fallback된다. `ch04_q03`은 `#dup`·`#update`·`#split`·`#tradeoff` 전부 첫 장면(`중복`/`중복`)으로 고정되고, `ch04_q04`는 `#lookup`이 첫 장면(`훑기`/`전체 스캔`)으로 fallback된다."
+  ],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-frame-inline",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01`~`ch04_q04` desktop/mobile 모두 `.phone-frame` / `.phone-notch` count 가 `0` 이다. 새 ch04 데모 4개는 iframe 폰 셸 없이 인라인 React preview 로 렌더링된다."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "PASS",
+      "evidence": "1440x900 에서 네 route 모두 section count 가 `4` 이고 top 좌표가 오름차순이다. 예: q01 `129 < 286.88 < 643.56 < 783.23`, q02 `129 < 264.78 < 613.84 < 874.81`, q03 `129 < 264.78 < 613.84 < 874.81`, q04 `129 < 264.78 < 613.84 < 753.52`."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "FAIL",
+      "evidence": "Playwright 로 각 route 의 시나리오 탭 4개를 순회 클릭한 결과, hash 는 바뀌지만 렌더 상태가 일부 또는 전부 첫 장면으로 fallback된다. q01은 `#semi`/`#unstructured`, q02는 `#pick`, q03은 4개 전부, q04는 `#lookup`에서 active 카드와 hero title 이 기대 장면으로 이동하지 않았다. 원인은 `client/src/data/demos.ts:201-241` 의 scenario id 와 [Q01DataShape.tsx](/home/claude/architecture/client/src/demos/ch04/Q01DataShape.tsx:13), [Q02DataFormat.tsx](/home/claude/architecture/client/src/demos/ch04/Q02DataFormat.tsx:13), [Q03DataDup.tsx](/home/claude/architecture/client/src/demos/ch04/Q03DataDup.tsx:13), [Q04DataIndex.tsx](/home/claude/architecture/client/src/demos/ch04/Q04DataIndex.tsx:13) 의 `SCENES` key 가 다르기 때문이다."
+    },
+    {
+      "id": "V4-contrast",
+      "verdict": "PASS",
+      "evidence": "활성 카드 라벨 색은 `rgb(180, 83, 9)`, 활성 배경은 `rgb(254, 243, 199)` 로 측정됐다. 대비비는 `4.51:1` 이고 WCAG AA `4.5:1` 이상을 만족한다."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01` inline host 폭은 정확히 `640px` 로 square max-width 계약과 일치한다. `ch04_q02`~`q04` 는 모두 `776px` 로 wide max-width `860px` 이하이며, pair row grid template 는 desktop 에서 `177.5px × 4` 로 균등 분할된다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01` pair cards 8개는 모두 svg descendant 를 가진다. `ch04_q02`~`q04` 도 active pair cards 와 각 row 카드에 SVG 가 정상 렌더링되어 아이콘 누락이 보이지 않았다."
+    },
+    {
+      "id": "V7-baseline-spotcheck",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check 로 `/library/3/ch03_q04` 를 확인했다. `.phone-frame` count `0`, 시나리오 tablist count `1`, 루트 CSS token `--demo-accent-ch03 = #15803d` 로 PR-14a/14b baseline 이 유지된다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852 에서 preview 탭으로 전환한 직후 네 route 모두 시나리오 tablist bottom 이 viewport 안에 있다. q01/q02 는 `276.78px`, q03/q04 는 `238.39px` 이고 hero 상단과 pair block 상단(`521.53px` 또는 `483.14px`)도 첫 화면 안에 들어온다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "393x852 에서 `ch04_q01` PairVertical grid 는 `327px` 단일 열로 stack 된다. `ch04_q02`~`q04` pair row grid template 는 모두 `155.5px 155.5px` 로 2열 변환되고, scrollWidth 는 전 route 공통 `393px` 로 가로 스크롤이 없다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr15a-round1.md` §B 만 따랐다.",
+    "Generator 센티넬 `qa/ao-logs/pr15a-r1-gen.status` 는 저장소에서 찾지 못했다. 대신 평가 시점 HEAD 와 `origin/feat/preview-inline-ch04-q1-q4` 가 모두 `9e27b5b409a3ebe2fec8315d0f3ef81dbda4e11c` 인 것을 확인하고 그 커밋에서 검증했다.",
+    "공유 환경에서 5185 포트가 이미 사용 중이라 Vite dev server 는 `http://127.0.0.1:5186` 에서 검증했다.",
+    "브라우저 자동화는 Playwright + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "캡처 산출물: `/tmp/pr15a-r1-eval-visual/ch04_q01-desktop.png`, `/tmp/pr15a-r1-eval-visual/ch04_q02-desktop.png`, `/tmp/pr15a-r1-eval-visual/ch04_q03-desktop.png`, `/tmp/pr15a-r1-eval-visual/ch04_q04-desktop.png`, `/tmp/pr15a-r1-eval-visual/ch04_q01-mobile.png`, `/tmp/pr15a-r1-eval-visual/ch04_q02-mobile.png`, `/tmp/pr15a-r1-eval-visual/ch04_q03-mobile.png`, `/tmp/pr15a-r1-eval-visual/ch04_q04-mobile.png`, `/tmp/pr15a-r1-eval-visual/ch03_q04-desktop.png`."
+  ]
+}

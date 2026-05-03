@@ -1,0 +1,62 @@
+{
+  "step": "pr15a",
+  "phase": "eval-interaction-round2",
+  "round": 2,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-88",
+  "ts": "2026-05-03T12:54:31Z",
+  "branch": "feat/preview-inline-ch04-q1-q4",
+  "evaluated_commit": "3b71b5a41859fa54a06df4f6ddea84a74a16c476",
+  "overall": "REVISE",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "`client/`에서 `npm install --no-audit --no-fund` 후 `npm run build`가 성공했다."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "`grep -rE \"['\\\"]#[0-9a-fA-F]{3,8}['\\\"]\" client/src/demos/ch04 --include=\"*.tsx\"`가 빈 결과라 ch04 인라인 데모에 raw hex가 없다."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "`grep -E \"from ['\\\"]\\.\\.?/_shared/[^i]\" client/src/demos/ch04/*.tsx`가 빈 결과라 금지된 `_shared/*` 직접 import가 없다."
+    },
+    {
+      "id": "I4",
+      "verdict": "PASS",
+      "evidence": "round 2 변경은 `client/src/data/demos.ts`의 scenario id 9건 정렬뿐이고, ch04 데모 컴포넌트와 라벨 본문은 유지됐다."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "`client/src/data/demos.ts:197-242`의 ch04 시나리오 ids가 `Q01DataShape.tsx:13-62`, `Q02DataFormat.tsx:13-78`, `Q03DataDup.tsx:13-78`, `Q04DataIndex.tsx:13-62`의 `SCENES` 키와 1:1로 일치한다. 런타임에서도 `/library/4/ch04_q01`에서 `반정형 — 유연한 틀` 탭 클릭 시 URL이 `#frame`으로 바뀌고 활성 탭도 같이 전환됐다."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "`client/src/demos/registry.ts:38-41`는 `ch04_q01`만 `square`, `ch04_q02~q04`는 `wide`로 등록했고, 각 컴포넌트의 `validatePairSet(...)`도 `Q01DataShape.tsx:80`, `Q02DataFormat.tsx:96`, `Q03DataDup.tsx:96`, `Q04DataIndex.tsx:80`에서 같은 레이아웃 계약을 유지한다."
+    },
+    {
+      "id": "I7",
+      "verdict": "REVISE",
+      "evidence": "`PreviewPanel.tsx:39-48`는 탭 클릭 시 `window.history.replaceState(..., `#${nextScenarioId}`)`로 hash를 쓰지만, `LearnPage.tsx:140-146`는 초기 진입 때 항상 `demo?.scenarios[0]?.id`로 `resetForQa(...)`를 호출한다. 실제 브라우저 재현에서도 `/library/4/ch04_q01#frame`, `/library/4/ch04_q02#choice`, `/library/4/ch04_q03#normalize`, `/library/4/ch04_q04#seek`로 직접 열면 URL hash는 유지되지만 활성 탭은 각각 첫 시나리오(`정형`, `CSV`, `중복`, `전체 훑기`)로 초기화됐다."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "`client/src/data/demos.ts:201-242`와 각 ch04 컴포넌트의 `SCENES` 키가 정렬돼 있어 round 1의 id mismatch는 해소됐다. `git diff --name-only main..HEAD -- client/src/demos/ch01 client/src/demos/ch02 client/src/demos/ch03`와 `git diff --name-only main..HEAD -- client/src/demos/_shared/pair-block.tsx client/src/demos/_shared/index.ts client/src/demos/_shared/labels.ts client/src/demos/_shared/design-tokens.css client/src/demos/_shared/types.ts client/src/components/learn/PreviewPanel.tsx`도 빈 결과라 기존 챕터와 공용 인프라 회귀는 보이지 않는다."
+    }
+  ],
+  "critical_findings": [],
+  "summary": "ch04 round-2 id 정렬 자체는 성공했다. 다만 인라인 데모의 직접 hash 진입은 여전히 첫 시나리오로 리셋되어 I7이 남아 있으므로 overall verdict는 REVISE다.",
+  "notes": [
+    "평가 대상 브랜치 head는 `3b71b5a41859fa54a06df4f6ddea84a74a16c476`였고, 실제 scenario id 수정 커밋 `91c2270`은 그 직전 parent에 있다.",
+    "런타임 검증은 로컬 Vite dev server `http://127.0.0.1:5184`에서 수행했다. 요청한 5183 포트는 이미 사용 중이라 Vite가 5184로 자동 승격했다.",
+    "브라우저 재현은 `npx -y -p playwright@1.52.0`와 시스템 Chrome `/usr/bin/google-chrome-stable` 조합으로 실행했다."
+  ],
+  "next_action": "REVISE. Generator는 초기 로드 시 `window.location.hash`를 읽어 `resetForQa` 기본값보다 우선 적용하도록 보강한 뒤, ch04 16개 hash deep-link를 다시 확인해야 한다."
+}

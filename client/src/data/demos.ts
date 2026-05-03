@@ -199,9 +199,9 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch04/q01.html',
     description: '정형, 반정형, 비정형 데이터가 얼마나 일정한 칸을 갖는지 서랍장 비유로 비교합니다.',
     scenarios: [
-      { id: 'structured', label: '정형 — 고정 칸' },
-      { id: 'semi', label: '반정형 — 유연한 틀' },
-      { id: 'unstructured', label: '비정형 — 자유형 내용' },
+      { id: 'cell', label: '정형 — 고정 칸' },
+      { id: 'frame', label: '반정형 — 유연한 틀' },
+      { id: 'free', label: '비정형 — 자유형 내용' },
       { id: 'choice', label: '상황별 선택' },
     ],
   },
@@ -214,7 +214,7 @@ export const DEMOS: DemoMeta[] = [
       { id: 'csv', label: 'CSV — 표 한 줄' },
       { id: 'json', label: 'JSON — 상자 속 상자' },
       { id: 'xml', label: 'XML — 태그 카드' },
-      { id: 'pick', label: '무엇을 고를까' },
+      { id: 'choice', label: '무엇을 고를까' },
     ],
   },
   {
@@ -223,10 +223,10 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch04/q03.html',
     description: '중복된 고객 정보를 나누기 전과 후를 비교해 정규화의 목적을 보여줍니다.',
     scenarios: [
-      { id: 'dup', label: '중복 장부' },
-      { id: 'update', label: '수정 혼선' },
-      { id: 'split', label: '테이블 분리' },
-      { id: 'tradeoff', label: '조회와 균형' },
+      { id: 'duplicate', label: '중복 장부' },
+      { id: 'anomaly', label: '수정 혼선' },
+      { id: 'normalize', label: '테이블 분리' },
+      { id: 'balance', label: '조회와 균형' },
     ],
   },
   {
@@ -237,7 +237,7 @@ export const DEMOS: DemoMeta[] = [
     scenarios: [
       { id: 'scan', label: '전체 훑기' },
       { id: 'index', label: '색인 찾기' },
-      { id: 'lookup', label: '위치 점프' },
+      { id: 'seek', label: '위치 점프' },
       { id: 'cost', label: '정리 비용' },
     ],
   },

@@ -271,6 +271,91 @@ export function ItInstallIcon() {
   );
 }
 
+export function StructuredIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="9" width="26" height="22" rx="2" />
+      <path d="M7 16h26M7 23h26M15 9v22M25 9v22" />
+    </svg>
+  );
+}
+
+export function SemiStructuredIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M14 8h12" />
+      <path d="M11 14h5v12h-5" />
+      <path d="M24 14h5v12h-5" />
+      <path d="M18 18h4M18 22h7" />
+      <path d="M10 8c-3 2-4 4-4 8s1 6 4 8M30 8c3 2 4 4 4 8s-1 6-4 8" />
+    </svg>
+  );
+}
+
+export function UnstructuredIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="9" width="24" height="22" rx="3" />
+      <path d="M13 24c3-8 7-10 14-8" />
+      <path d="M13 18c2 2 4 3 6 3 3 0 4-2 8-2" />
+      <circle cx="15" cy="15" r="1" fill="currentColor" stroke="none" />
+      <circle cx="25" cy="26" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function DataChoiceIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 11h24v18H8z" />
+      <path d="M14 17h12M14 22h8" />
+      <path d="M25 27l3 3 5-5" />
+    </svg>
+  );
+}
+
+export function CsvIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="8" width="26" height="24" rx="2" />
+      <path d="M7 16h26M7 24h26M16 8v24M24 8v24" />
+      <path d="M11 12h1M19 12h1M27 12h1" />
+    </svg>
+  );
+}
+
+export function JsonIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M15 9c-3 1-4 3-4 6v3c0 2-1 3-3 4 2 1 3 2 3 4v3c0 3 1 5 4 6" />
+      <path d="M25 9c3 1 4 3 4 6v3c0 2 1 3 3 4-2 1-3 2-3 4v3c0 3-1 5-4 6" />
+      <path d="M18 16h4M18 24h4" />
+    </svg>
+  );
+}
+
+export function XmlIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="m13 16-5 4 5 4" />
+      <path d="m27 16 5 4-5 4" />
+      <path d="M22 12 18 28" />
+      <path d="M15 10h10" />
+    </svg>
+  );
+}
+
+export function FormatChoiceIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="9" width="24" height="22" rx="3" />
+      <path d="M13 15h14M13 20h10M13 25h7" />
+      <circle cx="28" cy="27" r="5" />
+      <path d="M28 24v6M25 27h6" />
+    </svg>
+  );
+}
+
 export function UnitIcon() {
   return (
     <svg {...ICON_BASE} aria-hidden>
@@ -313,6 +398,82 @@ export function BalanceItIcon() {
       <path d="M13 21a4 2.5 0 0 1-6 0" />
       <path d="M27 21a4 2.5 0 0 1-6 0" />
       <path d="M14 33h12" />
+    </svg>
+  );
+}
+
+export function DataDupIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="11" width="13" height="13" rx="2" />
+      <rect x="18" y="16" width="14" height="14" rx="2" />
+      <path d="M21 21h6M21 25h6" />
+    </svg>
+  );
+}
+
+export function UpdateAnomalyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="11" width="10" height="18" rx="2" />
+      <rect x="22" y="11" width="10" height="18" rx="2" />
+      <path d="M18 20h4" />
+      <path d="m18 16 4 4-4 4" />
+    </svg>
+  );
+}
+
+export function NormalizeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="9" width="9" height="22" rx="2" />
+      <rect x="19" y="9" width="14" height="9" rx="2" />
+      <rect x="19" y="22" width="14" height="9" rx="2" />
+      <path d="M16 20h3M26 18v4" />
+    </svg>
+  );
+}
+
+export function QueryBalanceIcon() {
+  return <BalanceItIcon />;
+}
+
+export function FullScanIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="9" width="26" height="22" rx="2" />
+      <path d="M12 15h16M12 20h16M12 25h11" />
+      <path d="m25 25 3 3 5-5" opacity="0.5" />
+    </svg>
+  );
+}
+
+export function IndexIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 8h18v24l-5-3-4 3-4-3-5 3z" />
+      <path d="M15 14h10M15 19h10M15 24h7" />
+    </svg>
+  );
+}
+
+export function SeekIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="17" cy="17" r="7" />
+      <path d="m22 22 7 7" />
+      <path d="M17 14v6M14 17h6" />
+    </svg>
+  );
+}
+
+export function IndexCostIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 9h18v18H11z" />
+      <path d="M15 15h10M15 20h6" />
+      <circle cx="28" cy="28" r="7" />
+      <path d="M28 24v8M24 28h8" />
     </svg>
   );
 }

@@ -1,0 +1,1 @@
+{"status":"done","step":"pr15a","role":"eval-interaction","model":"codex","session_id":"arch-88","ts":"2026-05-03T12:54:31Z","verdict":"REVISE","commit":"3b71b5a41859fa54a06df4f6ddea84a74a16c476","branch":"feat/preview-inline-ch04-q1-q4","fail_items":[],"revise_items":["I7: direct hash deep-link still initializes the first scenario instead of the requested ch04 scenario id."]}
