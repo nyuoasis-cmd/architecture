@@ -1,0 +1,111 @@
+{
+  "step": "pr15a",
+  "round": 3,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-89",
+  "ts": "2026-05-03T13:56:41Z",
+  "verdict": "PASS",
+  "branch": "feat/preview-inline-ch04-q1-q4",
+  "commit": "b148ab1d309190ab188a5ab3803283e68f1573e9",
+  "evaluated_head": "853675c271280650a09d1a0f9fcf803a73e35bba",
+  "scope": {
+    "focus": "I7 deep-link fix revalidation only",
+    "routes_checked": 17,
+    "spot_check": "/library/3/ch03_q04#staging",
+    "build": "PASS",
+    "grep": [
+      "client/src/pages/LearnPage.tsx:145 window.location.hash.slice(1)",
+      "client/src/pages/LearnPage.tsx:147 resetForQa(qa.id, hashMatches ? hashId : (demo?.scenarios[0]?.id ?? 'launch'))"
+    ]
+  },
+  "checks": [
+    {
+      "route": "/library/4/ch04_q01#cell",
+      "expected": "정형 — 고정 칸",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q01#frame",
+      "expected": "반정형 — 유연한 틀",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q01#free",
+      "expected": "비정형 — 자유형 내용",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q01#choice",
+      "expected": "상황별 선택",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q02#csv",
+      "expected": "CSV — 표 한 줄",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q02#json",
+      "expected": "JSON — 상자 속 상자",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q02#xml",
+      "expected": "XML — 태그 카드",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q02#choice",
+      "expected": "무엇을 고를까",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q03#duplicate",
+      "expected": "중복 장부",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q03#anomaly",
+      "expected": "수정 혼선",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q03#normalize",
+      "expected": "테이블 분리",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q03#balance",
+      "expected": "조회와 균형",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q04#scan",
+      "expected": "전체 훑기",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q04#index",
+      "expected": "색인 찾기",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q04#seek",
+      "expected": "위치 점프",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/4/ch04_q04#cost",
+      "expected": "정리 비용",
+      "result": "PASS"
+    },
+    {
+      "route": "/library/3/ch03_q04#staging",
+      "expected": "staging — 운영 리허설",
+      "result": "PASS"
+    }
+  ],
+  "fail_items": [],
+  "revise_items": []
+}
