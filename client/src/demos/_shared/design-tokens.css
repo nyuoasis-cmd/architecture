@@ -35,17 +35,6 @@
   --demo-accent-soft-ch10: #fdf2f8;
   --demo-accent-border-ch10: #f9a8d4;
 
-  /* ch01 preserved accents */
-  --demo-accent-q02: #1d4ed8;
-  --demo-accent-soft-q02: #eff6ff;
-  --demo-accent-border-q02: #93c5fd;
-  --demo-accent-q03: #0f766e;
-  --demo-accent-soft-q03: #ecfeff;
-  --demo-accent-border-q03: #5eead4;
-  --demo-accent-q04: #7c3aed;
-  --demo-accent-soft-q04: #f5f3ff;
-  --demo-accent-border-q04: #c4b5fd;
-
   /* Card + surfaces */
   --demo-card-bg: #ffffff;
   --demo-card-bg-alt: #f8fafc;
