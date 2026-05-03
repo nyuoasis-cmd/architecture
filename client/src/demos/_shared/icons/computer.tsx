@@ -314,6 +314,145 @@ export function DataChoiceIcon() {
   );
 }
 
+export function FetchIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="11" height="20" rx="2" />
+      <rect x="22" y="10" width="11" height="20" rx="2" />
+      <path d="M18 20h9" />
+      <path d="m24 16 4 4-4 4" />
+    </svg>
+  );
+}
+
+export function DecodeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="9" width="26" height="22" rx="2" />
+      <path d="M12 15h16M12 20h10M12 25h6" />
+      <path d="m24 24 3 3 5-6" />
+    </svg>
+  );
+}
+
+export function ExecuteItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="7" width="22" height="26" rx="2" />
+      <path d="M14 13h12" />
+      <path d="M15 20h3M15 25h3M21 20h3M21 25h3" />
+      <path d="M27 22h4M29 20v4" />
+    </svg>
+  );
+}
+
+export function StoreIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 8h18l4 4v20H9z" />
+      <path d="M13 8v8h10V8" />
+      <rect x="14" y="22" width="12" height="7" rx="1" />
+      <path d="M26 24h4" />
+    </svg>
+  );
+}
+
+export function RegisterIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="14" width="26" height="12" rx="2" />
+      <rect x="11" y="17" width="4" height="6" />
+      <rect x="18" y="17" width="4" height="6" />
+      <rect x="25" y="17" width="4" height="6" />
+      <path d="M9 10h22" />
+    </svg>
+  );
+}
+
+export function ProgramIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="7" width="24" height="26" rx="2" />
+      <path d="M8 13h24" />
+      <circle cx="12" cy="10" r="1" fill="currentColor" stroke="none" />
+      <circle cx="16" cy="10" r="1" fill="currentColor" stroke="none" />
+      <path d="M13 19h14M13 24h10M13 29h6" />
+    </svg>
+  );
+}
+
+export function ProcessIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="10" height="20" rx="2" />
+      <rect x="23" y="10" width="10" height="20" rx="2" />
+      <path d="M17 20h6" />
+      <path d="m20 16 3 4-3 4" />
+    </svg>
+  );
+}
+
+export function TerminateIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M16 16l8 8M24 16l-8 8" />
+      <path d="M20 8v4" />
+    </svg>
+  );
+}
+
+export function RecentValueIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 13v7l4 3" />
+      <path d="M12 10h6" />
+    </svg>
+  );
+}
+
+export function NearValueIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="13" width="8" height="14" rx="1" />
+      <rect x="18" y="13" width="6" height="14" rx="1" />
+      <rect x="26" y="13" width="6" height="14" rx="1" />
+    </svg>
+  );
+}
+
+export function CacheHitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="10" width="22" height="20" rx="2" />
+      <path d="M13 20l4 4 10-10" />
+      <path d="M9 14h-3M9 20h-3M31 14h3M31 20h3" />
+    </svg>
+  );
+}
+
+export function CacheMissIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="10" width="22" height="20" rx="2" />
+      <path d="M15 16l10 10M25 16 15 26" />
+      <path d="M9 14h-3M9 20h-3M31 14h3M31 20h3" />
+    </svg>
+  );
+}
+
+export function CacheLevelIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="8" width="24" height="24" rx="2" />
+      <rect x="12" y="12" width="16" height="16" />
+      <rect x="16" y="16" width="8" height="8" />
+      <path d="M9 10h4M9 15h3M31 10h-4M31 15h-3" />
+    </svg>
+  );
+}
+
 export function CsvIcon() {
   return (
     <svg {...ICON_BASE} aria-hidden>

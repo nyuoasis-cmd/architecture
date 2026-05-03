@@ -367,10 +367,10 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch06/q03.html',
     description: '디스크의 프로그램이 메모리의 프로세스가 되고 CPU가 처리하는 흐름을 보여줍니다.',
     scenarios: [
-      { id: 'launch', label: '카톡 실행 — 프로세스 만들어지기' },
-      { id: 'multi', label: '같은 앱 두 번 — 프로세스 2개' },
-      { id: 'cpu', label: 'CPU가 일하는 모습' },
-      { id: 'kill', label: '앱 종료 — 프로세스 사라지기' },
+      { id: 'execute', label: '실행 요청' },
+      { id: 'clone', label: '프로세스 복제' },
+      { id: 'task', label: 'CPU 작업' },
+      { id: 'end', label: '종료와 회수' },
     ],
   },
   {
@@ -381,7 +381,7 @@ export const DEMOS: DemoMeta[] = [
     scenarios: [
       { id: 'fetch', label: '명령 읽기' },
       { id: 'decode', label: '의미 해석' },
-      { id: 'execute', label: 'ALU 계산' },
+      { id: 'execute', label: '연산 실행' },
       { id: 'store', label: '결과 저장' },
     ],
   },
@@ -391,10 +391,10 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch06/q02.html',
     description: '레지스터, 캐시, RAM, SSD/HDD가 속도와 용량을 어떻게 나눠 맡는지 비교합니다.',
     scenarios: [
-      { id: 'nearest', label: '손안 메모' },
-      { id: 'workbench', label: '작업 책상' },
-      { id: 'warehouse', label: '보관 창고' },
-      { id: 'tradeoff', label: '속도와 용량' },
+      { id: 'register', label: '레지스터' },
+      { id: 'cache', label: '가까운 캐시' },
+      { id: 'ram', label: '작업 RAM' },
+      { id: 'disk', label: '디스크 보관' },
     ],
   },
   {

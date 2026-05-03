@@ -27,6 +27,10 @@ import Q04SpaSsr from './ch05/Q04SpaSsr';
 import Q05PackageManager from './ch05/Q05PackageManager';
 import Q06ComponentReuse from './ch05/Q06ComponentReuse';
 import Q07BuildDeploy from './ch05/Q07BuildDeploy';
+import Q01CpuCycle from './ch06/Q01CpuCycle';
+import Q02MemoryHierarchy from './ch06/Q02MemoryHierarchy';
+import Q03Process from './ch06/Q03Process';
+import Q04CacheHit from './ch06/Q04CacheHit';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -59,6 +63,10 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch05_q05: { Component: Q05PackageManager, layout: 'wide' },
   ch05_q06: { Component: Q06ComponentReuse, layout: 'wide' },
   ch05_q07: { Component: Q07BuildDeploy, layout: 'wide' },
+  ch06_q01: { Component: Q01CpuCycle, layout: 'wide' },
+  ch06_q02: { Component: Q02MemoryHierarchy, layout: 'square' },
+  ch06_q03: { Component: Q03Process, layout: 'wide' },
+  ch06_q04: { Component: Q04CacheHit, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
