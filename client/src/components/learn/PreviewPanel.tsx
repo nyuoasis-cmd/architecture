@@ -42,6 +42,8 @@ export default function PreviewPanel({
       if (iframe && demo) {
         iframe.src = `${demo.url}#${nextScenarioId}`;
       }
+    } else if (typeof window !== 'undefined') {
+      window.history.replaceState(null, '', `#${nextScenarioId}`);
     }
     onScenarioChange(nextScenarioId);
   };
