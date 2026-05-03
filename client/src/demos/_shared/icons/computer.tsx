@@ -270,3 +270,176 @@ export function ItInstallIcon() {
     </svg>
   );
 }
+
+export function UnitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="10" y="10" width="20" height="20" rx="3" />
+      <path d="M16 16h8v8h-8z" />
+      <path d="M20 6v4M20 30v4M6 20h4M30 20h4" />
+    </svg>
+  );
+}
+
+export function IntegrationIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="12" width="10" height="10" rx="2" />
+      <rect x="24" y="12" width="10" height="10" rx="2" />
+      <rect x="15" y="24" width="10" height="10" rx="2" />
+      <path d="M16 17h8M20 22v2" />
+    </svg>
+  );
+}
+
+export function E2EIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="5" y="10" width="30" height="20" rx="3" />
+      <path d="M10 20h20" />
+      <path d="M26 16l4 4-4 4" />
+      <path d="M14 16l-4 4 4 4" />
+    </svg>
+  );
+}
+
+export function BalanceItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7v24" />
+      <path d="M11 13h18" />
+      <path d="M12 13l-4 8h8z" />
+      <path d="M28 13l-4 8h8z" />
+      <path d="M13 21a4 2.5 0 0 1-6 0" />
+      <path d="M27 21a4 2.5 0 0 1-6 0" />
+      <path d="M14 33h12" />
+    </svg>
+  );
+}
+
+export function RedTestIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M15 15l10 10M25 15 15 25" />
+      <path d="M20 8v2" />
+    </svg>
+  );
+}
+
+export function GreenTestIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M14 20l4 4 8-8" />
+      <path d="M20 8v2" />
+    </svg>
+  );
+}
+
+export function RefactorIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 12h14l-3-3" />
+      <path d="M30 28H16l3 3" />
+      <path d="M26 9v6" />
+      <path d="M14 25v6" />
+      <rect x="16" y="16" width="8" height="8" rx="2" />
+    </svg>
+  );
+}
+
+export function LoopIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="11" />
+      <path d="M20 9a11 11 0 0 1 10 7" />
+      <path d="M30 16v-5h-5" />
+      <path d="M20 31a11 11 0 0 1-10-7" />
+      <path d="M10 24v5h5" />
+    </svg>
+  );
+}
+
+export function CommitDetectIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="11" cy="20" r="3" />
+      <circle cx="21" cy="20" r="3" />
+      <path d="M14 20h4" />
+      <path d="M24 20h5" />
+      <path d="M27 16l4 4-4 4" />
+    </svg>
+  );
+}
+
+export function ItBuildIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="24" height="20" rx="3" />
+      <path d="M14 20h12" />
+      <path d="M17 15l-3 5 3 5" />
+      <path d="M23 15l3 5-3 5" />
+    </svg>
+  );
+}
+
+export function ItTestIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="8" width="22" height="26" rx="3" />
+      <path d="M14 15h12M14 20h8" />
+      <path d="M15 26l3 3 7-7" />
+    </svg>
+  );
+}
+
+export function ReportLogIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="7" width="22" height="26" rx="3" />
+      <path d="M14 15h12M14 20h12M14 25h7" />
+      <path d="M24 24l2 2 4-5" />
+    </svg>
+  );
+}
+
+export function DevIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="9" width="28" height="22" rx="3" />
+      <path d="M12 20l4-4-4-4M20 24h8" />
+    </svg>
+  );
+}
+
+export function StagingIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 30V12l12-6 12 6v18H8z" />
+      <path d="M14 22h12M14 17h12" />
+      <path d="M20 6v24" />
+    </svg>
+  );
+}
+
+export function ProdIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 30V14l11-7 11 7v16H9z" />
+      <path d="M15 30v-8h10v8" />
+      <path d="M17 17h6" />
+    </svg>
+  );
+}
+
+export function CdIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="11" width="8" height="18" rx="2" />
+      <rect x="17" y="16" width="8" height="13" rx="2" />
+      <rect x="28" y="8" width="6" height="21" rx="2" />
+      <path d="M10 8V5M21 13v-3M31 5V3" />
+    </svg>
+  );
+}
