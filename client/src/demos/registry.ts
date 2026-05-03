@@ -24,6 +24,9 @@ import Q01HallKitchen from './ch05/Q01HallKitchen';
 import Q02WebStack from './ch05/Q02WebStack';
 import Q03Rest from './ch05/Q03Rest';
 import Q04SpaSsr from './ch05/Q04SpaSsr';
+import Q05PackageManager from './ch05/Q05PackageManager';
+import Q06ComponentReuse from './ch05/Q06ComponentReuse';
+import Q07BuildDeploy from './ch05/Q07BuildDeploy';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -53,6 +56,9 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch05_q02: { Component: Q02WebStack, layout: 'wide' },
   ch05_q03: { Component: Q03Rest, layout: 'wide' },
   ch05_q04: { Component: Q04SpaSsr, layout: 'wide' },
+  ch05_q05: { Component: Q05PackageManager, layout: 'wide' },
+  ch05_q06: { Component: Q06ComponentReuse, layout: 'wide' },
+  ch05_q07: { Component: Q07BuildDeploy, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {

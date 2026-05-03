@@ -109,6 +109,9 @@ async function syncProgressRemote(qaId: string, payload: { readAt?: string; quiz
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
     const devId = readDevUserId();
+    if (import.meta.env.DEV && !devId) {
+      return;
+    }
     if (devId && import.meta.env.DEV) {
       headers['x-dev-teacher-id'] = devId;
     }

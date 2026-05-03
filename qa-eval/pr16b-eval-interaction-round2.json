@@ -1,0 +1,78 @@
+{
+  "step": "pr16b",
+  "round": 2,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-100",
+  "ts": "2026-05-03T23:28:58Z",
+  "verdict": "PASS",
+  "pr_number": 48,
+  "pr_url": "https://github.com/nyuoasis-cmd/architecture/pull/48",
+  "branch": "feat/preview-inline-ch05-q5-q7",
+  "commit_under_test": "b131c643e82e692d4b029f502c67d9840f55358c",
+  "target_fix_commit": "0f140ab",
+  "scope": {
+    "focus": "HANDOFF-pr16b-round2.md §C interaction recheck for the markRead 401 regression on direct /library entry, plus one spot-check for deep-link and scenario alignment.",
+    "build": {
+      "client": "PASS (cd client && npm run build)"
+    },
+    "raw_abbreviation_grep": "PASS (grep -nE \"label: '(OS|API|DB|UI|JS|CSS|HTML)'\" client/src/demos/ch05/*.tsx returned 0 matches)",
+    "registry_entries": [
+      "ch05_q05 -> Q05PackageManager (wide)",
+      "ch05_q06 -> Q06ComponentReuse (wide)",
+      "ch05_q07 -> Q07BuildDeploy (wide)"
+    ],
+    "scenario_alignment": [
+      "ch05_q05 demos.ts ids match SCENES: local, shared, update, tool",
+      "ch05_q06 demos.ts ids match SCENES: repeat, component, choice, team",
+      "ch05_q07 demos.ts ids match SCENES: dev, bundle, optimize, ship"
+    ],
+    "deep_link_guards": [
+      "client/src/pages/LearnPage.tsx:145-147 keeps a valid location hash as the initial inline scenario",
+      "client/src/components/learn/PreviewPanel.tsx:35-43 rewrites window.history hash on inline scenario change"
+    ]
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "route": "/library/5/ch05_q05",
+      "expected": "direct dev-mode entry emits no console error and no /api/progress 401",
+      "result": "PASS",
+      "evidence": "Playwright on http://localhost:5184 loaded the route directly with finalUrl unchanged, consoleErrors=[], pageErrors=[], badResponses=[], progressResponses=[]."
+    },
+    {
+      "id": "I2",
+      "route": "/library/5/ch05_q06",
+      "expected": "direct dev-mode entry emits no console error and no /api/progress 401",
+      "result": "PASS",
+      "evidence": "Playwright direct navigation kept the QA route and produced consoleErrors=[], pageErrors=[], badResponses=[], progressResponses=[]."
+    },
+    {
+      "id": "I3",
+      "route": "/library/5/ch05_q07#optimize",
+      "expected": "deep-link entry keeps a valid inline scenario without console noise",
+      "result": "PASS",
+      "evidence": "Direct navigation opened the route with no console/page errors and no API failures; beforeHash was #optimize."
+    },
+    {
+      "id": "I4",
+      "route": "/library/5/ch05_q07#optimize -> click '파일 묶기'",
+      "expected": "inline scenario click rewrites the hash to the selected scene id",
+      "result": "PASS",
+      "evidence": "Clicking the scenario tab changed the hash from #optimize to #bundle with no console or network errors."
+    },
+    {
+      "id": "I5",
+      "artifact": "client/src/demos/registry.ts + client/src/data/demos.ts + ch05 demo components",
+      "expected": "round-1 PASS items remain aligned after the progress fix",
+      "result": "PASS",
+      "evidence": "Registry still maps ch05_q05~q07 to the intended wide components, and demos.ts scenario ids match each component SCENES keys 1:1."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "notes": [
+    "The branch head now includes wrapper commit b131c64, but its only diff from 0f140ab is HANDOFF-pr16b-round2.md; the evaluated application code for the regression fix is unchanged.",
+    "An additional out-of-scope check with a synthetic dev-header user triggered PATCH /api/progress -> 500 because the backing Supabase project currently reports exceed_egress_quota. This did not affect the requested direct /library regression path, which stayed clean with zero console errors and zero 401s."
+  ]
+}
