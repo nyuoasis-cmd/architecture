@@ -7,7 +7,7 @@ export default function LibraryPage() {
 
   return (
     <main className="mx-auto w-full max-w-[1100px] px-6 py-10">
-      <h1 className="mb-6 text-2xl font-medium">기술노트 아카데미 라이브러리</h1>
+      <h1 className="mb-6 text-2xl font-medium">라이브러리</h1>
       <p className="mb-8 text-stone-600">10개 챕터, 71개 Q&amp;A.</p>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {CHAPTERS.map((chapter) => {
