@@ -255,6 +255,81 @@ export function BoxIcon() {
   );
 }
 
+export function CellIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="8" width="26" height="24" rx="2" />
+      <path d="M7 16h26M7 24h26M15 8v24M25 8v24" />
+    </svg>
+  );
+}
+
+export function FrameIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="8" width="24" height="24" rx="2" />
+      <path d="M13 13h14M13 20h10M13 27h8" />
+      <path d="M5 12h3M32 12h3M5 28h3M32 28h3" />
+    </svg>
+  );
+}
+
+export function FreestyleIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M7 26c4-10 10-15 16-12 2 1 4 4 7 4 2 0 3-1 3-1" />
+      <path d="M9 31c4-5 9-7 15-6 4 0 7 2 9 5" />
+      <path d="M11 12c2-3 5-5 9-5 3 0 6 1 8 3" />
+      <circle cx="10" cy="26" r="1" fill="currentColor" stroke="none" />
+      <circle cx="28" cy="10" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function PickIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 10h24v20H8z" />
+      <path d="M20 10V6" />
+      <path d="M14 18l4 4 8-8" />
+      <path d="M14 27h12" />
+    </svg>
+  );
+}
+
+export function TableMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="9" width="28" height="22" rx="2" />
+      <path d="M6 16h28M6 23h28M15 9v22M25 9v22" />
+    </svg>
+  );
+}
+
+export function BoxMetaIcon() {
+  return <BoxIcon />;
+}
+
+export function TagIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 20 20 8h11l1 11-12 12z" />
+      <circle cx="25" cy="15" r="1.5" fill="currentColor" stroke="none" />
+      <path d="M14 26l6 6" />
+    </svg>
+  );
+}
+
+export function PickFormatIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M7 10h26v20H7z" />
+      <path d="M13 16h14M13 22h9" />
+      <path d="M24 26l3 3 6-6" />
+    </svg>
+  );
+}
+
 export function LinkIcon() {
   return (
     <svg {...ICON_BASE} aria-hidden>
@@ -349,6 +424,80 @@ export function BalanceIcon() {
       <path d="M11 20a5 3 0 0 1-6 0" />
       <path d="M29 20a5 3 0 0 1-6 0" />
       <path d="M12 34h16" />
+    </svg>
+  );
+}
+
+export function DuplicateIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="11" width="14" height="14" rx="2" />
+      <rect x="17" y="17" width="14" height="14" rx="2" />
+    </svg>
+  );
+}
+
+export function ConfusionIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 12h8l4 4-4 4h-8" />
+      <path d="M30 28h-8l-4-4 4-4h8" />
+      <path d="M18 16v8M22 16v8" />
+    </svg>
+  );
+}
+
+export function SplitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="12" width="10" height="16" rx="2" />
+      <rect x="23" y="12" width="10" height="16" rx="2" />
+      <path d="M20 8v24" />
+    </svg>
+  );
+}
+
+export function BalanceMetaIcon() {
+  return <BalanceIcon />;
+}
+
+export function BrowseIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 12h24" />
+      <path d="M8 20h20" />
+      <path d="M8 28h16" />
+      <circle cx="31" cy="28" r="4" />
+      <path d="m34 31 3 3" />
+    </svg>
+  );
+}
+
+export function BookmarkIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M12 7h16v26l-8-5-8 5z" />
+      <path d="M16 13h8" />
+    </svg>
+  );
+}
+
+export function JumpIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 28V12h16" />
+      <path d="M18 10h12v12" />
+      <path d="m18 22 12-12" />
+    </svg>
+  );
+}
+
+export function CostIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 12v16" />
+      <path d="M24 15c-1-1-2-2-4-2-2.5 0-4 1.3-4 3 0 4 8 2 8 6 0 1.7-1.7 3-4 3-2 0-3.5-.7-4.5-1.8" />
     </svg>
   );
 }
