@@ -1,0 +1,1 @@
+{"status":"done","step":"pr16b","role":"gen","model":"codex","session_id":"arch-97","ts":"2026-05-03T23:10:31Z","branch":"feat/preview-inline-ch05-q5-q7","commit":"5463c7861b2bd54a58b266ab1bec095979f1170a","pr":"https://github.com/nyuoasis-cmd/architecture/pull/48","loc":"+765 -0","note":"ch05 q05~q07 3 demos (모두 wide). sky-600 톤. raw 약자 0건 + ID 정렬 검증 + dev deep-link 검증 완료."}
