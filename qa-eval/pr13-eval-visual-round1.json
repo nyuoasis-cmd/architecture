@@ -1,0 +1,72 @@
+{
+  "step": "pr13",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-60",
+  "ts": "2026-05-03T09:20:01Z",
+  "branch": "feat/preview-inline-ch02",
+  "commit": "ac7331d8601a428eaf8aa1cef23cbd3e5186c166",
+  "verdict": "FAIL",
+  "fail_items": [
+    "V8-mobile-first-viewport: `ch02_q01`~`ch02_q04` all fail the 393x852 first-screen requirement. Hero and Pair Block are visible, but the scenario chip tablist starts below the viewport (`tabTop`: q01 1354px, q02 1354px, q03 967px, q04 922px; viewport height 852px), so Hero + Pair Block + chips are never visible together without scrolling.",
+    "V9-mobile-grid-transform: the responsive grid contract is not applied on 393px. `ch02_q01`~`ch02_q03` stay at 4 columns (`73.75px 73.75px 73.75px 73.75px`) instead of the required 2-column collapse, and `ch02_q04` keeps a side-by-side pair grid (`146.953px 9.07812px 146.969px`) instead of stacking to 1 column."
+  ],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-frame-inline",
+      "verdict": "PASS",
+      "evidence": "All four ch02 library routes render inline React demos in PreviewPanel. No `.phone-frame` or `.phone-notch` elements appear in the DOM, matching the ch01 inline pattern."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "PASS",
+      "evidence": "Desktop 1440x900 captures preserve the expected order for all four demos: Hero gradient card, Pair Block, State/board section, Log section, then scenario chips."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "Scenario tab clicks at 1440x900 keep metaphor and IT highlights synchronized across all four ch02 demos. Manual screenshot checks showed the active metaphor cell and active IT cell changing together for indices 0, 1, 2, and 3."
+    },
+    {
+      "id": "V4-accent-contrast",
+      "verdict": "PASS",
+      "evidence": "The active ch02 accent uses `#0e7490` on `#ecfeff`. Computed contrast is 5.15:1, which clears the WCAG AA 4.5:1 threshold."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "PASS",
+      "evidence": "PreviewPanel still resolves ch02 wide demos with `max-w-[860px]` and q04 with `max-w-[640px]`. DOM inspection confirmed `mx-auto w-full max-w-[860px]` for `ch02_q01` and `mx-auto w-full max-w-[640px]` for `ch02_q04`."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "All pair cells include SVG icons. Desktop captures show visible icons in every metaphor/IT cell, with the active cell switching to the cyan accent tone and inactive cells remaining muted."
+    },
+    {
+      "id": "V7-baseline-ch01",
+      "verdict": "PASS",
+      "evidence": "Spot-checks against `ch01_q01` and `ch01_q04` show the expected chapter-tone separation (orange vs cyan), matching icon stroke weight and shared spacing patterns across the inline demo system."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "FAIL",
+      "evidence": "Initial mobile captures (`/tmp/pr13-eval-visual/ch02_q01-mobile-initial.png` and `/tmp/pr13-eval-visual/ch02_q04-mobile-initial.png`) show Hero and Pair Block content in view, but the scenario chip tablist is below the fold in every demo. Measured `tabTop` values exceed the 852px viewport in all four cases."
+    },
+    {
+      "id": "V9-mobile-grid-transform",
+      "verdict": "FAIL",
+      "evidence": "Responsive grid measurement at 393px shows no required collapse: q01/q02/q03 remain four narrow columns, while q04 retains a two-column pair layout separated by the `≈` connector. The handoff requires wide demos to become 2 columns and the square demo to become 1 column."
+    }
+  ],
+  "artifacts": {
+    "desktop_screenshots": "/tmp/pr13-eval-visual/ch02_q01-desktop.png,/tmp/pr13-eval-visual/ch02_q02-desktop.png,/tmp/pr13-eval-visual/ch02_q03-desktop.png,/tmp/pr13-eval-visual/ch02_q04-desktop.png",
+    "mobile_initial_screenshots": "/tmp/pr13-eval-visual/ch02_q01-mobile-initial.png,/tmp/pr13-eval-visual/ch02_q02-mobile-initial.png,/tmp/pr13-eval-visual/ch02_q03-mobile-initial.png,/tmp/pr13-eval-visual/ch02_q04-mobile-initial.png",
+    "raw_capture_dir": "/tmp/pr13-eval-visual"
+  },
+  "notes": [
+    "Evaluation followed `HANDOFF-pr13-round1.md` §B and `HANDOFF-pr13-eval-visual.md` against `feat/preview-inline-ch02`.",
+    "The PR 13 claim command could not be used because GitHub reports PR #13 as already merged; the visual evaluation was run directly on `feat/preview-inline-ch02` as instructed by the handoff branch metadata."
+  ]
+}
