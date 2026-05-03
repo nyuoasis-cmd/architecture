@@ -1,0 +1,27 @@
+{
+  "step": "pr14b",
+  "round": 1,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-82",
+  "ts": "2026-05-03T11:58:00Z",
+  "branch": "feat/preview-inline-ch03-q5-q7",
+  "commit": "0b73234896585851e92784f8f6ca3a4c9f1ba14b",
+  "verdict": "PASS",
+  "summary": {
+    "passed": [
+      "I1 build: `cd client && npm run build` succeeded on the evaluated head.",
+      "I2 raw hex: `grep -rE \"['\\\"]#[0-9a-fA-F]{3,8}['\\\"]\" client/src/demos/ch03 --include='*.tsx'` returned no matches.",
+      "I3 imports: `grep -E \"from ['\\\"]\\.?\\.?/_shared/[^i]\" client/src/demos/ch03/*.tsx` returned no matches.",
+      "I4 label length: q05~q07 labels and sub labels satisfy `validateLabel` constraints via `validatePairSet(..., { layout: 'wide', subPolicy: 'all' })`.",
+      "I5 active sync: each demo maps `scenarioId` to `activeIndex`, and `PreviewPanel` passes the selected scenario through `onScenarioChange` into the inline component key.",
+      "I6 pair validation: all three demos call `validatePairSet` with the locked wide/all contract.",
+      "I7 URL hash sync: `PreviewPanel.tsx` writes inline scenario changes with `window.history.replaceState(null, '', \\`#${nextScenarioId}\\`)`.",
+      "I8 content 1:1: `client/src/data/demos.ts`, `client/src/data/qa-stubs.ts`, and the q05~q07 demo files match the handoff mapping and scenario ids.",
+      "Regression: `git diff main..HEAD` is empty for ch03 q01~q04, `_shared` lock files, and `PreviewPanel.tsx`; only q05~q07 plus icon files changed."
+    ],
+    "revised": []
+  },
+  "fail_items": [],
+  "revise_items": []
+}
