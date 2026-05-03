@@ -17,6 +17,9 @@ import Q01DataShape from './ch04/Q01DataShape';
 import Q02DataFormat from './ch04/Q02DataFormat';
 import Q03DataDup from './ch04/Q03DataDup';
 import Q04DataIndex from './ch04/Q04DataIndex';
+import Q05Acid from './ch04/Q05Acid';
+import Q06Backup from './ch04/Q06Backup';
+import Q07Visualization from './ch04/Q07Visualization';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -39,6 +42,9 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch04_q02: { Component: Q02DataFormat, layout: 'wide' },
   ch04_q03: { Component: Q03DataDup, layout: 'wide' },
   ch04_q04: { Component: Q04DataIndex, layout: 'wide' },
+  ch04_q05: { Component: Q05Acid, layout: 'wide' },
+  ch04_q06: { Component: Q06Backup, layout: 'wide' },
+  ch04_q07: { Component: Q07Visualization, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {

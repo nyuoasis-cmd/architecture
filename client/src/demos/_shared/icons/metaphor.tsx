@@ -520,6 +520,115 @@ export function GreenDotIcon() {
   );
 }
 
+export function AllIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 11v18M11 20h18" />
+    </svg>
+  );
+}
+
+export function RuleIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 9h20l2 4v18H8V13z" />
+      <path d="M14 17h12M14 22h12M14 27h8" />
+      <path d="M24 9v4h8" />
+    </svg>
+  );
+}
+
+export function BlockMetaIcon() {
+  return <BlockIcon />;
+}
+
+export function PreserveIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7 31 12v8c0 6-4 10-11 13-7-3-11-7-11-13v-8z" />
+      <path d="M15 20l3 3 7-7" />
+    </svg>
+  );
+}
+
+export function BackupMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 12h20v16H10z" />
+      <path d="M15 12V8h10v4" />
+      <path d="M20 18v8" />
+      <path d="m16 22 4 4 4-4" />
+    </svg>
+  );
+}
+
+export function LossIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 8a12 12 0 1 1-8.5 3.5" />
+      <path d="M20 13v8l5 3" />
+      <path d="m8 8 3 0 0 3" />
+    </svg>
+  );
+}
+
+export function RecoverIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 21a10 10 0 1 0 3-7" />
+      <path d="M10 13v8h8" />
+      <path d="M18 19l4 4 8-9" />
+    </svg>
+  );
+}
+
+export function DrillIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M12 28V12l8-4 8 4v16" />
+      <path d="M16 20h8" />
+      <path d="M20 16v8" />
+      <path d="M10 32h20" />
+    </svg>
+  );
+}
+
+export function QuestionIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M16.5 16a3.5 3.5 0 1 1 5.2 3l-1.2.7c-1 .6-1.5 1.3-1.5 2.3v1" />
+      <circle cx="20" cy="27.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function PickQuestionIcon() {
+  return <PickIcon />;
+}
+
+export function CheckAxisIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 30V12h20" />
+      <path d="M14 24l4-5 4 3 5-7" />
+      <path d="m26 15 5 0 0 5" />
+    </svg>
+  );
+}
+
+export function RestraintIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 14h22" />
+      <path d="M9 20h16" />
+      <path d="M9 26h10" />
+      <path d="m25 24 3 3 5-6" />
+    </svg>
+  );
+}
+
 export function TidyIcon() {
   return (
     <svg {...ICON_BASE} aria-hidden>
