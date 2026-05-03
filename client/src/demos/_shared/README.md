@@ -76,12 +76,13 @@ validatePairSet(metaphor, it, { layout: 'wide', subPolicy: 'all' });
 
 ## DO/DON'T
 
-DO
+### DO
 - `import { ... } from '../_shared'` 만 사용한다.
 - 색상은 `var(--demo-...)` 토큰으로만 참조한다.
 - 모듈 선언 시 `validatePairSet(...)` 으로 라벨 규약을 검증한다.
+- 챕터 파일은 `const TONE = getTone(N)` 패턴으로 톤을 일원화한다.
 
-DON'T
+### DON'T
 - `_shared/pair-block` 같은 내부 경로를 직접 import 하지 않는다.
 - `'#ea580c'` 같은 raw hex 를 TS/TSX 안에 두지 않는다.
-- 챕터 파일에서 tone 객체를 raw hex 로 새로 만들지 않는다.
+- 챕터 파일에서 local `TONE` 객체를 직접 만들어 사용하지 않는다 (`getTone(N)` 사용).

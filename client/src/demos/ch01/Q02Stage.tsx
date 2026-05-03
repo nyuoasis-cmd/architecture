@@ -1,4 +1,4 @@
-import { Hero, Icons, LogBox, PairBinary } from '../_shared';
+import { Hero, Icons, LogBox, PairBinary, getTone } from '../_shared';
 import type { DemoComponentProps } from '../types';
 
 type Scene = {
@@ -81,11 +81,7 @@ const SCENES: Record<string, Scene> = {
   },
 };
 
-const TONE = {
-  accent: 'var(--demo-accent-q02)',
-  accentSoft: 'var(--demo-accent-soft-q02)',
-  accentBorder: 'var(--demo-accent-border-q02)',
-};
+const TONE = getTone(1);
 
 export default function Q02Stage({ scenarioId }: DemoComponentProps) {
   const scene = SCENES[scenarioId] ?? SCENES.stage;
