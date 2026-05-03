@@ -1,0 +1,38 @@
+{
+  "step": "pr15a",
+  "round": 1,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-85",
+  "ts": "2026-05-03T12:41:33Z",
+  "branch": "feat/preview-inline-ch04-q1-q4",
+  "commit": "9e27b5b409a3ebe2fec8315d0f3ef81dbda4e11c",
+  "verdict": "REVISE",
+  "summary": {
+    "passed": [
+      "I1 build: `cd client && npm run build` succeeded on the evaluated head.",
+      "I2 raw hex: `grep -rE \"['\\\"]#[0-9a-fA-F]{3,8}['\\\"]\" client/src/demos/ch04 --include='*.tsx'` returned no matches.",
+      "I3 imports: `grep -E \"from ['\\\"]\\.?\\.?/_shared/[^i]\" client/src/demos/ch04/*.tsx` returned no matches.",
+      "I4 label length: all ch04_q01~q04 labels and sub labels satisfy `validateLabel` constraints via `validatePairSet`.",
+      "I6 pair validation: q01 uses `layout: 'square'`; q02~q04 use `layout: 'wide'`; all four use `subPolicy: 'all'`.",
+      "Regression: `git diff main..HEAD` is empty for `client/src/demos/ch01`, `client/src/demos/ch02`, `client/src/demos/ch03`, the locked `_shared` files, and `client/src/components/learn/PreviewPanel.tsx`."
+    ],
+    "revised": [
+      "I5/I7/I8: `client/src/data/demos.ts` registers scenario ids that do not match the inline component `SCENES` keys for ch04_q01~q04. Because `PreviewPanel` forwards the selected/hash scenario id directly into the inline component, the affected demos fall back to their default scene instead of showing the selected step."
+    ]
+  },
+  "fail_items": [],
+  "revise_items": [
+    "I5/I7/I8-scenario-id-mismatch: align `client/src/data/demos.ts` scenario ids with the inline `SCENES` keys. Current mismatches are q01 structured/semi/unstructured vs cell/frame/free, q02 pick vs choice, q03 dup/update/split/tradeoff vs duplicate/anomaly/normalize/balance, and q04 lookup vs seek."
+  ],
+  "evidence": {
+    "preview_panel": "client/src/components/learn/PreviewPanel.tsx writes the selected inline scenario id to history hash and passes it unchanged to `<InlineComponent ... scenarioId={scenarioId} />`.",
+    "data_demos_lines": "client/src/data/demos.ts:197-241",
+    "demo_files": [
+      "client/src/demos/ch04/Q01DataShape.tsx:13-83",
+      "client/src/demos/ch04/Q02DataFormat.tsx:13-99",
+      "client/src/demos/ch04/Q03DataDup.tsx:13-99",
+      "client/src/demos/ch04/Q04DataIndex.tsx:13-83"
+    ]
+  }
+}

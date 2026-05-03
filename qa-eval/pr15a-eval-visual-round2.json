@@ -1,0 +1,71 @@
+{
+  "step": "pr15a",
+  "round": 2,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-87",
+  "ts": "2026-05-03T13:00:06Z",
+  "branch": "feat/preview-inline-ch04-q1-q4",
+  "commit": "91c2270443ca3218f6ebd47d69de9c5db1c2c412",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "Playwright로 `/library/4/ch04_q01#cell|frame|free|choice`, `ch04_q02#csv|json|xml|choice`, `ch04_q03#duplicate|anomaly|normalize|balance`, `ch04_q04#scan|index|seek|cost` 16개 시나리오를 모두 순회했다. 각 클릭마다 `window.location.hash`, preview tablist의 `aria-selected`, GuidePanel의 active launcher, hero title, pair block의 accent 카드 텍스트가 모두 기대 ID로 함께 이동했다. round 1에서 fallback되던 `frame/free`, `choice`, `anomaly/normalize/balance`, `seek` 케이스가 전부 정상 동기화됐다."
+    },
+    {
+      "id": "V1-frame-inline",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01` desktop/mobile spot-check 모두 `.phone-frame` / `.phone-notch` count 가 `0` 이다. ch04 preview는 계속 iframe 폰 셸 없이 인라인 React 데모로 렌더링된다."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01` desktop 1440x900 에서 main demo section 4개의 top 좌표가 `19 < 176.88 < 533.56 < 673.23` 으로 오름차순이다. hero, pair block, state chips, log box 순서가 round 1과 동일하게 유지된다."
+    },
+    {
+      "id": "V4-contrast",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01` 활성 카드 라벨 색은 `rgb(180, 83, 9)`, 활성 카드 배경은 `rgb(254, 243, 199)` 로 측정됐고 대비비는 `4.51:1` 이다. round 1과 같은 amber 톤을 유지하며 WCAG AA `4.5:1` 이상을 만족한다."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01` hero section 실측 폭은 `640px` 로 square max-width 계약과 일치한다. body/client width 도 `1440/1440` 으로 desktop 가로 overflow가 없다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01` pair block 의 SVG count 는 `8` 이다. 비유/실제 카드 8개 모두 아이콘을 유지해 라운드 1 시각 구성이 회귀하지 않았다."
+    },
+    {
+      "id": "V7-baseline-spotcheck",
+      "verdict": "PASS",
+      "evidence": "round 2 수정 범위는 `client/src/data/demos.ts` 의 scenario id 9개 정렬뿐이고, spot-check 결과 `ch04_q01` 의 hero/pair/state/log 시각 구조와 accent 표현은 round 1 PASS 상태를 그대로 유지한다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01` mobile 393x852 에서 `📱 시연` 탭 전환 후 scenario tablist bounds 는 `196..276.78px`, hero top 은 `341.56px`, pair block top 은 `521.53px` 로 모두 첫 viewport 안에 있다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "`ch04_q01` mobile pair grid template 는 `327px` 단일 열로 stack 되고 body/client width 는 `393/393` 이다. mobile 1열 전환과 무가로스크롤 계약이 유지된다."
+    }
+  ],
+  "artifacts": {
+    "desktop_screenshot": "/tmp/pr15a-r2-eval-visual/ch04_q01-desktop.png",
+    "mobile_screenshot": "/tmp/pr15a-r2-eval-visual/ch04_q01-mobile.png",
+    "raw_capture_dir": "/tmp/pr15a-r2-eval-visual"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr15a-round2.md` §B 만 따랐다.",
+    "브랜치 HEAD 는 wrapper commit `3b71b5a41859fa54a06df4f6ddea84a74a16c476` 이지만 코드 변경은 바로 아래 `91c2270443ca3218f6ebd47d69de9c5db1c2c412` 1건뿐이라, 평가 commit 필드는 실제 수정 SHA를 기록했다.",
+    "공유 환경에서 5185 포트가 이미 사용 중이라 Vite dev server 는 `http://127.0.0.1:5186` 에서 검증했다.",
+    "브라우저 자동화는 `npx -p playwright@1.52.0` + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다."
+  ]
+}

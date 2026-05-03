@@ -142,7 +142,9 @@ export default function LearnPage({ mode }: LearnPageProps) {
       return;
     }
 
-    resetForQa(qa.id, demo?.scenarios[0]?.id ?? 'launch');
+    const hashId = typeof window !== 'undefined' ? window.location.hash.slice(1) : '';
+    const hashMatches = !!hashId && demo?.scenarios.some((s) => s.id === hashId);
+    resetForQa(qa.id, hashMatches ? hashId : (demo?.scenarios[0]?.id ?? 'launch'));
   }, [demo?.scenarios, qa, resetForQa]);
 
   useEffect(() => {
