@@ -443,3 +443,131 @@ export function CdIcon() {
     </svg>
   );
 }
+
+export function RollbackIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M13 14H7v-6" />
+      <path d="M8 13a13 13 0 1 1-1 12" />
+      <path d="M20 14v7l5 3" />
+    </svg>
+  );
+}
+
+export function BlueGreenIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="11" width="11" height="18" rx="2" />
+      <rect x="23" y="11" width="11" height="18" rx="2" />
+      <path d="M17 20h6" />
+      <path d="M11 16h1M11 20h1M11 24h1" />
+      <path d="M28 16h1M28 20h1M28 24h1" />
+    </svg>
+  );
+}
+
+export function CanaryIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 27c0-7 4-12 10-12 5 0 8 3 8 7 0 6-5 10-11 10h-7z" />
+      <path d="M29 22h4l-2 2" />
+      <circle cx="24" cy="17" r="1.2" fill="currentColor" stroke="none" />
+      <path d="M12 17l-4-3" />
+    </svg>
+  );
+}
+
+export function StrategyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 9h20v22H10z" />
+      <path d="M15 15h10M15 20h7M15 25h10" />
+      <path d="m24 28 3 3 5-6" />
+    </svg>
+  );
+}
+
+export function RequestCountIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="22" width="4" height="8" rx="1" />
+      <rect x="18" y="16" width="4" height="14" rx="1" />
+      <rect x="28" y="11" width="4" height="19" rx="1" />
+      <path d="M8 32h24" />
+    </svg>
+  );
+}
+
+export function LatencyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 27c3-8 8-12 12-12s7 2 12 10" />
+      <path d="M20 20l6-6" />
+      <circle cx="20" cy="20" r="2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function ErrorRateIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 29 18 20l5 5 8-11" />
+      <path d="M28 14h6v6" />
+      <circle cx="18" cy="20" r="2" />
+      <circle cx="23" cy="25" r="2" />
+    </svg>
+  );
+}
+
+export function AlertIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 8a9 9 0 0 1 9 9v4l3 4H8l3-4v-4a9 9 0 0 1 9-9z" />
+      <path d="M16 30a4 4 0 0 0 8 0" />
+      <path d="M29 11h4M31 9v4" />
+    </svg>
+  );
+}
+
+export function PullRequestIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="12" cy="10" r="3" />
+      <circle cx="28" cy="30" r="3" />
+      <circle cx="28" cy="10" r="3" />
+      <path d="M12 13v17a5 5 0 0 0 5 5h8" />
+      <path d="M25 10H17a5 5 0 0 0-5 5v3" />
+    </svg>
+  );
+}
+
+export function CodeCommentIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 10h24v14H18l-6 6v-6H8z" />
+      <path d="m16 16-3 2 3 2M24 16l3 2-3 2" />
+    </svg>
+  );
+}
+
+export function CodeEditIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="9" width="16" height="20" rx="2" />
+      <path d="M13 15h6M13 20h6" />
+      <path d="m24 24 8-8 3 3-8 8-5 1z" />
+    </svg>
+  );
+}
+
+export function MergeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="12" cy="10" r="3" />
+      <circle cx="12" cy="30" r="3" />
+      <circle cx="28" cy="20" r="3" />
+      <path d="M12 13v10c0 4 3 7 7 7h6" />
+      <path d="M12 27v-6c0-4 3-7 7-7h6" />
+    </svg>
+  );
+}
