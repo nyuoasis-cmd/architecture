@@ -70,7 +70,7 @@ export default function ShowcasePage() {
         itRight={{ icon: <Icons.SoftwareIcon />, label: '소프트웨어', sub: '명령의 묶음' }}
         leftActive={activeIndex % 2 === 0}
         rightActive={activeIndex % 2 === 1}
-        tone={{ accent: 'var(--demo-accent-q02)', accentSoft: 'var(--demo-accent-soft-q02)', accentBorder: 'var(--demo-accent-border-q02)' }}
+        tone={getTone(2)}
       />
 
       <PairMatch
@@ -89,7 +89,7 @@ export default function ShowcasePage() {
           { icon: <Icons.OsLockIcon />, label: '권한·UI', sub: '승인·창' },
         ]}
         activeIndex={activeIndex}
-        tone={{ accent: 'var(--demo-accent-q03)', accentSoft: 'var(--demo-accent-soft-q03)', accentBorder: 'var(--demo-accent-border-q03)' }}
+        tone={getTone(3)}
       />
 
       <PairVertical
@@ -97,7 +97,7 @@ export default function ShowcasePage() {
         itTitle="컴퓨터 메모리"
         pairs={verticalPairs}
         activeIndex={activeIndex}
-        tone={{ accent: 'var(--demo-accent-q04)', accentSoft: 'var(--demo-accent-soft-q04)', accentBorder: 'var(--demo-accent-border-q04)' }}
+        tone={getTone(5)}
       />
     </main>
   );
