@@ -1,13 +1,4 @@
-import {
-  GroupBadge,
-  HardwareIcon,
-  IconCard,
-  PairConnector,
-  ScriptIcon,
-  SoftwareIcon,
-  StageIcon,
-  type Tone,
-} from './_shared';
+import { Hero, Icons, LogBox, PairBinary } from '../_shared';
 import type { DemoComponentProps } from '../types';
 
 type Scene = {
@@ -90,10 +81,10 @@ const SCENES: Record<string, Scene> = {
   },
 };
 
-const TONE: Tone = {
-  accent: '#1d4ed8',
-  accentSoft: '#eff6ff',
-  accentBorder: '#93c5fd',
+const TONE = {
+  accent: 'var(--demo-accent-q02)',
+  accentSoft: 'var(--demo-accent-soft-q02)',
+  accentBorder: 'var(--demo-accent-border-q02)',
 };
 
 export default function Q02Stage({ scenarioId }: DemoComponentProps) {
@@ -101,66 +92,19 @@ export default function Q02Stage({ scenarioId }: DemoComponentProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <section
-        className="rounded-2xl border p-5"
-        style={{
-          borderColor: 'var(--color-border)',
-          background: 'linear-gradient(135deg, #eff6ff, #ffffff)',
-        }}
-      >
-        <p className="m-0 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
-          하드웨어 vs 소프트웨어
-        </p>
-        <h2 className="mt-1.5 text-[20px] font-semibold leading-snug" style={{ color: 'var(--color-text-primary)' }}>
-          {scene.title}
-        </h2>
-        <p className="mt-2 text-[13px] leading-[1.7]" style={{ color: 'var(--color-text-body)' }}>
-          {scene.summary}
-        </p>
-      </section>
+      <Hero eyebrow="하드웨어 vs 소프트웨어" title={scene.title} summary={scene.summary} tone={TONE} />
 
-      <section
-        className="rounded-2xl border p-5"
-        style={{ borderColor: 'var(--color-border)', background: '#fff' }}
-      >
-        <GroupBadge label="공연장" sub="비유" tone={TONE} />
-        <div className="grid grid-cols-2 gap-3">
-          <ZonePanel
-            icon={<StageIcon />}
-            title="무대"
-            cards={scene.stageCards}
-            active={scene.stageActive}
-            tone={TONE}
-          />
-          <ZonePanel
-            icon={<ScriptIcon />}
-            title="대본"
-            cards={scene.scriptCards}
-            active={scene.scriptActive}
-            tone={TONE}
-          />
-        </div>
-
-        <PairConnector tone={TONE} />
-
-        <GroupBadge label="컴퓨터" sub="실제" tone={TONE} />
-        <div className="grid grid-cols-2 gap-3">
-          <IconCard
-            icon={<HardwareIcon />}
-            label="하드웨어"
-            sub={scene.hwLabel}
-            active={scene.stageActive}
-            tone={TONE}
-          />
-          <IconCard
-            icon={<SoftwareIcon />}
-            label="소프트웨어"
-            sub={scene.swLabel}
-            active={scene.scriptActive}
-            tone={TONE}
-          />
-        </div>
-      </section>
+      <PairBinary
+        metaphorTitle="공연장"
+        itTitle="컴퓨터"
+        metaphorLeft={{ icon: <Icons.StageIcon />, label: '무대', cards: scene.stageCards }}
+        metaphorRight={{ icon: <Icons.ScriptIcon />, label: '대본', cards: scene.scriptCards }}
+        itLeft={{ icon: <Icons.HardwareIcon />, label: '하드웨어', sub: scene.hwLabel }}
+        itRight={{ icon: <Icons.SoftwareIcon />, label: '소프트웨어', sub: scene.swLabel }}
+        leftActive={scene.stageActive}
+        rightActive={scene.scriptActive}
+        tone={TONE}
+      />
 
       <div className="flex flex-wrap gap-2">
         {scene.badges.map((badge) => (
@@ -169,7 +113,7 @@ export default function Q02Stage({ scenarioId }: DemoComponentProps) {
             className="rounded-full border px-3 py-1.5 text-[11px] font-medium"
             style={{
               borderColor: 'var(--color-border)',
-              background: '#fff',
+              background: 'var(--demo-card-bg)',
               color: 'var(--color-text-body)',
             }}
           >
@@ -178,71 +122,7 @@ export default function Q02Stage({ scenarioId }: DemoComponentProps) {
         ))}
       </div>
 
-      <section
-        className="rounded-2xl border px-4 py-3"
-        style={{ borderColor: 'var(--color-border)', background: '#0f172a', color: '#f8fafc' }}
-      >
-        <p className="m-0 text-[11px]" style={{ color: '#a8a29e' }}>
-          운영 로그
-        </p>
-        {scene.logs.map(([time, msg]) => (
-          <div key={time} className="font-mono text-[11px] leading-[1.8]">
-            <span style={{ color: '#a8a29e', marginRight: 6 }}>{time}</span>
-            {msg}
-          </div>
-        ))}
-      </section>
-    </div>
-  );
-}
-
-function ZonePanel({
-  icon,
-  title,
-  cards,
-  active,
-  tone,
-}: {
-  icon: React.ReactNode;
-  title: string;
-  cards: string[];
-  active: boolean;
-  tone: Tone;
-}) {
-  return (
-    <div
-      className="rounded-2xl border p-3 transition"
-      style={{
-        borderColor: active ? tone.accent : 'var(--color-border)',
-        background: active ? tone.accentSoft : '#fff',
-        boxShadow: active ? `0 8px 22px ${tone.accent}1f` : undefined,
-      }}
-    >
-      <div className="flex items-center gap-2">
-        <span
-          className="inline-flex h-9 w-9 items-center justify-center"
-          style={{ color: active ? tone.accent : 'var(--color-text-muted)' }}
-        >
-          {icon}
-        </span>
-        <span
-          className="text-[14px] font-semibold"
-          style={{ color: active ? tone.accent : 'var(--color-text-primary)' }}
-        >
-          {title}
-        </span>
-      </div>
-      <div className="mt-3 flex flex-col gap-1.5">
-        {cards.map((card) => (
-          <div
-            key={card}
-            className="rounded-xl border bg-white px-3 py-1.5 text-[12px] leading-tight"
-            style={{ borderColor: 'var(--color-border)' }}
-          >
-            {card}
-          </div>
-        ))}
-      </div>
+      <LogBox logs={scene.logs} variant="navy" title="운영 로그" />
     </div>
   );
 }

@@ -1,0 +1,60 @@
+{
+  "pr": "#12",
+  "phase": "eval-visual",
+  "round": 1,
+  "model": "codex",
+  "evaluated_branch": "feat/preview-inline-shared-contract",
+  "evaluated_commit": "7b8ba1e7314a9d36bede31974f97b9ac1acf28ca",
+  "verdict": "REVISE",
+  "fail_items": [],
+  "revise_items": [
+    "V3-ch01_q01: active label contrast is 3.35:1 for `재료` (`#ea580c` on `#fff7ed`), below the handoff WCAG AA threshold of 4.5:1."
+  ],
+  "checks": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "Compared PR #28 baseline `d39599d` against candidate `7b8ba1e` at 1440x900 using full-page screenshots. Pixel mismatch ratios stayed extremely low: q01/input 0.000059, q01/memory 0.000110, q02/stage 0.000000, q03/seats 0.000146, q04/storage 0.002574. Visual structure, chapter tones, and active-state rendering remained effectively unchanged."
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "Scenario chips on all four ch01 demos stayed synchronized with the paired metaphor/IT rows. Captured desktop and mobile passes for q01 4 scenarios, q02 4 scenarios, q03 4 scenarios, and q04 5 scenarios; no case showed one side activating without the other."
+    },
+    {
+      "id": "V3",
+      "verdict": "REVISE",
+      "evidence": "Active border/background token application was correct across demos. Sampled contrast ratios: q01 `재료` 3.35:1 (`rgb(234, 88, 12)` on `rgb(255, 247, 237)`), q03 `자리 배치` 5.26:1, q04 `책장` 5.20:1. q01 misses the handoff AA threshold even though the remaining sampled demos pass."
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "The routed layouts matched the intended wide/square split from the demo registry: `ch01_q01` and `ch01_q03` remained wide variants, `ch01_q02` and `ch01_q04` remained square variants. No desktop overflow or asymmetric outer framing was observed in the 1440px captures."
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "At 393x852, all four ch01 demos rendered without horizontal overflow (`bodyScrollWidth == bodyClientWidth` in every captured scenario). The paired cards stacked correctly for narrow screens and no label exceeded the viewport or clipped icons in the mobile screenshots."
+    },
+    {
+      "id": "V6",
+      "verdict": "PASS",
+      "evidence": "`/demos-preview/showcase` returned HTTP 200 and rendered all four `_shared` variants on a single page with the active-index range input present. The captured section count was 4: PairFlow, PairBinary, PairMatch, and PairVertical."
+    },
+    {
+      "id": "V7",
+      "verdict": "PASS",
+      "evidence": "`/library/2/ch02_q01` preserved the fallback path: iframe present, `.phone-frame` present, notch present, scenario dots count 4, and `<teachermate-nav>` still rendered inside the embedded demo."
+    },
+    {
+      "id": "V8",
+      "verdict": "PASS",
+      "evidence": "Hero gradients and chapter tones stayed aligned with the pre-PR baseline. q01 retained the orange hero ramp, q02 the blue tone, q03 the teal tone, and q04 the purple tone with no visible chapter-color regression in baseline-vs-candidate comparison."
+    }
+  ],
+  "artifacts": {
+    "candidate_dir": "/tmp/pr12-visual-candidate",
+    "baseline_dir": "/tmp/pr12-visual-baseline",
+    "diff_file": "/tmp/pr12-visual-diff.json"
+  }
+}

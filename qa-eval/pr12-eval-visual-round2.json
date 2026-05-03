@@ -1,0 +1,68 @@
+{
+  "status": "done",
+  "step": "pr12",
+  "phase": "eval-visual",
+  "round": 2,
+  "model": "codex",
+  "session_id": "arch-56",
+  "ts": "2026-05-02T13:33:18Z",
+  "evaluated_branch": "feat/preview-inline-shared-contract",
+  "evaluated_commit": "4413b0c6112ea4721515506f0a110f42cc964819",
+  "scope_out": [
+    "V3: ch01_q01 active-label contrast issue is explicitly marked out of PR-12 scope in HANDOFF-pr12-round2.md §B and no color-token files changed in round 2."
+  ],
+  "items": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "Round 2 delta against 7b8ba1e changes only two files: client/src/demos/_shared/README.md and client/src/demos/ch01/Q03Restaurant.tsx. No ch01 visual token, layout, hero, or shared renderer files changed, so previously passing visual parity items remain unchanged."
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "Q03Restaurant keeps the same PairMatch wiring and chip-driven activeIndex flow; the only scene change is checkout.active 3 -> 1, which restores a valid highlighted lane instead of altering chip/row activation behavior."
+    },
+    {
+      "id": "V3",
+      "verdict": "SCOPE_OUT",
+      "evidence": "Active-label contrast was excluded by handoff §B. Round 2 does not touch color tokens, accent hex values, or shared contrast styles."
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "No width/layout files changed in round 2. Q03Restaurant retains the same grid and section structure; README heading text has no rendered product impact."
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "Mobile wrapping rules remain unchanged. word-break: keep-all is still defined in client/src/index.css, and no label text or responsive CSS changed in round 2."
+    },
+    {
+      "id": "V6",
+      "verdict": "PASS",
+      "evidence": "Showcase route remains present at client/src/App.tsx:/demos-preview/showcase and no showcase-related files changed in round 2."
+    },
+    {
+      "id": "V7",
+      "verdict": "PASS",
+      "evidence": "Fallback path integrity is unchanged: PreviewPanel still renders .phone-frame and .phone-notch for iframe demos, and scenario dots remain defined in client/src/index.css and PreviewPanel.tsx. No fallback files changed in round 2."
+    },
+    {
+      "id": "V8",
+      "verdict": "PASS",
+      "evidence": "Hero gradients and chapter tones are untouched because round 2 changes do not modify any hero/tone definitions. Build of evaluated commit completed successfully with npm run build."
+    }
+  ],
+  "checks": {
+    "round2_changed_files": [
+      "client/src/demos/_shared/README.md",
+      "client/src/demos/ch01/Q03Restaurant.tsx"
+    ],
+    "build": "pass",
+    "q03_checkout_active_matches_html": true,
+    "visual_token_files_changed": false,
+    "fallback_related_files_changed": false,
+    "showcase_related_files_changed": false
+  },
+  "overall": "PASS"
+}

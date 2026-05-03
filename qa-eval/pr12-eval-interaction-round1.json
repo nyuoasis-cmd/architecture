@@ -1,0 +1,42 @@
+{
+  "status": "done",
+  "step": "pr12",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-54",
+  "ts": "2026-05-02T13:09:01Z",
+  "verdict": "FAIL",
+  "branch": "feat/preview-inline-shared-contract",
+  "commit": "7b8ba1e7314a9d36bede31974f97b9ac1acf28ca",
+  "fail_items": [
+    "I1-C10: client/src/demos/_shared/README.md uses `## DO / DON'T`, so the required `^## (Public API|DO/DON'T)` contract check returns 1 instead of >=2.",
+    "I3-case1: `validateLabel('가전제품운영체제', 'label')` did not throw in runtime verification, so the required 6/6 throw cases did not pass.",
+    "I8-q03-checkout: client/src/demos/ch01/Q03Restaurant.tsx sets `checkout.active` to 3, but client/public/demos/ch01/q03.html keeps the original value 1."
+  ],
+  "revise_items": [],
+  "checks": {
+    "contract": {
+      "C1_demo_tokens": 57,
+      "C2_index_exports": 8,
+      "C3_pair_block_exports": 4,
+      "C4_tone_exports": 2,
+      "C5_label_throws": 6,
+      "C6_icon_files": 6,
+      "C7_showcase_route_before_catchall": true,
+      "C8_shared_direct_imports": 0,
+      "C9_raw_hex_hits": 0,
+      "C10_readme_required_headings": 1,
+      "C11_client_build": "pass",
+      "C12_server_build": "pass",
+      "C13_baseline_file": "pass"
+    },
+    "interaction": {
+      "I2_pairflow_dual_active_checks": 2,
+      "I4_fallback_route_http_status": 200,
+      "I4_previewpanel_phone_frame_present": true,
+      "I4_previewpanel_scenario_dot_present": true,
+      "I5_direct_shared_import_hits": 0,
+      "I6_showcase_route_order_ok": true
+    }
+  }
+}

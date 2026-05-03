@@ -1,0 +1,60 @@
+{
+  "pr": "#12",
+  "phase": "eval-interaction-round2",
+  "round": 2,
+  "model": "codex",
+  "session_id": "arch-57",
+  "branch": "feat/preview-inline-shared-contract",
+  "evaluated_commit": "4413b0c6112ea4721515506f0a110f42cc964819",
+  "overall": "PASS",
+  "items": [
+    {
+      "id": "I1",
+      "verdict": "PASS",
+      "evidence": "`grep -E \"^## (Public API|DO/DON'T)\" client/src/demos/_shared/README.md | wc -l` returned 2, so the README heading contract is now satisfied."
+    },
+    {
+      "id": "I2",
+      "verdict": "PASS",
+      "evidence": "`client/src/demos/ch01/Q01Ramen.tsx` passes a single `activeIndex={scene.active}` to `PairFlow`, and `client/src/demos/_shared/pair-block.tsx` contains two `activeIndex === idx` checks, preserving dual-row synchronized activation."
+    },
+    {
+      "id": "I3",
+      "verdict": "PASS",
+      "evidence": "Runtime verification with `npx tsx -e` passed all six round-2 cases: 9-char label throws, `운영체제 OS` as `sub` passes, `OS` throws, `합니다` throws, emoji throws, and `subPolicy:'all'` mismatch throws. The prior `가전제품운영체제` case was correctly excluded because it is 8 chars and the spec only throws on `text.length > 8`."
+    },
+    {
+      "id": "I4",
+      "verdict": "PASS",
+      "evidence": "`PreviewPanel.tsx` still keeps the registry fallback split via `getDemoComponent` and `inlineMeta`, and the iframe fallback path still renders `.phone-frame` plus `.preview-scenario-dot` controls for non-inline demos."
+    },
+    {
+      "id": "I5",
+      "verdict": "PASS",
+      "evidence": "Direct `_shared/*` imports were not found. All ch01 demos import through `from '../_shared'` only."
+    },
+    {
+      "id": "I6",
+      "verdict": "PASS",
+      "evidence": "`client/src/App.tsx` keeps `<Route path=\"/demos-preview/showcase\" ... />` above `<Route path=\"*\" ... />`, so the showcase route remains reachable before the catch-all."
+    },
+    {
+      "id": "I7",
+      "verdict": "PASS",
+      "evidence": "`Q01Ramen.tsx` labels still match the SDD pattern: metaphor row uses `재료/냄비/불/그릇` and IT row uses `입력/메모리/처리/출력`, consistent with `SDD-preview-inline-v2.md`."
+    },
+    {
+      "id": "I8",
+      "verdict": "PASS",
+      "evidence": "`Q03Restaurant.tsx` now sets `checkout.active: 1`, and `client/public/demos/ch01/q03.html` keeps `#checkout.active: 1`, restoring the required 1:1 parity for the round-1 failure case."
+    }
+  ],
+  "critical_findings": [],
+  "summary": "PR12 round-2 interaction validation passed on detached HEAD 4413b0c6112ea4721515506f0a110f42cc964819. The README heading and Q03 checkout fixes are present, synchronized pair activation remains intact, the label validator matches the clarified length spec, and the fallback/route/import contracts did not regress.",
+  "notes": [
+    "Client build completed successfully via `npm run build` at repo root.",
+    "Server TypeScript build completed successfully via `npm run build` in `server/`.",
+    "The orchestrator claim step was attempted, but `ao session claim-pr 12` refused because PR #12 is already merged."
+  ],
+  "next_action": "PASS. No code changes required from T4."
+}
