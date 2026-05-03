@@ -861,3 +861,164 @@ export function MergeIcon() {
     </svg>
   );
 }
+
+export function FrontendIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="8" width="28" height="20" rx="3" />
+      <path d="M14 28v4M26 28v4M11 32h18" />
+      <path d="m15 15-4 5 4 5M25 15l4 5-4 5" />
+    </svg>
+  );
+}
+
+export function BackendIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <ellipse cx="20" cy="11" rx="11" ry="4" />
+      <path d="M9 11v18a11 4 0 0 0 22 0V11" />
+      <path d="M9 19a11 4 0 0 0 22 0M9 25a11 4 0 0 0 22 0" />
+    </svg>
+  );
+}
+
+export function ApiIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="10" height="20" rx="2" />
+      <rect x="23" y="10" width="10" height="20" rx="2" />
+      <path d="M17 20h6" />
+      <path d="m19 16 4 4-4 4" />
+      <path d="M11 17h2M27 23h2" />
+    </svg>
+  );
+}
+
+export function SeparationIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="12" width="10" height="16" rx="2" />
+      <rect x="23" y="12" width="10" height="16" rx="2" />
+      <path d="M20 8v24" />
+      <path d="M11 20h2M27 20h2" />
+    </svg>
+  );
+}
+
+export function HtmlIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 8h20l-2 24H12z" />
+      <path d="m16 15-4 5 4 5M24 15l4 5-4 5" />
+    </svg>
+  );
+}
+
+export function CssIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 8h20l-2 24H12z" />
+      <path d="M15 15h10M14 20h12M15 25h8" />
+    </svg>
+  );
+}
+
+export function JsIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="9" width="22" height="22" rx="3" />
+      <path d="M15 15v9c0 2-1 3-3 3" />
+      <path d="M23 15c2 0 4 1 4 3s-2 3-4 3-4 1-4 3 2 3 4 3" />
+    </svg>
+  );
+}
+
+export function IntegrationItIcon() {
+  return <IntegrationIcon />;
+}
+
+export function HttpRequestIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="12" width="17" height="16" rx="2" />
+      <path d="M25 20h7" />
+      <path d="m28 16 4 4-4 4" />
+      <path d="M12 18h7M12 22h9" />
+    </svg>
+  );
+}
+
+export function RestResourceIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 10h20v20H10z" />
+      <path d="M14 16h12M14 21h9M14 26h6" />
+      <circle cx="26" cy="14" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function HttpMethodIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 29h20" />
+      <rect x="11" y="14" width="4" height="10" rx="1" />
+      <rect x="18" y="10" width="4" height="14" rx="1" />
+      <rect x="25" y="17" width="4" height="7" rx="1" />
+    </svg>
+  );
+}
+
+export function StatelessItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="12" width="10" height="16" rx="2" />
+      <rect x="23" y="12" width="10" height="16" rx="2" />
+      <path d="m18 20 4-4M18 20l4 4" />
+      <path d="M12 17h0M28 23h0" />
+    </svg>
+  );
+}
+
+export function SpaInitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="8" width="26" height="24" rx="3" />
+      <path d="m16 15 8 5-8 5z" />
+      <path d="M11 12h18" />
+    </svg>
+  );
+}
+
+export function SpaNavIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="10" width="28" height="18" rx="3" />
+      <path d="M12 19h12" />
+      <path d="m22 15 5 4-5 4" />
+      <path d="M12 14h2M12 24h2" />
+    </svg>
+  );
+}
+
+export function SsrInitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="14" height="18" rx="2" />
+      <rect x="23" y="10" width="10" height="18" rx="2" />
+      <path d="M13 16h2M13 22h4" />
+      <path d="m21 19 2 2 4-4" />
+    </svg>
+  );
+}
+
+export function HybridIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="10" height="18" rx="2" />
+      <rect x="23" y="10" width="10" height="18" rx="2" />
+      <path d="M17 19h6" />
+      <path d="M20 14v10" />
+    </svg>
+  );
+}

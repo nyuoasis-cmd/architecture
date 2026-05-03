@@ -852,3 +852,177 @@ export function ApproveIcon() {
     </svg>
   );
 }
+
+export function HallIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="26" height="20" rx="2" />
+      <path d="M13 10V6h14v4" />
+      <path d="M12 17h16M12 22h10" />
+      <path d="M13 30v4M27 30v4" />
+    </svg>
+  );
+}
+
+export function KitchenIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="14" width="24" height="16" rx="2" />
+      <path d="M12 14v-4h16v4" />
+      <path d="M15 20h10M16 25h8" />
+      <path d="M11 10h18" />
+    </svg>
+  );
+}
+
+export function PromiseIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 14h20v14H10z" />
+      <path d="M14 10h12v4" />
+      <path d="M15 22h4M21 22h4" />
+      <path d="m17 28 3 3 5-6" />
+    </svg>
+  );
+}
+
+export function SeparateIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="11" width="9" height="18" rx="2" />
+      <rect x="24" y="11" width="9" height="18" rx="2" />
+      <path d="M20 8v24" />
+      <path d="M14 16h-3M29 16h-3M14 24h-3M29 24h-3" />
+    </svg>
+  );
+}
+
+export function SkeletonIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="7" width="22" height="26" rx="2" />
+      <path d="M14 13h12M14 20h12M14 27h8" />
+      <path d="M9 16h22M18 7v26" />
+    </svg>
+  );
+}
+
+export function ShapeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="14" cy="14" r="5" />
+      <rect x="21" y="10" width="9" height="9" rx="2" />
+      <path d="M10 29h20" />
+      <path d="m16 24 4-6 4 6 4-3" />
+    </svg>
+  );
+}
+
+export function ReactIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="2.5" fill="currentColor" stroke="none" />
+      <ellipse cx="20" cy="20" rx="12" ry="5.5" />
+      <ellipse cx="20" cy="20" rx="12" ry="5.5" transform="rotate(60 20 20)" />
+      <ellipse cx="20" cy="20" rx="12" ry="5.5" transform="rotate(120 20 20)" />
+    </svg>
+  );
+}
+
+export function UniteIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="12" width="9" height="9" rx="2" />
+      <rect x="24" y="12" width="9" height="9" rx="2" />
+      <rect x="15" y="23" width="10" height="10" rx="2" />
+      <path d="M16 17h8M20 21v2" />
+    </svg>
+  );
+}
+
+export function RequestMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 12h18v16H8z" />
+      <path d="M26 16h6M26 24h6" />
+      <path d="m28 12 4 4-4 4" />
+      <path d="M12 18h8M12 23h10" />
+    </svg>
+  );
+}
+
+export function ResourceIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="9" width="24" height="22" rx="3" />
+      <path d="M12 15h16M12 20h12M12 25h8" />
+      <circle cx="28" cy="13" r="2" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function MethodIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 28h20" />
+      <path d="M14 28V12" />
+      <path d="M20 28V16" />
+      <path d="M26 28V9" />
+      <path d="M11 14h6M17 18h6M23 11h6" />
+    </svg>
+  );
+}
+
+export function StatelessIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="12" width="10" height="16" rx="2" />
+      <rect x="23" y="12" width="10" height="16" rx="2" />
+      <path d="m18 20 4-4M18 20l4 4" />
+      <path d="M12 17h0M28 23h0" />
+    </svg>
+  );
+}
+
+export function StartIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 30V10h24" />
+      <path d="m18 14 7-4v8z" />
+      <path d="M12 24h12M12 28h8" />
+    </svg>
+  );
+}
+
+export function MoveIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="12" cy="20" r="4" />
+      <circle cx="28" cy="20" r="4" />
+      <path d="M16 20h8" />
+      <path d="m20 16 4 4-4 4" />
+    </svg>
+  );
+}
+
+export function RespondIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 14h18v12H8z" />
+      <path d="m26 18 6-4v12l-6-4" />
+      <path d="M12 18h8M12 22h10" />
+    </svg>
+  );
+}
+
+export function MixIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="11" width="10" height="18" rx="2" />
+      <path d="M23 11h10v8H23z" />
+      <path d="M23 21h10v8H23z" />
+      <path d="M17 20h6" />
+      <path d="M28 19v2" />
+    </svg>
+  );
+}

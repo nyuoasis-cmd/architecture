@@ -20,6 +20,10 @@ import Q04DataIndex from './ch04/Q04DataIndex';
 import Q05Acid from './ch04/Q05Acid';
 import Q06Backup from './ch04/Q06Backup';
 import Q07Visualization from './ch04/Q07Visualization';
+import Q01HallKitchen from './ch05/Q01HallKitchen';
+import Q02WebStack from './ch05/Q02WebStack';
+import Q03Rest from './ch05/Q03Rest';
+import Q04SpaSsr from './ch05/Q04SpaSsr';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -45,6 +49,10 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch04_q05: { Component: Q05Acid, layout: 'wide' },
   ch04_q06: { Component: Q06Backup, layout: 'wide' },
   ch04_q07: { Component: Q07Visualization, layout: 'wide' },
+  ch05_q01: { Component: Q01HallKitchen, layout: 'square' },
+  ch05_q02: { Component: Q02WebStack, layout: 'wide' },
+  ch05_q03: { Component: Q03Rest, layout: 'wide' },
+  ch05_q04: { Component: Q04SpaSsr, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
