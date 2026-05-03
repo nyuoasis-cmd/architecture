@@ -1,0 +1,66 @@
+{
+  "step": "pr14b",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-81",
+  "ts": "2026-05-03T12:49:00Z",
+  "branch": "feat/preview-inline-ch03-q5-q7",
+  "commit": "0b73234896585851e92784f8f6ca3a4c9f1ba14b",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-frame-inline",
+      "verdict": "PASS",
+      "evidence": "`ch03_q05`~`ch03_q07` desktop/mobile 모두 `.phone-frame` / `.phone-notch` count 가 `0` 이다. 새 ch03 데모 3개는 iframe 폰 셸 없이 인라인 React preview 로 렌더링된다."
+    },
+    {
+      "id": "V2-structure-desktop",
+      "verdict": "PASS",
+      "evidence": "1440x900 에서 세 route 모두 section count 가 `4` 이고 top 좌표가 오름차순이다. 예: q05 `129 < 264.78 < 613.84 < 753.52`, q06 `129 < 264.78 < 613.84 < 794.52`, q07 `129 < 264.78 < 613.84 < 753.52`."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "시나리오 탭 4개를 순회 클릭했을 때 메타포/IT 두 row 의 active index 가 항상 동일하게 `[0]/[0] → [1]/[1] → [2]/[2] → [3]/[3]` 로 이동했고, hero title 도 각 시나리오에 맞게 함께 바뀌었다."
+    },
+    {
+      "id": "V4-contrast",
+      "verdict": "PASS",
+      "evidence": "활성 카드 라벨 색은 `rgb(21, 128, 61)`, 활성 배경은 `rgb(240, 253, 244)` 로 측정됐다. 대비비는 세 route 모두 `4.79:1` 이고 WCAG AA `4.5:1` 이상이다."
+    },
+    {
+      "id": "V5-width-desktop",
+      "verdict": "PASS",
+      "evidence": "wide layout 컨테이너 폭은 세 route 모두 `776px` 로 `max-w-[860px]` 안에 있고, pair row grid template 는 양쪽 row 모두 `177.5px 177.5px 177.5px 177.5px` 로 4열 균등 분할이다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "세 route 의 pair row 8개 카드 모두 SVG 를 포함한다. row별 `querySelectorAll('svg').length` 는 공통으로 `[2,2,2,1] / [2,2,2,1]` 이라 메타포/IT 아이콘이 양쪽 모두 렌더링된다."
+    },
+    {
+      "id": "V7-baseline-spotcheck",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check 로 `/library/3/ch03_q04` 를 확인했다. `.phone-frame` count `0`, 시나리오 tablist 존재, 루트 CSS token `--demo-accent-ch03 = #15803d` 로 PR-14a green 톤 baseline 이 유지된다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852 에서 세 route 모두 hero 와 pair block 이 첫 viewport 안에 있고 시나리오 tablist bottom 이 `238.39px` 로 viewport `852px` 안에 완전히 들어온다. mobile 에서는 `flex-col-reverse` 로 chips 가 데모 위에 배치되어 첫 화면 접근성이 유지된다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "393x852 에서 세 route 의 pair row grid template 가 모두 `155.5px 155.5px` 로 2열 stack 으로 변환됐다. 카드 라벨은 전부 `word-break: keep-all` 이고 line count 최대 `1` 줄이라 3줄 overflow 가 없다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr14b-round1.md` §B 만 따랐다.",
+    "Generator 센티넬 SHA `0b73234896585851e92784f8f6ca3a4c9f1ba14b` 와 동일 커밋에서 평가했다.",
+    "공유 환경에서 5176~5183 포트가 이미 사용 중이라 Vite dev server 는 `http://127.0.0.1:5184` 에서 검증했다.",
+    "브라우저 자동화는 Playwright + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다."
+  ]
+}
