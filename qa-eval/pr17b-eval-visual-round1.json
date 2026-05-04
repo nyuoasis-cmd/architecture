@@ -1,0 +1,71 @@
+{
+  "step": "pr17b",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-107",
+  "ts": "2026-05-04T00:32:03Z",
+  "branch": "feat/preview-inline-ch06-q5-q7",
+  "commit": "8b5ab4e5a954c520ad4deb4a616549f7e47677bb",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame",
+      "verdict": "PASS",
+      "evidence": "`/library/6/ch06_q05~q07` 데스크톱·모바일과 회귀 spot-check `ch06_q04` 모두 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`으로 인라인 렌더링이 유지됐다."
+    },
+    {
+      "id": "V2-desktop-3col",
+      "verdict": "PASS",
+      "evidence": "1440x900에서 세 신규 데모 공통으로 학습/채팅/시연 컬럼 폭이 `280/320/840px`, 좌표가 `0/280/600px`로 측정돼 3단 구조가 일관됐다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "q05~q07의 시나리오 탭 12개를 모두 클릭해 확인했다. 각 탭마다 메타포와 IT 라벨 쌍(`확인/폴링`, `교환/컨텍스트`, `대피/스왑` 등)의 텍스트·보더·아이콘 색이 모두 `rgb(185, 28, 28)`로 동시에 활성화됐다."
+    },
+    {
+      "id": "V4-contrast-red700",
+      "verdict": "PASS",
+      "evidence": "활성 라벨 색 `rgb(185, 28, 28)`와 활성 카드 배경 `rgb(254, 242, 242)`의 대비비를 계산한 결과 `5.91:1`로 WCAG AA 4.5:1 기준을 넘겼다."
+    },
+    {
+      "id": "V5-width-wide-860",
+      "verdict": "PASS",
+      "evidence": "세 신규 데모의 inline host computed `max-width`가 모두 `860px`였고 실제 폭은 데스크톱 `776px`, 모바일 `361px`로 제한 안에서 렌더링됐다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "각 활성 카드 라벨 조사에서 `hasSvg=true`가 유지됐고 pair row 내부 SVG 총수는 데모별 `14개`(카드 아이콘 8 + 화살표 6)로 확인됐다. 활성 아이콘 색도 모두 `rgb(185, 28, 28)`였다."
+    },
+    {
+      "id": "V7-baseline",
+      "verdict": "PASS",
+      "evidence": "캡처 검토 결과 `ch06_q05` 데스크톱과 `ch06_q06` 모바일, `ch06_q04` 모바일 모두 PR-17a의 ch06 인라인 패턴과 같은 red-700 톤, 동일한 카드 반경/간격, 같은 3컬럼 셸을 유지했다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852에서 세 신규 데모 공통으로 hero top이 `0px`, 시나리오 tablist bottom이 `238.4px`여서 첫 화면 안에 Hero와 시나리오 칩이 함께 들어왔다. 회귀 spot-check `ch06_q04`도 tablist bottom `276.8px < 852px`였다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "q05~q07의 두 pair row는 모두 `gridTemplateColumns=\"155.5px 155.5px\"`로 2열 변환됐고 카드 좌표도 `left 37/200.5`에 정렬됐다. 회귀 spot-check `ch06_q04`의 5칸 row도 동일 2열이며 5번째 카드가 `top 823.2/1207.1, left 37`로 마지막 행에 정상 wrap 됐다."
+    },
+    {
+      "id": "REG-ch06_q04",
+      "verdict": "PASS",
+      "evidence": "기존 `ch06_q04`를 모바일 393x852에서 재확인한 결과 인라인 렌더링 유지, 시나리오 칩 첫 화면 노출, 5칸 카드의 2열 mobile wrap이 모두 유지됐다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr17b-round1.md` §B만 따랐다.",
+    "대상 커밋은 `8b5ab4e5a954c520ad4deb4a616549f7e47677bb`이며 별도 detached worktree `/tmp/architecture-pr17b-visual`에서 실행했다.",
+    "Vite dev server는 `http://127.0.0.1:5186`에서 구동했고 브라우저 자동화는 Playwright + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "캡처 및 측정 산출물은 `/tmp/pr17b-r1-eval-visual/` 아래 PNG와 `metrics.json`으로 남겼다."
+  ]
+}
