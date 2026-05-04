@@ -32,6 +32,7 @@ function LearnLayout(props: {
   availableChapters?: typeof CHAPTERS;
   progressMapOverride?: Record<string, { read: boolean; quizScore?: number }>;
   sessionId?: string;
+  sessionCode?: string;
   onScore?: (score: number) => void;
 }) {
   const mobileTab = useLearnStore((state) => state.mobileTab);
@@ -90,6 +91,7 @@ function LearnLayout(props: {
             qaId={props.qa.id}
             quizProps={props.onScore ? { onScore: props.onScore } : undefined}
             scenarioId={scenarioId}
+            sessionCode={props.sessionCode}
           />
         </section>
       </div>
@@ -260,6 +262,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
         }}
         progressMapOverride={viewerProgress}
         qa={qa}
+        sessionCode={currentSession.code}
         sessionId={currentSession.id}
       />
     );
