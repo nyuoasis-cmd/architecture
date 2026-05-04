@@ -609,10 +609,10 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch08/q05.html',
     description: '방화벽과 VPN이 출입 통제와 안전한 통로를 어떻게 나눠 맡는지 비교합니다.',
     scenarios: [
-      { id: 'firewall', label: '방화벽' },
-      { id: 'vpn', label: 'VPN' },
-      { id: 'together', label: '함께 쓰기' },
-      { id: 'risk', label: '역할 분리' },
+      { id: 'gatekeeper', label: '문지기 — 방화벽' },
+      { id: 'tunnel', label: '통로 — VPN' },
+      { id: 'together', label: '함께 — 복합 보호' },
+      { id: 'separate', label: '분리 — 역할 구분' },
     ],
   },
   {
@@ -621,10 +621,10 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch08/q06.html',
     description: 'HTTP, 폴링, WebSocket이 실시간성 요구에 따라 어떻게 달라지는지 비교합니다.',
     scenarios: [
-      { id: 'http', label: 'HTTP' },
+      { id: 'oneshot', label: '단발 — HTTP' },
       { id: 'polling', label: '폴링' },
-      { id: 'ws', label: 'WebSocket' },
-      { id: 'usecase', label: '적합한 사례' },
+      { id: 'bidirectional', label: '양방향 — WS' },
+      { id: 'usecase', label: '사례 — 상황별 선택' },
     ],
   },
   {

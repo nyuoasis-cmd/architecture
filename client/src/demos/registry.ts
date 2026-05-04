@@ -47,6 +47,9 @@ import Q01Protocol from './ch08/Q01Protocol';
 import Q02Tls from './ch08/Q02Tls';
 import Q03Dns from './ch08/Q03Dns';
 import Q04Cdn from './ch08/Q04Cdn';
+import Q05Firewall from './ch08/Q05Firewall';
+import Q06Realtime from './ch08/Q06Realtime';
+import Q07Security from './ch08/Q07Security';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -99,6 +102,9 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch08_q02: { Component: Q02Tls, layout: 'wide' },
   ch08_q03: { Component: Q03Dns, layout: 'wide' },
   ch08_q04: { Component: Q04Cdn, layout: 'square' },
+  ch08_q05: { Component: Q05Firewall, layout: 'wide' },
+  ch08_q06: { Component: Q06Realtime, layout: 'wide' },
+  ch08_q07: { Component: Q07Security, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
