@@ -657,7 +657,7 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch09/q02.html',
     description: '화면, 서비스, 데이터 계층이 책임을 나눠 변경 범위를 줄이는 방식을 보여줍니다.',
     scenarios: [
-      { id: 'ui', label: '화면 계층' },
+      { id: 'ui', label: '화면' },
       { id: 'service', label: '서비스 계층' },
       { id: 'data', label: '데이터 계층' },
       { id: 'flow', label: '요청 흐름' },
@@ -679,11 +679,11 @@ export const DEMOS: DemoMeta[] = [
     qaId: 'ch09_q04',
     title: '캐시 위치',
     url: '/demos/ch09/q04.html',
-    description: 'CDN, 메모리, DB 앞 캐시가 어느 층에서 원본 접근을 줄이는지 보여줍니다.',
+    description: '엣지 CDN, 메모리, 데이터 앞 캐시가 어느 층에서 원본 접근을 줄이는지 보여줍니다.',
     scenarios: [
-      { id: 'cdn', label: 'CDN' },
+      { id: 'cdn', label: '엣지 CDN' },
       { id: 'app', label: '메모리' },
-      { id: 'db', label: 'DB 앞' },
+      { id: 'db', label: '데이터 앞' },
       { id: 'invalidate', label: '무효화' },
     ],
   },
