@@ -1,0 +1,112 @@
+{
+  "step": "pr20a",
+  "round": 2,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-136",
+  "ts": "2026-05-04T03:11:19Z",
+  "branch": "codex/pr20a",
+  "pr": 63,
+  "evaluated_commit": "b57c3c7606581e97eb900940fae5aba720c53c3b",
+  "verdict": "PASS",
+  "scope": {
+    "focus": "HANDOFF-pr20a-round2.md §C interaction verification for ch09_q01~q04 plus one ch08 regression spot-check.",
+    "build": {
+      "root": "PASS (npm run build; includes client `vite build` and server `tsc`)"
+    },
+    "diff_guard": [
+      "git diff --name-only main..b57c3c7 changed only client/src/demos/ch09/Q01Architecture.tsx, Q02Layer.tsx, Q03Pattern.tsx, Q04Cache.tsx, client/src/data/demos.ts, and client/src/demos/registry.ts.",
+      "git diff --name-only b57c3c7..00b65f5 shows only HANDOFF-pr20a-round1.md and HANDOFF-pr20a-round2.md, so the round-2 wrapper branch adds no app-code delta over the PR head."
+    ],
+    "static_checks": {
+      "raw_hex_grep": "PASS (0 matches in client/src/demos/ch09/Q01~Q04*.tsx)",
+      "shared_import_grep": "PASS (0 forbidden imports outside ../_shared and ../types)",
+      "raw_abbrev_grep": "PASS (0 direct label matches for OS/API/DB/UI/JS/CSS/HTML/CDN)",
+      "db_substring_grep": "PASS (0 matches for DB substring in ch09 TSX files)",
+      "label_length": "PASS (all visible labels <= 8 chars; e.g. `마이크로서비스`=7, `변경 범위 축소`=8, `반복 조회 흡수`=8, `조회 부하 절감`=8)",
+      "scenario_id_alignment": [
+        "ch09_q01 SCENES keys match demos.ts ids: mono/growth/micro/tradeoff",
+        "ch09_q02 SCENES keys match demos.ts ids: ui/service/data/flow",
+        "ch09_q03 SCENES keys match demos.ts ids: problem/singleton/observer/factory",
+        "ch09_q04 SCENES keys match demos.ts ids: cdn/app/db/invalidate",
+        "ch08_q01 regression spot-check still matches demos.ts ids: ip/tcp/udp/mix"
+      ],
+      "registry_alignment": "PASS (registry.ts maps ch09_q01~q04 to Q01Architecture/Q02Layer/Q03Pattern/Q04Cache with square/wide/wide/wide layouts)"
+    },
+    "interaction_checks": {
+      "deep_link_guards": [
+        "LearnPage seeds scenarioId from window.location.hash only when the hash matches a declared scenario id.",
+        "PreviewPanel writes inline scenario changes through window.history.replaceState(null, '', `#${nextScenarioId}`).",
+        "Inline demos remount on key `${qaId}:${scenarioId}`, so hash-driven scenario changes select the intended scene."
+      ],
+      "playwright": {
+        "base_url": "http://127.0.0.1:5184",
+        "routes": [
+          "/library/9/ch09_q01#growth -> click `마이크로서비스` => #micro",
+          "/library/9/ch09_q02#service -> click `데이터 계층` => #data",
+          "/library/9/ch09_q03#observer -> click `팩토리` => #factory",
+          "/library/9/ch09_q04#db -> click `무효화` => #invalidate",
+          "/library/8/ch08_q01#udp -> click `함께 보기` => #mix"
+        ],
+        "inline_render": "PASS (iframe count stayed 0 on all five routes)",
+        "console_health": "PASS (no actionable page errors or bad responses; ch09_q01 emitted only the same excluded favicon-style generic 404 console line)",
+        "progress_api": "PASS (progressRequests=[] and progressResponses=[] on all five self-mode routes)"
+      }
+    }
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "Root `npm run build` succeeded on the evaluated app-code commit and completed both client and server builds."
+    },
+    {
+      "id": "I2",
+      "result": "PASS",
+      "evidence": "Raw hex grep returned 0 matches in client/src/demos/ch09/Q01~Q04*.tsx."
+    },
+    {
+      "id": "I3",
+      "result": "PASS",
+      "evidence": "Forbidden import grep returned 0 matches; the new ch09 demos only import from ../_shared and ../types."
+    },
+    {
+      "id": "I4",
+      "result": "PASS",
+      "evidence": "Q02/Q03/Q04 each call validatePairSet(..., { layout: 'wide', subPolicy: 'all' }); Q01 uses PairBinary; all visible labels remain within the <=8-char limit."
+    },
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "SCENES keys and demos.ts scenario ids are 1:1 aligned for ch09_q01~q04, and the ch08_q01 regression route still matches ip/tcp/udp/mix."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "Shared hash/deep-link infrastructure is unchanged from main; only the four new ch09 inline demos, demos.ts, and registry wiring changed in the PR head diff."
+    },
+    {
+      "id": "I7",
+      "result": "PASS",
+      "evidence": "Playwright preserved direct deep links and rewrote hashes on click for all four ch09 routes and the ch08_q01 regression route: #growth->#micro, #service->#data, #observer->#factory, #db->#invalidate, #udp->#mix."
+    },
+    {
+      "id": "I8",
+      "result": "PASS",
+      "evidence": "All tested routes rendered inline with iframe count 0, active scenario tabs followed the requested hashes, and no /api/progress request fired in self-mode."
+    },
+    {
+      "id": "DEV-CONSOLE",
+      "result": "PASS",
+      "evidence": "Direct entry checks for /library/9/ch09_q01~q04 and regression /library/8/ch08_q01 produced no actionable console or page errors. The only observed console error was the excluded generic 404 line on q01, consistent with a favicon miss."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "summary": "HANDOFF-pr20a-round2.md §C 기준 상호작용 검증 결과 PASS. ch09_q01~q04의 scenario ids, registry wiring, deep-link/hash 전환, inline 렌더링, raw-label guard가 모두 정합하며 ch08_q01 회귀 spot-check도 유지된다.",
+  "notes": [
+    "Evaluation started from the detached round-2 wrapper branch `feat/preview-inline-ch09-q1-q4@00b65f5` as instructed, then the artifact files were recorded on a branch forked from the open PR head `codex/pr20a` for commit/push.",
+    "The open PR head remains `codex/pr20a@b57c3c7`, while the handoff cites cherry-picked app-code commit `1c7ce97` and wrapper head `00b65f5`. `git diff b57c3c7..1c7ce97` shows only HANDOFF-pr20a-round1.md, and `git diff b57c3c7..00b65f5` shows only handoff wrapper files, so all evaluated application code is identical."
+  ],
+  "next_action": "PASS. 추가 수정 필요 없음."
+}
