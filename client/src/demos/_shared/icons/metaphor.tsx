@@ -693,6 +693,138 @@ export function PreserveIcon() {
   );
 }
 
+export function HouseIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 18 20 8l12 10" />
+      <path d="M11 17v14h18V17" />
+      <path d="M17 31v-7h6v7" />
+    </svg>
+  );
+}
+
+export function DocIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 6h14l6 6v22H10z" />
+      <path d="M24 6v6h6" />
+      <path d="M15 18h10M15 23h10M15 28h7" />
+    </svg>
+  );
+}
+
+export function LinkDbIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <ellipse cx="12" cy="12" rx="5" ry="3" />
+      <path d="M7 12v7a5 3 0 0 0 10 0v-7" />
+      <ellipse cx="28" cy="28" rx="5" ry="3" />
+      <path d="M23 28v-7a5 3 0 0 1 10 0v7" />
+      <path d="M16 16l8 8" />
+      <path d="M16 22h8" />
+    </svg>
+  );
+}
+
+export function DistributedDbIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <ellipse cx="12" cy="12" rx="5" ry="3" />
+      <path d="M7 12v5a5 3 0 0 0 10 0v-5" />
+      <ellipse cx="28" cy="12" rx="5" ry="3" />
+      <path d="M23 12v5a5 3 0 0 0 10 0v-5" />
+      <ellipse cx="20" cy="28" rx="5" ry="3" />
+      <path d="M15 28v5a5 3 0 0 0 10 0v-5" />
+      <path d="M12 19v3M28 19v3M17 24l-3-2M23 24l3-2" />
+    </svg>
+  );
+}
+
+export function FindIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="17" cy="17" r="7" />
+      <path d="m22 22 8 8" />
+      <path d="M17 14v6M14 17h6" />
+    </svg>
+  );
+}
+
+export function AddIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 13v14M13 20h14" />
+    </svg>
+  );
+}
+
+export function EditDbIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M28 9l3 3-11 11-5 1 1-5z" />
+      <path d="M17 10h-5a3 3 0 0 0-3 3v14a3 3 0 0 0 3 3h14a3 3 0 0 0 3-3v-5" />
+      <path d="M16 26h8" />
+    </svg>
+  );
+}
+
+export function DeleteIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 12h18" />
+      <path d="M15 12V9h10v3" />
+      <path d="M13 12l1 18h12l1-18" />
+      <path d="M17 16v10M23 16v10" />
+    </svg>
+  );
+}
+
+export function BrowseDbIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 12h16" />
+      <path d="M9 19h13" />
+      <path d="M9 26h10" />
+      <circle cx="28" cy="27" r="5" />
+      <path d="m31.5 30.5 4 4" />
+    </svg>
+  );
+}
+
+export function BranchIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="12" cy="12" r="3" />
+      <circle cx="28" cy="12" r="3" />
+      <circle cx="20" cy="28" r="3" />
+      <path d="M15 12h10" />
+      <path d="M20 15v10" />
+    </svg>
+  );
+}
+
+export function RangeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 12v16M30 12v16" />
+      <path d="M14 16h12M14 24h12" />
+      <path d="M18 20h4" />
+    </svg>
+  );
+}
+
+export function WriteCostIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 30V10h13" />
+      <path d="m18 8 5 5-5 5" />
+      <circle cx="27" cy="27" r="5" />
+      <path d="M27 24v6M24 27h6" />
+    </svg>
+  );
+}
+
 export function BackupMetaIcon() {
   return (
     <svg {...ICON_BASE} aria-hidden>
