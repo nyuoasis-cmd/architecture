@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { QrCode } from 'lucide-react';
 import QrFullscreen from '../common/QrFullscreen';
 import type { DemoMeta } from '../../data/demos';
 import { getDemoComponent } from '../../demos/registry';
@@ -96,12 +97,13 @@ export default function PreviewPanel({
           {sessionCode ? (
             <button
               aria-label="QR 코드 보기"
-              className="toolbar-btn"
+              className="inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-stone-600 transition hover:bg-stone-100 hover:text-stone-900"
               onClick={() => setIsQrOpen(true)}
-              title="QR 코드 (학생 참여)"
+              title="학생 참여 QR 코드"
               type="button"
             >
-              QR
+              <QrCode size={14} strokeWidth={1.75} />
+              QR코드
             </button>
           ) : null}
           <span className="flex items-center gap-1" style={{ visibility: isDemo ? 'visible' : 'hidden' }}>

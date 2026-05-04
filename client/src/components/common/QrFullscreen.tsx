@@ -41,10 +41,10 @@ export default function QrFullscreen({ code, onClose }: QrFullscreenProps) {
         >
           ✕
         </button>
-        <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Join</p>
-        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-3">
+        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-3 shadow-lg">
           <QRCodeSVG bgColor="#ffffff" fgColor="#111827" includeMargin size={320} value={joinUrl} />
         </div>
+        <p className="text-xs text-stone-400">QR 코드를 스캔하거나 코드를 입력하세요</p>
         <div className="text-center">
           <div className="font-mono text-3xl tracking-[0.4em] text-stone-950">{code}</div>
           <div className="mt-2 break-all text-xs text-stone-500">{joinUrl}</div>
