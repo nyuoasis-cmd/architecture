@@ -1,0 +1,74 @@
+{
+  "step": "pr19b",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-130",
+  "ts": "2026-05-04T02:46:21Z",
+  "branch": "feat/preview-inline-ch08-q5-q7",
+  "commit": "4e2b8bd2b58db94d3df92a20ad87a40d39952f57",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame",
+      "verdict": "PASS",
+      "evidence": "`/library/8/ch08_q05`~`ch08_q07` desktop/mobile과 회귀 spot-check `/library/8/ch08_q01`~`ch08_q04` desktop에서 모두 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`, `console error=0`, `pageerror=0`이었다. 신규 3개와 기존 ch08 q01~q04가 모두 React 인라인 렌더로 유지됐다."
+    },
+    {
+      "id": "V2-desktop-3col",
+      "verdict": "PASS",
+      "evidence": "1440x900에서 ch08 신규 q05~q07 공통으로 학습/채팅/시연 셸 폭이 `280/320/840px`였다. 세 라우트 모두 preview host가 `776px` wide 계약 안에서 렌더됐고 hero, pair block, 보조 보드, log 순서가 안정적으로 유지됐다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "q05 4개(`gatekeeper/tunnel/together/separate`), q06 4개(`oneshot/polling/bidirectional/usecase`), q07 4개(`auth/encrypt/isolate/least`)를 모두 클릭했다. 12개 전환 모두에서 URL hash, 활성 scenario tab 라벨, preview hero 제목이 각각 기대값과 정확히 같이 바뀌었다."
+    },
+    {
+      "id": "V4-contrast-teal700",
+      "verdict": "PASS",
+      "evidence": "ch08 tone은 `--demo-accent-ch08=#0f766e`(teal-700), `--demo-accent-soft-ch08=#f0fdfa`였다. 활성 accent 대비비는 `5.25:1`로 WCAG AA `4.5:1` 기준을 넘겼다."
+    },
+    {
+      "id": "V5-layout-contract",
+      "verdict": "PASS",
+      "evidence": "Generator가 q05를 PairMatch `wide`로 선택한 결과 host 계약이 registry와 일치했다. 신규 q05~q07은 모두 `776px` wide였고, 회귀 spot-check에서도 q01~q03은 `776px` wide, q04는 `640px` square로 유지돼 ch08 layout 매핑이 깨지지 않았다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "desktop DOM에서 q05~q07은 모두 `svgCount=16`이었다. q05 pair row 2줄은 각각 `177.5px x4`, q06은 pair row 2줄 `177.5px x4`에 추가 선택 보드 `242px x3`, q07은 pair row 2줄 `177.5px x4`에 보안 점검 보드 `179.5px x4`가 렌더돼 아이콘과 보조 카드 누락이 없었다."
+    },
+    {
+      "id": "V7-regression-ch08-q01-q04",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check로 `/library/8/ch08_q01`~`ch08_q04`를 다시 열었다. 네 라우트 모두 `iframe=0`, `console error=0`, `pageerror=0`, desktop 3컬럼 `280/320/840px`를 유지했고 host 폭도 q01~q03 `776px`, q04 `640px`로 이전 계약이 유지됐다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852에서 `📱 시연` 탭 전환 후 q05/q06은 scenario tablist bottom `276.78px`, hero 시작점 `387.25px`, q07은 tablist bottom `238.39px`, hero 시작점 `348.86px`였다. 세 라우트 모두 첫 모바일 뷰포트 안에 시나리오 칩과 hero가 함께 들어왔다."
+    },
+    {
+      "id": "V9-mobile-layout",
+      "verdict": "PASS",
+      "evidence": "mobile 393x852에서 q05~q07 inline host 폭은 모두 `361px`였고 pair row 두 줄이 각각 `gridTemplateColumns=\"155.5px 155.5px\"` 2열로 접혔다. `document.documentElement.scrollWidth=393`으로 세 라우트 모두 가로 스크롤 없이 유지됐다."
+    }
+  ],
+  "artifacts": {
+    "metrics": "/tmp/pr19b-r1-eval-visual/metrics.json",
+    "screenshots_dir": "/tmp/pr19b-r1-eval-visual",
+    "browser": "Playwright Core + system Chrome (/usr/bin/google-chrome)",
+    "base_url": "http://127.0.0.1:3004"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr19b-round1.md` §B만 따랐다.",
+    "평가 대상 구현은 `origin/feat/preview-inline-ch08-q5-q7`의 `4e2b8bd2b58db94d3df92a20ad87a40d39952f57`였다.",
+    "`ao session claim-pr 19`는 GitHub PR #19가 이미 merged라서 실패했고, 핸드오프에 명시된 브랜치와 SHA를 기준으로 평가를 계속했다.",
+    "앱은 `/home/claude/architecture`에서 `npm run build` 후 `NODE_ENV=production PORT=3004 npm start`로 기동했다.",
+    "브라우저 검증은 Playwright Core와 system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "시각 평가 노이즈만 줄이기 위해 harness에서 `/api/progress`는 `200 {\"ok\":true}`, `/favicon.ico`는 `204`로 stub 했다. 데모 렌더, 스타일, DOM 자체는 수정하지 않았다."
+  ]
+}
