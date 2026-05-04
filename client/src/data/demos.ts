@@ -695,8 +695,8 @@ export const DEMOS: DemoMeta[] = [
     scenarios: [
       { id: 'request', label: '요청' },
       { id: 'enqueue', label: '큐 적재' },
-      { id: 'worker', label: '워커 처리' },
-      { id: 'burst', label: '버퍼링' },
+      { id: 'worker', label: '워커' },
+      { id: 'burst', label: '버스트' },
     ],
   },
   {
