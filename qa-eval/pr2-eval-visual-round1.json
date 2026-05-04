@@ -1,0 +1,93 @@
+{
+  "step": "pr2",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-161",
+  "ts": "2026-05-04T12:53:23Z",
+  "branch": "ao/teacher-explain-pr2",
+  "commit": "bdf9470ca86ae0624768fd238ca55a8e92739a1c",
+  "verdict": "REVISE",
+  "fail_items": [],
+  "revise_items": [
+    "V9",
+    "V13"
+  ],
+  "checks": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "`LearnPage.tsx:118-120,252-271` computes `isTeacherPreview` from `?role=teacher` and only passes `sessionId` to `LearnLayout` for teacher preview. `LearnLayout` then enables `teacherPanel` only when `props.mode === 'session' && Boolean(props.sessionId)` at `LearnPage.tsx:87-98`, and `PreviewPanel.tsx:191-204` renders the `📝 설명 노트` toggle only when `teacherPanel` is true."
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "Student/session routes do not receive `sessionId` into `LearnLayout`, so `teacherPanel` stays false at `LearnPage.tsx:97` and the explain toggle branch in `PreviewPanel.tsx:191-204` is skipped. Source review found no alternate render path for the explain toggle."
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "Mobile nav still renders exactly four tabs from the fixed `LABELS` map in `LearnPage.tsx:14-19,45-55`: `📖 학습 / 💬 채팅 / 📱 시연 / ✅ 퀴즈`. There is no `⋯` or extra mobile nav entry added in this PR."
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "`TeacherExplainPanel.tsx:220-335` renders `tldr`, `goal`, `cue`, `concept`, `mechanism`, `advanced`, `realLife`, `prompts`, `misconception`, `beforeDemo`, `note`, `relatedQas`, and `demoTip` when the block contains both optional sections. The seeded block `server/src/data/teacher-explain/ch01_q01.ts:3-48` includes all 13 fields."
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "`TeacherExplainPanel.tsx:212-218` renders the Korean owner badge as literal text `세션 주인 전용` in the panel header."
+    },
+    {
+      "id": "V6",
+      "verdict": "PASS",
+      "evidence": "`TeacherExplainPanel.tsx:20,227-235` defines and renders four flow chips, with only index `0` receiving `is-current` and the remaining chips left inactive."
+    },
+    {
+      "id": "V7",
+      "verdict": "PASS",
+      "evidence": "`TeacherExplainPanel.tsx:61-160` only renders the internal tab UI when both `advanced` and `demoTip` exist. If only one optional section exists, the component renders that section directly without the nested tablist at `:80-108`."
+    },
+    {
+      "id": "V8",
+      "verdict": "PASS",
+      "evidence": "A grep for raw hex literals in the new visual files returned no matches: `grep -nE \"['\\\"]#[0-9a-fA-F]{3,8}['\\\"]\" client/src/components/learn/TeacherExplainPanel.tsx client/src/components/learn/Glossary.tsx` produced empty output. The panel styling is token-driven in `client/src/index.css`."
+    },
+    {
+      "id": "V9",
+      "verdict": "REVISE",
+      "evidence": "The mobile readability requirement is not enforced. `client/src/index.css:457-548` applies `font-size` and `line-height` to `.teacher-explain-card__body` and `.teacher-explain-prompts__answer`, but there is no line clamp, max-height, or overflow guard. The seeded copy in `server/src/data/teacher-explain/ch01_q01.ts:9-46` contains multi-sentence paragraphs that will naturally exceed three lines on a 393px viewport, so the `3줄 초과 0건` part of V9 is not satisfied by implementation."
+    },
+    {
+      "id": "V10",
+      "verdict": "PASS",
+      "evidence": "`PreviewPanel.tsx:208-219` keeps the QR affordance with `lucide-react` `QrCode`, the mobile short label `QR`, and the desktop label `QR코드`, matching the PR #84 regression target."
+    },
+    {
+      "id": "V11",
+      "verdict": "PASS",
+      "evidence": "`PreviewPanel.tsx:136-163,221-228` derives `showToolbar` from `previewTab === 'demo'` and hides the reload/fullscreen toolbar for explain mode by setting the wrapper visibility to hidden whenever `previewTab !== 'demo'`."
+    },
+    {
+      "id": "V12",
+      "verdict": "PASS",
+      "evidence": "The mobile header uses shortened labels explicitly: `📝 설명` at `PreviewPanel.tsx:201-202` and `QR` at `:217-218`. Combined with the compact `text-xs`, `px-3`, and `px-2.5` button sizing in `PreviewPanel.tsx:169-219`, the implementation follows the SDD's one-line mobile header strategy."
+    },
+    {
+      "id": "V13",
+      "verdict": "REVISE",
+      "evidence": "The V5 carry-over summary card is missing. `LearnLayout` renders only `GuidePanel`, `ChatPanel`, and `PreviewPanel` in `LearnPage.tsx:58-99`, and `LearnPage.tsx` contains no `summary` reference at all. There is no accent-soft summary card inserted above the learning body on either desktop or mobile."
+    },
+    {
+      "id": "V14",
+      "verdict": "PASS",
+      "evidence": "`ChatPanel.tsx:115-117` builds the placeholder from `qaTitle` as `예: ${qaTitle}에 대해 일상 비유로 설명해줘`, which removes the previous hard-coded `라면 끓이기` phrasing and ties the hint to the current Q&A title."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr2-round1.md` §B만 따랐다.",
+    "평가 대상 구현은 `ao/teacher-explain-pr2`의 `bdf9470ca86ae0624768fd238ca55a8e92739a1c` 커밋이다.",
+    "임시 워크트리 `/home/claude/.worktrees/architecture/pr2-eval`에서 `client`/`server` 의존성을 설치한 뒤 `npm run build`를 수행했고 둘 다 통과했다."
+  ]
+}
