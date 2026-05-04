@@ -1,0 +1,111 @@
+{
+  "step": "pr19b",
+  "round": 1,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-131",
+  "ts": "2026-05-04T02:44:15Z",
+  "branch": "feat/preview-inline-ch08-q5-q7",
+  "evaluated_commit": "4e2b8bd2b58db94d3df92a20ad87a40d39952f57",
+  "verdict": "PASS",
+  "scope": {
+    "focus": "HANDOFF-pr19b-round1.md \u00a7C interaction verification for ch08_q05~q07 plus ch08_q01 regression spot-check.",
+    "build": {
+      "client": "PASS (cd client && npm install --no-audit --no-fund && npm run build)",
+      "server": "PASS (cd server && npm install --no-audit --no-fund && npm run build)",
+      "root": "PASS (npm run build)"
+    },
+    "diff_guard": [
+      "git diff --name-only main..HEAD changed only client/src/demos/ch08/Q05Firewall.tsx, Q06Realtime.tsx, Q07Security.tsx, client/src/data/demos.ts, client/src/demos/registry.ts, and the handoff wrapper.",
+      "git diff --name-only main..HEAD -- client/src/demos/_shared client/src/components/learn/PreviewPanel.tsx client/src/pages/LearnPage.tsx client/src/lib/progress.ts returned no changes."
+    ],
+    "static_checks": {
+      "raw_hex_grep": "PASS (0 matches in client/src/demos/ch08/Q05~Q07*.tsx)",
+      "shared_import_grep": "PASS (0 forbidden imports outside ../_shared and ../types)",
+      "raw_abbrev_grep": "PASS (0 direct label matches for OS/API/DB/UI/JS/CSS/HTML/VPN/WS)",
+      "db_substring_grep": "PASS (0 matches for DB substring in ch08 q05~q07 TSX files)",
+      "label_length": "PASS (all q05~q07 labels <= 8 chars; e.g. '통로 VPN'=6, '양방향 WS'=6, '최소 권한'=5)",
+      "scenario_id_alignment": [
+        "ch08_q05 SCENES keys match demos.ts ids: gatekeeper/tunnel/together/separate",
+        "ch08_q06 SCENES keys match demos.ts ids: oneshot/polling/bidirectional/usecase",
+        "ch08_q07 SCENES keys match demos.ts ids: auth/encrypt/isolate/least",
+        "ch08_q01 regression spot-check still matches demos.ts ids: ip/tcp/udp/mix"
+      ],
+      "registry_alignment": "PASS (registry.ts maps ch08_q05~q07 to Q05Firewall/Q06Realtime/Q07Security with layout='wide')"
+    },
+    "interaction_checks": {
+      "deep_link_guards": [
+        "LearnPage seeds scenarioId from window.location.hash only when the hash matches a declared scenario id.",
+        "PreviewPanel writes inline scenario changes through window.history.replaceState(null, '', `#${nextScenarioId}`).",
+        "Inline demos remount on key `${qaId}:${scenarioId}`, so hash-driven scenario changes select the intended scene."
+      ],
+      "playwright": {
+        "base_url": "http://127.0.0.1:5184",
+        "routes": [
+          "/library/8/ch08_q05#tunnel -> click '함께 — 복합 보호' => #together",
+          "/library/8/ch08_q06#bidirectional -> click '사례 — 상황별 선택' => #usecase",
+          "/library/8/ch08_q07#least -> click '인증' => #auth",
+          "/library/8/ch08_q01#udp -> click '함께 보기' => #mix"
+        ],
+        "inline_render": "PASS (iframe count stayed 0 on all four routes)",
+        "console_health": "PASS (no actionable console/page errors and no bad responses; q05 emitted the same excluded favicon-style 404 console line only)",
+        "progress_api": "PASS (progressRequests=[] and progressResponses=[] on all four self-mode routes)"
+      }
+    }
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "Client, server, and root builds all succeeded on the detached PR head after local npm installs."
+    },
+    {
+      "id": "I2",
+      "result": "PASS",
+      "evidence": "Raw hex grep returned 0 matches in client/src/demos/ch08/Q05~Q07*.tsx."
+    },
+    {
+      "id": "I3",
+      "result": "PASS",
+      "evidence": "Forbidden import grep returned 0 matches; the new ch08 demos only import from ../_shared and ../types."
+    },
+    {
+      "id": "I4",
+      "result": "PASS",
+      "evidence": "Q05/Q06/Q07 each call validatePairSet(..., { layout: 'wide', subPolicy: 'all' }), and all visible labels stay within the <=8-char constraint."
+    },
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "SCENES keys and demos.ts scenario ids are 1:1 aligned for ch08_q05~q07; q05 uses gatekeeper/tunnel/together/separate, q06 uses oneshot/polling/bidirectional/usecase, and q07 uses auth/encrypt/isolate/least."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "Shared hash/deep-link infrastructure is unchanged from main; only the three new ch08 inline demos, demos.ts, and registry wiring changed in this diff."
+    },
+    {
+      "id": "I7",
+      "result": "PASS",
+      "evidence": "Playwright preserved direct deep links and rewrote hashes on click for q05/q06/q07 and the q01 regression route: #tunnel->#together, #bidirectional->#usecase, #least->#auth, #udp->#mix."
+    },
+    {
+      "id": "I8",
+      "result": "PASS",
+      "evidence": "All tested routes rendered inline with iframe count 0, scenario tabs matched the handoff labels, and no /api/progress request fired in self-mode."
+    },
+    {
+      "id": "DEV-CONSOLE",
+      "result": "PASS",
+      "evidence": "Direct entry checks for /library/8/ch08_q05~q07 and regression /library/8/ch08_q01 produced no actionable console or page errors. The lone q05 console error was the excluded generic 404 line corresponding to the usual favicon miss."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "summary": "HANDOFF-pr19b-round1.md \u00a7C 기준 상호작용 검증 결과 PASS. ch08_q05~q07의 scenario ids, registry wiring, deep-link/hash 전환, inline 렌더링, raw-label guard가 모두 정합하며 ch08_q01 회귀 spot-check도 유지된다.",
+  "notes": [
+    "Evaluation was performed from a detached checkout at commit 4e2b8bd2b58db94d3df92a20ad87a40d39952f57 as instructed, then the artifact files were recorded on the branch worktree for commit/push.",
+    "The evaluated branch head matches the handoff target commit directly; there was no additional app-code delta beyond the wrapper handoff file inside main..HEAD."
+  ],
+  "next_action": "PASS. 추가 수정 필요 없음."
+}
