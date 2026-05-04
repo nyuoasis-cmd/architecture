@@ -1,0 +1,75 @@
+{
+  "step": "pr21b",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-147",
+  "ts": "2026-05-04T05:18:02Z",
+  "branch": "codex/pr21b-r1-eval-visual",
+  "commit": "66a63b496544708bc283862f77930703edd9a2f1",
+  "verdict": "FAIL",
+  "fail_items": [
+    "V1/V2/V3/V4/V5/V6/V8/V9 blocked at runtime: `client/src/demos/ch10/Q07AiSecurity.tsx:90` defines `sub: \"identity & access\"`, but `_shared/labels.ts:3-18` caps `sub` length at 16. `validatePairSet(...)` throws during module import at `Q07AiSecurity.tsx:96`, so the preview stack never mounts for `ch10_q05~q07`.",
+    "V7 regression spot-check is also blocked: `client/src/demos/registry.ts:59-61` eagerly imports all ch10 demo modules, so the same `validateLabel` exception blanks unrelated routes too. `/library/9/ch09_q01` reproduced the identical pageerror before any tablist or inline preview DOM appeared."
+  ],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame",
+      "verdict": "FAIL",
+      "evidence": "`/library/10/ch10_q05`에서 `pageerror Error: [validateLabel] sub 글자수 17 > 16 (text: \"identity & access\")`가 즉시 발생했다. 이후 `iframe=0`, `.phone-frame=0`, `[role=\"tablist\"]=0`, `#root` text는 빈 문자열이라 인라인 preview 자체가 마운트되지 않았다."
+    },
+    {
+      "id": "V2-desktop-3col",
+      "verdict": "FAIL",
+      "evidence": "Desktop 1440x900 구조 검증은 시작조차 못 했다. 학습/채팅/시연 3컬럼 셸과 Hero/Pair/StateChips/LogBox 스택이 렌더되기 전에 import-time validator 예외로 React tree가 비었다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "FAIL",
+      "evidence": "시나리오 탭리스트가 DOM에 생성되지 않아 hash-active-preview 동기화 체크를 수행할 수 없었다. `ch10_q05~q07` 모두 같은 전역 import 예외에 걸리는 상태다."
+    },
+    {
+      "id": "V4-contrast-pink700",
+      "verdict": "FAIL",
+      "evidence": "활성 pair card가 마운트되지 않아 pink-700 accent 대비 측정을 수집할 수 없었다. 본 항목은 렌더 차단 예외에 의해 block됐다."
+    },
+    {
+      "id": "V5-layout-contract",
+      "verdict": "FAIL",
+      "evidence": "registry 상 `ch10_q05~q07`는 모두 `layout: 'wide'`지만, 실제 host container가 마운트되지 않아 776px wide 계약을 실측할 수 없었다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "FAIL",
+      "evidence": "PairFlow/PairMatch가 그려지지 않아 아이콘 SVG cell visibility 검증도 불가능했다. 메타포/IT 카드 DOM이 전혀 생성되지 않았다."
+    },
+    {
+      "id": "V7-regression-ch10q01q04",
+      "verdict": "FAIL",
+      "evidence": "handoff가 요구한 `ch10_q01~q04`와 인접 회귀 spot-check는 같은 이유로 차단된다. 실제로 `/library/9/ch09_q01`에서도 동일한 `validateLabel(... \"identity & access\")` pageerror가 재현돼, ch10 import side effect가 신규 범위를 넘어 기존 라우트까지 막는 것이 확인됐다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "FAIL",
+      "evidence": "모바일 first viewport 검증도 시작할 수 없었다. preview가 비어 있어 `📱 시연` 탭 이후 scenario chips와 hero 위치를 측정할 DOM이 없다."
+    },
+    {
+      "id": "V9-mobile-layout",
+      "verdict": "FAIL",
+      "evidence": "mobile 393x852에서 PairFlow/PairMatch grid가 렌더되지 않으므로 2열 접힘과 가로 스크롤 여부를 판정할 수 없었다. root blank 상태가 그대로 유지된다."
+    }
+  ],
+  "artifacts": {
+    "browser": "Playwright Core + system Chrome (/usr/bin/google-chrome)",
+    "base_url": "http://127.0.0.1:3005",
+    "raw_capture_dir": "/tmp/pr21b-r1-eval-visual"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr21b-round1.md` §B만 따랐다.",
+    "평가 대상 구현은 generator 센티넬 `qa/ao-logs/pr21b-r1-gen.status`가 가리키는 `feat/preview-inline-ch10-q5-q7` HEAD `66a63b496544708bc283862f77930703edd9a2f1`였다.",
+    "앱은 `/home/claude/architecture`에서 `npm run build` 후 `PORT=3005 NODE_ENV=production npm start`로 기동했다.",
+    "브라우저 자동화는 Playwright Core와 system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "시각 평가 노이즈만 줄이기 위해 harness에서 `service-nav.js`, `/favicon.ico`, `/api/progress*`만 stub 했다. 데모 렌더, 스타일, DOM 자체는 수정하지 않았다."
+  ]
+}

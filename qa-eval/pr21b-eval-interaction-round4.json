@@ -1,0 +1,72 @@
+{
+  "step": "pr21b",
+  "round": 4,
+  "phase": "eval-interaction-round4",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-153",
+  "ts": "2026-05-04T05:41:43Z",
+  "branch": "feat/preview-inline-ch10-q5-q7",
+  "evaluated_commit": "018477d6c952974aaad57a7abc94f89401c05fa3",
+  "product_fix_commit": "f614cdd8aa1fe3ce82dfab707d160a58eb79ef8d",
+  "verdict": "PASS",
+  "scope": {
+    "focus": "HANDOFF-pr21b-round4.md §C only. Re-verify the round 3 I4 fix for ch10_q06 on the detached PR head.",
+    "build": {
+      "client": "PASS (cd client && npm install --no-audit --no-fund && npm run build)",
+      "server": "PASS (cd server && npm install --no-audit --no-fund && npm run build)"
+    },
+    "static_checks": {
+      "diff_scope": "PASS (c088bd9..f614cdd changes only client/src/demos/ch10/Q06Cost.tsx, replacing `prefix 재사용` with `캐시 재사용` in the cache scene chip list)",
+      "label_length": "PASS (`client/src/demos/ch10/Q06Cost.tsx` cache-scene chip `캐시 재사용` is 6 characters, within `_shared/labels.ts` `maxLabelLength: 8`; `prefix 재사용` is absent)",
+      "registry_alignment": "PASS (`client/src/data/demos.ts` keeps ch10_q06 ids `percall`/`pertoken`/`cache`/`batch`, and `client/src/demos/registry.ts` still maps `ch10_q06` to `Q06Cost` with `layout: 'wide'`)"
+    },
+    "interaction_checks": {
+      "initial_deep_link": [
+        "/library/10/ch10_q06#cache selected the `캐시 절감` tab on load",
+        "The cache scene body text rendered immediately, and the `캐시 재사용` chip was visible on first paint"
+      ],
+      "hash_sync": [
+        "/library/10/ch10_q06#cache -> click `배치 절감` => #batch",
+        "After the click, the batch scene body text rendered and the `묶음 처리` chip became visible"
+      ],
+      "inline_render": "PASS (iframeCount=0 and phoneFrameCount=0 both before and after the tab click)",
+      "console_health": "PASS (no page errors, no bad responses, no /api/progress traffic, and no actionable console errors; only Vite debug + React DevTools info messages were observed)"
+    }
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "Client and server installs were already up to date, and both production builds completed successfully on the detached PR head."
+    },
+    {
+      "id": "I4",
+      "result": "PASS",
+      "evidence": "`client/src/demos/ch10/Q06Cost.tsx` now uses `캐시 재사용` for the cache-scene chip. Its measured length is 6, satisfying `_shared/labels.ts` `maxLabelLength: 8`, and `prefix 재사용` no longer appears in the rendered route."
+    },
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "The round 4 fix did not alter scenario ids or layout wiring: ch10_q06 remains aligned between `demos.ts`, `Q06Cost.tsx` `SCENES`, and `registry.ts`."
+    },
+    {
+      "id": "I7",
+      "result": "PASS",
+      "evidence": "Playwright on http://127.0.0.1:5187 preserved the `#cache` deep link on initial entry and rewrote the hash to `#batch` after clicking the `배치 절감` tab, with the corresponding scene text and chip content updating correctly."
+    },
+    {
+      "id": "I8",
+      "result": "PASS",
+      "evidence": "The route stayed on the inline React path throughout the replay: no iframe, no phone-frame wrapper, and no `/api/progress` network activity in self mode."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "summary": "HANDOFF-pr21b-round4.md §C 기준 재검증 결과는 PASS. round 3의 유일한 interaction 이슈였던 ch10_q06 cache-scene chip 길이 위반은 `캐시 재사용`으로 해소됐고, deep-link, hash sync, inline 렌더링, console/network 상태도 정상이다.",
+  "notes": [
+    "Evaluation began from the required detached checkout of `origin/feat/preview-inline-ch10-q5-q7`; the head commit `018477d6c952974aaad57a7abc94f89401c05fa3` is a wrapper that includes the handoff file, and the only product-code delta since round 3 is `f614cdd8aa1fe3ce82dfab707d160a58eb79ef8d` in `Q06Cost.tsx`.",
+    "Browser verification used a local Vite dev server at http://127.0.0.1:5187 with Playwright 1.52.0 and system Chrome (`/usr/bin/google-chrome`)."
+  ],
+  "next_action": "PASS. No further interaction-side changes are required for PR-21b round 4."
+}
