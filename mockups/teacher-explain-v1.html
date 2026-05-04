@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>SDD-teacher-explain-v2.0 · UI 목업 (친화 장치 7종)</title>
+<style>
+:root {
+  --color-bg: #fafaf9;
+  --color-bg-card: #ffffff;
+  --color-bg-input: #f5f5f4;
+  --color-bg-subtle: #f0eeea;
+  --color-bg-amber: #fffbeb;
+  --color-bg-rose: #fef2f2;
+
+  --color-border: #e7e5e4;
+  --color-border-strong: #d6d3d1;
+  --color-border-amber: #fde68a;
+  --color-border-rose: #fecaca;
+
+  --color-text-primary: #1c1917;
+  --color-text-body: #292524;
+  --color-text-muted: #57534e;
+  --color-text-faint: #78716c;
+  --color-text-amber-q: #78350f;
+  --color-text-amber-a: #92400e;
+  --color-text-rose: #7f1d1d;
+  --color-text-rose-soft: #991b1b;
+
+  --color-accent: #0f766e;
+  --color-accent-soft: #ccfbf1;
+  --color-accent-deep: #115e59;
+  --color-section-label: #0f766e;
+  --color-note-label: #475569;
+
+  --color-stone-100: #f5f5f4;
+  --color-stone-200: #e7e5e4;
+  --color-stone-600: #57534e;
+  --color-stone-900: #1c1917;
+  --color-stone-950: #0c0a09;
+
+  /* B1 시간 라벨 색 띠 */
+  --color-time-before: #22c55e;
+  --color-time-during: #f59e0b;
+  --color-time-after:  #3b82f6;
+
+  --radius-card: 12px;
+  --radius-sm: 8px;
+
+  --font-body: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; word-break: keep-all; overflow-wrap: break-word; }
+body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text-body); line-height: 1.6; padding: 24px; }
+
+.page-header { max-width: 1600px; margin: 0 auto 32px; }
+.page-title { font-size: 24px; font-weight: 600; color: var(--color-stone-950); margin-bottom: 6px; letter-spacing: -0.01em; }
+.page-sub { font-size: 13px; color: var(--color-text-muted); }
+.page-tag { display: inline-block; font-size: 11px; padding: 2px 8px; background: var(--color-stone-100); color: var(--color-stone-600); border-radius: 999px; margin-left: 6px; vertical-align: 1px; }
+.page-pattern { display: inline-block; font-size: 11px; padding: 2px 8px; background: rgba(15,118,110,0.1); color: var(--color-accent); border-radius: 999px; margin-left: 6px; vertical-align: 1px; font-weight: 600; }
+
+.views { max-width: 1600px; margin: 0 auto; display: grid; gap: 36px; }
+.view-section { }
+.view-label {
+  font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--color-section-label); font-weight: 700; margin-bottom: 8px;
+}
+.view-desc { font-size: 12px; color: var(--color-text-muted); margin-bottom: 14px; }
+
+/* ===== 친화 장치 표지 ===== */
+.devices-legend {
+  background: var(--color-bg-card); border: 1px solid var(--color-border); border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 18px;
+}
+.devices-legend h3 { font-size: 13px; font-weight: 600; color: var(--color-stone-950); margin-bottom: 10px; }
+.devices-legend .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 8px; }
+.devices-legend .item { font-size: 11px; color: var(--color-text-muted); display: flex; gap: 6px; }
+.devices-legend .item .key { font-weight: 700; color: var(--color-accent); flex-shrink: 0; }
+
+/* ===== Desktop frame ===== */
+.desktop-frame {
+  width: 1440px; max-width: 100%; height: 880px;
+  background: var(--color-bg-card); border: 1px solid var(--color-border-strong); border-radius: 8px;
+  overflow: hidden; box-shadow: 0 4px 24px rgba(28,25,23,0.06);
+  display: flex; flex-direction: column;
+}
+.desktop-topbar {
+  height: 56px; flex-shrink: 0; display: flex; align-items: center; justify-content: space-between;
+  padding: 0 24px; border-bottom: 1px solid var(--color-border); background: #fff;
+  font-size: 13px; color: var(--color-text-muted);
+}
+.desktop-topbar .brand { font-weight: 600; color: var(--color-stone-950); }
+.desktop-topbar .url { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--color-text-faint); }
+.desktop-cols { flex: 1; min-height: 0; display: flex; }
+.col-guide { width: 280px; min-width: 260px; border-right: 1px solid var(--color-border); padding: 14px; overflow-y: auto; flex-shrink: 0; background: #fff; }
+.col-chat  { width: 320px; min-width: 280px; border-right: 1px solid var(--color-border); display: flex; flex-direction: column; flex-shrink: 0; background: #fff; }
+.col-preview { flex: 1; background: var(--color-bg); display: flex; flex-direction: column; }
+
+/* Guide / Chat 동일 (v1.5와 같음, 축약) */
+.guide-back { font-size: 11px; color: var(--color-text-muted); margin-bottom: 12px; }
+.guide-chip-row { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.guide-chip-row .chap { font-size: 12px; font-weight: 600; color: var(--color-stone-950); }
+.guide-chip-row .cat { margin-left: auto; font-size: 10px; padding: 2px 8px; background: var(--color-accent-soft); color: var(--color-accent); border-radius: 999px; }
+.guide-title { font-size: 14px; font-weight: 600; color: var(--color-stone-950); margin-top: 16px; margin-bottom: 10px; }
+.guide-body { font-size: 12px; color: var(--color-text-body); line-height: 1.8; }
+.guide-body p { margin-bottom: 10px; }
+.chat-header { flex-shrink: 0; height: 44px; padding: 0 14px; border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: 8px; background: #fff; font-size: 13px; color: var(--color-text-muted); }
+.chat-body { flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+.chat-bubble { font-size: 12px; padding: 8px 12px; border-radius: 12px; max-width: 85%; line-height: 1.6; }
+.chat-bubble.bot { background: var(--color-bg-input); align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-bubble.user { background: var(--color-accent); color: #fff; align-self: flex-end; border-bottom-right-radius: 4px; }
+.chat-input { padding: 10px; border-top: 1px solid var(--color-border); }
+.chat-input .field { background: var(--color-bg-input); padding: 8px 12px; border-radius: 999px; font-size: 12px; color: var(--color-text-faint); }
+
+/* Preview tabbar */
+.preview-tabbar {
+  height: 40px; padding: 0 16px; border-bottom: 1px solid var(--color-border);
+  display: flex; align-items: center; gap: 4px; background: #fff;
+}
+.preview-tabbar .pv-tab { padding: 5px 12px; font-size: 12px; font-weight: 500; border-radius: 6px; background: transparent; color: var(--color-text-muted); border: 0; cursor: pointer; }
+.preview-tabbar .pv-tab.active { background: var(--color-stone-100); color: var(--color-stone-950); }
+.preview-tabbar .pv-tab.teacher-only::after {
+  content: '주인'; font-size: 9px; padding: 1px 5px; background: var(--color-accent-soft); color: var(--color-accent);
+  border-radius: 999px; margin-left: 4px; font-weight: 700; vertical-align: 1px;
+}
+.preview-tabbar .qr-btn {
+  margin-left: auto; height: 28px; padding: 0 10px; font-size: 12px; font-weight: 500;
+  background: var(--color-stone-900); color: #fff; border-radius: 8px; display: inline-flex; align-items: center; gap: 6px;
+}
+.qr-icon { width: 12px; height: 12px; display: inline-block; background: #fff; -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'><rect x='3' y='3' width='6' height='6' rx='1'/><rect x='15' y='3' width='6' height='6' rx='1'/><rect x='3' y='15' width='6' height='6' rx='1'/><rect x='12' y='12' width='3' height='3'/><rect x='18' y='12' width='3' height='3'/><rect x='12' y='18' width='3' height='3'/><rect x='18' y='18' width='3' height='3'/></svg>") center/contain no-repeat; mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='currentColor'><rect x='3' y='3' width='6' height='6' rx='1'/><rect x='15' y='3' width='6' height='6' rx='1'/><rect x='3' y='15' width='6' height='6' rx='1'/><rect x='12' y='12' width='3' height='3'/><rect x='18' y='12' width='3' height='3'/><rect x='12' y='18' width='3' height='3'/><rect x='18' y='18' width='3' height='3'/></svg>") center/contain no-repeat; }
+
+.preview-body { flex: 1; min-height: 0; overflow-y: auto; background: var(--color-bg); }
+
+/* ===== TeacherExplainPanel v2.0 ===== */
+.tep-host { padding: 16px 22px 22px; max-width: 760px; margin: 0 auto; }
+
+/* A2 + F1 — 우상단 컨트롤 바 */
+.tep-controls {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 8px 0 14px; border-bottom: 1px solid var(--color-border); margin-bottom: 14px;
+}
+.read-toggle { display: inline-flex; gap: 2px; padding: 2px; background: var(--color-bg-input); border-radius: 999px; }
+.read-toggle button {
+  padding: 4px 12px; font-size: 11px; font-weight: 600; border-radius: 999px; border: 0; cursor: pointer;
+  background: transparent; color: var(--color-text-muted);
+  display: inline-flex; align-items: center; gap: 4px;
+}
+.read-toggle button.active { background: var(--color-accent); color: #fff; }
+.tep-action-btns { display: inline-flex; gap: 6px; }
+.tep-action-btns button {
+  width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid var(--color-border); background: #fff; border-radius: 8px; cursor: pointer;
+  color: var(--color-text-muted); font-size: 14px;
+}
+.tep-action-btns button:hover { background: var(--color-bg-input); color: var(--color-stone-950); }
+
+.tep-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+.tep-header .meta-eyebrow { font-size: 11px; font-weight: 700; letter-spacing: 0.16em; text-transform: uppercase; color: var(--color-accent); margin-bottom: 6px; }
+.tep-header .meta-title { font-size: 18px; font-weight: 700; color: var(--color-stone-950); line-height: 1.4; }
+.badge-teacher-only {
+  font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+  background: var(--color-stone-100); color: var(--color-stone-600); white-space: nowrap; flex-shrink: 0;
+  border: 1px solid var(--color-border);
+}
+
+/* A1 한 줄 요약 카드 */
+.tldr-card {
+  background: var(--color-accent-soft); border: 1px solid rgba(15,118,110,0.3); border-left: 4px solid var(--color-accent);
+  border-radius: var(--radius-card); padding: 12px 14px; margin-bottom: 14px;
+  display: flex; align-items: flex-start; gap: 10px;
+}
+.tldr-card .icon { font-size: 18px; flex-shrink: 0; }
+.tldr-card .text { font-size: 14px; font-weight: 600; color: var(--color-accent-deep); line-height: 1.5; }
+
+.flow-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.flow-chip {
+  font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px;
+  background: var(--color-bg-input); color: var(--color-text-faint); border: 1px solid var(--color-border);
+}
+.flow-chip.cur { background: var(--color-accent-soft); color: var(--color-accent); border-color: rgba(15,118,110,0.3); }
+
+/* B1 시간 라벨 색 띠 */
+.tep-card, .tep-prompts, .tep-note, .misc-card {
+  position: relative; border: 1px solid var(--color-border); border-radius: var(--radius-card);
+  padding: 12px 14px 12px 16px; margin-bottom: 10px;
+}
+.time-band {
+  position: absolute; left: 0; top: 8px; bottom: 8px; width: 3px; border-radius: 999px;
+}
+.time-band.before { background: var(--color-time-before); }
+.time-band.during { background: var(--color-time-during); }
+.time-band.after  { background: var(--color-time-after); }
+
+.time-dot {
+  display: inline-block; width: 6px; height: 6px; border-radius: 999px; margin-right: 6px; vertical-align: 2px;
+}
+.time-dot.before { background: var(--color-time-before); }
+.time-dot.during { background: var(--color-time-during); }
+.time-dot.after  { background: var(--color-time-after); }
+
+/* 카드 본문 */
+.tep-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px; }
+@media (max-width: 600px) { .tep-grid { grid-template-columns: 1fr; } }
+.tep-card.muted { background: var(--color-bg-input); }
+.tep-card .label, .tep-prompts .label, .tep-note .label, .misc-card .label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 6px;
+  color: var(--color-section-label);
+}
+.tep-card .body { font-size: 12px; line-height: 1.7; color: var(--color-text-body); }
+.tep-card .body em { font-style: normal; color: var(--color-stone-950); font-weight: 600; }
+
+/* AdvancedSection */
+.adv-card { padding: 0; overflow: hidden; }
+.adv-tabs { display: flex; gap: 2px; padding: 8px 12px 0 14px; }
+.adv-tab { font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 6px 6px 0 0; background: transparent; color: var(--color-text-muted); border: 0; cursor: pointer; }
+.adv-tab.active { background: var(--color-bg-input); color: var(--color-stone-950); }
+.adv-body { padding: 12px 14px; font-size: 12px; line-height: 1.7; color: var(--color-text-body); background: var(--color-bg-input); }
+
+/* prompts amber */
+.tep-prompts { background: var(--color-bg-amber); border-color: var(--color-border-amber); }
+.tep-prompts .label { color: var(--color-text-amber-q); }
+.tep-prompts ul { list-style: none; }
+.tep-prompts li { margin-bottom: 12px; }
+.tep-prompts li:last-child { margin-bottom: 0; }
+.tep-prompts .q { font-size: 12px; font-weight: 600; color: var(--color-text-amber-q); margin-bottom: 4px; line-height: 1.6; }
+.tep-prompts .a { font-size: 12px; line-height: 1.7; color: var(--color-text-amber-a); padding: 8px 10px; background: rgba(120,53,15,0.07); border-radius: var(--radius-sm); }
+
+/* D1 오개념 상자 (rose tint) */
+.misc-card { background: var(--color-bg-rose); border-color: var(--color-border-rose); }
+.misc-card .label { color: var(--color-text-rose); display: flex; align-items: center; gap: 6px; }
+.misc-card .label .icon { font-size: 12px; letter-spacing: 0; text-transform: none; }
+.misc-card .body { font-size: 12px; line-height: 1.7; color: var(--color-text-rose-soft); }
+.misc-card .body .myth { font-weight: 600; padding: 6px 10px; background: rgba(127,29,29,0.1); border-radius: var(--radius-sm); margin-bottom: 8px; display: block; }
+
+/* note */
+.tep-note { background: var(--color-bg-subtle); }
+.tep-note .label { color: var(--color-note-label); }
+.tep-note .body { font-size: 12px; line-height: 1.7; color: var(--color-text-muted); }
+
+/* E1 관련 Q&A */
+.related-card {
+  background: #fff; border: 1px solid var(--color-border); border-radius: var(--radius-card);
+  padding: 12px 14px; margin-top: 14px; margin-bottom: 0;
+  position: relative; padding-left: 16px;
+}
+.related-card .label {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--color-section-label); margin-bottom: 8px;
+}
+.related-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.related-chip {
+  display: inline-flex; align-items: center; gap: 6px; padding: 6px 10px;
+  background: var(--color-bg-input); border: 1px solid var(--color-border); border-radius: var(--radius-sm);
+  font-size: 11px; color: var(--color-text-body); cursor: pointer;
+  transition: background 0.15s;
+}
+.related-chip:hover { background: var(--color-accent-soft); border-color: rgba(15,118,110,0.3); color: var(--color-accent-deep); }
+.related-chip .id { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--color-text-faint); }
+.related-chip.disabled { opacity: 0.4; cursor: not-allowed; }
+.related-chip.disabled::after {
+  content: '(현재 세션 외)'; font-size: 9px; color: var(--color-text-faint); margin-left: 4px;
+}
+
+/* C1 용어 사전 — 점선 밑줄 + Tooltip */
+.term {
+  border-bottom: 1px dashed var(--color-accent); cursor: help; position: relative; color: var(--color-stone-900);
+  font-weight: 500;
+}
+.term:hover .term-tip { display: block; }
+.term-tip {
+  display: none; position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+  white-space: normal; width: 240px; background: var(--color-stone-900); color: #fff;
+  padding: 8px 10px; border-radius: 8px; font-size: 11px; font-weight: 400; line-height: 1.5;
+  box-shadow: 0 6px 18px rgba(28,25,23,0.2); z-index: 30;
+  text-align: left;
+}
+.term-tip::after {
+  content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+  width: 0; height: 0; border: 5px solid transparent; border-top-color: var(--color-stone-900);
+}
+.term-tip .term-name { font-weight: 700; color: var(--color-accent-soft); display: block; margin-bottom: 3px; font-size: 11px; }
+/* 시연용 강제 표시 */
+.term.force-show .term-tip { display: block; }
+
+/* ===== Mobile frame ===== */
+.mobile-frame {
+  width: 393px; height: 800px;
+  background: var(--color-bg-card); border: 1px solid var(--color-border-strong); border-radius: 24px;
+  overflow: hidden; box-shadow: 0 4px 24px rgba(28,25,23,0.08);
+  display: flex; flex-direction: column;
+}
+.mobile-topbar { height: 48px; flex-shrink: 0; padding: 0 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--color-border); background: #fff; font-size: 12px; color: var(--color-text-muted); }
+.mobile-tabs { height: 44px; flex-shrink: 0; display: flex; border-bottom: 1px solid var(--color-border); background: #fff; }
+.m-tab { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; color: var(--color-text-muted); border-bottom: 2px solid transparent; }
+.m-tab.active { color: var(--color-stone-950); border-bottom-color: var(--color-accent); font-weight: 600; }
+.mobile-body { flex: 1; min-height: 0; overflow-y: auto; background: #fff; display: flex; flex-direction: column; }
+.m-preview-tabbar { height: 40px; padding: 0 12px; display: flex; align-items: center; gap: 3px; background: #fff; flex-shrink: 0; overflow-x: auto; border-bottom: 1px solid var(--color-border); }
+.m-preview-tabbar .pv-tab { padding: 4px 8px; font-size: 11px; font-weight: 500; border-radius: 6px; background: transparent; color: var(--color-text-muted); white-space: nowrap; }
+.m-preview-tabbar .pv-tab.active { background: var(--color-stone-100); color: var(--color-stone-950); }
+.m-preview-tabbar .qr-btn { margin-left: auto; height: 26px; padding: 0 8px; font-size: 11px; background: var(--color-stone-900); color: #fff; border-radius: 7px; display: inline-flex; align-items: center; gap: 4px; flex-shrink: 0; }
+
+/* C1 모바일 — bottom sheet 시각화 */
+.bottom-sheet {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 30%;
+  background: #fff; border-top: 1px solid var(--color-border-strong);
+  border-radius: 16px 16px 0 0; box-shadow: 0 -4px 18px rgba(28,25,23,0.15);
+  padding: 14px 18px; z-index: 5;
+}
+.bottom-sheet .handle { width: 36px; height: 4px; background: var(--color-stone-200); border-radius: 999px; margin: 0 auto 10px; }
+.bottom-sheet .term-name { font-size: 13px; font-weight: 700; color: var(--color-accent-deep); margin-bottom: 4px; }
+.bottom-sheet .term-cat { font-size: 10px; color: var(--color-text-faint); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.bottom-sheet .term-body { font-size: 12px; line-height: 1.6; color: var(--color-text-body); }
+.bottom-sheet .close-x { position: absolute; top: 10px; right: 14px; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; color: var(--color-text-muted); font-size: 16px; }
+
+/* ===== Print mockup ===== */
+.print-mockup {
+  background: #fff; border: 1px solid var(--color-border-strong); border-radius: 4px;
+  padding: 32px 36px; max-width: 720px; margin: 0 auto;
+  box-shadow: 0 4px 18px rgba(28,25,23,0.06);
+  font-size: 11px; line-height: 1.5; color: #000;
+}
+.print-mockup h2 { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.print-mockup .pm-eyebrow { font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase; color: #666; margin-bottom: 4px; }
+.print-mockup .pm-tldr { font-size: 12px; font-weight: 600; padding: 8px 10px; background: #f5f5f5; border-left: 3px solid #000; margin: 8px 0 14px; }
+.print-mockup .pm-section { margin-bottom: 10px; }
+.print-mockup .pm-label { font-size: 9px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: #333; margin-bottom: 3px; }
+.print-mockup .pm-band { display: inline-block; width: 4px; height: 9px; background: #999; margin-right: 6px; vertical-align: -1px; border-radius: 1px; }
+.print-mockup .pm-body { font-size: 11px; }
+.print-mockup .pm-prompts li { margin-bottom: 5px; }
+.print-mockup .pm-prompts .q { font-weight: 600; }
+.print-mockup hr { border: 0; border-top: 1px dashed #ccc; margin: 10px 0; }
+.print-mockup .pm-glossary { font-size: 9px; color: #555; padding: 6px 8px; background: #fafafa; border-radius: 3px; }
+.print-mockup .pm-related { font-size: 10px; padding-top: 6px; border-top: 1px solid #ddd; margin-top: 12px; }
+
+.annot-row { display: flex; gap: 24px; flex-wrap: wrap; margin-top: 14px; }
+.annot { font-size: 11px; color: var(--color-text-muted); padding: 6px 10px; background: rgba(15,118,110,0.06); border: 1px solid rgba(15,118,110,0.2); border-radius: 8px; max-width: 360px; }
+.annot strong { color: var(--color-accent); }
+
+@media (max-width: 1500px) { .desktop-frame { width: 100%; } }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-title">SDD-teacher-explain-v2.0 · UI 목업 <span class="page-tag">v2.0</span> <span class="page-pattern">친화 장치 7종</span></div>
+  <div class="page-sub">Architecture Academy — 비개발자 교사가 시연 직전 1분 안에 핵심 파악 + 시연 중 학생 반응 즉시 대응 가능하도록 7종 장치 추가.</div>
+</div>
+
+<div class="devices-legend">
+  <h3>📐 7종 장치 한눈에</h3>
+  <div class="grid">
+    <div class="item"><span class="key">A1</span><span>한 줄 요약 — 패널 최상단 진한 카드</span></div>
+    <div class="item"><span class="key">A2</span><span>1분 / 3분 모드 토글 — 우상단</span></div>
+    <div class="item"><span class="key">B1</span><span>시간 라벨 색 띠 — 🟢전 / 🟡중 / 🔵후</span></div>
+    <div class="item"><span class="key">C1</span><span>용어 사전 — 점선 밑줄 + hover/탭 풀이</span></div>
+    <div class="item"><span class="key">D1</span><span>오개념 상자 — 붉은 tint 카드</span></div>
+    <div class="item"><span class="key">E1</span><span>관련 Q&A 링크 — 패널 footer chip</span></div>
+    <div class="item"><span class="key">F1</span><span>인쇄 친화 — 🖨️ 버튼 + A4 1장 레이아웃</span></div>
+  </div>
+</div>
+
+<div class="views">
+
+<!-- ============================================================
+     데스크탑 — 3분 모드 (전체 노출, 친화 장치 모두 시각화)
+     ============================================================ -->
+<div class="view-section">
+  <div class="view-label">▼ 데스크탑 (1440 × 880) — 3분 정독 모드 (전체 노출)</div>
+  <div class="view-desc">친화 장치 A1·A2·B1·C1·D1·E1·F1 모두 활성 상태로 시각화. 색 띠 + 한 줄 요약 + 용어 사전 점선 밑줄 + 오개념 상자 + 관련 Q&A.</div>
+
+  <div class="desktop-frame">
+    <div class="desktop-topbar">
+      <div><span class="brand">Architecture</span> · 1장 컴퓨터 큰 그림 · Q1</div>
+      <div class="url">/learn/3a8f...?role=teacher&qa=ch01_q01</div>
+    </div>
+
+    <div class="desktop-cols">
+      <aside class="col-guide">
+        <div class="guide-back">← 라이브러리에서 다른 챕터 보기</div>
+        <div class="guide-chip-row">
+          <span style="font-size:13px;">🖥️</span>
+          <span class="chap">1장 · 컴퓨터 큰 그림</span>
+          <span class="cat">기초</span>
+        </div>
+        <h3 class="guide-title">컴퓨터는 어떤 부품들이 만나서 일을 할까</h3>
+        <div class="guide-body">
+          <p>컴퓨터는 한 덩어리가 아니라 여러 부품이 서로 신호를 주고받으며 협력하는 작은 회사 같아요.</p>
+        </div>
+      </aside>
+
+      <section class="col-chat">
+        <div class="chat-header">
+          <span style="font-size:14px;">💬</span>
+          <span style="font-weight:600;color:var(--color-stone-950);">챗봇</span>
+          <span style="margin-left:auto;font-size:10px;color:var(--color-text-faint);">변경 0</span>
+        </div>
+        <div class="chat-body">
+          <div class="chat-bubble bot">컴퓨터의 다섯 부품에 대해 무엇이 궁금한가요?</div>
+          <div class="chat-bubble user">CPU랑 GPU 차이가 뭐예요?</div>
+          <div class="chat-bubble bot">CPU는 다양한 일을 빠르게 순서대로 처리하고, GPU는 단순한 계산을 동시에 수만 개 처리해요.</div>
+        </div>
+        <div class="chat-input"><div class="field">메시지 입력...</div></div>
+      </section>
+
+      <section class="col-preview">
+        <div class="preview-tabbar">
+          <button class="pv-tab">시연</button>
+          <button class="pv-tab">퀴즈</button>
+          <button class="pv-tab active teacher-only">📝 설명 노트</button>
+          <button class="qr-btn"><span class="qr-icon"></span>QR코드</button>
+        </div>
+
+        <div class="preview-body">
+          <div class="tep-host">
+            <!-- A2 + F1 컨트롤 -->
+            <div class="tep-controls">
+              <div class="read-toggle">
+                <button>⏱️ 1분 훑기</button>
+                <button class="active">📖 3분 정독</button>
+              </div>
+              <div class="tep-action-btns">
+                <button title="인쇄 (A4 1장)">🖨️</button>
+              </div>
+            </div>
+
+            <!-- 헤더 -->
+            <div class="tep-header">
+              <div>
+                <div class="meta-eyebrow">1장 · Q1</div>
+                <div class="meta-title">컴퓨터는 어떤 부품들이 만나서 일을 할까</div>
+              </div>
+              <span class="badge-teacher-only">세션 주인 전용</span>
+            </div>
+
+            <!-- A1 한 줄 요약 -->
+            <div class="tldr-card">
+              <span class="icon">💡</span>
+              <span class="text">컴퓨터는 다섯 가지 큰 부품이 한 팀으로 협력해야 일이 끝납니다.</span>
+            </div>
+
+            <!-- Flow chips -->
+            <div class="flow-chips">
+              <span class="flow-chip cur">1. 학습</span>
+              <span class="flow-chip">2. 채팅</span>
+              <span class="flow-chip">3. 시연</span>
+              <span class="flow-chip">4. 퀴즈</span>
+            </div>
+
+            <!-- B1 색 띠 + goal/cue -->
+            <div class="tep-grid">
+              <div class="tep-card muted">
+                <span class="time-band before"></span>
+                <div class="label"><span class="time-dot before"></span>이 Q&amp;A 수업 목표</div>
+                <div class="body">학생이 컴퓨터의 다섯 가지 큰 부품—입력·처리·저장·출력·연결—이 따로따로가 아니라 한 팀으로 일한다는 점을 받아들이게 합니다.</div>
+              </div>
+              <div class="tep-card muted">
+                <span class="time-band before"></span>
+                <div class="label"><span class="time-dot before"></span>교사가 먼저 해줄 말</div>
+                <div class="body">"컴퓨터 안에 작은 회사가 있다고 생각해봐. 비서가 이메일을 받고, 직원이 처리하고, 캐비닛에 보관하고, 우편으로 보내고, 외부 기관과 연락해."</div>
+              </div>
+            </div>
+
+            <!-- C1 용어 사전 적용 — 개념 설명 -->
+            <div class="tep-card">
+              <span class="time-band before"></span>
+              <div class="label"><span class="time-dot before"></span>개념 설명</div>
+              <div class="body">컴퓨터는 한 덩어리가 아니라 다섯 종류의 부품이 협력하는 구조예요. <em>입력 장치</em>(키보드·마우스), <em>처리 장치</em>(<span class="term force-show">CPU<span class="term-tip"><span class="term-name">CPU · Central Processing Unit</span>컴퓨터의 두뇌 — 명령어를 해석하고 계산을 수행하는 부품</span></span>), <em>저장 장치</em>(<span class="term">RAM</span>·<span class="term">SSD</span>), <em>출력 장치</em>(화면·스피커), <em>연결 장치</em>(와이파이·랜선)가 각자 맡은 일을 하고, 이 중 하나만 빠져도 작업이 멈춥니다.</div>
+            </div>
+
+            <!-- AdvancedSection -->
+            <div class="tep-card adv-card">
+              <span class="time-band before"></span>
+              <div class="adv-tabs">
+                <button class="adv-tab active">작동 원리</button>
+                <button class="adv-tab">시연 운영 팁</button>
+              </div>
+              <div class="adv-body">
+                <div style="font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--color-section-label);margin-bottom:6px;">풀어쓴 설명</div>
+                <p>컴퓨터 부품들은 도로(<span class="term">버스</span>)로 이어진 작은 도시 같아요. 데이터(시민)가 빠른 동네(<span class="term">캐시</span>), 보통 동네(메모리), 시 외곽(디스크)을 오갑니다. 가까운 동네일수록 빠르지만 좁고, 먼 동네일수록 넓지만 한참 걸려요.</p>
+              </div>
+            </div>
+
+            <div class="tep-card">
+              <span class="time-band before"></span>
+              <div class="label"><span class="time-dot before"></span>실생활 활용 연결</div>
+              <div class="body">교무실 일과와 닮았어요. 학부모 전화(입력) → 담당 교사 처리(<span class="term">CPU</span>) → 문서함 보관(저장) → 회신(출력) → 외부 기관 연락(연결). 컴퓨터 부품도 똑같이 '받고-처리하고-보관하고-내보내고-연결한다'는 다섯 단계를 갖고 있다고 설명하면 학생이 빨리 이해합니다.</div>
+            </div>
+
+            <!-- 학생 질문 (시연 중) -->
+            <div class="tep-prompts">
+              <span class="time-band during"></span>
+              <div class="label"><span class="time-dot during"></span>학생에게 던질 질문</div>
+              <ul>
+                <li>
+                  <div class="q">Q. 메모리(<span class="term">RAM</span>)와 <span class="term">SSD</span>가 둘 다 저장 장치인데 왜 따로 둘까요?</div>
+                  <div class="a">A. RAM은 책상 위 작업 공간이고 SSD는 책장이라고 비유합니다. 책상은 빨리 꺼내 쓸 수 있지만 좁고 전원이 꺼지면 비워지고, 책장은 느리지만 영구 보관합니다.</div>
+                </li>
+                <li>
+                  <div class="q">Q. 와이파이는 어느 부품에 들어가나요?</div>
+                  <div class="a">A. 연결 장치에 속합니다. 컴퓨터 안의 우편함이라고 부르면 외부와 대화하는 창구라는 점을 학생이 떠올립니다.</div>
+                </li>
+                <li>
+                  <div class="q">Q. <span class="term">CPU</span>와 <span class="term">GPU</span>는 무엇이 다른가요?</div>
+                  <div class="a">A. CPU는 다양한 일을 순서대로 빠르게, GPU는 단순한 계산을 동시에 수만 개 처리합니다. 만능 사무원과 단순 작업 군인의 비교로 설명하면 직관적입니다.</div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- D1 오개념 상자 (시연 중) -->
+            <div class="misc-card">
+              <span class="time-band during"></span>
+              <div class="label"><span class="icon">⚠️</span> 흔한 오개념 + 정정법</div>
+              <div class="body">
+                <span class="myth">"<span class="term">CPU</span>가 좋으면 컴퓨터가 빨라진다" 라고 단정하는 학생이 많습니다.</span>
+                메모리(<span class="term">RAM</span>)가 부족하면 CPU가 아무리 좋아도 디스크를 자주 읽느라 느려집니다. 다섯 부품의 균형이 속도를 결정한다고 정정해 주세요. 7장 병목 비유로 자연스럽게 이어집니다.
+              </div>
+            </div>
+
+            <!-- 시연 시작 전 체크 (시연 중) -->
+            <div class="tep-card">
+              <span class="time-band during"></span>
+              <div class="label"><span class="time-dot during"></span>시연 시작 전 체크</div>
+              <div class="body">시연은 네 시나리오(타이핑→화면 / 파일 저장→읽기 / 인터넷 요청 / 영상 재생) 순서로 진행해주세요. 각 시나리오에서 학생에게 "지금 어느 부품이 일하고 있을까?" 손가락으로 가리키게 하면 5대 부품을 자연스럽게 외웁니다.</div>
+            </div>
+
+            <!-- 교사 메모 (시연 후) -->
+            <div class="tep-note">
+              <span class="time-band after"></span>
+              <div class="label"><span class="time-dot after"></span>교사 메모</div>
+              <div class="body">"그럼 부품이 여러 개면 컴퓨터가 더 빨라져요?" 라는 질문이 자주 나옵니다. "많기만 한 게 아니라 균형이 맞아야 빨라요" 라고 답하고, 7장 병목 비유를 미리 예고하면 학습 흐름이 자연스럽습니다.</div>
+            </div>
+
+            <!-- E1 관련 Q&A (시연 후) -->
+            <div class="related-card">
+              <span class="time-band after"></span>
+              <div class="label"><span class="time-dot after"></span>👉 함께 보면 좋은 Q&A</div>
+              <div class="related-chips">
+                <a class="related-chip">
+                  <span class="id">ch06_q01</span>
+                  <span>CPU는 어떻게 명령을 처리할까</span>
+                </a>
+                <a class="related-chip">
+                  <span class="id">ch06_q02</span>
+                  <span>메모리 계층은 왜 여러 단계일까</span>
+                </a>
+                <a class="related-chip disabled">
+                  <span class="id">ch07_q01</span>
+                  <span>DB는 어떻게 데이터를 보관할까</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div class="annot-row">
+    <div class="annot"><strong>① A1 한 줄 요약</strong> — accent border-left + soft bg. 1초 안에 핵심 파악</div>
+    <div class="annot"><strong>② A2 모드 토글</strong> — 1분 모드 클릭 시 tldr+cue+prompts+misconception 만 노출</div>
+    <div class="annot"><strong>③ B1 색 띠 (3px 좌측)</strong> — 🟢 시연 전 (목표·개념·작동) / 🟡 중 (질문·체크·오개념) / 🔵 후 (메모·관련 Q&A)</div>
+    <div class="annot"><strong>④ C1 용어 사전</strong> — CPU 위에 점선 밑줄. hover 시 검은 풍선으로 1줄 풀이 (정확 일치 첫 등장만)</div>
+    <div class="annot"><strong>⑤ D1 오개념 상자</strong> — rose tint. 첫 줄 = 오개념(인용 박스), 둘째 = 정정법</div>
+    <div class="annot"><strong>⑥ E1 관련 Q&A</strong> — chip 1~3개. 현재 세션 chapter_ids 안에 있으면 활성, 없으면 회색 + "(현재 세션 외)" 안내</div>
+    <div class="annot"><strong>⑦ F1 인쇄 버튼</strong> — 🖨️ 클릭 시 window.print() → A4 1장 레이아웃 (아래 별도 시각화)</div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     모바일 — 1분 훑기 모드 + 용어 사전 bottom sheet
+     ============================================================ -->
+<div class="view-section">
+  <div class="view-label">▼ 모바일 (393 × 800) — 1분 훑기 모드 (압축) + 용어 사전 bottom sheet 시각화</div>
+  <div class="view-desc">시연 직전 1분 안에 핵심만 보고 들어가는 패턴. tldr + cue + prompts + misconception 만 노출. 용어 탭 시 30%-높이 sheet 슬라이드 업.</div>
+
+  <div style="display:flex; gap:32px; flex-wrap:wrap; align-items:flex-start;">
+    <!-- 모바일 1 — 1분 모드 -->
+    <div>
+      <div style="font-size:11px;color:var(--color-text-muted);margin-bottom:8px;">상태 1 — 1분 훑기 모드 (압축 — 4 카드만)</div>
+      <div class="mobile-frame">
+        <div class="mobile-topbar">
+          <span style="font-weight:600;color:var(--color-stone-950);">Architecture</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;">/learn?role=teacher</span>
+        </div>
+        <div class="mobile-tabs">
+          <div class="m-tab">📖 학습</div>
+          <div class="m-tab">💬 채팅</div>
+          <div class="m-tab active">📱 시연</div>
+          <div class="m-tab">✅ 퀴즈</div>
+        </div>
+        <div class="mobile-body">
+          <div class="m-preview-tabbar">
+            <button class="pv-tab">시연</button>
+            <button class="pv-tab">퀴즈</button>
+            <button class="pv-tab active" style="font-size:10px;">📝 설명<span style="font-size:9px;background:var(--color-accent-soft);color:var(--color-accent);padding:1px 5px;border-radius:999px;margin-left:3px;font-weight:700;">주인</span></button>
+            <button class="qr-btn"><span class="qr-icon"></span>QR</button>
+          </div>
+          <div style="padding:14px;">
+            <!-- A2 컨트롤 -->
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">
+              <div class="read-toggle" style="transform:scale(0.9);transform-origin:left;">
+                <button class="active">⏱️ 1분</button>
+                <button>📖 3분</button>
+              </div>
+              <button title="인쇄" style="width:28px;height:28px;border:1px solid var(--color-border);background:#fff;border-radius:6px;font-size:13px;">🖨️</button>
+            </div>
+
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-accent);margin-bottom:4px;">1장 · Q1</div>
+            <div style="font-size:14px;font-weight:700;color:var(--color-stone-950);margin-bottom:10px;line-height:1.4;">컴퓨터는 어떤 부품들이 만나서 일을 할까</div>
+
+            <!-- A1 한 줄 요약 -->
+            <div class="tldr-card" style="padding:10px 12px;margin-bottom:10px;">
+              <span class="icon" style="font-size:15px;">💡</span>
+              <span class="text" style="font-size:13px;">컴퓨터는 다섯 가지 큰 부품이 한 팀으로 협력해야 일이 끝납니다.</span>
+            </div>
+
+            <!-- cue (시연 전) -->
+            <div class="tep-card muted" style="padding:10px 12px 10px 14px;">
+              <span class="time-band before"></span>
+              <div class="label"><span class="time-dot before"></span>교사가 먼저 해줄 말</div>
+              <div class="body" style="font-size:11px;">"컴퓨터 안에 작은 회사가 있다고 생각해봐. 비서·직원·캐비닛·우편처럼 역할이 나뉘어 있어."</div>
+            </div>
+
+            <!-- prompts (시연 중) -->
+            <div class="tep-prompts" style="padding:10px 12px 10px 14px;">
+              <span class="time-band during"></span>
+              <div class="label"><span class="time-dot during"></span>학생에게 던질 질문</div>
+              <ul>
+                <li>
+                  <div class="q" style="font-size:11px;">Q. <span class="term" style="color:inherit;">RAM</span>과 <span class="term" style="color:inherit;">SSD</span>가 왜 따로 있어요?</div>
+                  <div class="a" style="font-size:11px;padding:6px 8px;">A. 책상(빠르지만 좁고 휘발) vs 책장(느리지만 영구) 비유로 설명합니다.</div>
+                </li>
+                <li>
+                  <div class="q" style="font-size:11px;">Q. 와이파이는 어느 부품?</div>
+                  <div class="a" style="font-size:11px;padding:6px 8px;">A. 연결 장치. 외부와 대화하는 창구로 설명합니다.</div>
+                </li>
+              </ul>
+            </div>
+
+            <!-- D1 오개념 (시연 중) -->
+            <div class="misc-card" style="padding:10px 12px 10px 14px;">
+              <span class="time-band during"></span>
+              <div class="label"><span class="icon">⚠️</span> 흔한 오개념 + 정정법</div>
+              <div class="body" style="font-size:11px;">
+                <span class="myth" style="font-size:11px;padding:5px 8px;">"<span class="term" style="color:inherit;">CPU</span> 좋으면 컴퓨터가 빨라" 라고 단정합니다.</span>
+                메모리가 부족하면 CPU가 아무리 좋아도 디스크를 자주 읽느라 느려요. 다섯 부품의 균형이 속도를 결정한다고 정정해 주세요.
+              </div>
+            </div>
+
+            <div style="text-align:center;font-size:10px;color:var(--color-text-faint);padding:12px 0 4px;">3분 정독 모드로 가면 개념·작동·실생활·메모·관련 Q&A 추가 노출</div>
+          </div>
+        </div>
+      </div>
+      <div class="annot" style="margin-top:10px;max-width:393px;"><strong>1분 모드 = tldr + cue + prompts + misconception</strong> — 시연 직전 훑기 최적화. localStorage에 마지막 선택 저장</div>
+    </div>
+
+    <!-- 모바일 2 — 용어 사전 bottom sheet 펼침 -->
+    <div>
+      <div style="font-size:11px;color:var(--color-text-muted);margin-bottom:8px;">상태 2 — 용어 "RAM" 탭 → bottom sheet (30vh) 슬라이드 업</div>
+      <div class="mobile-frame" style="position:relative;">
+        <div class="mobile-topbar">
+          <span style="font-weight:600;color:var(--color-stone-950);">Architecture</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:10px;">/learn?role=teacher</span>
+        </div>
+        <div class="mobile-tabs">
+          <div class="m-tab">📖 학습</div>
+          <div class="m-tab">💬 채팅</div>
+          <div class="m-tab active">📱 시연</div>
+          <div class="m-tab">✅ 퀴즈</div>
+        </div>
+        <div class="mobile-body">
+          <div class="m-preview-tabbar">
+            <button class="pv-tab">시연</button>
+            <button class="pv-tab">퀴즈</button>
+            <button class="pv-tab active" style="font-size:10px;">📝 설명</button>
+            <button class="qr-btn"><span class="qr-icon"></span>QR</button>
+          </div>
+          <div style="padding:14px;opacity:0.4;">
+            <div style="font-size:10px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:var(--color-accent);margin-bottom:4px;">1장 · Q1</div>
+            <div style="font-size:14px;font-weight:700;color:var(--color-stone-950);margin-bottom:10px;line-height:1.4;">컴퓨터는 어떤 부품들이 만나서 일을 할까</div>
+            <div class="tep-prompts" style="padding:10px 12px 10px 14px;">
+              <span class="time-band during"></span>
+              <div class="label"><span class="time-dot during"></span>학생에게 던질 질문</div>
+              <ul>
+                <li>
+                  <div class="q" style="font-size:11px;">Q. <span style="border-bottom:1px dashed var(--color-accent);background:var(--color-accent-soft);">RAM</span>과 SSD가 왜 따로 있어요?</div>
+                  <div class="a" style="font-size:11px;padding:6px 8px;">A. 책상(빠르지만 좁고 휘발) vs 책장 비유로 설명합니다.</div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <!-- bottom sheet -->
+        <div class="bottom-sheet">
+          <div class="handle"></div>
+          <button class="close-x">✕</button>
+          <div class="term-name">RAM · 메모리</div>
+          <div class="term-cat">하드웨어 · 저장</div>
+          <div class="term-body">책상 위 작업 공간 — 빠르지만 전원 꺼지면 비워지는 임시 저장소. CPU가 자주 꺼내쓰는 데이터를 잠깐 올려둡니다. 책장(SSD)과 짝을 이뤄 동작합니다.</div>
+        </div>
+      </div>
+      <div class="annot" style="margin-top:10px;max-width:393px;"><strong>모바일 용어 사전</strong> — hover 불가 → 탭 시 bottom sheet (30vh). 외부 탭/✕/ESC 닫힘. 핸들 드래그도 가능</div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================================================
+     인쇄 모드 — A4 1장 레이아웃 (F1)
+     ============================================================ -->
+<div class="view-section">
+  <div class="view-label">▼ F1 인쇄 친화 — A4 1장 레이아웃 (`@media print`)</div>
+  <div class="view-desc">🖨️ 버튼 클릭 → window.print() → 3컬럼 → 단일 컬럼 + 색 띠 패턴 보존(grayscale) + hover 풀이 모두 펼쳐서 노출 + 12pt. 종이 들고 시연하는 교사 패턴.</div>
+
+  <div class="print-mockup">
+    <div class="pm-eyebrow">Architecture · 1장 Q1 · 교사 설명 노트</div>
+    <h2>컴퓨터는 어떤 부품들이 만나서 일을 할까</h2>
+
+    <div class="pm-tldr">💡 컴퓨터는 다섯 가지 큰 부품이 한 팀으로 협력해야 일이 끝납니다.</div>
+
+    <div class="pm-section">
+      <div class="pm-label"><span class="pm-band" style="background:#22c55e;"></span>이 Q&A 수업 목표 (시연 전)</div>
+      <div class="pm-body">학생이 컴퓨터의 다섯 가지 큰 부품—입력·처리·저장·출력·연결—이 따로따로가 아니라 한 팀으로 일한다는 점을 받아들이게 합니다.</div>
+    </div>
+
+    <div class="pm-section">
+      <div class="pm-label"><span class="pm-band" style="background:#22c55e;"></span>교사가 먼저 해줄 말 (시연 전)</div>
+      <div class="pm-body">"컴퓨터 안에 작은 회사가 있다고 생각해봐. 비서·직원·캐비닛·우편·외부 기관 연락처럼 역할이 나뉘어 있어."</div>
+    </div>
+
+    <div class="pm-section">
+      <div class="pm-label"><span class="pm-band" style="background:#22c55e;"></span>개념 설명 (시연 전)</div>
+      <div class="pm-body">컴퓨터는 한 덩어리가 아니라 다섯 종류의 부품이 협력하는 구조예요. <strong>입력 장치</strong>(키보드·마우스), <strong>처리 장치</strong>(CPU<sup style="color:#666;">¹</sup>), <strong>저장 장치</strong>(RAM<sup style="color:#666;">²</sup>·SSD<sup style="color:#666;">³</sup>), <strong>출력 장치</strong>, <strong>연결 장치</strong>가 각자 맡은 일을 하고 이 중 하나만 빠져도 작업이 멈춥니다.</div>
+      <div class="pm-glossary" style="margin-top:6px;">
+        ¹ CPU · 컴퓨터의 두뇌 — 명령어 해석 + 계산<br>
+        ² RAM · 책상 위 작업 공간 — 빠르지만 휘발<br>
+        ³ SSD · 책장 — 느리지만 영구 보관
+      </div>
+    </div>
+
+    <hr>
+
+    <div class="pm-section pm-prompts">
+      <div class="pm-label"><span class="pm-band" style="background:#f59e0b;"></span>학생에게 던질 질문 (시연 중)</div>
+      <ul style="list-style:none;padding-left:0;">
+        <li><span class="q">Q. RAM과 SSD가 왜 따로 있어요?</span><br>A. 책상 vs 책장 비유 — 빠르지만 휘발 vs 느리지만 영구.</li>
+        <li><span class="q">Q. 와이파이는 어느 부품?</span><br>A. 연결 장치. 컴퓨터 안의 우편함.</li>
+        <li><span class="q">Q. CPU와 GPU 차이?</span><br>A. CPU = 다양한 일 순서대로 / GPU = 단순 계산 동시 다수.</li>
+      </ul>
+    </div>
+
+    <div class="pm-section">
+      <div class="pm-label"><span class="pm-band" style="background:#f59e0b;"></span>흔한 오개념 + 정정법 (시연 중)</div>
+      <div class="pm-body" style="background:#fef2f2;padding:6px 8px;border-left:2px solid #991b1b;border-radius:2px;">⚠️ "CPU 좋으면 컴퓨터가 빨라" — 단정 금지. 메모리 부족 시 CPU 아무리 좋아도 디스크 읽기로 느려짐. 다섯 부품 균형이 속도 결정.</div>
+    </div>
+
+    <div class="pm-section">
+      <div class="pm-label"><span class="pm-band" style="background:#f59e0b;"></span>시연 시작 전 체크 (시연 중)</div>
+      <div class="pm-body">시연 = 4 시나리오 (타이핑→화면 / 파일 저장→읽기 / 인터넷 요청 / 영상 재생). 각 시나리오에서 학생에게 "지금 어느 부품이 일하고 있을까?" 손으로 가리키게 하기.</div>
+    </div>
+
+    <hr>
+
+    <div class="pm-section">
+      <div class="pm-label"><span class="pm-band" style="background:#3b82f6;"></span>교사 메모 (시연 후)</div>
+      <div class="pm-body">"부품 많으면 더 빨라요?" → "균형이 중요해요" + 7장 병목 비유 예고.</div>
+    </div>
+
+    <div class="pm-related">
+      👉 <strong>함께 보면 좋은 Q&A</strong> · ch06_q01 (CPU 작동) · ch06_q02 (메모리 계층) · ch07_q01 (DB 큰 그림)
+    </div>
+  </div>
+
+  <div class="annot" style="max-width:720px;margin:14px auto 0;display:block;"><strong>인쇄 레이아웃 핵심</strong> — 3컬럼 → 단일 컬럼 / hover 용어 풀이 = 각주 번호 + 본문 하단 사전 / 색 띠 = grayscale 패턴 / 12pt / A4 1장 안에 들어가도록 prompts·realLife 압축 (긴 답변 일부만)</div>
+</div>
+
+</div>
+</body>
+</html>

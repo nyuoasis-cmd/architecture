@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>PR-0 사전 승인 — 10 챕터 + 71 Q&A title fresh (책 TOC 0% 차용)</title>
+<style>
+:root {
+  --color-bg: #fafaf9;
+  --color-bg-card: #ffffff;
+  --color-bg-old: #fef3f2;
+  --color-bg-new: #ecfdf5;
+
+  --color-border: #e7e5e4;
+  --color-border-strong: #d6d3d1;
+  --color-border-old: #fecaca;
+  --color-border-new: #a7f3d0;
+
+  --color-text-primary: #1c1917;
+  --color-text-body: #292524;
+  --color-text-muted: #57534e;
+  --color-text-faint: #78716c;
+  --color-text-old: #991b1b;
+  --color-text-new: #065f46;
+
+  --color-accent: #0f766e;
+  --color-accent-soft: #ccfbf1;
+  --color-accent-deep: #115e59;
+
+  --color-stone-100: #f5f5f4;
+  --color-stone-600: #57534e;
+  --color-stone-950: #0c0a09;
+
+  --radius-card: 12px;
+  --radius-sm: 8px;
+
+  --font-body: -apple-system, BlinkMacSystemFont, 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; word-break: keep-all; overflow-wrap: break-word; }
+body { font-family: var(--font-body); background: var(--color-bg); color: var(--color-text-body); line-height: 1.6; padding: 24px 16px; font-size: 13.5px; }
+
+.container { max-width: 1180px; margin: 0 auto; }
+
+.page-header { margin-bottom: 28px; padding: 20px 24px; background: var(--color-bg-card); border: 1px solid var(--color-border-strong); border-radius: 12px; }
+.page-title { font-size: 20px; font-weight: 700; color: var(--color-stone-950); margin-bottom: 6px; letter-spacing: -0.01em; }
+.page-sub { font-size: 13px; color: var(--color-text-muted); line-height: 1.7; }
+.page-sub strong { color: var(--color-accent-deep); }
+.page-sub code { background: var(--color-stone-100); padding: 1px 6px; border-radius: 4px; font-size: 12px; }
+
+.scope-box { margin-top: 14px; padding: 12px 16px; background: var(--color-accent-soft); border-radius: 8px; font-size: 12.5px; color: var(--color-accent-deep); }
+.scope-box strong { font-weight: 700; }
+
+/* ===== Section ===== */
+.section { margin-bottom: 32px; }
+.section-title { font-size: 14px; font-weight: 700; color: var(--color-stone-950); margin-bottom: 12px; padding-left: 4px; letter-spacing: -0.01em; display: flex; align-items: center; gap: 10px; }
+.section-title .count { font-size: 11px; padding: 2px 8px; background: var(--color-stone-100); color: var(--color-stone-600); border-radius: 999px; font-weight: 600; }
+
+/* ===== Chapter table ===== */
+.chapter-table {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+}
+.row {
+  display: grid;
+  grid-template-columns: 64px 1fr 1fr;
+  border-bottom: 1px solid var(--color-border);
+  align-items: stretch;
+}
+.row:last-child { border-bottom: 0; }
+.row.head { background: var(--color-stone-100); font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-faint); font-weight: 700; }
+.row > div { padding: 10px 14px; display: flex; align-items: center; gap: 6px; }
+.row .id-col { font-family: monospace; font-size: 12px; color: var(--color-text-faint); border-right: 1px solid var(--color-border); justify-content: center; flex-direction: column; gap: 2px; }
+.row .id-col .emoji { font-size: 18px; }
+.row .old-col { background: var(--color-bg-old); border-right: 1px solid var(--color-border); color: var(--color-text-old); font-size: 13px; }
+.row .new-col { background: var(--color-bg-new); color: var(--color-text-new); font-size: 13.5px; font-weight: 500; }
+
+/* ===== Q&A table ===== */
+.qa-section {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-card);
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+.qa-section-header {
+  padding: 12px 16px;
+  background: linear-gradient(to right, var(--color-stone-100), transparent);
+  border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-stone-950);
+}
+.qa-section-header .ch-emoji { font-size: 18px; }
+.qa-section-header .new-ch-title { color: var(--color-accent-deep); }
+.qa-section-header .arrow { color: var(--color-text-faint); font-size: 11px; }
+.qa-section-header .count { font-size: 11px; padding: 2px 8px; background: rgba(15,118,110,0.1); color: var(--color-accent); border-radius: 999px; font-weight: 600; margin-left: auto; }
+
+.qa-row {
+  display: grid;
+  grid-template-columns: 90px 1fr 1fr;
+  border-bottom: 1px solid var(--color-border);
+}
+.qa-row:last-child { border-bottom: 0; }
+.qa-row > div { padding: 10px 14px; }
+.qa-row .qid { font-family: monospace; font-size: 11.5px; color: var(--color-text-faint); border-right: 1px solid var(--color-border); display: flex; align-items: center; }
+.qa-row .qold { background: var(--color-bg-old); color: var(--color-text-old); border-right: 1px solid var(--color-border); font-size: 12.5px; line-height: 1.5; }
+.qa-row .qnew { background: var(--color-bg-new); color: var(--color-text-new); font-size: 13px; font-weight: 500; line-height: 1.5; }
+
+/* ===== Footer ===== */
+.confirm-block {
+  margin-top: 32px; padding: 20px 24px;
+  background: var(--color-bg-card); border: 2px dashed var(--color-accent);
+  border-radius: 12px;
+}
+.confirm-block h3 { font-size: 14px; color: var(--color-accent-deep); margin-bottom: 10px; }
+.confirm-block ul { padding-left: 20px; font-size: 13px; color: var(--color-text-body); line-height: 1.9; }
+.confirm-block li strong { color: var(--color-stone-950); }
+.confirm-block .note { margin-top: 14px; font-size: 12.5px; color: var(--color-text-muted); padding: 10px 12px; background: var(--color-stone-100); border-radius: 6px; }
+
+@media (max-width: 720px) {
+  .row { grid-template-columns: 50px 1fr; }
+  .row .old-col { display: none; }
+  .qa-row { grid-template-columns: 70px 1fr; }
+  .qa-row .qold { display: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <div class="page-header">
+    <div class="page-title">📝 PR-0 사전 승인 — 10 챕터 + 71 Q&A title fresh</div>
+    <div class="page-sub">
+      A안 — <strong>책 TOC 0% 차용 정책 강화</strong>. 모든 학생 화면 노출 title (학습 라이브러리·LearnPage·챗봇 input·관련 Q&A chip) 새로 생성.
+      summary 도 같은 정책으로 재작성 예정 (mockup 에는 미포함, title OK 후 일괄 작성).
+    </div>
+    <div class="scope-box">
+      <strong>이 PR-0 의 변경 범위</strong>:
+      ① <code>qa-stubs.ts</code> 71 entry 의 <code>title</code> + <code>summary</code> 재작성<br>
+      ② <code>qa-stubs.ts</code> 의 <code>CHAPTERS</code> const 10 entry 의 <code>title</code> 재작성<br>
+      ③ <code>architecture/CLAUDE.md</code> 의 "목차·질문 제목만 차용" 정책 → "모든 콘텐츠 fresh 생성, 책 TOC 0% 차용" 으로 강화<br>
+      ④ <code>SDD-teacher-explain-v1.md</code> 의 §7 콘텐츠 정책 1줄 정합 (PR-1 진입 전)
+    </div>
+  </div>
+
+  <!-- ========== 10 챕터 ========== -->
+  <div class="section">
+    <div class="section-title">📚 10 챕터 title<span class="count">10개</span></div>
+    <div class="chapter-table">
+      <div class="row head">
+        <div class="id-col">ch / 카테고리</div>
+        <div class="old-col">현 (책 TOC 차용 의심)</div>
+        <div class="new-col">신 (fresh)</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">🧭</span><span>ch01<br>컴퓨터 기초</span></div>
+        <div class="old-col">컴퓨터의 큰 그림</div>
+        <div class="new-col">컴퓨터가 1초 안에 하는 일</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">🛠️</span><span>ch02<br>개발</span></div>
+        <div class="old-col">소프트웨어의 종류와 특징</div>
+        <div class="new-col">프로그램, 한 종류가 아닙니다</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">🧪</span><span>ch03<br>개발</span></div>
+        <div class="old-col">테스트와 배포</div>
+        <div class="new-col">코드를 세상에 내보내는 길</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">🗂️</span><span>ch04<br>데이터</span></div>
+        <div class="old-col">데이터 다루기</div>
+        <div class="new-col">데이터를 길들이는 법</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">🧩</span><span>ch05<br>개발</span></div>
+        <div class="old-col">프론트엔드와 백엔드</div>
+        <div class="new-col">보이는 쪽과 안 보이는 쪽</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">💻</span><span>ch06<br>컴퓨터 기초</span></div>
+        <div class="old-col">컴퓨터 구조와 운영체제</div>
+        <div class="new-col">컴퓨터 안을 분해해 봅니다</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">🗄️</span><span>ch07<br>데이터</span></div>
+        <div class="old-col">데이터베이스</div>
+        <div class="new-col">데이터를 보관하는 창고</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">🌐</span><span>ch08<br>네트워크</span></div>
+        <div class="old-col">네트워크와 인터넷</div>
+        <div class="new-col">인터넷 너머의 보이지 않는 길</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">🏗️</span><span>ch09<br>아키텍처</span></div>
+        <div class="old-col">아키텍처와 설계</div>
+        <div class="new-col">큰 시스템의 뼈대 그리는 법</div>
+      </div>
+
+      <div class="row">
+        <div class="id-col"><span class="emoji">🤖</span><span>ch10<br>AI</span></div>
+        <div class="old-col">클라우드와 AI</div>
+        <div class="new-col">거대한 컴퓨터를 빌리는 시대</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== 71 Q&A ========== -->
+  <div class="section">
+    <div class="section-title">❓ 71 Q&A title<span class="count">71개</span></div>
+
+    <!-- ch01 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">🧭</span>
+        <span>ch01</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">컴퓨터가 1초 안에 하는 일</span>
+        <span class="count">4 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch01_q01</div><div class="qold">컴퓨터는 결국 무슨 일을 하나요?</div><div class="qnew">키보드를 누르면 무엇이 움직이나요?</div></div>
+      <div class="qa-row"><div class="qid">ch01_q02</div><div class="qold">하드웨어와 소프트웨어의 차이는?</div><div class="qnew">부품과 명령은 왜 따로 있을까요?</div></div>
+      <div class="qa-row"><div class="qid">ch01_q03</div><div class="qold">운영체제는 무슨 역할을 하나요?</div><div class="qnew">앱들 사이를 정리하는 건 누구일까요?</div></div>
+      <div class="qa-row"><div class="qid">ch01_q04</div><div class="qold">컴퓨터 안에서 데이터는 어떻게 흐르나요?</div><div class="qnew">한 번의 클릭은 어디서 어디까지 다녀오나요?</div></div>
+    </div>
+
+    <!-- ch02 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">🛠️</span>
+        <span>ch02</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">프로그램, 한 종류가 아닙니다</span>
+        <span class="count">4 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch02_q01</div><div class="qold">소프트웨어는 어떻게 분류되나요?</div><div class="qnew">워드와 윈도우는 같은 소프트웨어일까요?</div></div>
+      <div class="qa-row"><div class="qid">ch02_q02</div><div class="qold">오픈소스와 상용 소프트웨어의 차이는?</div><div class="qnew">오픈소스가 무료인 이유는 뭘까요?</div></div>
+      <div class="qa-row"><div class="qid">ch02_q03</div><div class="qold">패키지와 모듈은 무엇인가요?</div><div class="qnew">코드 묶음은 왜 잘게 나뉠까요?</div></div>
+      <div class="qa-row"><div class="qid">ch02_q04</div><div class="qold">클라우드와 SaaS는 무엇인가요?</div><div class="qnew">구글 드라이브는 어디서 돌아가나요?</div></div>
+    </div>
+
+    <!-- ch03 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">🧪</span>
+        <span>ch03</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">코드를 세상에 내보내는 길</span>
+        <span class="count">7 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch03_q01</div><div class="qold">단위·통합·E2E 테스트는 무엇이 다른가?</div><div class="qnew">테스트는 작을수록 좋을까, 클수록 좋을까요?</div></div>
+      <div class="qa-row"><div class="qid">ch03_q02</div><div class="qold">TDD는 어떻게 일하는 방식인가?</div><div class="qnew">코드보다 테스트를 먼저 쓴다고요?</div></div>
+      <div class="qa-row"><div class="qid">ch03_q03</div><div class="qold">CI는 무엇이고 왜 쓰나?</div><div class="qnew">코드를 합칠 때마다 자동 검사가 도는 이유는?</div></div>
+      <div class="qa-row"><div class="qid">ch03_q04</div><div class="qold">CD와 배포 환경(dev/staging/prod) 차이는?</div><div class="qnew">운영, 검증, 개발 환경은 왜 따로 있을까요?</div></div>
+      <div class="qa-row"><div class="qid">ch03_q05</div><div class="qold">배포가 잘못되면 어떻게 되돌리나?</div><div class="qnew">배포하다 망가지면 어떻게 되돌릴까요?</div></div>
+      <div class="qa-row"><div class="qid">ch03_q06</div><div class="qold">운영 중인 서비스는 어떻게 감시하나?</div><div class="qnew">운영 중인 서비스가 살아있는지 어떻게 알까요?</div></div>
+      <div class="qa-row"><div class="qid">ch03_q07</div><div class="qold">코드 리뷰는 왜 하고 어떻게 하나?</div><div class="qnew">내 코드를 동료가 살피는 건 왜일까요?</div></div>
+    </div>
+
+    <!-- ch04 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">🗂️</span>
+        <span>ch04</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">데이터를 길들이는 법</span>
+        <span class="count">7 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch04_q01</div><div class="qold">정형·반정형·비정형 데이터는 어떻게 다른가?</div><div class="qnew">엑셀, 글자, 사진은 같은 데이터일까요?</div></div>
+      <div class="qa-row"><div class="qid">ch04_q02</div><div class="qold">JSON, XML, CSV는 어떻게 다른가?</div><div class="qnew">JSON, XML, CSV는 왜 셋이나 있을까요?</div></div>
+      <div class="qa-row"><div class="qid">ch04_q03</div><div class="qold">데이터 정규화는 왜 필요한가?</div><div class="qnew">같은 정보를 여러 곳에 적으면 왜 위험할까요?</div></div>
+      <div class="qa-row"><div class="qid">ch04_q04</div><div class="qold">인덱스는 어떻게 검색을 빠르게 하나?</div><div class="qnew">수억 건에서 1건 찾기는 어떻게 1초 안에?</div></div>
+      <div class="qa-row"><div class="qid">ch04_q05</div><div class="qold">트랜잭션 ACID는 무엇을 지키나?</div><div class="qnew">송금이 절반만 끝나면 안 되는 이유는?</div></div>
+      <div class="qa-row"><div class="qid">ch04_q06</div><div class="qold">백업과 복구는 어떻게 설계하나?</div><div class="qnew">데이터 사고 후 24시간 안에 복구되나요?</div></div>
+      <div class="qa-row"><div class="qid">ch04_q07</div><div class="qold">데이터 시각화의 기본 원칙은 무엇인가?</div><div class="qnew">그래프가 거짓말을 할 때는 언제일까요?</div></div>
+    </div>
+
+    <!-- ch05 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">🧩</span>
+        <span>ch05</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">보이는 쪽과 안 보이는 쪽</span>
+        <span class="count">7 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch05_q01</div><div class="qold">프론트엔드와 백엔드는 왜 나뉘어 있나?</div><div class="qnew">화면을 그리는 일과 규칙을 처리하는 일은 왜 나뉘나요?</div></div>
+      <div class="qa-row"><div class="qid">ch05_q02</div><div class="qold">HTML, CSS, JavaScript는 각각 무슨 일을 하나?</div><div class="qnew">한 화면을 만드는 데 왜 3가지 언어가 필요할까요?</div></div>
+      <div class="qa-row"><div class="qid">ch05_q03</div><div class="qold">API와 REST는 무엇인가?</div><div class="qnew">앱끼리 데이터를 주고받는 창구의 이름은?</div></div>
+      <div class="qa-row"><div class="qid">ch05_q04</div><div class="qold">SPA와 SSR은 화면을 보여주는 방식이 어떻게 다른가?</div><div class="qnew">같은 화면도 그리는 시점이 다를 수 있다고요?</div></div>
+      <div class="qa-row"><div class="qid">ch05_q05</div><div class="qold">상태 관리는 왜 필요한가?</div><div class="qnew">여러 화면이 같은 정보를 보면 어떻게 맞출까요?</div></div>
+      <div class="qa-row"><div class="qid">ch05_q06</div><div class="qold">프레임워크와 라이브러리는 왜 쓰나?</div><div class="qnew">내가 만들지 않은 코드를 가져다 쓰는 이유는?</div></div>
+      <div class="qa-row"><div class="qid">ch05_q07</div><div class="qold">빌드 도구는 무엇을 하나?</div><div class="qnew">수십 개 파일이 1개 결과물로 묶이는 과정은?</div></div>
+    </div>
+
+    <!-- ch06 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">💻</span>
+        <span>ch06</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">컴퓨터 안을 분해해 봅니다</span>
+        <span class="count">10 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch06_q01</div><div class="qold">CPU는 어떻게 구성되어 있나?</div><div class="qnew">CPU 안에는 정확히 무엇이 들어 있나요?</div></div>
+      <div class="qa-row"><div class="qid">ch06_q02</div><div class="qold">메모리는 왜 종류가 여러 개인가?</div><div class="qnew">메모리에 종류가 4~5개나 있는 이유는?</div></div>
+      <div class="qa-row"><div class="qid">ch06_q03</div><div class="qold">프로그램, 프로세스, 프로세서의 차이가 뭔가요?</div><div class="qnew">프로그램과 프로세스, 같은 말 아닌가요?</div></div>
+      <div class="qa-row"><div class="qid">ch06_q04</div><div class="qold">캐시는 어떻게 동작하나?</div><div class="qnew">자주 쓰는 데이터를 가까이 두는 작은 비밀은?</div></div>
+      <div class="qa-row"><div class="qid">ch06_q05</div><div class="qold">인터럽트는 무엇이고 왜 필요한가?</div><div class="qnew">키보드를 누른 신호는 CPU를 어떻게 부르나요?</div></div>
+      <div class="qa-row"><div class="qid">ch06_q06</div><div class="qold">멀티태스킹은 어떻게 가능한가?</div><div class="qnew">동시에 여러 앱이 도는 건 진짜로 동시일까요?</div></div>
+      <div class="qa-row"><div class="qid">ch06_q07</div><div class="qold">가상 메모리는 무엇인가?</div><div class="qnew">메모리가 부족한데 앱이 안 죽는 이유는?</div></div>
+      <div class="qa-row"><div class="qid">ch06_q08</div><div class="qold">파일 시스템은 무엇을 정리하나?</div><div class="qnew">내 PC가 파일을 잃어버리지 않는 비결은?</div></div>
+      <div class="qa-row"><div class="qid">ch06_q09</div><div class="qold">디바이스 드라이버는 왜 필요한가?</div><div class="qnew">운영체제는 새 부품을 어떻게 알아볼까요?</div></div>
+      <div class="qa-row"><div class="qid">ch06_q10</div><div class="qold">부팅은 어떤 순서로 일어나나?</div><div class="qnew">전원을 누른 뒤 화면이 뜰 때까지 무슨 일이?</div></div>
+    </div>
+
+    <!-- ch07 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">🗄️</span>
+        <span>ch07</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">데이터를 보관하는 창고</span>
+        <span class="count">6 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch07_q01</div><div class="qold">RDBMS와 NoSQL은 무엇이 다른가?</div><div class="qnew">표 형태 DB와 자유 형태 DB는 왜 둘 다 쓰일까요?</div></div>
+      <div class="qa-row"><div class="qid">ch07_q02</div><div class="qold">SQL은 어떤 명령으로 데이터를 다루나?</div><div class="qnew">DB에 묻는 4가지 기본 질문은 무엇일까요?</div></div>
+      <div class="qa-row"><div class="qid">ch07_q03</div><div class="qold">ACID는 왜 중요한가?</div><div class="qnew">송금 도중 정전이 나도 돈이 안 사라지는 이유는?</div></div>
+      <div class="qa-row"><div class="qid">ch07_q04</div><div class="qold">인덱스는 검색을 왜 빠르게 하나?</div><div class="qnew">수억 행 중 1행을 1초 안에 찾는 비결은?</div></div>
+      <div class="qa-row"><div class="qid">ch07_q05</div><div class="qold">정규화는 왜 데이터를 나누려 하나?</div><div class="qnew">정보를 일부러 여러 표로 쪼개는 이유는?</div></div>
+      <div class="qa-row"><div class="qid">ch07_q06</div><div class="qold">격리 수준은 무엇을 조절하나?</div><div class="qnew">두 사람이 같은 데이터를 동시에 만지면 어떻게 될까요?</div></div>
+    </div>
+
+    <!-- ch08 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">🌐</span>
+        <span>ch08</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">인터넷 너머의 보이지 않는 길</span>
+        <span class="count">7 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch08_q01</div><div class="qold">IP, TCP, UDP는 각각 어떤 역할인가?</div><div class="qnew">내 폰의 신호는 어떻게 길을 잃지 않을까요?</div></div>
+      <div class="qa-row"><div class="qid">ch08_q02</div><div class="qold">HTTP와 HTTPS는 무엇이 다른가?</div><div class="qnew">주소창에 's' 한 글자가 더 붙으면 무엇이 달라지나요?</div></div>
+      <div class="qa-row"><div class="qid">ch08_q03</div><div class="qold">DNS는 이름을 어떻게 주소로 바꾸나?</div><div class="qnew">youtube.com 은 어떻게 숫자 주소로 바뀌나요?</div></div>
+      <div class="qa-row"><div class="qid">ch08_q04</div><div class="qold">CDN은 왜 더 가까운 것처럼 빠를까?</div><div class="qnew">유튜브가 한국에서 빠른 진짜 비결은?</div></div>
+      <div class="qa-row"><div class="qid">ch08_q05</div><div class="qold">방화벽과 VPN은 왜 목적이 다를까?</div><div class="qnew">차단과 보호 통로는 왜 다른 도구일까요?</div></div>
+      <div class="qa-row"><div class="qid">ch08_q06</div><div class="qold">WebSocket은 왜 실시간 서비스에 자주 쓰일까?</div><div class="qnew">카카오톡 메시지는 왜 즉시 도착하나요?</div></div>
+      <div class="qa-row"><div class="qid">ch08_q07</div><div class="qold">네트워크 보안의 기본 원칙은 무엇인가?</div><div class="qnew">보안에서 '최소 권한'이 첫 원칙인 이유는?</div></div>
+    </div>
+
+    <!-- ch09 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">🏗️</span>
+        <span>ch09</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">큰 시스템의 뼈대 그리는 법</span>
+        <span class="count">6 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch09_q01</div><div class="qold">모놀리식과 마이크로서비스는 어떻게 다를까?</div><div class="qnew">한 덩어리 vs 여러 조각, 어느 쪽이 맞을까요?</div></div>
+      <div class="qa-row"><div class="qid">ch09_q02</div><div class="qold">레이어드 아키텍처는 왜 자주 쓰일까?</div><div class="qnew">코드를 층층이 쌓는 게 왜 자주 보이나요?</div></div>
+      <div class="qa-row"><div class="qid">ch09_q03</div><div class="qold">디자인 패턴은 왜 반복해서 언급될까?</div><div class="qnew">베테랑들은 왜 같은 이름의 패턴을 쓸까요?</div></div>
+      <div class="qa-row"><div class="qid">ch09_q04</div><div class="qold">캐시는 어디에 두고 어떻게 비울까?</div><div class="qnew">캐시는 어디에 두고 언제 비워야 할까요?</div></div>
+      <div class="qa-row"><div class="qid">ch09_q05</div><div class="qold">메시지 큐는 왜 시스템 사이에 들어갈까?</div><div class="qnew">급한 일과 안 급한 일을 어떻게 분리할까요?</div></div>
+      <div class="qa-row"><div class="qid">ch09_q06</div><div class="qold">확장성은 서버를 크게 하는 일만 뜻할까?</div><div class="qnew">서버를 키운다는 건 한 가지 의미만 있을까요?</div></div>
+    </div>
+
+    <!-- ch10 -->
+    <div class="qa-section">
+      <div class="qa-section-header">
+        <span class="ch-emoji">🤖</span>
+        <span>ch10</span>
+        <span class="arrow">→</span>
+        <span class="new-ch-title">거대한 컴퓨터를 빌리는 시대</span>
+        <span class="count">7 Q</span>
+      </div>
+      <div class="qa-row"><div class="qid">ch10_q01</div><div class="qold">IaaS, PaaS, SaaS는 어떻게 다른가?</div><div class="qnew">같은 클라우드도 책임 범위가 3가지로 나뉜다고요?</div></div>
+      <div class="qa-row"><div class="qid">ch10_q02</div><div class="qold">도커는 왜 컨테이너라고 하나?</div><div class="qnew">도커는 왜 '컨테이너'라는 이름을 골랐을까요?</div></div>
+      <div class="qa-row"><div class="qid">ch10_q03</div><div class="qold">쿠버네티스는 무엇을 자동화하나?</div><div class="qnew">수백 개 컨테이너를 누가 정리해 주나요?</div></div>
+      <div class="qa-row"><div class="qid">ch10_q04</div><div class="qold">AI, ML, DL의 관계는?</div><div class="qnew">AI, 머신러닝, 딥러닝은 같은 말일까요?</div></div>
+      <div class="qa-row"><div class="qid">ch10_q05</div><div class="qold">LLM은 어떻게 동작하나?</div><div class="qnew">ChatGPT 가 다음 글자를 고르는 원리는?</div></div>
+      <div class="qa-row"><div class="qid">ch10_q06</div><div class="qold">API 비용과 요금 모델은 어떻게 보나?</div><div class="qnew">API 비용은 왜 토큰 단위로 매겨질까요?</div></div>
+      <div class="qa-row"><div class="qid">ch10_q07</div><div class="qold">클라우드 보안의 기본은 무엇인가?</div><div class="qnew">클라우드를 쓸 때 가장 먼저 잠가야 할 것은?</div></div>
+    </div>
+  </div>
+
+  <!-- ========== 승인 요청 ========== -->
+  <div class="confirm-block">
+    <h3>✅ 사전 승인 체크리스트</h3>
+    <ul>
+      <li><strong>책 TOC 차용 0%</strong>: 신 title 어디에도 책 차례·소제목 차용 없음 (refframing·시나리오·1인칭 학생 시점). <em>OK?</em></li>
+      <li><strong>질문형 일관성</strong>: 81개 모두 question form (~까요?·~나요?·~인가요?). <em>OK?</em></li>
+      <li><strong>비전공자 친화</strong>: 일상 앱·시나리오 hook (카카오톡·유튜브·송금·폰). <em>OK?</em></li>
+      <li><strong>분량</strong>: title 10~30자, ≤2줄 wrap. <em>OK?</em></li>
+      <li><strong>중복 회피</strong>: ch04_q03 vs ch07_q05 (정규화), ch04_q04 vs ch07_q04 (인덱스), ch04_q05 vs ch07_q03 (ACID) 같은 중복 항목도 각각 다른 각도로 변주. <em>OK?</em></li>
+      <li><strong>summary 도 같은 정책</strong>: title OK 후 71 summary 도 fresh 재작성 (mockup 미포함). <em>OK?</em></li>
+      <li><strong>CLAUDE.md 정책 라인 갱신</strong>: "목차·질문 제목만 차용" → "모든 콘텐츠 fresh, 책 TOC 0% 차용". <em>OK?</em></li>
+    </ul>
+    <div class="note">
+      <strong>OK</strong> → PR-0 → PR-1 → PR-2 → PR-3 → PR-3.5 → PR-4 → PR-5 (총 7 PR) 직렬 진행.<br>
+      <strong>특정 챕터/Q 만 REVISE</strong> → 해당 ch 또는 qaId 짚어 주세요. 그 부분만 다시 그려서 재승인.<br>
+      <strong>전면 REVISE</strong> → 톤 방향 (예: 더 짧게·더 보수적으로·시나리오 빼고 평이하게) 한 줄 지시 주세요.
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
