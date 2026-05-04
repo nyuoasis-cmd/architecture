@@ -1,0 +1,59 @@
+{
+  "step": "pr21b",
+  "round": 2,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-149",
+  "ts": "2026-05-04T05:28:08Z",
+  "branch": "feat/preview-inline-ch10-q5-q7",
+  "commit": "25a5408830a5feb5e35a68a797547b4889562ba2",
+  "verdict": "FAIL",
+  "fail_items": [
+    "V6-regression-ch10-q01-q04-inline: `/library/10/ch10_q01`~`/library/10/ch10_q04` no longer satisfy the PR-21a inline React contract. All four routes render the iframe fallback path (`iframe=1`, `.phone-frame=1`, `.phone-notch=1`, tablist `0`) instead of inline demos, and `client/src/demos/registry.ts` only registers `ch10_q05`~`ch10_q07`."
+  ],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame-q05-q07",
+      "verdict": "PASS",
+      "evidence": "`/library/10/ch10_q05`~`ch10_q07` desktop에서 모두 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`, `console error=0`, `pageerror=0`이었다. 세 라우트 모두 tablist 1개와 `visibleSvgCount=16`을 유지해 round 1 import-time throw는 재현되지 않았다."
+    },
+    {
+      "id": "V2-q07-iam-sub-fix",
+      "verdict": "PASS",
+      "evidence": "`/library/10/ch10_q07` 본문/시연 DOM에 `identity access`는 존재하고 `identity & access`는 더 이상 없었다. q07 desktop/mobile 모두 `pageerror=0`이었고, IAM 시나리오 hero가 정상 렌더돼 `maxSubLength` 위반으로 인한 eager-import 크래시는 해소됐다."
+    },
+    {
+      "id": "V3-active-sync-q05-q07",
+      "verdict": "PASS",
+      "evidence": "q05 4개(`context/predict/repeat/limit`), q06 4개(`percall/pertoken/cache/batch`), q07 4개(`iam/encrypt/segment/monitor`)를 모두 클릭했다. 12개 전환 전부에서 URL hash, 활성 scenario tab 라벨, preview hero 제목이 기대값과 정확히 같이 바뀌었다."
+    },
+    {
+      "id": "V4-desktop-layout-tone",
+      "verdict": "PASS",
+      "evidence": "q05~q07 desktop 1440x900에서 학습/채팅/시연 셸 폭은 공통으로 `280/320/840px`였다. ch10 tone token은 여전히 `--demo-accent-ch10=#be185d`, `--demo-accent-soft-ch10=#fdf2f8`였고 accent-white 대비비는 `6.04:1`로 WCAG AA `4.5:1` 기준을 넘겼다."
+    },
+    {
+      "id": "V5-mobile-q05-q07",
+      "verdict": "PASS",
+      "evidence": "393x852에서 `📱 시연` 탭 전환 후 q05~q07 모두 tablist 1개가 첫 화면 안에 들어왔다(`tabBottom=182.39px`). hero 시작점은 q05 `292.86px`, q06 `272.47px`, q07 `292.86px`였고 세 라우트 모두 `scrollWidth=clientWidth=393`으로 가로 오버플로가 없었다."
+    },
+    {
+      "id": "V6-regression-ch10-q01-q04-inline",
+      "verdict": "FAIL",
+      "evidence": "handoff가 요구한 회귀 spot-check에서 `/library/10/ch10_q01`~`ch10_q04`는 모두 inline React가 아니라 fallback iframe으로 렌더됐다. 네 라우트 공통으로 desktop에서 `iframe=1`, `.phone-frame=1`, `.phone-notch=1`, `tablist=0`, `visibleSvgCount=0`, heading은 `AI 챗봇`만 남았고 iframe title은 각각 `클라우드 책임 층계`, `컨테이너 표준 상자`, `쿠버네티스 관제실`, `AI 가족 트리`였다. 소스 기준으로도 `client/src/demos/registry.ts`에는 `ch10_q05`~`ch10_q07`만 있고 `ch10_q01`~`ch10_q04` entry가 없어 PR-21a 회귀가 확인됐다."
+    }
+  ],
+  "artifacts": {
+    "metrics": "/tmp/pr21b-r2-eval-visual/metrics.json",
+    "screenshots_dir": "/tmp/pr21b-r2-eval-visual",
+    "browser": "Playwright 1.52.0 + system Chrome (/usr/bin/google-chrome)",
+    "base_url": "http://127.0.0.1:3007"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr21b-round2.md` §B만 따랐다.",
+    "앱은 `/home/claude/architecture`에서 `npm run build` 후 `NODE_ENV=production PORT=3007 npm start`로 기동했다.",
+    "브라우저 검증은 Playwright와 system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "노이즈만 줄이기 위해 harness에서 `service-nav.js`, `/favicon.ico`, `/api/progress*`만 stub 했고 데모 렌더 로직과 DOM은 수정하지 않았다."
+  ]
+}
