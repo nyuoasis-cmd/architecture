@@ -126,7 +126,7 @@ export default function TeacherSessionPage() {
             <button
               className="inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white disabled:bg-stone-300"
               disabled={currentSession.status === 'ended'}
-              onClick={() => navigate(`/learn/${currentSession.id}?role=teacher`)}
+              onClick={() => navigate(`/library?sessionId=${currentSession.id}`)}
               type="button"
             >
               ▶ 수업 시연 시작
