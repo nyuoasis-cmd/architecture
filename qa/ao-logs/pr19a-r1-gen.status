@@ -1,0 +1,1 @@
+{"status":"done","step":"pr19a","role":"gen","model":"codex","session_id":"arch-126","ts":"2026-05-04T02:17:52.582Z","branch":"feat/preview-inline-ch08-q1-q4","commit":"056ffdc1f953f0ac8f6e87dc1a32a17e01f79733","pr":"https://github.com/nyuoasis-cmd/architecture/pull/61","loc":"+822 -8","note":"ch08 q01~q04 인라인 데모 4개 추가. network 아이콘군 보강. demos/registry 라벨과 등록 정리."}

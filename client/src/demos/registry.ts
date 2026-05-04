@@ -43,6 +43,10 @@ import Q03Acid from './ch07/Q03Acid';
 import Q04Index from './ch07/Q04Index';
 import Q05Normalization from './ch07/Q05Normalization';
 import Q06IsolationLevel from './ch07/Q06IsolationLevel';
+import Q01Protocol from './ch08/Q01Protocol';
+import Q02Tls from './ch08/Q02Tls';
+import Q03Dns from './ch08/Q03Dns';
+import Q04Cdn from './ch08/Q04Cdn';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -91,6 +95,10 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch07_q04: { Component: Q04Index, layout: 'wide' },
   ch07_q05: { Component: Q05Normalization, layout: 'wide' },
   ch07_q06: { Component: Q06IsolationLevel, layout: 'wide' },
+  ch08_q01: { Component: Q01Protocol, layout: 'wide' },
+  ch08_q02: { Component: Q02Tls, layout: 'wide' },
+  ch08_q03: { Component: Q03Dns, layout: 'wide' },
+  ch08_q04: { Component: Q04Cdn, layout: 'square' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
