@@ -41,6 +41,8 @@ import Q01DbType from './ch07/Q01DbType';
 import Q02Crud from './ch07/Q02Crud';
 import Q03Acid from './ch07/Q03Acid';
 import Q04Index from './ch07/Q04Index';
+import Q05Normalization from './ch07/Q05Normalization';
+import Q06IsolationLevel from './ch07/Q06IsolationLevel';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -87,6 +89,8 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch07_q02: { Component: Q02Crud, layout: 'wide' },
   ch07_q03: { Component: Q03Acid, layout: 'wide' },
   ch07_q04: { Component: Q04Index, layout: 'wide' },
+  ch07_q05: { Component: Q05Normalization, layout: 'wide' },
+  ch07_q06: { Component: Q06IsolationLevel, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
