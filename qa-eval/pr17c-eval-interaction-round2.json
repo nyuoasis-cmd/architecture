@@ -1,0 +1,99 @@
+{
+  "step": "pr17c",
+  "round": 2,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-114",
+  "ts": "2026-05-04T00:59:12Z",
+  "verdict": "PASS",
+  "pr_number": 54,
+  "pr_url": "https://github.com/nyuoasis-cmd/architecture/pull/54",
+  "branch": "feat/preview-inline-ch06-q8-q10",
+  "commit_under_test": "138005e264395834d3250ded0c093c60cdcde395",
+  "target_fix_commit": "dc4c2f6",
+  "scope": {
+    "focus": "HANDOFF-pr17c-round2.md §C interaction verification for ch06_q08~q10 only.",
+    "build": {
+      "client": "PASS (cd client && npm run build)",
+      "server": "PASS (cd server && npm run build)"
+    },
+    "dev_server": "PASS (cd client && npm run dev -- --host 127.0.0.1 --port 5184)",
+    "raw_hex_grep": "PASS (0 matches in client/src/demos/ch06/*.tsx)",
+    "shared_import_grep": "PASS (0 forbidden imports in client/src/demos/ch06/*.tsx)",
+    "raw_abbrev_grep": "PASS (0 matches for OS/API/DB/UI/JS/CSS/HTML/CPU/RAM/Fetch/Decode/Execute/Store in client/src/demos/ch06/*.tsx)",
+    "validate_pair_set": [
+      "Q08FileSystem uses PairMatch + validatePairSet(..., { layout: 'wide', subPolicy: 'all' })",
+      "Q09Driver uses PairFlow + validatePairSet(..., { layout: 'wide', subPolicy: 'all' })",
+      "Q10BootSequence uses PairFlow + validatePairSet(..., { layout: 'wide', subPolicy: 'all' })"
+    ],
+    "scenario_alignment": [
+      "ch06_q08 demos.ts ids match SCENES: folders, inode, blocks, journal",
+      "ch06_q09 demos.ts ids match SCENES: request, translate, device, feedback",
+      "ch06_q10 demos.ts ids match SCENES: power, firmware, bootloader, kernel, login",
+      "registry.ts maps ch06_q08~q10 to Q08FileSystem/Q09Driver/Q10BootSequence with layout=wide"
+    ],
+    "deep_link_guards": [
+      "LearnPage reads window.location.hash and seeds scenarioId only when the hash matches a declared demo scenario",
+      "PreviewPanel writes inline scenario changes through window.history.replaceState(null, '', `#${nextScenarioId}`)",
+      "Inline demos receive key `${qaId}:${scenarioId}` so hash changes remount the selected scene"
+    ],
+    "regression_diff": [
+      "git diff main..HEAD -- client/src/demos/ch01 client/src/demos/ch02 client/src/demos/ch03 client/src/demos/ch04 client/src/demos/ch05 returned no changes",
+      "git diff main..HEAD -- client/src/demos/_shared/pair-block.tsx client/src/demos/_shared/index.ts client/src/demos/_shared/labels.ts client/src/demos/_shared/design-tokens.css client/src/demos/_shared/types.ts client/src/components/learn/PreviewPanel.tsx returned no changes",
+      "Only shared icon additions and ch06 q08~q10 registry wiring changed under the evaluated diff"
+    ]
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "Client and server builds completed successfully on the detached PR head."
+    },
+    {
+      "id": "I2",
+      "result": "PASS",
+      "evidence": "Raw hex grep returned 0 matches in ch06 demo TSX files."
+    },
+    {
+      "id": "I3",
+      "result": "PASS",
+      "evidence": "Forbidden shared-import grep returned 0 matches; the new demos only import from ../_shared."
+    },
+    {
+      "id": "I4",
+      "result": "PASS",
+      "evidence": "All three demos enforce validatePairSet with layout='wide' and subPolicy='all'; scenario keys and active indexes stay within bounds, and the raw-abbreviation grep returned 0 matches."
+    },
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "Each demo resolves SCENES[scenarioId] ?? defaultScene, and PreviewPanel forwards the selected scenario id into the inline component."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "Q08 uses PairMatch, Q09/Q10 use PairFlow, and the shared interaction infrastructure stayed unchanged from main."
+    },
+    {
+      "id": "I7",
+      "result": "PASS",
+      "evidence": "Playwright on http://127.0.0.1:5184 preserved direct deep links and rewrote hashes on click: /library/6/ch06_q10#kernel -> click '로그인 화면' => #login, /library/6/ch06_q08#folders -> click '메타데이터 카드' => #inode. ConsoleErrors=[], pageErrors=[], badResponses=[] except the excluded favicon 404."
+    },
+    {
+      "id": "I8",
+      "result": "PASS",
+      "evidence": "The handoff mapping, registry wiring, demos.ts scenario ids, and q08~q10 SCENES definitions are 1:1 aligned, including q10's 5-step flow."
+    },
+    {
+      "id": "DEV-CONSOLE",
+      "result": "PASS",
+      "evidence": "Playwright direct entry checks for /library/6/ch06_q08, /library/6/ch06_q09#translate, and /library/6/ch06_q10#kernel produced no actionable console or page errors. The only observed 404 was http://127.0.0.1:5184/favicon.ico, which the handoff excludes."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "notes": [
+    "The branch head under test is wrapper commit 138005e, but git diff dc4c2f6..HEAD shows only HANDOFF-pr17c-round2.md; the evaluated application code is unchanged from dc4c2f6.",
+    "ao session claim-pr 17 failed because PR #17 is already merged. Evaluation proceeded against the branch and commit explicitly named in the round-2 handoff."
+  ]
+}

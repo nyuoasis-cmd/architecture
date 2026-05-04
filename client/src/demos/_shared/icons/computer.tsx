@@ -1391,3 +1391,136 @@ export function SwapIcon() {
     </svg>
   );
 }
+
+export function DirectoryIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M5 12h11l3 4h16v14a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" />
+      <path d="M5 12V9a3 3 0 0 1 3-3h8l3 4" />
+      <path d="M13 20h14" />
+    </svg>
+  );
+}
+
+export function InodeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="7" width="24" height="26" rx="2" />
+      <path d="M13 13h10M13 18h14M13 23h8" />
+      <circle cx="26" cy="24" r="3" />
+    </svg>
+  );
+}
+
+export function BlockItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="8" height="8" rx="1" />
+      <rect x="18" y="10" width="8" height="8" rx="1" />
+      <rect x="28" y="10" width="4" height="8" rx="1" />
+      <rect x="8" y="20" width="8" height="8" rx="1" />
+      <rect x="18" y="20" width="8" height="8" rx="1" />
+      <rect x="28" y="20" width="4" height="8" rx="1" />
+    </svg>
+  );
+}
+
+export function JournalIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 6h14l4 4v24H11z" />
+      <path d="M25 6v4h4" />
+      <path d="M15 16h10M15 21h10M15 26h7" />
+      <path d="m24 24 2 2 4-5" />
+    </svg>
+  );
+}
+
+export function OsRequestIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="8" width="22" height="24" rx="3" />
+      <path d="M6 14h22" />
+      <circle cx="11" cy="11" r="1" fill="currentColor" stroke="none" />
+      <path d="M12 20h10M12 25h7" />
+      <path d="m28 20 6 0-3-3M34 20l-3 3" />
+    </svg>
+  );
+}
+
+export function DriverItIcon() {
+  return <DriverIcon />;
+}
+
+export function DeviceIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="10" y="7" width="20" height="26" rx="3" />
+      <path d="M10 14h20" />
+      <circle cx="16" cy="10.5" r="1" fill="currentColor" stroke="none" />
+      <circle cx="20" cy="10.5" r="1" fill="currentColor" stroke="none" />
+      <path d="M16 21h8M16 26h8" />
+    </svg>
+  );
+}
+
+export function ResultItIcon() {
+  return <ResultIcon />;
+}
+
+export function PostIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="9" width="24" height="18" rx="2" />
+      <path d="M14 27v4M26 27v4M12 31h16" />
+      <path d="M12 15h10M12 20h6" />
+      <path d="m24 18 2 2 4-5" />
+    </svg>
+  );
+}
+
+export function BiosIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="10" y="11" width="20" height="18" rx="2" />
+      <path d="M14 7v4M20 7v4M26 7v4M14 29v4M20 29v4M26 29v4" />
+      <path d="M6 15h4M6 21h4M30 15h4M30 21h4" />
+      <text x="20" y="22" fontSize="6" textAnchor="middle" fill="currentColor" stroke="none" fontWeight="700">
+        FW
+      </text>
+    </svg>
+  );
+}
+
+export function BootloaderIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 8v13" />
+      <path d="m14 15 6 6 6-6" />
+      <rect x="8" y="24" width="24" height="8" rx="2" />
+      <path d="M13 28h14" />
+    </svg>
+  );
+}
+
+export function KernelItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="7" />
+      <path d="M20 7v4M20 29v4M7 20h4M29 20h4" />
+      <path d="m11 11 3 3M26 26l3 3M29 11l-3 3M14 26l-3 3" />
+      <circle cx="20" cy="20" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function LoginItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="8" width="26" height="24" rx="2" />
+      <circle cx="20" cy="16" r="3" />
+      <path d="M14 27c0-3.5 2.7-6 6-6s6 2.5 6 6" />
+      <path d="m28 20 5 0-2.5-2.5M33 20l-2.5 2.5" />
+    </svg>
+  );
+}

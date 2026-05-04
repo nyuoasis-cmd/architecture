@@ -1409,3 +1409,114 @@ export function IsolateMetaIcon() {
     </svg>
   );
 }
+
+export function FolderIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M5 12h11l3 4h16v14a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z" />
+      <path d="M5 12V9a3 3 0 0 1 3-3h8l3 4" />
+    </svg>
+  );
+}
+
+export function CardIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="8" width="26" height="24" rx="2" />
+      <path d="M12 14h10M12 19h16M12 24h8" />
+      <circle cx="27" cy="14" r="2" />
+    </svg>
+  );
+}
+
+export function RecordIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 6h14l6 6v22H10z" />
+      <path d="M24 6v6h6" />
+      <path d="M15 17h10M15 22h10M15 27h7" />
+    </svg>
+  );
+}
+
+export function RequestQ09Icon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="18" height="20" rx="2" />
+      <path d="M11 16h10M11 21h7" />
+      <path d="m25 20 8 0-3-3M33 20l-3 3" />
+    </svg>
+  );
+}
+
+export function TranslateIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 11h12M15 11v18" />
+      <path d="M11 18h8" />
+      <path d="m22 13 8 8M30 13l-8 8" />
+      <path d="M25 9v24" />
+    </svg>
+  );
+}
+
+export function RunActionIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="15" cy="20" r="7" />
+      <path d="m14 17 5 3-5 3z" />
+      <rect x="24" y="12" width="8" height="16" rx="2" />
+      <path d="M28 28v4M26 32h4" />
+    </svg>
+  );
+}
+
+export function PowerIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7v12" />
+      <path d="M13 11a12 12 0 1 0 14 0" />
+    </svg>
+  );
+}
+
+export function FirmwareIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="9" width="24" height="22" rx="2" />
+      <path d="M12 14h16M12 19h10M12 24h8" />
+      <path d="M25 24h3M28 24v3" />
+    </svg>
+  );
+}
+
+export function BootIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 8v14" />
+      <path d="m14 16 6 6 6-6" />
+      <rect x="9" y="25" width="22" height="6" rx="2" />
+    </svg>
+  );
+}
+
+export function KernelIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="7" />
+      <path d="M20 7v4M20 29v4M7 20h4M29 20h4" />
+      <path d="m11 11 3 3M26 26l3 3M29 11l-3 3M14 26l-3 3" />
+    </svg>
+  );
+}
+
+export function LoginIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="8" width="24" height="24" rx="3" />
+      <circle cx="20" cy="16" r="3" />
+      <path d="M14 27c0-3.5 2.7-6 6-6s6 2.5 6 6" />
+      <path d="M32 20h4" />
+    </svg>
+  );
+}
