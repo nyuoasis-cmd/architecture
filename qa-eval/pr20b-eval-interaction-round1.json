@@ -1,0 +1,64 @@
+{
+  "step": "pr20b",
+  "round": 1,
+  "phase": "eval-interaction-round1",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-140",
+  "ts": "2026-05-04T04:22:30Z",
+  "verdict": "FAIL",
+  "branch_under_test": "feat/preview-inline-ch09-q5-q6",
+  "commit_under_test": "aa3ed7bfe07fb18ed113726fa0b71d63944ba27c",
+  "scope": {
+    "focus": "HANDOFF-pr20b-round1.md §C interaction verification for ch09_q05~q06 only.",
+    "build": {
+      "client": "PASS (`cd client && npm install --no-audit --no-fund && npm run build` succeeded on the detached PR head)",
+      "server": "PASS (`cd server && npm run build` succeeded on the detached PR head)"
+    },
+    "branch_diff": "FAIL (`git diff --stat origin/main...HEAD` shows only `HANDOFF-pr20b-round1.md`; no product code changed on the branch under test)",
+    "inline_registry": "FAIL (`client/src/demos/registry.ts` stops at `ch09_q04`; `ch09_q05` and `ch09_q06` are absent, so PreviewPanel cannot mount inline React demos for the target QAs)",
+    "component_presence": "FAIL (`client/src/demos/ch09/` contains only `Q01Architecture.tsx`~`Q04Cache.tsx`; `Q05Queue.tsx` and `Q06Scaling.tsx` do not exist on the branch under test)",
+    "demo_fallback_path": "FAIL (`client/src/data/demos.ts` already points `ch09_q05` and `ch09_q06` to `/demos/ch09/q05.html` and `/demos/ch09/q06.html`, so the target routes still fall back to legacy iframe demos instead of the required inline conversions)",
+    "regression_spot_check": "PASS (`ch09_q01`~`q04` inline registry entries remain present and unchanged from `main`)"
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "The detached PR head builds cleanly for both client and server."
+    },
+    {
+      "id": "I2",
+      "result": "FAIL",
+      "evidence": "The PR head contains no implementation diff beyond the handoff document, so there is no q05~q06 inline conversion to validate."
+    },
+    {
+      "id": "I3",
+      "result": "FAIL",
+      "evidence": "`client/src/demos/registry.ts` has no `ch09_q05` or `ch09_q06` entries, which means `getDemoComponent(qaId)` returns `undefined` for both target routes."
+    },
+    {
+      "id": "I4",
+      "result": "FAIL",
+      "evidence": "The required React demo modules `Q05Queue.tsx` and `Q06Scaling.tsx` are missing from `client/src/demos/ch09/`."
+    },
+    {
+      "id": "I5",
+      "result": "FAIL",
+      "evidence": "Because `PreviewPanel` only renders inline when both `demo` and `InlineComponent` exist, `ch09_q05` and `ch09_q06` would continue to render the legacy iframe path (`/demos/ch09/q05.html` and `/demos/ch09/q06.html`) instead of the handoff's wide PairFlow and PairMatch components."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "Regression scope `ch09_q01`~`q04` is unchanged: their registry entries and inline component files still exist."
+    }
+  ],
+  "summary": "This branch cannot pass T4 for PR-20b. The requested interaction target was the inline conversion of `ch09_q05` and `ch09_q06`, but the tested branch only adds `HANDOFF-pr20b-round1.md` and leaves product code identical to `main`. The two target QAs still route through legacy iframe demos because there are no q05~q06 inline component files and no registry wiring for them.",
+  "fail_items": [
+    "missing-pr20b-implementation: `feat/preview-inline-ch09-q5-q6` contains no product-code diff against `main`; only the handoff markdown was added.",
+    "missing-inline-registry-q05-q06: `client/src/demos/registry.ts` has no `ch09_q05` or `ch09_q06` entries, so inline mounting never occurs for the target routes.",
+    "missing-demo-components-q05-q06: `client/src/demos/ch09/Q05Queue.tsx` and `Q06Scaling.tsx` do not exist, so the handoff's PairFlow/PairMatch interaction contract is entirely unmet."
+  ],
+  "revise_items": [],
+  "next_action": "FAIL. Generator must first add the missing ch09_q05~q06 inline implementation before interaction re-evaluation."
+}

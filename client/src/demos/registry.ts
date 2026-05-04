@@ -54,6 +54,8 @@ import Q01Architecture from './ch09/Q01Architecture';
 import Q02Layer from './ch09/Q02Layer';
 import Q03Pattern from './ch09/Q03Pattern';
 import Q04Cache from './ch09/Q04Cache';
+import Q05Queue from './ch09/Q05Queue';
+import Q06Scaling from './ch09/Q06Scaling';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -113,6 +115,8 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch09_q02: { Component: Q02Layer, layout: 'wide' },
   ch09_q03: { Component: Q03Pattern, layout: 'wide' },
   ch09_q04: { Component: Q04Cache, layout: 'wide' },
+  ch09_q05: { Component: Q05Queue, layout: 'wide' },
+  ch09_q06: { Component: Q06Scaling, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
