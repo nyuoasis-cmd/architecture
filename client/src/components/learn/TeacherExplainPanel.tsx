@@ -1,6 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Glossary from './Glossary';
+import Glossary, { collectMatchedTerms } from './Glossary';
 import { getQaById } from '../../data/qa-stubs';
 import type { TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
 
@@ -51,11 +51,19 @@ function ExplainCard({
 }
 
 function renderText(text: string, seenTerms: Set<string>) {
-  return text.split(/\n\n+/).map((paragraph, index) => (
-    <p key={`${paragraph.slice(0, 16)}-${index}`}>
-      <Glossary seenTerms={seenTerms} text={paragraph} />
-    </p>
-  ));
+  return text.split(/\n\n+/).map((paragraph, index) => {
+    const paragraphSeenTerms = new Set(seenTerms);
+
+    for (const term of collectMatchedTerms(paragraph, paragraphSeenTerms)) {
+      seenTerms.add(term);
+    }
+
+    return (
+      <p key={`${paragraph.slice(0, 16)}-${index}`}>
+        <Glossary seenTerms={paragraphSeenTerms} text={paragraph} />
+      </p>
+    );
+  });
 }
 
 function AdvancedSection({ block, seenTerms }: { block: TeacherExplainBlock; seenTerms: Set<string> }) {

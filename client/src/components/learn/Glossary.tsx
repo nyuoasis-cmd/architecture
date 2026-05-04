@@ -3,7 +3,7 @@ import { GLOSSARY, type GlossaryEntry } from '../../data/teacher-glossary';
 
 type GlossaryProps = {
   text: string;
-  seenTerms?: Set<string>;
+  seenTerms?: ReadonlySet<string>;
 };
 
 type MatchCandidate = {
@@ -73,6 +73,42 @@ function findEarliestMatch(text: string, seenTerms: Set<string>) {
   return bestMatch;
 }
 
+type RenderMatch = MatchCandidate & {
+  absoluteStart: number;
+  absoluteEnd: number;
+};
+
+function collectRenderMatches(text: string, initialSeenTerms?: ReadonlySet<string>) {
+  const seenTerms = new Set(initialSeenTerms);
+  const matches: RenderMatch[] = [];
+  let cursor = 0;
+
+  while (cursor < text.length) {
+    const match = findEarliestMatch(text.slice(cursor), seenTerms);
+    if (!match) {
+      break;
+    }
+
+    const absoluteStart = cursor + match.start;
+    const absoluteEnd = cursor + match.end;
+
+    matches.push({
+      ...match,
+      absoluteStart,
+      absoluteEnd,
+    });
+
+    seenTerms.add(match.entry.term);
+    cursor = absoluteEnd;
+  }
+
+  return matches;
+}
+
+export function collectMatchedTerms(text: string, initialSeenTerms?: ReadonlySet<string>) {
+  return collectRenderMatches(text, initialSeenTerms).map((match) => match.entry.term);
+}
+
 function isMobileViewport() {
   if (typeof window === 'undefined' || !window.matchMedia) {
     return false;
@@ -81,13 +117,14 @@ function isMobileViewport() {
   return window.matchMedia('(max-width: 767px)').matches;
 }
 
-function useGlossaryMarkup(text: string, sharedSeenTerms?: Set<string>) {
+function useGlossaryMarkup(text: string, sharedSeenTerms?: ReadonlySet<string>) {
   const [activeEntry, setActiveEntry] = useState<GlossaryEntry | null>(null);
   const [activeTrigger, setActiveTrigger] = useState<HTMLButtonElement | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
   const dragStartYRef = useRef<number | null>(null);
   const dialogTitleId = useId();
+  const tooltipIdBase = useId();
 
   useEffect(() => {
     if (!activeEntry) {
@@ -166,28 +203,23 @@ function useGlossaryMarkup(text: string, sharedSeenTerms?: Set<string>) {
     }
 
     const parts: ReactNode[] = [];
+    const matches = collectRenderMatches(text, sharedSeenTerms);
     let cursor = 0;
-    const seenTerms = sharedSeenTerms ?? new Set<string>();
 
-    while (cursor < text.length) {
-      const match = findEarliestMatch(text.slice(cursor), seenTerms);
-      if (!match) {
-        parts.push(text.slice(cursor));
-        break;
+    for (const match of matches) {
+      if (match.absoluteStart > cursor) {
+        parts.push(text.slice(cursor, match.absoluteStart));
       }
 
-      const start = cursor + match.start;
-      const end = cursor + match.end;
-
-      if (start > cursor) {
-        parts.push(text.slice(cursor, start));
-      }
-
-      seenTerms.add(match.entry.term);
+      const tooltipId = `${tooltipIdBase}-${match.entry.term}-${match.absoluteStart}`;
 
       parts.push(
-        <span key={`${match.entry.term}-${start}`} className="glossary-term-wrapper">
+        <span
+          key={`${match.entry.term}-${match.absoluteStart}`}
+          className="glossary-term-wrapper"
+        >
           <button
+            aria-describedby={tooltipId}
             className="glossary-term"
             onClick={(event) => {
               if (!isMobileViewport()) {
@@ -201,7 +233,7 @@ function useGlossaryMarkup(text: string, sharedSeenTerms?: Set<string>) {
             type="button"
           >
             {match.matchedText}
-            <span className="glossary-tooltip" role="tooltip">
+            <span className="glossary-tooltip" id={tooltipId} role="tooltip">
               <span className="glossary-tooltip__term">{match.entry.term}</span>
               {match.entry.oneline}
             </span>
@@ -209,7 +241,11 @@ function useGlossaryMarkup(text: string, sharedSeenTerms?: Set<string>) {
         </span>,
       );
 
-      cursor = end;
+      cursor = match.absoluteEnd;
+    }
+
+    if (cursor < text.length) {
+      parts.push(text.slice(cursor));
     }
 
     return parts;
