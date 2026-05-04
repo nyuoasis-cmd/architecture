@@ -87,7 +87,7 @@ const METAPHOR = [
 ];
 
 const IT = [
-  { icon: <Icons.IamIcon />, label: '권한 IAM', sub: 'identity & access' },
+  { icon: <Icons.IamIcon />, label: '권한 IAM', sub: 'identity access' },
   { icon: <Icons.EncryptIcon />, label: '암호화', sub: 'KMS' },
   { icon: <Icons.NetIsolateItIcon />, label: '네트워크 격리', sub: 'VPC/subnet' },
   { icon: <Icons.LogWatchIcon />, label: '로그 감시', sub: 'CloudWatch/SIEM' },
