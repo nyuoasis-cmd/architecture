@@ -5,7 +5,7 @@
  * 표준 목업: shared/mockups/landing-standard-v2-2026-05-03.html
  *
  * 카피 유지 (이미 §9.F.4 톤 정합): "복잡한 IT 흐름이 / 한 화면 학습이 됩니다."
- * 5요소 (Ghost 없음 — 단독 체험 미구현)
+ * 6요소 (Ghost = "혼자 학습해볼게요 →" → /library 자율학습 진입)
  * 신규 className `landing-hero-*` (기존 index.css의 .hero-* 의존성 회피)
  * design-tokens.css는 demos 전용이라 hex 직접 사용
  */
@@ -108,6 +108,21 @@ export default function LandingPage() {
           background: #fafaf9;
           border-color: #a8a29e;
         }
+        .landing-cta-ghost {
+          margin-top: 8px;
+          background: transparent;
+          border: none;
+          padding: 0;
+          font-size: 14px;
+          color: #78716c;
+          cursor: pointer;
+          font-family: inherit;
+          font-weight: 500;
+          text-decoration: none;
+        }
+        .landing-cta-ghost:hover {
+          color: #1c1917;
+        }
 
         @media (max-width: 639px) {
           .landing-hero-page { padding: 72px 24px; }
@@ -176,6 +191,14 @@ export default function LandingPage() {
               수업 만들기
             </button>
           </div>
+
+          <button
+            type="button"
+            className="landing-cta-ghost"
+            onClick={() => navigate('/library')}
+          >
+            혼자 학습해볼게요 →
+          </button>
         </section>
       </main>
     </>
