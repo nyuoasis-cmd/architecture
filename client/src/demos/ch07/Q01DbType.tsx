@@ -84,11 +84,11 @@ export default function Q01DbType({ scenarioId }: DemoComponentProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <Hero eyebrow="DB 유형 비교" title={scene.title} summary={scene.summary} tone={TONE} />
+      <Hero eyebrow="데이터베이스 유형 비교" title={scene.title} summary={scene.summary} tone={TONE} />
 
       <PairVertical
         metaphorTitle="보관 감각"
-        itTitle="DB 선택지"
+        itTitle="데이터베이스 선택지"
         pairs={METAPHOR.map((metaphor, index) => ({ metaphor, it: IT[index] }))}
         activeIndex={scene.active}
         tone={TONE}
@@ -104,7 +104,7 @@ export default function Q01DbType({ scenarioId }: DemoComponentProps) {
         description="데이터 구조를 엄격히 맞출지, 변화와 분산을 더 우선할지에 따라 RDBMS와 NoSQL의 선택 기준이 갈립니다."
       />
 
-      <LogBox logs={scene.logs} variant="blue" title="DB 선택 로그" />
+      <LogBox logs={scene.logs} variant="blue" title="데이터베이스 선택 로그" />
     </div>
   );
 }

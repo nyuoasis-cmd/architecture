@@ -84,7 +84,7 @@ export default function Q04Index({ scenarioId }: DemoComponentProps) {
 
   return (
     <div className="flex flex-col gap-3">
-      <Hero eyebrow="DB 인덱스 흐름" title={scene.title} summary={scene.summary} tone={TONE} />
+      <Hero eyebrow="데이터베이스 인덱스 흐름" title={scene.title} summary={scene.summary} tone={TONE} />
 
       <PairFlow
         metaphorTitle="찾는 감각"

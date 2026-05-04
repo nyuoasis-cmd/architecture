@@ -119,7 +119,7 @@ export default function Q03Acid({ scenarioId }: DemoComponentProps) {
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3">
           {scene.lanes.map((items, index) => {
             const active = scene.active === index;
-            const titles = ['생활 장면', 'DB 동작', '핵심 효과'];
+            const titles = ['생활 장면', '데이터베이스 동작', '핵심 효과'];
             return (
               <div
                 key={titles[index]}
