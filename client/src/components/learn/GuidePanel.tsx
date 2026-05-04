@@ -55,7 +55,7 @@ export default function GuidePanel({
     <div className="flex h-full flex-col">
       <div className="flex-shrink-0 border-b border-[var(--color-border)] p-3">
         <Link
-          to="/library"
+          to={mode === 'session' && sessionId ? `/library?sessionId=${sessionId}` : '/library'}
           className="mb-3 inline-flex items-center gap-1 text-[11px] text-stone-600 hover:text-stone-950"
         >
           ← 라이브러리에서 다른 챕터 보기

@@ -7,11 +7,8 @@ type NewSessionModalProps = {
   onCreated: (session: SessionRecord) => void;
 };
 
-const MAX_PARTICIPANT_OPTIONS = [50, 100, 200] as const;
-
 export default function NewSessionModal({ onClose, onCreated }: NewSessionModalProps) {
   const [name, setName] = useState('');
-  const [maxParticipants, setMaxParticipants] = useState<(typeof MAX_PARTICIPANT_OPTIONS)[number]>(100);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -30,7 +27,7 @@ export default function NewSessionModal({ onClose, onCreated }: NewSessionModalP
       const session = await createSession({
         name: name.trim(),
         chapterIds: allChapterIds,
-        maxParticipants,
+        maxParticipants: 100,
       });
       onCreated(session);
       onClose();
@@ -69,26 +66,6 @@ export default function NewSessionModal({ onClose, onCreated }: NewSessionModalP
           <section>
             <div className="rounded-2xl bg-stone-50 px-4 py-3 text-xs text-stone-600">
               📚 모든 챕터(1장~10장 · 71개 Q&A)가 학생들에게 열립니다.
-            </div>
-          </section>
-
-          <section>
-            <div className="mb-2 text-sm font-medium text-stone-700">최대 인원</div>
-            <div className="flex gap-2">
-              {MAX_PARTICIPANT_OPTIONS.map((option) => (
-                <button
-                  key={option}
-                  className={`rounded-full px-4 py-2 text-sm ${
-                    maxParticipants === option
-                      ? 'bg-stone-900 text-white'
-                      : 'border border-[var(--color-border)] bg-white text-stone-700'
-                  }`}
-                  onClick={() => setMaxParticipants(option)}
-                  type="button"
-                >
-                  {option}명
-                </button>
-              ))}
             </div>
           </section>
         </div>
