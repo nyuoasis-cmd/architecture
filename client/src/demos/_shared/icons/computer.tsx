@@ -839,6 +839,105 @@ export function GoalIcon() {
   );
 }
 
+export function RdbmsIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="24" height="20" rx="2" />
+      <path d="M8 17h24M16 10v20M24 10v20" />
+    </svg>
+  );
+}
+
+export function NoSqlIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 8h14l5 5v19H11z" />
+      <path d="M25 8v5h5" />
+      <path d="M16 18h9M16 23h6" />
+      <circle cx="23" cy="27" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function JoinIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="15" cy="20" r="7" />
+      <circle cx="25" cy="20" r="7" />
+      <path d="M20 13v14" />
+      <path d="M13 20h14" />
+    </svg>
+  );
+}
+
+export function ShardIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="11" width="7" height="18" rx="1.5" />
+      <rect x="17" y="11" width="7" height="18" rx="1.5" />
+      <rect x="26" y="11" width="6" height="18" rx="1.5" />
+      <path d="M11.5 16h0M20.5 20h0M29 24h0" />
+    </svg>
+  );
+}
+
+export function SelectIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="10" width="16" height="20" rx="2" />
+      <circle cx="27" cy="27" r="5" />
+      <path d="m30.5 30.5 3 3" />
+      <path d="M13 16h8M13 21h8" />
+    </svg>
+  );
+}
+
+export function InsertIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="10" width="22" height="20" rx="2" />
+      <path d="M9 17h22" />
+      <path d="M20 13v8M16 17h8" />
+    </svg>
+  );
+}
+
+export function UpdateDbIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="10" width="18" height="20" rx="2" />
+      <path d="M13 16h8M13 21h6" />
+      <path d="M28 14a7 7 0 1 1-3 13" />
+      <path d="m30 12-2 2 2 2" />
+    </svg>
+  );
+}
+
+export function DeleteDbIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="10" width="22" height="20" rx="2" />
+      <path d="M9 17h22" />
+      <path d="M16 22l8-8M24 22l-8-8" />
+    </svg>
+  );
+}
+
+export function BTreeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="10" r="3" />
+      <circle cx="12" cy="22" r="3" />
+      <circle cx="28" cy="22" r="3" />
+      <circle cx="8" cy="32" r="2.5" />
+      <circle cx="16" cy="32" r="2.5" />
+      <circle cx="24" cy="32" r="2.5" />
+      <circle cx="32" cy="32" r="2.5" />
+      <path d="M20 13v6M13.5 24l-4 6M12 25v4M28 25v4M26.5 24l4 6" />
+    </svg>
+  );
+}
+
 export function ChartIcon() {
   return (
     <svg {...ICON_BASE} aria-hidden>

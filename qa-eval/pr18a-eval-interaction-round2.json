@@ -1,0 +1,104 @@
+{
+  "step": "pr18a",
+  "round": 2,
+  "phase": "eval-interaction-round2",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-120",
+  "ts": "2026-05-04T01:33:22Z",
+  "verdict": "REVISE",
+  "pr_number": null,
+  "pr_url": null,
+  "branch": "feat/preview-inline-ch07-q1-q4",
+  "commit_under_test": "98fa545deedf2ac8015e1bae30d4c08637ee9aab",
+  "target_fix_commit": "dadb3f6a3f334489e71166a349879f5723af08ac",
+  "scope": {
+    "focus": "HANDOFF-pr18a-round2.md §C interaction verification for ch07_q01~q04 plus one ch06 regression spot-check.",
+    "build": {
+      "client": "PASS (cd client && npm install --no-audit --no-fund && npm run build)",
+      "server": "PASS (cd server && npm install --no-audit --no-fund && npm run build)"
+    },
+    "dev_server": "PASS (cd client && npm run dev -- --host 127.0.0.1 --port 5184)",
+    "raw_hex_grep": "PASS (0 matches in client/src/demos/ch07/*.tsx and relevant shared files)",
+    "shared_import_grep": "PASS (ch07 demo modules only import ../_shared and ../types)",
+    "raw_abbrev_grep": "REVISE (5 `DB` matches remain in ch07 source: Q01 hero eyebrow/title/log strings, Q03 lane title, Q04 hero eyebrow)",
+    "label_length_check": "PASS (all ch07 component labels <= 8 chars and subs <= 16 chars; ch07 scenario chip labels in client/src/data/demos.ts also stay within 8 chars)",
+    "validate_pair_set": [
+      "Q01DbType uses PairVertical + validatePairSet(..., { layout: 'square', subPolicy: 'all' })",
+      "Q02Crud uses PairMatch + validatePairSet(..., { layout: 'wide', subPolicy: 'all' })",
+      "Q03Acid uses PairMatch + validatePairSet(..., { layout: 'wide', subPolicy: 'all' })",
+      "Q04Index uses PairFlow + validatePairSet(..., { layout: 'wide', subPolicy: 'all' })"
+    ],
+    "scenario_alignment": [
+      "ch07_q01 demos.ts ids match SCENES: rdbms, document, join, shard",
+      "ch07_q02 demos.ts ids match SCENES: select, insert, update, delete",
+      "ch07_q03 demos.ts ids match SCENES: atomic, consistent, isolated, durable",
+      "ch07_q04 demos.ts ids match SCENES: scan, btree, range, cost",
+      "registry.ts maps ch07_q01~q04 to Q01DbType/Q02Crud/Q03Acid/Q04Index with square, wide, wide, wide layouts"
+    ],
+    "deep_link_guards": [
+      "LearnPage reads window.location.hash and seeds scenarioId only when the hash matches a declared demo scenario",
+      "PreviewPanel writes inline scenario changes through window.history.replaceState(null, '', `#${nextScenarioId}`)",
+      "Inline demos receive key `${qaId}:${scenarioId}` so hash changes remount the selected scene"
+    ],
+    "runtime_checks": [
+      "/library/7/ch07_q01#join renders inline (iframeCount=0), shows the join title on entry, and clicking `분산 확장` rewrites the hash to #shard and swaps the hero title",
+      "/library/7/ch07_q02#update renders inline, preserves #update on entry, and clicking `삭제` rewrites the hash to #delete and swaps the hero title",
+      "/library/7/ch07_q03#isolated renders inline, preserves #isolated on entry, and clicking `지속성` rewrites the hash to #durable and swaps the hero title",
+      "/library/7/ch07_q04#btree renders inline, preserves #btree on entry, and clicking `쓰기 비용` rewrites the hash to #cost and swaps the hero title",
+      "Regression spot-check: /library/6/ch06_q10#kernel preserves the deep link and clicking `로그인 화면` rewrites the hash to #login with the corresponding title change"
+    ],
+    "console_health": "PASS (Playwright recorded consoleErrors=[], pageErrors=[], badResponses=[]; excluded favicon 404 did not occur)"
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "Client and server builds both succeeded after the required npm installs on the detached PR head."
+    },
+    {
+      "id": "I2",
+      "result": "PASS",
+      "evidence": "Raw hex grep over the new ch07 demos returned 0 matches."
+    },
+    {
+      "id": "I3",
+      "result": "PASS",
+      "evidence": "The ch07 demo modules only import from ../_shared and ../types; no forbidden local shared-contract drift was introduced."
+    },
+    {
+      "id": "I4",
+      "result": "REVISE",
+      "evidence": "The required raw-abbreviation cleanup is incomplete. `DB` still appears five times in ch07 source strings, so the handoff's `raw 약자 0건` criterion is not met even though validatePairSet/layout contracts are correct."
+    },
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "All four ch07 demos resolve `SCENES[scenarioId] ?? defaultScene`, and demos.ts scenario ids match the component SCENES exactly."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "The registry maps q01 square + q02~q04 wide exactly as required, with PairVertical/PairMatch/PairMatch/PairFlow matching the handoff."
+    },
+    {
+      "id": "I7",
+      "result": "PASS",
+      "evidence": "Playwright on http://127.0.0.1:5184 preserved direct deep links for ch07_q01~q04, rewrote hashes on scenario-chip clicks, rendered inline without iframes, and emitted no console/page/network errors."
+    },
+    {
+      "id": "I8",
+      "result": "PASS",
+      "evidence": "The ch06_q10 regression spot-check kept the deep-link guard behavior intact (`#kernel` -> click `로그인 화면` => `#login`) while the evaluated diff only touched ch07 files, demos metadata, registry, and icon additions."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [
+    "I4-raw-abbrev: replace the remaining raw `DB` strings in ch07 source (`client/src/demos/ch07/Q01DbType.tsx`, `client/src/demos/ch07/Q03Acid.tsx`, `client/src/demos/ch07/Q04Index.tsx`) with fully written Korean labels so the `raw 약자 0건` contract passes."
+  ],
+  "notes": [
+    "The branch head under test is wrapper commit 98fa545, but git diff dadb3f6..HEAD shows only HANDOFF-pr18a-round2.md; the evaluated application code is unchanged from dadb3f6.",
+    "ao session claim-pr 18 failed because GitHub PR #18 is already merged. Evaluation proceeded against the branch and commit explicitly named in the round-2 handoff.",
+    "gh pr list --head feat/preview-inline-ch07-q1-q4 returned no open PR at evaluation time."
+  ]
+}

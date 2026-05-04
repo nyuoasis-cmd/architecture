@@ -489,10 +489,10 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch07/q01.html',
     description: 'RDBMS와 NoSQL이 구조, 확장, 조회 방식에서 어떻게 다른지 비교합니다.',
     scenarios: [
-      { id: 'schema', label: '정해진 칸' },
+      { id: 'rdbms', label: '정해진 칸' },
       { id: 'document', label: '유연한 문서' },
       { id: 'join', label: '관계 연결' },
-      { id: 'scale', label: '분산 확장' },
+      { id: 'shard', label: '분산 확장' },
     ],
   },
   {
@@ -526,7 +526,7 @@ export const DEMOS: DemoMeta[] = [
     description: '전체 스캔과 인덱스 탐색의 차이를 단계별로 보여줍니다.',
     scenarios: [
       { id: 'scan', label: '전체 훑기' },
-      { id: 'tree', label: '가지 따라가기' },
+      { id: 'btree', label: '가지 따라가기' },
       { id: 'range', label: '범위 찾기' },
       { id: 'cost', label: '쓰기 비용' },
     ],

@@ -37,6 +37,10 @@ import Q07VirtualMemory from './ch06/Q07VirtualMemory';
 import Q08FileSystem from './ch06/Q08FileSystem';
 import Q09Driver from './ch06/Q09Driver';
 import Q10BootSequence from './ch06/Q10BootSequence';
+import Q01DbType from './ch07/Q01DbType';
+import Q02Crud from './ch07/Q02Crud';
+import Q03Acid from './ch07/Q03Acid';
+import Q04Index from './ch07/Q04Index';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -79,6 +83,10 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch06_q08: { Component: Q08FileSystem, layout: 'wide' },
   ch06_q09: { Component: Q09Driver, layout: 'wide' },
   ch06_q10: { Component: Q10BootSequence, layout: 'wide' },
+  ch07_q01: { Component: Q01DbType, layout: 'square' },
+  ch07_q02: { Component: Q02Crud, layout: 'wide' },
+  ch07_q03: { Component: Q03Acid, layout: 'wide' },
+  ch07_q04: { Component: Q04Index, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
