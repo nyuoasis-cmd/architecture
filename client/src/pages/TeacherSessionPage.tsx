@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Navigate, useParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import QrInline from '../components/common/QrInline';
 import ParticipantList from '../components/teacher/ParticipantList';
 import { CHAPTERS, getQasByChapterId } from '../data/qa-stubs';
@@ -8,6 +8,7 @@ import { useSessionStore } from '../store/session-store';
 
 export default function TeacherSessionPage() {
   const { id = '' } = useParams();
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isEnding, setIsEnding] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
@@ -121,7 +122,15 @@ export default function TeacherSessionPage() {
               참여자 {participants.length}명
             </span>
           </div>
-          <div className="mt-6">
+          <div className="mt-6 flex flex-wrap gap-2">
+            <button
+              className="inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white disabled:bg-stone-300"
+              disabled={currentSession.status === 'ended'}
+              onClick={() => navigate(`/learn/${currentSession.id}?role=teacher`)}
+              type="button"
+            >
+              ▶ 수업 시연 시작
+            </button>
             <button
               className="inline-flex min-h-11 items-center rounded-2xl bg-rose-600 px-5 text-sm font-medium text-white"
               disabled={isEnding || currentSession.status === 'ended'}

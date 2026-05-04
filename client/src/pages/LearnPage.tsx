@@ -111,6 +111,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
   );
   const [sessionError, setSessionError] = useState<{ status?: number; message: string } | null>(null);
 
+  const isTeacherPreview = mode === 'session' && searchParams.get('role') === 'teacher';
   const chapterId = Number(params.chapterId);
   const qaId = params.qaId ?? '';
 
@@ -162,7 +163,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
     setSessionStatus('loading');
     setSessionError(null);
 
-    getSession(params.sessionId)
+    getSession(params.sessionId, isTeacherPreview ? { teacher: true } : undefined)
       .then((session) => {
         if (!cancelled) {
           setCurrentSession(session);
@@ -171,7 +172,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
       })
       .catch((caught) => {
         if (!cancelled) {
-          if (caught instanceof SessionClientError && caught.status === 401) {
+          if (caught instanceof SessionClientError && caught.status === 401 && !isTeacherPreview) {
             clearSessionTokenHint();
           }
 
@@ -186,10 +187,10 @@ export default function LearnPage({ mode }: LearnPageProps) {
     return () => {
       cancelled = true;
     };
-  }, [mode, params.sessionId, setCurrentSession]);
+  }, [mode, params.sessionId, setCurrentSession, isTeacherPreview]);
 
   useEffect(() => {
-    if (mode !== 'session' || !qa || !currentSession || currentSession.id !== params.sessionId) {
+    if (mode !== 'session' || isTeacherPreview || !qa || !currentSession || currentSession.id !== params.sessionId) {
       return;
     }
 
@@ -214,15 +215,15 @@ export default function LearnPage({ mode }: LearnPageProps) {
     return () => {
       cancelled = true;
     };
-  }, [currentSession, mode, params.sessionId, qa, updateViewerProgress, viewerProgress]);
+  }, [currentSession, isTeacherPreview, mode, params.sessionId, qa, updateViewerProgress, viewerProgress]);
 
   if (mode === 'session') {
     if (sessionStatus === 'error' && sessionError?.status === 410) {
-      return <Navigate replace to="/join?closed=1" />;
+      return <Navigate replace to={isTeacherPreview ? `/teacher/session/${params.sessionId}` : '/join?closed=1'} />;
     }
 
     if (sessionStatus === 'error' && sessionError?.status === 401) {
-      return <Navigate replace to="/join?expired=1" />;
+      return <Navigate replace to={isTeacherPreview ? '/forbidden' : '/join?expired=1'} />;
     }
 
     if (
