@@ -1,0 +1,47 @@
+{
+  "step": "pr3-5",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-167",
+  "ts": "2026-05-04T14:41:52Z",
+  "branch": "codex/eval-visual-pr3-5-r1",
+  "evaluated_branch": "ao/teacher-explain-glossary",
+  "evaluated_commit": "a3660a931a0bed556b8b0103af482d42c81c9503",
+  "verdict": "FAIL",
+  "fail_items": [
+    "V1-first-glossary-underline: `/learn/11111111-1111-4111-8111-111111111111?role=teacher&qa=ch01_q02`에서 TeacherExplainPanel은 렌더되지만 `.glossary-term` DOM이 0개라 `CPU`, `RAM`, `운영체제` 첫 등장에 점선 밑줄이 전혀 생기지 않는다.",
+    "V2-desktop-tooltip: 데스크탑 1440x900에서 hover 가능한 `.glossary-term` 자체가 0개이고 `.glossary-tooltip`도 0개라 tooltip 노출과 oneline 확인 경로가 없다.",
+    "V3-mobile-bottom-sheet: 모바일 393x852에서 설명 노트 패널은 열리지만 term trigger가 없어 tap으로 bottom sheet를 띄울 수 없다. `.glossary-sheet` count도 0으로 유지된다."
+  ],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1",
+      "verdict": "FAIL",
+      "evidence": "Stubbed teacher preview route with dev-auth localStorage and mocked `/api/sessions/:id`, `/api/teacher-explain/ch01_q02`. Explain panel rendered (`explainPanelCount=1`) and concept text containing `CPU, RAM, SSD` was visible (`cpuTextVisible=2`), but desktop metrics recorded `glossaryTermCount=0` and `tooltipCount=0`."
+    },
+    {
+      "id": "V2",
+      "verdict": "FAIL",
+      "evidence": "At 1440x900, there were no glossary trigger buttons to hover. The rendered HTML for `.teacher-explain-panel` contains plain paragraph text instead of any `glossary-term` wrapper/button markup, so tooltip behavior could not occur."
+    },
+    {
+      "id": "V3",
+      "verdict": "FAIL",
+      "evidence": "At 393x852, the teacher explain panel rendered after tapping `📱 시연` then `📝 설명 노트`, but `glossaryTermCount=0` and `sheetCountBeforeTap=0`. Because no term trigger exists, the required 30vh slide-up sheet is unreachable."
+    }
+  ],
+  "artifacts": {
+    "metrics": "/tmp/pr3-5-r1-eval-visual/metrics.json",
+    "desktop_screenshot": "/tmp/pr3-5-r1-eval-visual/desktop-explain.png",
+    "mobile_screenshot": "/tmp/pr3-5-r1-eval-visual/mobile-explain.png",
+    "browser": "playwright-core + system Chrome (/usr/bin/google-chrome)",
+    "base_url": "http://127.0.0.1:3008"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr3-5-round1.md` §B만 따랐다.",
+    "평가 대상 HEAD는 `ao/teacher-explain-glossary`의 `a3660a931a0bed556b8b0103af482d42c81c9503`였고, eval worktree branch는 `codex/eval-visual-pr3-5-r1`이다.",
+    "Client-only Vite dev server를 3008 포트로 띄우고, teacher preview 진입에 필요한 `/api/sessions/:id`와 `/api/teacher-explain/:qaId`는 브라우저 route fulfill로만 stub했다. 코드나 런타임 bundle은 수정하지 않았다."
+  ]
+}
