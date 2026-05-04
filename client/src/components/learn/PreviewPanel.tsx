@@ -1,4 +1,5 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import QrFullscreen from '../common/QrFullscreen';
 import type { DemoMeta } from '../../data/demos';
 import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
@@ -14,6 +15,7 @@ type PreviewPanelProps = {
   quizProps?: {
     onScore?: (score: number) => void;
   };
+  sessionCode?: string;
 };
 
 export default function PreviewPanel({
@@ -23,10 +25,12 @@ export default function PreviewPanel({
   onScenarioChange,
   initialTab = 'demo',
   quizProps,
+  sessionCode,
 }: PreviewPanelProps) {
   const inlineHostRef = useRef<HTMLDivElement>(null);
   const previewTab = useLearnStore((state) => state.previewTab);
   const setPreviewTab = useLearnStore((state) => state.setPreviewTab);
+  const [isQrOpen, setIsQrOpen] = useState(false);
 
   useEffect(() => {
     setPreviewTab(initialTab);
@@ -88,15 +92,30 @@ export default function PreviewPanel({
           </button>
         </div>
 
-        <div className="flex items-center gap-1" style={{ visibility: isDemo ? 'visible' : 'hidden' }}>
-          <button className="toolbar-btn" onClick={handleReload} title="처음 상태로" type="button">
-            ↺
-          </button>
-          <button className="toolbar-btn" onClick={handleFullscreen} title="전체화면" type="button">
-            ⛶
-          </button>
+        <div className="flex items-center gap-1">
+          {sessionCode ? (
+            <button
+              aria-label="QR 코드 보기"
+              className="toolbar-btn"
+              onClick={() => setIsQrOpen(true)}
+              title="QR 코드 (학생 참여)"
+              type="button"
+            >
+              QR
+            </button>
+          ) : null}
+          <span className="flex items-center gap-1" style={{ visibility: isDemo ? 'visible' : 'hidden' }}>
+            <button className="toolbar-btn" onClick={handleReload} title="처음 상태로" type="button">
+              ↺
+            </button>
+            <button className="toolbar-btn" onClick={handleFullscreen} title="전체화면" type="button">
+              ⛶
+            </button>
+          </span>
         </div>
       </div>
+
+      {isQrOpen && sessionCode ? <QrFullscreen code={sessionCode} onClose={() => setIsQrOpen(false)} /> : null}
 
       {isDemo ? (
         <div className="flex flex-1 flex-col overflow-auto px-4 py-6 lg:px-8">

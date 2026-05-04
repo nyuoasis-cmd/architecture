@@ -1,0 +1,55 @@
+import { useEffect } from 'react';
+import { QRCodeSVG } from 'qrcode.react';
+
+type QrFullscreenProps = {
+  code: string;
+  onClose: () => void;
+};
+
+export default function QrFullscreen({ code, onClose }: QrFullscreenProps) {
+  const joinUrl =
+    typeof window === 'undefined'
+      ? `https://architecture.teachermate.co.kr/join?code=${code}`
+      : `${window.location.origin}/join?code=${code}`;
+
+  useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
+  return (
+    <div
+      aria-modal="true"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6"
+      onClick={onClose}
+      role="dialog"
+    >
+      <div
+        className="relative flex w-full max-w-md flex-col items-center gap-5 rounded-3xl bg-white p-8 shadow-[0_30px_80px_rgba(28,25,23,0.32)]"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
+          aria-label="닫기"
+          className="absolute right-4 top-4 inline-flex h-9 w-9 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100"
+          onClick={onClose}
+          type="button"
+        >
+          ✕
+        </button>
+        <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Join</p>
+        <div className="rounded-2xl border border-[var(--color-border)] bg-white p-3">
+          <QRCodeSVG bgColor="#ffffff" fgColor="#111827" includeMargin size={320} value={joinUrl} />
+        </div>
+        <div className="text-center">
+          <div className="font-mono text-3xl tracking-[0.4em] text-stone-950">{code}</div>
+          <div className="mt-2 break-all text-xs text-stone-500">{joinUrl}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
