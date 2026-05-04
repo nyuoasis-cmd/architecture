@@ -1,0 +1,55 @@
+{
+  "step": "pr3",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-164",
+  "ts": "2026-05-04T14:05:50Z",
+  "branch": "codex/pr3-r1-eval-visual",
+  "commit": "b0a4a48077f3428fd92741785a10ab2c6b1c14af",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1",
+      "verdict": "PASS",
+      "evidence": "`ch01_q01~q04`의 `tldr/goal/cue/concept/mechanism/realLife/beforeDemo/misconception/note/advanced.*` 길이를 스크립트로 점검했다. `tldr`는 모두 31자, 본문 필드는 각 제한(`goal <= 200`, `concept/mechanism <= 300`, `advanced.* <= 500` 등) 안에 있었고 `relatedQas`는 `q01~q02=2개`, `q03~q04=3개`였다."
+    },
+    {
+      "id": "V2",
+      "verdict": "PASS",
+      "evidence": "프롬프트 배열은 4개 문항 모두 3개였다. 각 `q`는 15~42자, 각 `a`는 71~96자로 `q <= 80`, `a <= 200`, `prompts 3~5` 규칙을 모두 만족했다."
+    },
+    {
+      "id": "V3",
+      "verdict": "PASS",
+      "evidence": "`rg -n '합니다' server/src/data/teacher-explain/ch01_q0[1-4].ts` 결과가 비어 있었다. `~합니다` 종결은 4개 파일에서 검출되지 않았다."
+    },
+    {
+      "id": "V4",
+      "verdict": "PASS",
+      "evidence": "`client/src/data/qa-stubs.ts`의 `ch01_q01~q04 body`와 `server/src/data/teacher-explain/ch01_q01~q04.ts` 전체 설명 텍스트를 8-gram으로 비교했다. 4개 문항 모두 `overlap_pct = 0.00`이었고 일치하는 8-gram이 없었다."
+    },
+    {
+      "id": "V5",
+      "verdict": "PASS",
+      "evidence": "개발 서버에서 `/api/sessions/8689b713-fa9a-49d2-a627-a95c96281bd2`와 `/api/teacher-explain/ch01_q02?sessionId=8689b713-fa9a-49d2-a627-a95c96281bd2`를 dev teacher header로 호출해 둘 다 200을 확인했다. `teacher-explain` 응답은 `qaId,tldr,misconception,relatedQas,goal,cue,concept,mechanism,realLife,prompts,beforeDemo,note,advanced,demoTip` 14개 키를 반환했고, `/learn/8689b713-fa9a-49d2-a627-a95c96281bd2?role=teacher&qa=ch01_q02`의 `📝 설명 노트` 탭에서 `세션 주인 전용`, `tldr`, 목표/멘트/개념/작동/실생활/학생 질문/오개념/체크/메모, 관련 Q&A, `작동 원리`, `시연 운영 팁`까지 모두 렌더됐다."
+    },
+    {
+      "id": "VR1",
+      "verdict": "PASS",
+      "evidence": "Playwright로 `q01~q04`를 각각 teacher preview로 열어 spot-check 했다. 4개 모두 `.teacher-explain-panel`과 `.teacher-explain-related`가 정상 렌더됐고, 카드 수는 모두 12개였으며 `scrollWidth == clientWidth == 1440`, `badBoxesCount == 0`으로 가로 오버플로나 잘린 카드가 없었다."
+    }
+  ],
+  "artifacts": {
+    "browser": "Playwright 1.58.0 + /usr/bin/google-chrome",
+    "base_url": "http://127.0.0.1:5176",
+    "api_session_id": "8689b713-fa9a-49d2-a627-a95c96281bd2"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr3-round1.md` §B만 따랐다.",
+    "평가 대상 구현은 `ao/teacher-explain-pr3`의 `b0a4a48077f3428fd92741785a10ab2c6b1c14af` 커밋이다.",
+    "dev visual 재현을 위해 `server`는 `PORT=3004`로 띄우고, `client`는 `localhost:3003 -> 127.0.0.1:3004` 포워더를 통해 기존 Vite proxy 경로(`/api`)를 유지했다. 제품 코드는 수정하지 않았다."
+  ]
+}
