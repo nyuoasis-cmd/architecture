@@ -1,0 +1,1 @@
+{"status":"done","step":"pr20b","role":"gen","model":"codex","session_id":"arch-138","ts":"2026-05-04T04:19:48Z","branch":"codex/pr20b","commit":"007174fd16de71a9d823fce32274c9308737bb02","pr":"https://github.com/nyuoasis-cmd/architecture/pull/65","loc":"+244 -2","note":"ch09_q05 PairFlow wide 및 ch09_q06 PairMatch wide 인라인 데모 추가. registry/demos 연결과 q05 시나리오 한국어 라벨 정리 완료."}

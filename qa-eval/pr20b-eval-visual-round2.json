@@ -1,0 +1,73 @@
+{
+  "step": "pr20b",
+  "round": 2,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-141",
+  "ts": "2026-05-04T04:35:38Z",
+  "branch": "feat/preview-inline-ch09-q5-q6",
+  "commit": "3559dd74e40145cdba1f9a5669f6ebaba3a04986",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame",
+      "verdict": "PASS",
+      "evidence": "`/library/9/ch09_q05`~`ch09_q06` desktop/mobile과 회귀 spot-check `/library/9/ch09_q01`~`ch09_q04` desktop에서 모두 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`, `console error=0`, `pageerror=0`이었다. 신규 q05~q06과 기존 q01~q04 모두 React 인라인 preview로 정상 렌더링됐다."
+    },
+    {
+      "id": "V2-desktop-layout",
+      "verdict": "PASS",
+      "evidence": "1440x900에서 신규 `ch09_q05`, `ch09_q06`의 inline host 폭은 모두 `776px`였고 hero 시작점은 둘 다 `73px`였다. 첫 step row의 grid는 두 route 모두 `177.5px 177.5px 177.5px 177.5px` 4열로 유지돼 wide PairFlow/PairMatch 배치가 안정적이었다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "시나리오 탭 클릭 시 hash, active tab, preview hero가 함께 바뀌었다. q05는 `request/요청/요청이 몰릴 때...` → `enqueue/큐 적재/적재 단계는...` → `worker/워커/워커는 쌓인...` → `burst/버스트/버퍼는 폭주 순간...`, q06은 `measure/병목 측정/확장은 장비부터...` → `scale-up/수직 확장/한 대가 너무 약하면...` → `scale-out/수평 확장/요청이 꾸준히 많다면...` → `mix/혼합 전략/실전에서는 한 번의 정답보다...` 순으로 정확히 동기화됐다."
+    },
+    {
+      "id": "V4-contrast-indigo700",
+      "verdict": "PASS",
+      "evidence": "ch09 tone은 `--demo-accent-ch09=#4f46e5`, `--demo-accent-soft-ch09=#eef2ff`였고 accent 대비비는 white 기준 `6.29:1`로 WCAG AA `4.5:1`을 넘겼다. 신규 시나리오 탭 라벨도 `요청/큐 적재/워커/버스트`, `병목 측정/수직 확장/수평 확장/혼합 전략`으로 raw 약자 단독 노출이 없었다."
+    },
+    {
+      "id": "V5-layout-contract",
+      "verdict": "PASS",
+      "evidence": "registry 계약과 실제 host 폭이 일치했다. 회귀 `ch09_q01`은 `square=640px`, `ch09_q02`~`ch09_q04`는 `wide=776px`, 신규 `ch09_q05`~`ch09_q06`도 모두 `wide=776px`로 렌더됐다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "신규 q05, q06의 preview host 내부 SVG 수는 desktop에서 각각 `16/16 visible`이었다. mobile에서는 두 route 모두 `16개 중 10개 visible`이었는데, 이는 `sm:block` 화살표/커넥터가 접히며 숨는 정상 동작이고 아이콘 카드 본체는 모두 남아 있었다."
+    },
+    {
+      "id": "V7-regression-ch09-q01-q04",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check로 `/library/9/ch09_q01`~`ch09_q04`를 다시 열었다. 네 route 모두 `console error=0`, `pageerror=0`, indigo tone 유지였고 host 폭도 q01 `640px`, q02~q04 `776px`로 기존 계약이 깨지지 않았다. SVG visibility도 q01 `6/6`, q02~q04 `16/16`으로 정상 렌더링됐다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852에서 outer `📱 시연` 탭 전환 후 신규 q05, q06 모두 scenario tablist bottom이 `182.39px`, hero top이 `247.17px`였다. 두 route 모두 첫 모바일 viewport 안에 시나리오 칩과 hero가 함께 들어왔다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "393x852 mobile에서 신규 q05, q06의 첫 step row는 둘 다 `155.5px 155.5px` 2열로 축소됐다. inline host 폭은 `361px`, `document.documentElement.scrollWidth`는 `393px`로 viewport와 같아 가로 스크롤이 없었다."
+    }
+  ],
+  "artifacts": {
+    "metrics": "/tmp/pr20b-r2-eval-visual/metrics.json",
+    "screenshots_dir": "/tmp/pr20b-r2-eval-visual",
+    "browser": "playwright-core + system Chrome (/usr/bin/google-chrome)",
+    "base_url": "http://127.0.0.1:4173"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr20b-round2.md` §B만 따랐다.",
+    "평가 대상 구현 커밋은 `3559dd74e40145cdba1f9a5669f6ebaba3a04986` (`feat/preview-inline-ch09-q5-q6`) 이다.",
+    "앱은 Vite dev server `http://127.0.0.1:4173`에서 구동했고 브라우저 자동화는 `playwright-core`와 system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "시각 평가 노이즈를 줄이기 위해 harness에서 `service-nav.js`와 `/favicon.ico`만 stub 했고, 데모 렌더/스타일/DOM 자체는 수정하지 않았다.",
+    "캡처 산출물: `/tmp/pr20b-r2-eval-visual/ch09_q05-desktop.png`, `/tmp/pr20b-r2-eval-visual/ch09_q06-desktop.png`, `/tmp/pr20b-r2-eval-visual/ch09_q05-mobile.png`, `/tmp/pr20b-r2-eval-visual/ch09_q06-mobile.png`, `/tmp/pr20b-r2-eval-visual/ch09_q01-desktop.png`, `/tmp/pr20b-r2-eval-visual/ch09_q02-desktop.png`, `/tmp/pr20b-r2-eval-visual/ch09_q03-desktop.png`, `/tmp/pr20b-r2-eval-visual/ch09_q04-desktop.png`."
+  ]
+}
