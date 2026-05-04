@@ -1,0 +1,71 @@
+{
+  "step": "pr17c",
+  "round": 3,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-115",
+  "ts": "2026-05-04T01:11:33Z",
+  "branch": "feat/preview-inline-ch06-q8-q10",
+  "commit": "07aee738454e7524360de0f8f12720eb83679708",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame-regression",
+      "verdict": "PASS",
+      "evidence": "`/library/6/ch06_q05~q10`와 spot-check `/library/6/ch06_q04` 모두 desktop/mobile에서 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`, `pageerror=0`으로 import-time exception 없이 인라인 렌더링됐다."
+    },
+    {
+      "id": "V2-desktop-3col-structure",
+      "verdict": "PASS",
+      "evidence": "`ch06_q08~q10` desktop 1440x900에서 학습/채팅/시연 컬럼 폭이 모두 `280/320/840px`였고, demo section top 좌표도 `129 < 264.8 < 613.8 < 753.5`로 hero → pair → state → log 순서를 유지했다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "`ch06_q08~q10`의 시나리오 탭 13개를 전부 클릭해 확인했다. 각 탭마다 hash가 `#folders/#inode/...`, `#request/#translate/...`, `#power/#firmware/.../#login`으로 바뀌었고, 두 pair row의 활성 index도 각각 `0/0 → 1/1 → ...`로 항상 동기화됐다."
+    },
+    {
+      "id": "V4-contrast-red700",
+      "verdict": "PASS",
+      "evidence": "`ch06_q08~q10` 활성 라벨 색 `rgb(185, 28, 28)`와 활성 배경 `rgb(254, 242, 242)`의 대비비가 모두 `5.91:1`로 WCAG AA `4.5:1` 기준을 넘겼다."
+    },
+    {
+      "id": "V5-width-wide-860",
+      "verdict": "PASS",
+      "evidence": "`ch06_q08~q10` desktop에서 실제 pair section 폭이 모두 `776px`로 측정돼 wide preset(`max-w-[860px]`) 안에서 중앙 정렬을 유지했다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "`ch06_q08~q09` 각 row SVG는 `7개`, `ch06_q10`은 `9개`였고 활성 아이콘 색과 활성 라벨 색이 모두 `rgb(185, 28, 28)`로 일치했다."
+    },
+    {
+      "id": "V7-baseline-regression",
+      "verdict": "PASS",
+      "evidence": "기존 `ch06_q05~q07` desktop/mobile을 다시 확인한 결과 `pageerror=0`, `iframe=0`, red-700 active tone, mobile 2열 grid가 그대로 유지됐다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852 모바일에서 시나리오 tablist bottom이 `ch06_q08=276.8px`, `ch06_q09=238.4px`, `ch06_q10=276.8px`, spot-check `ch06_q04=276.8px`로 모두 first viewport 안에 들어왔다."
+    },
+    {
+      "id": "V9-mobile-grid-and-q10-five-step",
+      "verdict": "PASS",
+      "evidence": "`ch06_q08~q09` mobile pair row는 모두 `gridTemplateColumns=\"155.5px 155.5px\"` 2열이었다. `ch06_q10`은 desktop에서 두 row 모두 `140.391/140.406px x5` 5열, mobile에서는 두 row 모두 `155.5px 155.5px` 2열로 wrap 됐다. spot-check `ch06_q04`의 5칸 row 2개도 mobile에서 `155.5px 155.5px` 2열이며 5번째 카드가 마지막 행에 단독 wrap 됐다."
+    },
+    {
+      "id": "POST-label-fix",
+      "verdict": "PASS",
+      "evidence": "`ch06_q10` IT row 첫 라벨이 desktop/mobile 모두 `POST 진단`으로 렌더링됐고, 이전 `POST 자가진단` 표기는 보이지 않았다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr17c-round3.md` §B만 따랐다.",
+    "대상 구현 SHA는 `07aee738454e7524360de0f8f12720eb83679708`로 검증했다. 현재 브랜치 HEAD `e3690b2`와의 diff는 `HANDOFF-pr17c-round3.md` 추가뿐이라 앱 코드에는 영향이 없었다.",
+    "실측은 detached worktree `/tmp/architecture-pr17c-visual`에서 `npm run dev`로 Vite를 `http://127.0.0.1:5188`에 띄운 뒤 Playwright + system Chrome(`/usr/bin/google-chrome`)로 수행했다.",
+    "산출물은 `/tmp/pr17c-r3-eval-visual/metrics.json`과 PNG 캡처들(`ch06_q08~q10`, `ch06_q04~q07` desktop/mobile)로 남겼다."
+  ]
+}
