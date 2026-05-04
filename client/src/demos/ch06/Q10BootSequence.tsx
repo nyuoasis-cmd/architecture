@@ -84,7 +84,7 @@ const METAPHOR = [
 ];
 
 const IT = [
-  { icon: <Icons.PostIcon />, label: 'POST 자가진단', sub: '하드 점검' },
+  { icon: <Icons.PostIcon />, label: 'POST 진단', sub: '하드 점검' },
   { icon: <Icons.BiosIcon />, label: 'BIOS 펌웨어', sub: '부팅 프로그램' },
   { icon: <Icons.BootloaderIcon />, label: '부트로더', sub: 'GRUB/LILO' },
   { icon: <Icons.KernelItIcon />, label: '커널 적재', sub: 'kernel load' },
