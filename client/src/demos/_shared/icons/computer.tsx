@@ -573,6 +573,30 @@ export function NormalizeIcon() {
   );
 }
 
+export function UnnormalizedIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="24" height="20" rx="2" />
+      <path d="M8 17h24M8 24h24M16 10v20M24 10v20" />
+      <path d="M20 10v20" opacity="0.5" />
+    </svg>
+  );
+}
+
+export function ThirdNfIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="8" height="20" rx="2" />
+      <rect x="20" y="10" width="12" height="8" rx="2" />
+      <rect x="20" y="22" width="12" height="8" rx="2" />
+      <path d="M16 20h4M26 18v4" />
+      <text x="11.5" y="22.5" fontSize="6" textAnchor="middle" fill="currentColor" stroke="none" fontWeight="700">
+        3
+      </text>
+    </svg>
+  );
+}
+
 export function QueryBalanceIcon() {
   return <BalanceItIcon />;
 }
@@ -782,6 +806,51 @@ export function DurabilityIcon() {
       <path d="M10 11h20v18H10z" />
       <path d="M15 11V8h10v3" />
       <path d="M15 24l3 3 7-7" />
+    </svg>
+  );
+}
+
+export function DirtyReadIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="9" height="20" rx="2" />
+      <rect x="23" y="10" width="9" height="20" rx="2" />
+      <path d="M17 20h6" />
+      <path d="M13 16h0M27 24h0" />
+      <path d="m18 18 2 2 3-4" opacity="0.5" />
+    </svg>
+  );
+}
+
+export function ReadCommittedIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="10" width="14" height="20" rx="2" />
+      <path d="M13 16h6M13 21h6" />
+      <path d="m23 20 3 3 6-7" />
+    </svg>
+  );
+}
+
+export function RepeatableReadIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="10" height="20" rx="2" />
+      <rect x="22" y="10" width="10" height="20" rx="2" />
+      <path d="M12 16h2M12 21h2M26 16h2M26 21h2" />
+      <path d="M18 20h4" />
+    </svg>
+  );
+}
+
+export function SerializableIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="10" y="9" width="6" height="22" rx="2" />
+      <rect x="18" y="9" width="6" height="22" rx="2" />
+      <rect x="26" y="9" width="4" height="22" rx="2" />
+      <path d="M13 14h0M21 20h0M28 26h0" />
+      <path d="M10 7h20" />
     </svg>
   );
 }

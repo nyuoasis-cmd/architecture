@@ -549,10 +549,10 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch07/q06.html',
     description: '동시 작업 충돌을 얼마나 허용할지 격리 수준별로 비교합니다.',
     scenarios: [
-      { id: 'dirty', label: '더티 리드' },
-      { id: 'committed', label: 'Read Committed' },
-      { id: 'repeatable', label: 'Repeatable Read' },
-      { id: 'serial', label: 'Serializable' },
+      { id: 'dirty', label: '더티 읽기' },
+      { id: 'committed', label: '커밋 읽기' },
+      { id: 'repeatable', label: '반복 읽기' },
+      { id: 'serial', label: '직렬화' },
     ],
   },
   {

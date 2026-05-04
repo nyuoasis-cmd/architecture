@@ -792,6 +792,38 @@ export function BrowseDbIcon() {
   );
 }
 
+export function TableSingleIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="24" height="20" rx="2" />
+      <path d="M8 17h24M16 10v20M24 10v20" />
+    </svg>
+  );
+}
+
+export function AnomalyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="10" height="20" rx="2" />
+      <rect x="22" y="10" width="10" height="20" rx="2" />
+      <path d="M17 20h6" />
+      <path d="M20 14v12" />
+    </svg>
+  );
+}
+
+export function NormalFormIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="8" height="20" rx="2" />
+      <rect x="20" y="10" width="12" height="8" rx="2" />
+      <rect x="20" y="22" width="12" height="8" rx="2" />
+      <path d="M16 20h4M26 18v4" />
+      <path d="m28 13 2 2 4-4" />
+    </svg>
+  );
+}
+
 export function BranchIcon() {
   return (
     <svg {...ICON_BASE} aria-hidden>
@@ -930,6 +962,38 @@ export function CommitIcon() {
       <circle cx="29" cy="20" r="3" />
       <path d="M14 20h12" />
       <path d="M20 12v16" />
+    </svg>
+  );
+}
+
+export function DirtyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 14h20v14H10z" />
+      <path d="M14 12c0-2 1-4 3-4 1 0 2 1 3 2s2 2 3 2c2 0 3-2 3-4" />
+      <path d="M14 20h8M14 24h12" />
+    </svg>
+  );
+}
+
+export function RepeatableIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="15" cy="20" r="6" />
+      <circle cx="25" cy="20" r="6" />
+      <path d="M15 12v-3M25 12v-3M15 28v3M25 28v3" />
+      <path d="M18 20h4" />
+    </svg>
+  );
+}
+
+export function SerialIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="10" y="9" width="6" height="22" rx="2" />
+      <rect x="18" y="9" width="6" height="22" rx="2" />
+      <rect x="26" y="9" width="4" height="22" rx="2" />
+      <path d="M13 15h0M21 20h0M28 25h0" />
     </svg>
   );
 }
