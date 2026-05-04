@@ -385,7 +385,7 @@ export async function createChatReply(input: {
       const response = await withTimeout(
         anthropic.messages.create({
           model: modelUsed,
-          max_tokens: 300,
+          max_tokens: 1500,
           temperature: 0.35,
           system: systemBlocks,
           messages: toAnthropicMessages(input.history, input.question),
