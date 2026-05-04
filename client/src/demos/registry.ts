@@ -56,6 +56,10 @@ import Q03Pattern from './ch09/Q03Pattern';
 import Q04Cache from './ch09/Q04Cache';
 import Q05Queue from './ch09/Q05Queue';
 import Q06Scaling from './ch09/Q06Scaling';
+import Q01CloudService from './ch10/Q01CloudService';
+import Q02Container from './ch10/Q02Container';
+import Q03K8s from './ch10/Q03K8s';
+import Q04AiHierarchy from './ch10/Q04AiHierarchy';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -117,6 +121,10 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch09_q04: { Component: Q04Cache, layout: 'wide' },
   ch09_q05: { Component: Q05Queue, layout: 'wide' },
   ch09_q06: { Component: Q06Scaling, layout: 'wide' },
+  ch10_q01: { Component: Q01CloudService, layout: 'square' },
+  ch10_q02: { Component: Q02Container, layout: 'wide' },
+  ch10_q03: { Component: Q03K8s, layout: 'wide' },
+  ch10_q04: { Component: Q04AiHierarchy, layout: 'square' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
