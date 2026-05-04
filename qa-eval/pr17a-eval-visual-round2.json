@@ -1,0 +1,40 @@
+{
+  "step": "pr17a",
+  "round": 2,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-104",
+  "ts": "2026-05-04T00:02:42Z",
+  "branch": "feat/preview-inline-ch06-q1-q4",
+  "commit": "6e6873e4ae85ee612ab490b9d2ab88b1c3d6e96d",
+  "verdict": "REVISE",
+  "fail_items": [],
+  "revise_items": [
+    "V9-mobile-grid"
+  ],
+  "checks": [
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "REVISE",
+      "evidence": "`/library/6/ch06_q04`를 393x852 모바일에서 외부 `📱 시연` 탭으로 연 뒤 측정한 결과, 비유/실제 두 pair row 모두 `className=\"grid grid-cols-1 gap-2 sm:grid-cols-5\"`, `gridTemplateColumns=\"319px\"`였다. 각 row의 5개 카드 left 좌표가 모두 `37px`로 동일하고 top 좌표만 `573→685→796→908→1019`, `1180→1292→1403→1515→1626`으로 증가해 2열이 아니라 single-column stack이 재현됐다."
+    },
+    {
+      "id": "V1/V2/V3/V5/V6/V7/V8-spotcheck",
+      "verdict": "PASS",
+      "evidence": "spot-check로 `/library/6/ch06_q01` 모바일을 확인했다. `iframe`, `.phone-frame`, `.phone-notch` count는 `0`이고 scenario tablist bottom은 `238px`로 first viewport 안에 있었다. pair row 두 개 모두 `gridTemplateColumns=\"155.5px 155.5px\"` 2열이며 child 좌표도 `left 37/201`, `top 513/624`와 `785/897`로 정상 분할됐다."
+    },
+    {
+      "id": "V4-contrast",
+      "verdict": "PASS",
+      "informational": true,
+      "evidence": "round 1 정책대로 informational만 유지했다. 현재 토큰은 `--demo-accent-ch06: #b91c1c`, soft 배경은 `#fef2f2`이고 대비비는 `5.91:1`로 WCAG AA `4.5:1`을 넘긴다. outdated spec의 `#dc2626` 불일치는 verdict에 반영하지 않았다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr17a-round2.md` §B만 따랐다.",
+    "핸드오프가 요구한 fix 커밋 `6e6873e4ae85ee612ab490b9d2ab88b1c3d6e96d`를 detached checkout해서 시각 검증했다.",
+    "원격 branch HEAD `c9ae093`와 fix commit diff는 `HANDOFF-pr17a-round2.md` 추가뿐이어서 시각 결과에는 영향이 없었다.",
+    "Vite dev server는 `http://127.0.0.1:5184`에서 구동했고 브라우저 자동화는 `npx -p puppeteer-core` + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "캡처 산출물: `/tmp/pr17a-r2-eval-visual/ch06_q04-mobile.png`, `/tmp/pr17a-r2-eval-visual/ch06_q04-desktop.png`, `/tmp/pr17a-r2-eval-visual/ch06_q01-mobile.png`."
+  ]
+}

@@ -1,0 +1,31 @@
+{
+  "step": "pr17a",
+  "round": 3,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-105",
+  "ts": "2026-05-04T00:12:39Z",
+  "branch": "feat/preview-inline-ch06-q1-q4",
+  "commit": "9e578d956b311d5a212731e0480fd583bb0578e8",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "`/library/6/ch06_q04`를 393x852 모바일에서 `📱 시연` 탭으로 연 뒤 측정한 결과, 비유/실제 두 pair row 모두 `className=\"grid grid-cols-2 gap-2 sm:grid-cols-5\"`, `gridTemplateColumns=\"155.5px 155.5px\"`였다. 각 row의 카드 좌표는 `left 37/200.5`, `top 573.2/684.7/796.2` 및 `957.1/1068.6/1180.1`로 2열 분할이 유지됐고, 5번째 카드는 마지막 행에 단독 wrap 됐다."
+    },
+    {
+      "id": "V1/V2/V3/V5/V6/V7/V8-spotcheck",
+      "verdict": "PASS",
+      "evidence": "spot-check로 `/library/6/ch06_q01` 모바일을 다시 확인했다. `iframe`, `.phone-frame`, `.phone-notch` count는 `0`이고 scenario tablist bottom은 `238.4px`로 first viewport 안에 있었다. pair row 두 개 모두 `gridTemplateColumns=\"155.5px 155.5px\"` 2열이며 child 좌표도 `left 37/200.5`, `top 512.7/624.2`와 `785.1/896.6`으로 정상 분할됐다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr17a-round3.md` §B만 따랐다.",
+    "브랜치 HEAD는 `9e578d9`였고, `2524b18..9e578d9` diff는 `HANDOFF-pr17a-round3.md` 추가뿐이라 시각 결과에는 영향이 없었다.",
+    "Vite dev server는 `http://127.0.0.1:5184`에서 구동했고 브라우저 자동화는 Playwright + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "캡처 산출물: `/tmp/pr17a-r3-eval-visual/ch06_q04-mobile.png`, `/tmp/pr17a-r3-eval-visual/ch06_q01-mobile.png`."
+  ]
+}
