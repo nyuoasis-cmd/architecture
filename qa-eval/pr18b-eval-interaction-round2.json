@@ -1,0 +1,41 @@
+{
+  "step": "pr18b",
+  "round": 2,
+  "phase": "eval-interaction-round2",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-125",
+  "ts": "2026-05-04T02:01:46Z",
+  "verdict": "PASS",
+  "pr_number": null,
+  "pr_url": null,
+  "branch": "feat/preview-inline-ch07-q5-q6",
+  "commit_under_test": "5e43780662760484b83e88aa1f52146b6530d46a",
+  "target_fix_commit": "50557b8",
+  "scope": {
+    "focus": "HANDOFF-pr18b-round2.md §C interaction verification for the ch07_q06 scenario-label fix only.",
+    "install": "PASS (cd client && npm install --no-audit --no-fund)",
+    "client_build": "PASS (cd client && npm run build)",
+    "i5_label_grep": "PASS (`client/src/data/demos.ts:552-555` uses `더티 읽기`, `커밋 읽기`, `반복 읽기`, `직렬화`.)",
+    "spot_check": "PASS (`client/src/demos/ch07/Q06IsolationLevel.tsx` defines matching SCENES keys `dirty`, `committed`, `repeatable`, `serial`, so demos.ts ids remain aligned with the inline component.)"
+  },
+  "checks": [
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "`client/src/data/demos.ts:547-555` now exposes the four ch07_q06 scenario tab labels in Korean only, matching the round-2 handoff requirement."
+    },
+    {
+      "id": "SPOT-CHECK",
+      "result": "PASS",
+      "evidence": "`client/src/demos/ch07/Q06IsolationLevel.tsx:8-78` keeps `SCENES` keyed as `dirty`, `committed`, `repeatable`, and `serial`, which still matches the `demos.ts` scenario ids 1:1."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "notes": [
+    "The fetched branch head is wrapper commit `5e43780`, not the handoff's expected `50557b8`. `git log --oneline -2` shows `5e43780` only adds `HANDOFF-pr18b-round2.md`, while `50557b8` is its direct parent and contains the actual demos.ts label fix.",
+    "Phase A/B was not run. This report follows the handoff instruction to execute Phase C only."
+  ],
+  "next_action": "PASS. No further generator changes required for I5."
+}
