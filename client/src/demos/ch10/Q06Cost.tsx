@@ -48,7 +48,7 @@ const SCENES: Record<string, Scene> = {
     summary: '자주 꺼내는 안내문을 매번 새로 쓰지 않듯, prompt cache는 반복되는 prefix를 재사용해 입력 비용을 절감합니다.',
     active: 2,
     chips: [
-      { label: 'prefix 재사용', active: true },
+      { label: '캐시 재사용', active: true },
       { label: '중복 감소' },
       { label: '비용 절감' },
     ],
