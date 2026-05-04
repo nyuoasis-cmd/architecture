@@ -1,0 +1,73 @@
+{
+  "step": "pr20a",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-133",
+  "ts": "2026-05-04T03:08:30Z",
+  "branch": "codex/pr20a",
+  "commit": "b57c3c7606581e97eb900940fae5aba720c53c3b",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame",
+      "verdict": "PASS",
+      "evidence": "`/library/9/ch09_q01`~`ch09_q04`와 회귀 spot-check `/library/8/ch08_q01`~`ch08_q04` desktop에서 모두 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`, `console error=0`, `pageerror=0`이었다. 신규 ch09 4개와 기존 ch08 4개가 모두 React 인라인 렌더로 유지됐다."
+    },
+    {
+      "id": "V2-desktop-3col",
+      "verdict": "PASS",
+      "evidence": "1440x900에서 ch09 신규 4개 공통으로 학습/채팅/시연 셸 폭이 `280/320/840px`였다. 데모 host는 q01 `640px`, q02~q04 `776px`로 렌더돼 square/wide 계약 안에서 안정적으로 배치됐다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "q01 4개(`mono/growth/micro/tradeoff`), q02 4개(`ui/service/data/flow`), q03 4개(`problem/singleton/observer/factory`), q04 4개(`cdn/app/db/invalidate`)를 모두 클릭했다. 16개 전환 전부에서 URL hash, 활성 scenario tab 라벨, preview hero 제목이 기대값과 정확히 같이 바뀌었다."
+    },
+    {
+      "id": "V4-contrast-indigo700",
+      "verdict": "PASS",
+      "evidence": "ch09 tone은 `--demo-accent-ch09=#4f46e5`, `--demo-accent-soft-ch09=#eef2ff`였다. accent와 white 대비비는 `6.29:1`로 WCAG AA `4.5:1` 기준을 넘겼다."
+    },
+    {
+      "id": "V5-layout-contract",
+      "verdict": "PASS",
+      "evidence": "registry와 실제 host 폭이 일치했다. 신규 ch09는 q01 `square=640px`, q02~q04 `wide=776px`였고, 회귀 spot-check에서도 ch08 q01~q03은 `776px` wide, q04는 `640px` square로 유지됐다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "desktop DOM에서 q01은 `svgCount=6`, q02~q04는 각 `svgCount=16`이었고 모두 non-zero 크기로 렌더됐다. mobile에서는 q02~q04가 `16개 중 10개 visible`이었는데 이는 `sm:block` 화살표/커넥터가 접히며 숨는 정상 동작이다. q01 mobile은 `6/6` visible이었다."
+    },
+    {
+      "id": "V7-regression-ch08-q01-q04",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check로 `/library/8/ch08_q01`~`ch08_q04`를 다시 열었다. 네 라우트 모두 `iframe=0`, `console error=0`, `pageerror=0`, desktop 3컬럼 `280/320/840px`를 유지했고 host 폭도 q01~q03 `776px`, q04 `640px`로 이전 계약이 유지됐다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852에서 `📱 시연` 탭 전환 후 ch09 4개 모두 scenario tablist bottom이 `182.39px`였고 hero 시작점은 q03 `226.78px`, 나머지 3개 `247.17px`였다. 네 라우트 모두 첫 모바일 뷰포트 안에 시나리오 칩과 hero가 함께 들어왔다."
+    },
+    {
+      "id": "V9-mobile-layout",
+      "verdict": "PASS",
+      "evidence": "mobile 393x852에서 q01~q04 inline host 폭은 모두 `361px`였고 가로 스크롤은 `document.documentElement.scrollWidth=393`으로 0건이었다. q01 PairBinary는 두 zone grid가 각각 `319px` 단일 열로 접혔고, q02~q04 PairMatch는 두 row 모두 `155.5px 155.5px` 2열로 안정적으로 접혔다."
+    }
+  ],
+  "artifacts": {
+    "metrics": "/tmp/pr20a-r1-eval-visual/metrics.json",
+    "screenshots_dir": "/tmp/pr20a-r1-eval-visual",
+    "browser": "playwright-core + system Chrome (/usr/bin/google-chrome)",
+    "base_url": "http://127.0.0.1:3004"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr20a-round1.md` §B만 따랐다.",
+    "wrapper 브랜치 `feat/preview-inline-ch09-q1-q4`는 handoff commit만 포함하고 있었고, 실제 구현은 `codex/pr20a`의 `b57c3c7606581e97eb900940fae5aba720c53c3b`에 있었다. 본 평가는 구현 브랜치/커밋 기준으로 수행했다.",
+    "앱은 `/tmp/architecture-pr20a-eval` worktree에서 `npm run build` 후 `NODE_ENV=production PORT=3004 npm start`로 기동했다.",
+    "브라우저 검증은 `playwright-core`와 system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "시각 평가 노이즈만 줄이기 위해 harness에서 `service-nav.js`, `/favicon.ico`, `/api/progress*`만 stub 했다. 데모 렌더, 스타일, DOM 자체는 수정하지 않았다."
+  ]
+}

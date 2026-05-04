@@ -1,0 +1,105 @@
+{
+  "step": "pr20a",
+  "round": 3,
+  "phase": "eval-interaction-round3",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-137",
+  "ts": "2026-05-04T03:50:00Z",
+  "branch": "feat/preview-inline-ch09-q1-q4",
+  "evaluated_commit": "b59470bbb026058920103c11f9f441dd013b843f",
+  "verdict": "PASS",
+  "scope": {
+    "focus": "HANDOFF-pr20a-round3.md §C only. Re-verify interaction behavior for ch09_q01~q04 on the round-3 wrapper head.",
+    "build": {
+      "client": "PASS (cd client && npm install --no-audit --no-fund && npm run build)",
+      "server": "PASS (cd server && npm run build)"
+    },
+    "static_checks": {
+      "raw_hex_grep": "PASS (grep -rE \"['\\\"]#[0-9a-fA-F]{3,8}['\\\"]\" client/src/demos/ch09 --include='*.tsx' --include='*.ts' returned 0 matches)",
+      "forbidden_shared_import_grep": "PASS (grep -E \"from ['\\\"]\\.\\.?/_shared/[^i]\" client/src/demos/ch09/*.tsx returned 0 matches)",
+      "raw_label_abbrev_grep": "PASS (grep for exact label/sub raw acronyms UI/OS/API/DB/JS/CSS/HTML returned 0 matches in ch09 demos and demos.ts)",
+      "label_length": "PASS (python3 check found all labels <= 8 chars and all subs <= 16 chars across Q01~Q04)",
+      "id_alignment": [
+        "ch09_q01 demos.ts ids mono/growth/micro/tradeoff match Q01Architecture.tsx SCENES keys",
+        "ch09_q02 demos.ts ids ui/service/data/flow match Q02Layer.tsx SCENES keys",
+        "ch09_q03 demos.ts ids problem/singleton/observer/factory match Q03Pattern.tsx SCENES keys",
+        "ch09_q04 demos.ts ids cdn/app/db/invalidate match Q04Cache.tsx SCENES keys"
+      ],
+      "registry_alignment": "PASS (registry.ts maps ch09_q01 to square and ch09_q02~q04 to wide, matching the component contracts)",
+      "diff_guard": [
+        "git diff --name-only main..HEAD -- client/src/demos/_shared returned no changes",
+        "git diff --name-only main..HEAD -- client/src/demos/ch08 returned no changes",
+        "git diff --name-only main..HEAD -- client/src/demos/ch01 returned no changes",
+        "git diff --name-only main..HEAD -- client/src/demos/ch02 returned no changes"
+      ]
+    },
+    "interaction_checks": {
+      "initial_deep_link": [
+        "/library/9/ch09_q01#micro selected the '마이크로서비스' tab on load",
+        "/library/9/ch09_q02#service selected the '서비스 계층' tab on load",
+        "/library/9/ch09_q03#observer selected the '옵저버' tab on load",
+        "/library/9/ch09_q04#app selected the '메모리' tab on load"
+      ],
+      "hash_sync": [
+        "/library/9/ch09_q01#micro -> click '트레이드오프' => #tradeoff",
+        "/library/9/ch09_q02#service -> click '요청 흐름' => #flow",
+        "/library/9/ch09_q03#observer -> click '팩토리' => #factory",
+        "/library/9/ch09_q04#app -> click '무효화' => #invalidate"
+      ],
+      "inline_render": "PASS (all four routes kept iframeCount=0 and phoneFrameCount=0 during direct-entry and click replay)",
+      "console_health": "PASS (Playwright saw no page errors, no bad responses, and no /api/progress traffic; the only console error was the usual favicon-style 404 and is excluded)"
+    }
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "Client install/build and server build both succeeded on the detached branch head."
+    },
+    {
+      "id": "I2",
+      "result": "PASS",
+      "evidence": "Raw hex grep for client/src/demos/ch09 returned no matches."
+    },
+    {
+      "id": "I3",
+      "result": "PASS",
+      "evidence": "Forbidden direct _shared import grep returned no matches outside the barrel import path."
+    },
+    {
+      "id": "I4",
+      "result": "PASS",
+      "evidence": "Exact raw-acronym label grep returned 0 matches, and all extracted labels/subs satisfied the <=8/<=16 length contract."
+    },
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "demos.ts scenario ids align 1:1 with SCENES keys for ch09_q01~q04."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "registry.ts layout wiring matches the component-side contracts: q01 is square, q02~q04 are wide; unrelated shared/ch08/ch01/ch02 files remain untouched in main..HEAD."
+    },
+    {
+      "id": "I7",
+      "result": "PASS",
+      "evidence": "Playwright confirmed both direct hash entry and click-driven hash rewrites for all four ch09 routes, with the clicked tab switching to aria-selected=true."
+    },
+    {
+      "id": "I8",
+      "result": "PASS",
+      "evidence": "All tested ch09 routes rendered through the inline React path with iframeCount=0, phoneFrameCount=0, and no /api/progress request in self-mode."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "summary": "HANDOFF-pr20a-round3.md §C 기준 재검증 결과 PASS. ch09_q01~q04의 build, 정적 계약, scenario id 정렬, direct deep-link, click hash sync, inline 렌더링이 모두 정상이며 round 2 zombie로 누락된 interaction 결과를 회복했다.",
+  "notes": [
+    "The fetched branch head is wrapper commit b59470b, which is later than the handoff's minimum expected round-2 app commit 1c7ce97 and contains the same app code plus the round-3 wrapper file.",
+    "Playwright verification used a local Vite dev server at http://127.0.0.1:5187 because the requested port was already occupied in the shared environment.",
+    "ao session claim-pr 20 was attempted per session instructions, but the orchestrator rejected it because GitHub PR #20 is already merged. Evaluation continued against the explicit handoff branch feat/preview-inline-ch09-q1-q4."
+  ],
+  "next_action": "PASS. 추가 수정 필요 없음."
+}

@@ -1,0 +1,1 @@
+{"status":"done","step":"pr20a-r1","role":"gen","model":"codex","session_id":"arch-132","ts":"2026-05-04T02:56:44Z","branch":"codex/pr20a","commit":"b57c3c7606581e97eb900940fae5aba720c53c3b","pr":"https://github.com/nyuoasis-cmd/architecture/pull/63","loc":"+490 -4","note":"ch09 q01~q04 인라인 데모 4종 추가. registry 연결 완료. q04 DB 표기를 데이터 앞으로 정리."}
