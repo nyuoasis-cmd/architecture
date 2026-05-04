@@ -1,0 +1,84 @@
+{
+  "step": "pr21b",
+  "round": 2,
+  "phase": "eval-interaction-round2",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-150",
+  "ts": "2026-05-04T05:26:08Z",
+  "verdict": "PASS",
+  "pr_number": null,
+  "pr_url": null,
+  "branch": "feat/preview-inline-ch10-q5-q7",
+  "commit_under_test": "25a5408166e3d1508add9f1d20d0460c8ae76f3e",
+  "target_fix_commit": "6e66bb31b0e6e0eead06059d11ed34a40f1a0ae3",
+  "scope": {
+    "focus": "HANDOFF-pr21b-round2.md \u00a7C interaction verification for ch10_q05~q07 plus ch10_q01~q04 regression spot-check after the IAM sub-length fix.",
+    "build": {
+      "client": "PASS (`cd client && npm install --no-audit --no-fund && npm run build` succeeded on the detached PR head)",
+      "server": "PASS (`cd server && npm install --no-audit --no-fund && npm run build` succeeded on the detached PR head)"
+    },
+    "round1_failure_guard": "PASS (`client/src/demos/ch10/Q07AiSecurity.tsx` now uses `sub: 'identity access'`, so the eager `client/src/demos/registry.ts` import no longer throws during app bootstrap.)",
+    "inline_runtime_q05_q07": [
+      "/library/10/ch10_q05#predict renders inline (iframeCount=0, phoneFrameCount=0), preserves #predict on entry, and clicking `\uac80\uc99d \ud55c\uacc4` rewrites the hash to #limit while swapping the hero title.",
+      "/library/10/ch10_q06#cache renders inline (iframeCount=0, phoneFrameCount=0), preserves #cache on entry, and clicking `\ubc30\uce58 \uc808\uac10` rewrites the hash to #batch while swapping the hero title.",
+      "/library/10/ch10_q07#encrypt renders inline (iframeCount=0, phoneFrameCount=0), preserves #encrypt on entry, and clicking `\ub85c\uadf8 \uac10\uc2dc` rewrites the hash to #monitor while swapping the hero title."
+    ],
+    "scenario_alignment": [
+      "demos.ts scenario ids match component SCENES for ch10_q05: context, predict, repeat, limit",
+      "demos.ts scenario ids match component SCENES for ch10_q06: percall, pertoken, cache, batch",
+      "demos.ts scenario ids match component SCENES for ch10_q07: iam, encrypt, segment, monitor",
+      "registry.ts maps ch10_q05~q07 to Q05Llm/Q06Cost/Q07AiSecurity with wide layout"
+    ],
+    "regression_spot_check_q01_q04": [
+      "/library/10/ch10_q01#paas loads without bootstrap failure, keeps top-level #paas on entry, and the iframe src changes from /demos/ch10/q01.html#paas to /demos/ch10/q01.html#saas when the `SaaS - \uc644\uc131 \uc11c\ube44\uc2a4` dot is clicked.",
+      "/library/10/ch10_q02#image loads without bootstrap failure, keeps top-level #image on entry, and the iframe src changes to /demos/ch10/q02.html#share when `\ucee4\ub110 \uacf5\uc720` is clicked.",
+      "/library/10/ch10_q03#heal loads without bootstrap failure, keeps top-level #heal on entry, and the iframe src changes to /demos/ch10/q03.html#rollout when `\uc810\uc9c4 \ubc30\ud3ec` is clicked.",
+      "/library/10/ch10_q04#ml loads without bootstrap failure, keeps top-level #ml on entry, and the iframe src changes to /demos/ch10/q04.html#scope when `\ud3ec\ud568 \uad00\uacc4` is clicked."
+    ],
+    "console_health": "PASS (Playwright recorded pageErrors=[], badResponses=[]; only the excluded favicon 404 appeared once as a browser console error on the first navigation.)"
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "Client and server builds both succeeded after the required npm installs on the detached PR head."
+    },
+    {
+      "id": "I2",
+      "result": "PASS",
+      "evidence": "The round-1 blocker is resolved: `Q07AiSecurity` no longer violates `maxSubLength`, so the eager registry import stops crashing chapter 10 routes during bootstrap."
+    },
+    {
+      "id": "I3",
+      "result": "PASS",
+      "evidence": "Playwright on http://127.0.0.1:5184 confirmed `ch10_q05`~`q07` render through the inline React path with `iframeCount=0` and `phoneFrameCount=0` on direct entry."
+    },
+    {
+      "id": "I4",
+      "result": "PASS",
+      "evidence": "Direct deep links for `ch10_q05`~`q07` were preserved (`#predict`, `#cache`, `#encrypt`), and clicking the scenario chips rewrote the hash to `#limit`, `#batch`, and `#monitor` while updating the hero title."
+    },
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "Metadata wiring is correct: `client/src/data/demos.ts` scenario ids match each component's SCENES, and `client/src/demos/registry.ts` registers `ch10_q05`~`q07` with the expected wide layout."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "Regression spot-check for `ch10_q01`~`q04` passed. Those routes now load again after the Q07 fix, preserve their initial top-level hashes, and their iframe src values still move to the selected scenario ids when the legacy dots are clicked."
+    },
+    {
+      "id": "I7",
+      "result": "PASS",
+      "evidence": "No runtime regressions were observed in Playwright: `pageErrors=[]`, `badResponses=[]`, and the only console noise was a single excluded favicon 404 on first navigation."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "notes": [
+    "The branch head under test is wrapper commit `25a5408`, but the product-code fix relevant to round 2 is `6e66bb3`; the wrapper itself only adds the round-2 handoff markdown.",
+    "The chapter-10 regression spot-check routes (`ch10_q01`~`q04`) currently remain on the legacy iframe preview path in this baseline. This evaluation only verifies that the round-1 eager-import crash no longer prevents those routes from loading."
+  ]
+}
