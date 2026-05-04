@@ -789,7 +789,7 @@ export const DEMOS: DemoMeta[] = [
     url: '/demos/ch10/q07.html',
     description: 'IAM, 암호화, 네트워크 격리, 로그 감시를 성문과 구역으로 설명합니다.',
     scenarios: [
-      { id: 'iam', label: 'IAM 권한' },
+      { id: 'iam', label: '권한 IAM' },
       { id: 'encrypt', label: '암호화' },
       { id: 'segment', label: '네트워크 격리' },
       { id: 'monitor', label: '로그 감시' },
