@@ -1275,3 +1275,137 @@ export function DeployMetaIcon() {
     </svg>
   );
 }
+
+export function CheckIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 12v8" />
+      <path d="M16 20h8" />
+      <path d="M14 28l3-3 3 3" />
+      <path d="M23 28l3-3 3 3" />
+    </svg>
+  );
+}
+
+export function SignalIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M9 28a11 11 0 1 1 22 0" />
+      <path d="M13 28a7 7 0 1 1 14 0" />
+      <path d="M17 28a3 3 0 1 1 6 0" />
+      <path d="M20 9v4M10 13l3 2M30 13l-3 2" />
+    </svg>
+  );
+}
+
+export function HandleIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="8" width="24" height="24" rx="3" />
+      <path d="M14 20h12" />
+      <path d="M20 14v12" />
+      <path d="M12 12l4 4M28 12l-4 4M12 28l4-4M28 28l-4-4" />
+    </svg>
+  );
+}
+
+export function ReturnIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M27 12H14l4-4" />
+      <path d="M14 12l4 4" />
+      <path d="M13 12a10 10 0 1 0 5-2" />
+    </svg>
+  );
+}
+
+export function SliceIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 20 30 16" />
+      <path d="M20 20V8" />
+      <path d="M20 20 12 28" />
+    </svg>
+  );
+}
+
+export function SwapMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="10" width="10" height="20" rx="2" />
+      <rect x="24" y="10" width="10" height="20" rx="2" />
+      <path d="M16 15h8" />
+      <path d="m21 12 3 3-3 3" />
+      <path d="M24 25h-8" />
+      <path d="m19 22-3 3 3 3" />
+    </svg>
+  );
+}
+
+export function PriorityIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 30V12" />
+      <rect x="14" y="20" width="4" height="10" rx="1" />
+      <rect x="20" y="15" width="4" height="15" rx="1" />
+      <rect x="26" y="10" width="4" height="20" rx="1" />
+      <path d="M10 30h22" />
+    </svg>
+  );
+}
+
+export function ConcurrencyIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="14" cy="16" r="5" />
+      <circle cx="26" cy="16" r="5" />
+      <circle cx="20" cy="26" r="5" />
+      <path d="M17 19l3 3 3-3" />
+    </svg>
+  );
+}
+
+export function RoomIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 30V12l12-6 12 6v18H8z" />
+      <path d="M15 30v-8h10v8" />
+      <rect x="16" y="13" width="8" height="5" rx="1" />
+    </svg>
+  );
+}
+
+export function ActualIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 8h20v24H10z" />
+      <path d="M10 14h20" />
+      <path d="M16 20h8M16 25h6" />
+      <circle cx="14" cy="11" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function EvacuateIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 28h24" />
+      <path d="M12 24V12h10" />
+      <path d="M23 9l7 7-7 7" />
+      <path d="M30 16H18" />
+    </svg>
+  );
+}
+
+export function IsolateMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="10" height="20" rx="2" />
+      <rect x="23" y="10" width="10" height="20" rx="2" />
+      <path d="M20 10v20" />
+      <path d="M14 20h-3M29 20h-3" />
+    </svg>
+  );
+}

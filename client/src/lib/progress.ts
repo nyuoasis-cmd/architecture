@@ -106,15 +106,11 @@ function readDevUserId(): string | null {
 }
 
 async function syncProgressRemote(qaId: string, payload: { readAt?: string; quizScore?: number }) {
+  if (import.meta.env.DEV) {
+    return;
+  }
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    const devId = readDevUserId();
-    if (import.meta.env.DEV && !devId) {
-      return;
-    }
-    if (devId && import.meta.env.DEV) {
-      headers['x-dev-teacher-id'] = devId;
-    }
     await fetch('/api/progress', {
       method: 'PATCH',
       headers,

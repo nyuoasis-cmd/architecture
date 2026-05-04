@@ -1,0 +1,65 @@
+{
+  "step": "pr17b",
+  "round": 2,
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-109",
+  "ts": "2026-05-04T00:38:59Z",
+  "verdict": "PASS",
+  "pr_number": 52,
+  "pr_url": "https://github.com/nyuoasis-cmd/architecture/pull/52",
+  "branch": "feat/preview-inline-ch06-q5-q7",
+  "commit_under_test": "7a544ab33a19afc47a294e778c6017e562273500",
+  "target_fix_commit": "d0016c6",
+  "scope": {
+    "focus": "HANDOFF-pr17b-round2.md §C interaction recheck for the dev-only /api/progress skip on direct /library entry, plus one static spot-check from the round-1 PASS set.",
+    "build": {
+      "client": "PASS (cd client && npm run build)"
+    },
+    "dev_server": "PASS (cd client && npm run dev -- --host 127.0.0.1 --port 5184)",
+    "spot_check": "PASS (client/src/demos/registry.ts keeps ch06_q05~q07 mapped to wide components, and client/src/data/demos.ts keeps q05/q06/q07 scenario ids polling|bell|handler|resume, slice|switch|priority|illusion, virtual|physical|swap|protect)"
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "route": "/library/6/ch06_q05",
+      "expected": "direct dev-mode entry emits no actionable console error and no /api/progress request",
+      "result": "PASS",
+      "evidence": "Playwright on http://127.0.0.1:5184 loaded the route directly with finalUrl unchanged, progressRequests=[], progressResponses=[], pageErrors=[], badResponses=[]. The only console message was a favicon 404, which the handoff explicitly excludes."
+    },
+    {
+      "id": "I2",
+      "route": "/library/6/ch06_q06",
+      "expected": "direct dev-mode entry emits no console error and no /api/progress request",
+      "result": "PASS",
+      "evidence": "Direct navigation kept the QA route and produced consoleErrors=[], pageErrors=[], badResponses=[], progressRequests=[], progressResponses=[]."
+    },
+    {
+      "id": "I3",
+      "route": "/library/6/ch06_q07#virtual",
+      "expected": "deep-link entry keeps the requested inline scenario without console noise and without /api/progress activity",
+      "result": "PASS",
+      "evidence": "Direct navigation preserved the #virtual hash with consoleErrors=[], pageErrors=[], badResponses=[], progressRequests=[], progressResponses=[]."
+    },
+    {
+      "id": "I4",
+      "route": "/library/6/ch06_q07#virtual -> click 실제 RAM",
+      "expected": "inline scenario click rewrites the hash to the selected scene id",
+      "result": "PASS",
+      "evidence": "Clicking the tab named '실제 RAM' changed the hash from #virtual to #physical. The only console message during the page load was the same excluded favicon 404; no other console/page/network errors appeared."
+    },
+    {
+      "id": "I5",
+      "artifact": "client/src/demos/registry.ts + client/src/data/demos.ts",
+      "expected": "round-1 PASS items remain aligned after the progress.ts dev skip fix",
+      "result": "PASS",
+      "evidence": "Registry still maps ch06_q05~q07 to Q05Interrupt/Q06Scheduler/Q07VirtualMemory with layout='wide', and demos.ts still exposes the expected scenario ids for q05~q07."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [],
+  "notes": [
+    "The branch head under test is wrapper commit 7a544ab, but git show confirmed its only diff from d0016c6 is HANDOFF-pr17b-round2.md; the evaluated application code for the regression fix is unchanged from d0016c6.",
+    "This round-2 interaction recheck confirms the requested regression target: direct dev-mode entry into /library/6/ch06_q05~q07 no longer issues any /api/progress request, so the previous Supabase egress-induced 500 path is not exercised."
+  ]
+}

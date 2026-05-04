@@ -1,0 +1,102 @@
+{
+  "step": "pr17b",
+  "round": 1,
+  "phase": "eval-interaction-round1",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-108",
+  "ts": "2026-05-04T00:32:24Z",
+  "verdict": "FAIL",
+  "pr_number": 52,
+  "pr_url": "https://github.com/nyuoasis-cmd/architecture/pull/52",
+  "branch_under_test": "feat/preview-inline-ch06-q5-q7",
+  "commit_under_test": "8b5ab4e5a954c520ad4deb4a616549f7e47677bb",
+  "generator_commit": "8b5ab4e5a954c520ad4deb4a616549f7e47677bb",
+  "scope": {
+    "focus": "HANDOFF-pr17b-round1.md §C interaction verification for ch06_q05~q07 only",
+    "build": {
+      "client": "PASS (root `npm run build` completed; client `tsc -b && vite build` succeeded)",
+      "server": "PASS (root `npm run build` completed; server `tsc` succeeded)"
+    },
+    "raw_hex_grep": "PASS (0 matches in `client/src/demos/ch06/*.tsx`)",
+    "shared_import_grep": "PASS (0 forbidden imports in `client/src/demos/ch06/Q0[5-7]*.tsx`)",
+    "raw_abbrev_grep": "PASS (0 matches for raw OS/API/DB/UI/JS/CSS/HTML labels in `client/src/demos/ch06/Q0[5-7]*.tsx`)",
+    "validate_pair_set": [
+      "Q05Interrupt uses `PairFlow` + `validatePairSet(..., { layout: 'wide', subPolicy: 'all' })`",
+      "Q06Scheduler uses `PairMatch` + `validatePairSet(..., { layout: 'wide', subPolicy: 'all' })`",
+      "Q07VirtualMemory uses `PairMatch` + `validatePairSet(..., { layout: 'wide', subPolicy: 'all' })`"
+    ],
+    "scenario_alignment": [
+      "ch06_q05 demos.ts ids match SCENES: polling, bell, handler, resume",
+      "ch06_q06 demos.ts ids match SCENES: slice, switch, priority, illusion",
+      "ch06_q07 demos.ts ids match SCENES: virtual, physical, swap, protect",
+      "registry.ts maps ch06_q05~q07 to Q05Interrupt/Q06Scheduler/Q07VirtualMemory with layout=wide"
+    ],
+    "deep_link_guards": [
+      "LearnPage reads `window.location.hash` and only falls back when the hash is invalid",
+      "PreviewPanel writes inline scenario changes through `window.history.replaceState(null, '', `#${nextScenarioId}`)`",
+      "Inline demos receive `key={`${qaId}:${scenarioId}`}` so scenario hash changes remount the selected scene"
+    ],
+    "environment_observation": [
+      "The Vite client under test proxied `/api/*` to `localhost:3003`, but that listener belonged to `/home/claude/architecture/server`, not this detached worktree.",
+      "Direct Supabase service-role probe returned `Service for this project is restricted ... exceed_egress_quota`, which explains the shared `/api/progress` 500s."
+    ]
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "Build completed and all new demo modules type-check."
+    },
+    {
+      "id": "I2",
+      "result": "PASS",
+      "evidence": "Raw hex grep returned 0 matches in ch06 demo TSX files."
+    },
+    {
+      "id": "I3",
+      "result": "PASS",
+      "evidence": "Forbidden `_shared` import grep returned 0 matches; demos only import from `../_shared`."
+    },
+    {
+      "id": "I4",
+      "result": "PASS",
+      "evidence": "All three demos enforce `validatePairSet(..., { layout: 'wide', subPolicy: 'all' })`; no raw acronym-only labels found."
+    },
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "Each demo resolves `SCENES[scenarioId] ?? defaultScene`, and PreviewPanel forwards selected scenario ids into the inline component."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "Q05 uses PairFlow; Q06/Q07 use PairMatch; all stay on the locked shared contracts without `_shared/*` drift."
+    },
+    {
+      "id": "I7",
+      "result": "PASS",
+      "evidence": "URL hash deep-link path remains intact through unchanged LearnPage/PreviewPanel logic and aligned scenario ids."
+    },
+    {
+      "id": "I8",
+      "result": "PASS",
+      "evidence": "Handoff mapping, `qa-stubs`, `demos.ts`, `registry.ts`, and the q05~q07 scene ids are 1:1 aligned."
+    },
+    {
+      "id": "RAW-ABBREV",
+      "result": "PASS",
+      "evidence": "`grep -nE \"label: '(OS|API|DB|UI|JS|CSS|HTML)'|label: \\\"(OS|API|DB|UI|JS|CSS|HTML)\\\"\" client/src/demos/ch06/Q0[5-7]*.tsx` returned no matches."
+    },
+    {
+      "id": "DEV-CONSOLE",
+      "result": "FAIL",
+      "evidence": "Playwright opening `/library/6/ch06_q05~q07` captured non-favicon console errors from `PATCH /api/progress` returning HTTP 500 twice per route. The same 500 reproduced on unchanged `/library/6/ch06_q01`, so the blocker is environmental/shared-backend, not introduced by this PR diff."
+    }
+  ],
+  "summary": "The PR-specific inline interaction contract for ch06_q05~q07 passes statically: scene ids, registry wiring, deep-link/hash flow, wide/all pair validation, and raw-label guards all match the handoff. The overall verdict is FAIL because the required dev-mode console check cannot pass in the current shared environment: `/api/progress` returns HTTP 500 on both changed and unchanged ch06 routes, and the backing Supabase project reports `exceed_egress_quota`.",
+  "fail_items": [
+    "dev-console-500-progress-api: `/library/6/ch06_q05~q07` emits non-favicon console errors because `PATCH /api/progress` returns 500 in the shared dev backend; unchanged `/library/6/ch06_q01` reproduces the same failure, so T4 is blocked by environment health rather than the q05~q07 diff."
+  ],
+  "revise_items": []
+}
