@@ -118,6 +118,22 @@ export async function endSession(sessionId: string): Promise<SessionRecord> {
   return readJson<SessionRecord>(response);
 }
 
+export async function deleteSession(sessionId: string): Promise<void> {
+  const headers = await getTeacherAuthHeaders();
+  const response = await fetch(`/api/sessions/${sessionId}`, {
+    method: 'DELETE',
+    headers,
+  });
+  if (!response.ok) {
+    const body = (await response.json().catch(() => ({}))) as { error?: string; message?: string };
+    throw new SessionClientError(
+      response.status,
+      body.error ?? 'request_failed',
+      body.message ?? '요청을 처리하지 못했습니다.',
+    );
+  }
+}
+
 export async function joinSession(input: { code: string; nickname: string }) {
   const response = await fetch('/api/join', {
     method: 'POST',

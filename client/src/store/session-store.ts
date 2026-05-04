@@ -13,6 +13,7 @@ type SessionStoreState = {
   viewerProgress: Record<string, SessionProgressEntry>;
   setTeacherSessions: (sessions: SessionRecord[]) => void;
   prependTeacherSession: (session: SessionRecord) => void;
+  removeTeacherSession: (sessionId: string) => void;
   setCurrentSession: (session: SessionDetail | null) => void;
   setParticipants: (participants: SessionParticipant[]) => void;
   updateViewerProgress: (qaId: string, patch: SessionProgressEntry) => void;
@@ -27,6 +28,10 @@ export const useSessionStore = create<SessionStoreState>((set) => ({
   prependTeacherSession: (session) =>
     set((state) => ({
       teacherSessions: [session, ...state.teacherSessions.filter((item) => item.id !== session.id)],
+    })),
+  removeTeacherSession: (sessionId) =>
+    set((state) => ({
+      teacherSessions: state.teacherSessions.filter((item) => item.id !== sessionId),
     })),
   setCurrentSession: (currentSession) =>
     set({

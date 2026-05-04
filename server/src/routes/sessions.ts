@@ -378,4 +378,48 @@ router.post('/:id/end', async (req, res) => {
   res.json(updated);
 });
 
+router.delete('/:id', async (req, res) => {
+  const teacherId = await requireTeacherId(req);
+  if (!teacherId) {
+    res.status(401).json({ error: 'unauthorized' });
+    return;
+  }
+
+  let supabase;
+  try {
+    supabase = getSupabaseOrThrow();
+  } catch {
+    res.status(503).json({ error: 'db_not_configured' });
+    return;
+  }
+
+  const { data: session, error } = await supabase
+    .from('architecture_sessions')
+    .select('id, teacher_id')
+    .eq('id', req.params.id)
+    .maybeSingle();
+
+  if (error || !session) {
+    res.status(404).json({ error: 'session_not_found' });
+    return;
+  }
+
+  if (session.teacher_id !== teacherId) {
+    res.status(403).json({ error: 'forbidden' });
+    return;
+  }
+
+  const { error: deleteError } = await supabase
+    .from('architecture_sessions')
+    .delete()
+    .eq('id', session.id);
+
+  if (deleteError) {
+    res.status(500).json({ error: 'session_delete_failed' });
+    return;
+  }
+
+  res.status(204).end();
+});
+
 export default router;
