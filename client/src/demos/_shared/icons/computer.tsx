@@ -1281,3 +1281,113 @@ export function DeployItIcon() {
     </svg>
   );
 }
+
+export function PollingIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="11" />
+      <path d="M20 20V12" />
+      <path d="M20 20l5 3" />
+      <path d="M20 6v2M34 20h-2M6 20h2M20 34v-2" />
+    </svg>
+  );
+}
+
+export function InterruptIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M17 8h6l-2 10h5L15 32l2-10h-5z" />
+      <path d="M9 11l2 2M29 11l-2 2M8 22h3M29 22h3" />
+    </svg>
+  );
+}
+
+export function HandlerIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="9" width="24" height="22" rx="2" />
+      <path d="M14 15h12M14 20h8M14 25h10" />
+      <path d="M24 9V6h4v3" />
+    </svg>
+  );
+}
+
+export function ResumeIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M12 20a8 8 0 1 1 3 6" />
+      <path d="M8 24v-8h8" />
+      <path d="M27 13l3-3" />
+    </svg>
+  );
+}
+
+export function TimeSliceIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="12" />
+      <path d="M20 20V9" />
+      <path d="M20 20 29 15" />
+      <path d="M20 20 16 30" />
+    </svg>
+  );
+}
+
+export function ContextIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="6" y="10" width="10" height="18" rx="2" />
+      <rect x="24" y="10" width="10" height="18" rx="2" />
+      <path d="M16 15h8" />
+      <path d="m20 12 4 3-4 3" />
+      <path d="M24 23h-8" />
+      <path d="m20 20-4 3 4 3" />
+    </svg>
+  );
+}
+
+export function PriorityItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 30V12" />
+      <path d="M10 30h22" />
+      <rect x="14" y="22" width="4" height="8" rx="1" />
+      <rect x="20" y="18" width="4" height="12" rx="1" />
+      <rect x="26" y="10" width="4" height="20" rx="1" />
+      <path d="M28 6l2 4h-4z" />
+    </svg>
+  );
+}
+
+export function ParallelIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="8" height="20" rx="2" />
+      <rect x="17" y="10" width="8" height="20" rx="2" />
+      <rect x="27" y="10" width="6" height="20" rx="2" />
+      <path d="M11 15v10M21 15v10M30 15v10" />
+    </svg>
+  );
+}
+
+export function VirtualAddrIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="9" width="26" height="22" rx="2" />
+      <path d="M12 14h16M12 19h12M12 24h8" />
+      <path d="M26 24l3 3 5-5" />
+    </svg>
+  );
+}
+
+export function SwapIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <ellipse cx="20" cy="11" rx="10" ry="3.5" />
+      <path d="M10 11v10a10 3.5 0 0 0 20 0V11" />
+      <path d="M12 26h10" />
+      <path d="m20 23 6 0-3 4" />
+      <path d="M28 23V9" />
+    </svg>
+  );
+}

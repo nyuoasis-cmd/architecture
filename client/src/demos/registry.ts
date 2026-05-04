@@ -31,6 +31,9 @@ import Q01CpuCycle from './ch06/Q01CpuCycle';
 import Q02MemoryHierarchy from './ch06/Q02MemoryHierarchy';
 import Q03Process from './ch06/Q03Process';
 import Q04CacheHit from './ch06/Q04CacheHit';
+import Q05Interrupt from './ch06/Q05Interrupt';
+import Q06Scheduler from './ch06/Q06Scheduler';
+import Q07VirtualMemory from './ch06/Q07VirtualMemory';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -67,6 +70,9 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch06_q02: { Component: Q02MemoryHierarchy, layout: 'square' },
   ch06_q03: { Component: Q03Process, layout: 'wide' },
   ch06_q04: { Component: Q04CacheHit, layout: 'wide' },
+  ch06_q05: { Component: Q05Interrupt, layout: 'wide' },
+  ch06_q06: { Component: Q06Scheduler, layout: 'wide' },
+  ch06_q07: { Component: Q07VirtualMemory, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
