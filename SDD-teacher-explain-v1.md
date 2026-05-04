@@ -5,7 +5,7 @@
 > 상위 문서: `SDD-v1.md` (전체 서비스), `SDD-preview-inline-v2.md` (시연 인라인)
 > 양식 참조: `ai-app-builder/SDD-자유모드-react-canvas-v2.md` (PR 분할 + Sprint Contract) + `ai-app-builder/SDD-한결-session-join-v1.md` (AC 중심)
 > 구현 양식 참조: `ai-app-builder/client/src/components/tutorial/TeacherLessonMockup.tsx` + `lesson-flows.ts` (교사 설명 탭 — 본 SDD가 architecture 맥락으로 변환)
-> 사용자 결정 (2026-05-04, Q1~Q8): A 추가 탭 / "설명 노트" / ai-app-builder 양식 참고 / 모두 추가(가독성만 신경) / 책 무시·Claude 작성·외부 fetch 허용 / 서버단 권한 / 더보기 드롭다운 / 71 Q&A 한 번에
+> 사용자 결정 (2026-05-04, Q1~Q8): A 추가 탭 / "설명 노트" / ai-app-builder 양식 참고 / 모두 추가(가독성만 신경) / 책 무시·Claude 작성·외부 fetch 허용 / 서버단 권한 / 더보기 드롭다운 / 64 Q&A 한 번에
 
 ---
 
@@ -19,7 +19,7 @@
 | 적용 범위 | LearnPage 시연 모드 (`role=teacher`) 5번째 탭 |
 | 학생 노출 | ❌ 없음 (서버단 + 클라단 이중 차단) |
 | 책 본문 인용 | 0% (`SDD-v1.md` §2.1 정책 동일 — 본 SDD에서도 강제) |
-| 콘텐츠 71개 작성 | 1 PR (Claude Sonnet 4.6 일괄 + 가독성 검수) |
+| 콘텐츠 64개 작성 | 1 PR (Claude Sonnet 4.6 일괄 + 가독성 검수) |
 | 의존 | LearnPage 시연 모드 (PR #76·#77) ✅ 머지 완료 / lucide-react ✅ 도입 완료 (PR #84) |
 
 ---
@@ -31,7 +31,7 @@
 PR #80~#84 시리즈로 교사 시연 흐름이 완성되었으나, **교사가 시연 중 어떻게 설명할지는 즉석 판단에 맡겨짐**:
 - LearnPage 4탭(`📖 학습` / `💬 채팅` / `📱 시연` / `✅ 퀴즈`)은 **학생용**. 교사가 시연 모드(`role=teacher`)로 들어가도 학생과 동일 화면을 봄
 - `currentQa.body`(GuidePanel 본문)는 학생용 학습 텍스트라 교사 운영 정보 없음 — "이 Q&A의 핵심 메시지가 뭔지", "어떤 비유가 잘 먹히는지", "학생이 어떤 질문 던지는지", "시연 시나리오를 어떤 순서로 클릭해야 하는지" 모두 비공개
-- 71 Q&A × 평균 2.4 시연 시나리오 = ~170 시나리오를 교사가 사전 학습 없이 운영해야 함
+- 64 Q&A × 평균 2.4 시연 시나리오 = ~154 시나리오를 교사가 사전 학습 없이 운영해야 함
 
 ### 1.2 본 SDD의 목적
 
@@ -76,7 +76,7 @@ LearnPage에 **5번째 탭 "📝 설명 노트"** 추가 — 교사 시연 모�
 ### 3.1 In
 
 - 데이터 모델 `TeacherExplainBlock` 11~13 필드 정의 (§4)
-- 71 Q&A × 1 블록 = 71 블록 콘텐츠 정적 작성 (`server/data/teacher-explain/*.json` 또는 `client/src/data/teacher-explain.ts` — §4.3 결정 표)
+- 64 Q&A × 1 블록 = 64 블록 콘텐츠 정적 작성 (`server/data/teacher-explain/*.json` 또는 `client/src/data/teacher-explain.ts` — §4.3 결정 표)
 - 서버 라우트 `GET /api/teacher-explain/:qaId` 권한 검증 + 응답 (§6.1)
 - LearnPage 5번째 탭 + 새 컴포넌트 `<TeacherExplainPanel>` (§5)
 - 모바일 더보기 드롭다운 (§5.2)
@@ -105,7 +105,7 @@ export interface TeacherExplainPrompt {
 }
 
 export interface TeacherExplainBlock {
-  qaId: string;                    // 'ch01_q01' 등 71개
+  qaId: string;                    // 'ch01_q01' 등 64개
 
   // 신규 (v2.0)
   tldr: string;                    // A1 한 줄 요약 (30~50자, 1 문장 — "1분 훑기" 모드 핵심)
@@ -238,7 +238,7 @@ export const GLOSSARY: GlossaryEntry[] = [
 | PR-2 | +1.5h | A1·A2·B1·D1·E1·F1 UI 모두 PR-2 (TeacherExplainPanel 컴포넌트 작성) |
 | PR-2 (C1 용어 사전) | +1h | Glossary 컴포넌트 + Tooltip + bottom sheet (모바일) |
 | PR-3 | +20% (~20분) | ch01 4 Q&A 작성 시 `tldr`/`misconception`/`relatedQas` 3 필드 같이 작성 |
-| PR-4 | +20% (~50분) | 67 Q&A 일괄 — Claude 한 번에 같이 생성 |
+| PR-4 | +20% (~50분) | 60 Q&A 일괄 — Claude 한 번에 같이 생성 |
 | PR-3.5 (신규) | 1h | `client/src/data/teacher-glossary.ts` 30 용어 작성 (Claude 일괄) |
 
 총 추가 ~5h. SDD §11 타임라인 갱신 §14.6 참조.
@@ -247,10 +247,10 @@ export const GLOSSARY: GlossaryEntry[] = [
 
 | 옵션 | 위치 | 장점 | 단점 | 채택 |
 |------|------|------|------|------|
-| A. 클라이언트 정적 TS | `client/src/data/teacher-explain.ts` (71 객체) | 즉시 import | 번들 ~120KB 증가 / 학생 클라에 콘텐츠 노출 | ❌ |
-| ~~B. 서버 정적 JSON~~ | ~~`server/data/teacher-explain/{qaId}.json` 71 파일~~ | 권한 검증 가능 | **현 build script `tsc` 단독 → dist 에 JSON 누락 (production 미동작)**. postbuild copy 필요 | ❌ **v1.2 폐기** |
+| A. 클라이언트 정적 TS | `client/src/data/teacher-explain.ts` (64 객체) | 즉시 import | 번들 ~120KB 증가 / 학생 클라에 콘텐츠 노출 | ❌ |
+| ~~B. 서버 정적 JSON~~ | ~~`server/data/teacher-explain/{qaId}.json` 64 파일~~ | 권한 검증 가능 | **현 build script `tsc` 단독 → dist 에 JSON 누락 (production 미동작)**. postbuild copy 필요 | ❌ **v1.2 폐기** |
 | C. DB | Supabase `architecture_teacher_explain` 테이블 | 갱신 용이 | 이중 관리 / 마이그 PR 필요 | ❌ |
-| **D. 서버 TS 모듈** ⭐ | `server/src/data/teacher-explain/{qaId}.ts` 71 파일 + `index.ts` (record map) | tsc 자동 컴파일 → dist/data 자동 생성 / fs 의존 0 / 권한 검증 가능 / 학생 번들 0byte / 타입 안전 | 71 파일 모두 시작 시 로드 (~100KB 메모리, 무시 가능) | ✅ **v1.2 채택** |
+| **D. 서버 TS 모듈** ⭐ | `server/src/data/teacher-explain/{qaId}.ts` 64 파일 + `index.ts` (record map) | tsc 자동 컴파일 → dist/data 자동 생성 / fs 의존 0 / 권한 검증 가능 / 학생 번들 0byte / 타입 안전 | 64 파일 모두 시작 시 로드 (~100KB 메모리, 무시 가능) | ✅ **v1.2 채택** |
 
 **결정 (v1.2)**: 옵션 **D — TS 모듈**. 사용자 검토 ①번(배포 시 JSON 누락 위험) 정면 대응.
 
@@ -299,7 +299,7 @@ export type TeacherExplainBlock = {
 };
 ```
 
-build 시: `tsc` 가 `server/dist/data/teacher-explain/{qaId}.js` 71 + `index.js` + `types.js` 자동 생성. asset copy 스크립트 0건.
+build 시: `tsc` 가 `server/dist/data/teacher-explain/{qaId}.js` 64 + `index.js` + `types.js` 자동 생성. asset copy 스크립트 0건.
 
 dev 시: `tsx` 가 동일 import 처리.
 
@@ -431,7 +431,7 @@ resetForQa: (qaId, scenarioId) => set((state) => ({
 }))
 ```
 
-**근거**: 교사가 71 Q&A 사이를 자유롭게 점프하며 설명 노트 훑는 패턴 보존. 학생은 explain 진입 불가라 영향 0.
+**근거**: 교사가 64 Q&A 사이를 자유롭게 점프하며 설명 노트 훑는 패턴 보존. 학생은 explain 진입 불가라 영향 0.
 
 #### 5.2.2 모바일 (lg < 1024px) — 4탭 그대로, 더보기 ⋯ 불필요 (v1.5)
 
@@ -570,7 +570,7 @@ architecture 변형:
 
 | 옵션 | 의미 | 채택 |
 |------|------|------|
-| A. 광역 | 교사 권한자(어느 세션이든 1개 이상의 `teacher_id` 보유) → 71 Q&A 전체 접근 | ❌ |
+| A. 광역 | 교사 권한자(어느 세션이든 1개 이상의 `teacher_id` 보유) → 64 Q&A 전체 접근 | ❌ |
 | **B. 좁은** ⭐ | 요청 시 `sessionId` 동봉 → `architecture_sessions.teacher_id == user.id` AND `qaId의 chapterId ∈ session.chapter_ids` 검증 | ✅ **채택** |
 
 **채택 이유**:
@@ -630,7 +630,7 @@ type QaMeta = { qaId: string; chapterId: number };
 export const QA_META: QaMeta[] = [
   { qaId: 'ch01_q01', chapterId: 1 },
   { qaId: 'ch01_q02', chapterId: 1 },
-  // ... 71 entry (qaId → chapterId 매핑만, body·title 복제 0)
+  // ... 64 entry (qaId → chapterId 매핑만, body·title 복제 0)
 ];
 
 const QA_INDEX: Record<string, number> = Object.fromEntries(
@@ -642,7 +642,7 @@ export function getQaChapterId(qaId: string): number | null {
 }
 ```
 
-용량: 71 × ~30 bytes ≈ 2KB. import-time evaluation 즉시 완료, throw 0건.
+용량: 64 × ~30 bytes ≈ 2KB. import-time evaluation 즉시 완료, throw 0건.
 
 §7.1 입력 자료 표 갱신: "Q&A 학생용 본문 — `client/src/data/qa-stubs.ts` (Claude 콘텐츠 생성 시 base, 정적 fetch)" + "qaId·chapterId 매핑 — `server/src/data/qa-meta.ts` (server 권한 검증용, PR-1 신설)" 두 항목으로 분리.
 
@@ -650,7 +650,7 @@ export function getQaChapterId(qaId: string): number | null {
 
 | 단계 | Cache-Control | 이유 |
 |------|---------------|------|
-| **PR-1 ~ PR-5 (현 SDD)** | `no-store` 단독 | 더미 → 정식 교체 시 클라 stale 0건. 71 × ~1KB × 클릭 횟수 = 부담 무시 |
+| **PR-1 ~ PR-5 (현 SDD)** | `no-store` 단독 | 더미 → 정식 교체 시 클라 stale 0건. 64 × ~1KB × 클릭 횟수 = 부담 무시 |
 | (별도 SDD) 안정화 단계 | `private, max-age=300, must-revalidate` + ETag | 5분 SWR. 갱신 시 5분 내 자동 반영 |
 
 **결정 (v2.1 정정 — preflight Area 1 #4)**: PR-1~PR-5 모두 **`no-store` 단독**. ETag 응답 부착 폐기 — RFC 9111 §5.2.1.5 에 따라 `no-store` 면 캐시 저장 자체 금지 → 브라우저가 `If-None-Match` 미발송 → ETag 검증 효력 0. v1.2~v2.0 의 "ETag 선택 부착" 문구 폐기. 안정화 단계에서 SWR 환원 시 ETag 의미 회복 — 별도 SDD 작업.
@@ -718,7 +718,7 @@ PR-2 Sprint Contract §9.2 인터랙션 검증에 본 케이스 강제.
 ### 6.3 콘텐츠 정책 (책 무시 — 사용자 결정 #5)
 
 - **책 본문 직접 인용 0%** (`SDD-v1.md` §2.1 정책 동일 — 본 SDD에서도 강제)
-- Claude Sonnet 4.6이 71 Q&A 블록 일괄 작성 (master agent가 콘텐츠 PR에서 수행)
+- Claude Sonnet 4.6이 64 Q&A 블록 일괄 작성 (master agent가 콘텐츠 PR에서 수행)
 - 외부 자료 fetch 허용 — 애매한 IT 개념(예: Reed-Solomon, ACID 미묘한 케이스)은 master agent가 web search/fetch로 정보 보강
 - 출처 표기: about 페이지 푸터에 "교사 가이드 콘텐츠는 Claude로 작성, 외부 공개 IT 학습 자료 참조" 한 줄 (책은 미언급 — 책 무시 정책)
 
@@ -730,7 +730,7 @@ PR-2 Sprint Contract §9.2 인터랙션 검증에 본 케이스 강제.
 
 ---
 
-## §7 콘텐츠 작성 흐름 (PR-4)
+## §7 콘텐츠 작성 흐름 (PR-3 + PR-4)
 
 ### 7.1 입력 자료
 
@@ -744,7 +744,7 @@ PR-2 Sprint Contract §9.2 인터랙션 검증에 본 케이스 강제.
 ### 7.2 작성 절차 (master agent 수행)
 
 ```
-For each qaId in 71:
+For each qaId in 64:
   1. qa-stubs.ts에서 currentQa.{title, body, keywords, checkpoint} 추출
   2. demos.ts에서 시연 시나리오 라벨 N개 추출 (beforeDemo input)
   3. SDD-preview-inline-v2.md §4 표에서 메타포 ↔ IT 매핑 추출 (mechanism input)
@@ -767,7 +767,7 @@ End
 // server/src/data/teacher-explain/index.ts
 import { teacherExplainBlockSchema } from './types';
 import ch01_q01 from './ch01_q01';
-// ... 71 import
+// ... 64 import
 
 const RAW_BLOCKS = { ch01_q01, /* ... */ };
 
@@ -788,7 +788,7 @@ for (const [qaId, raw] of Object.entries(RAW_BLOCKS)) {
 
 ### 7.3 가독성 검수 (수동)
 
-랜덤 샘플 7개(10%) 사용자 spot-check:
+랜덤 샘플 6~7개 (10%, ch01 PR-3 4건 + 잔여 PR-4 60건 중 랜덤 6개) 사용자 spot-check:
 - 교사 입장에서 시연 직전 1분 안에 훑을 수 있는가?
 - 학생 질문 3~5개가 실제 수업에서 나올 법한가?
 - 비유와 기술이 균형 잡혀 있는가? (한쪽 치우치면 FAIL)
@@ -799,13 +799,15 @@ for (const [qaId, raw] of Object.entries(RAW_BLOCKS)) {
 
 | STEP / PR | 마일스톤 | 데이터 | 코드 | 시간 |
 |-----------|---------|------|------|------|
-| **PR-1** | 데이터 모델 (TS 모듈, §4.3.1) + 서버 라우트 (좁은 권한 §6.1.1 B) + 1개 더미 콘텐츠 + 권한 검증 + Cache-Control: no-store | `server/src/data/teacher-explain/ch01_q01.ts` 1개 정식 + 더미 70개 (placeholder TS) + `index.ts` + `types.ts` | 서버 라우트 / 타입 / 400·401·403·404 테스트 / sessionId 검증 | 1.8h |
-| **PR-2** | LearnPage 5번째 탭 + TeacherExplainPanel 컴포넌트 (D-1: Chat 컬럼 토글, 또는 사용자 결정 옵션) + 데스크탑·모바일 layout + 더보기 드롭다운 + DESIGN-POLICY 토큰 정합 | 변경 0 (PR-1의 ch01_q01 더미로 시각 검증) | 클라 컴포넌트 + store + fetch hook | 2.5h |
-| **PR-3** | ch01 4 Q&A 정식 콘텐츠 작성 (Claude + 가독성 검수) | `ch01_q01~q04.json` 4개 정식 | 변경 0 | 1.5h (Claude 호출 + 검수) |
-| **PR-4** | 잔여 67 Q&A 콘텐츠 일괄 작성 (Claude + 후처리 + 책 8-gram overlap 검사 + 사용자 spot-check 7개) | `ch02~ch10` 67 JSON | 변경 0 | 4h (Claude 호출 + 검수 + 정정) |
-| **PR-5** | (조건부) 사용자 spot-check FAIL 항목 정정 + DESIGN-POLICY 토큰 stone variant 교체 검토 + PR #84 QR 회귀 spot-check 보고 | 일부 JSON 정정 | 토큰 교체 시 일부 컴포넌트 | 1h |
+| **PR-0** | qa-stubs.ts 64 Q&A title+summary fresh + CHAPTERS 10 title + qaCount(ch06) + FULL_QA_ID + CLAUDE.md 정책 + SDD §7~§13 정합 | qa-stubs.ts | 0 | 1.5h |
+| PR-1 | 데이터 모델 (TS 모듈, §4.3.1) + 서버 라우트 (좁은 권한 §6.1.1 B) + 1개 더미 콘텐츠 + 권한 검증 + Cache-Control: no-store | `server/src/data/teacher-explain/ch01_q01.ts` 1개 정식 + 더미 63개 (placeholder TS) + `index.ts` + `types.ts` | 서버 라우트 / 타입 / 400·401·403·404 테스트 / sessionId 검증 | 1.8h |
+| PR-2 | LearnPage 5번째 탭 + TeacherExplainPanel 컴포넌트 (D-1: Chat 컬럼 토글, 또는 사용자 결정 옵션) + 데스크탑·모바일 layout + 더보기 드롭다운 + DESIGN-POLICY 토큰 정합 | 변경 0 (PR-1의 ch01_q01 더미로 시각 검증) | 클라 컴포넌트 + store + fetch hook | 2.5h |
+| PR-3 | ch01 4 Q&A 정식 콘텐츠 작성 (Claude + 가독성 검수) | ch01 4 TS | 변경 0 | 1.5h |
+| **PR-3.5** | `client/src/data/teacher-glossary.ts` 30 용어 + Glossary 컴포넌트 (tooltip 데스크탑 / bottom sheet 모바일 ARIA) | teacher-glossary.ts | 1 신규 컴포넌트 | 1h |
+| PR-4 | 잔여 60 Q&A 콘텐츠 일괄 작성 (Claude + 후처리 + 책 8-gram overlap 검사 + 사용자 spot-check 6개) | `ch02~ch10` 60 TS | 변경 0 | 4h |
+| PR-5 | (조건부) 사용자 spot-check FAIL 항목 정정 + DESIGN-POLICY 토큰 stone variant 교체 검토 + PR #84 QR 회귀 spot-check 보고 | 일부 TS 정정 | 토큰 교체 시 일부 컴포넌트 | 1h |
 
-총 **5 PR / ~10.5h / 71 콘텐츠**.
+총 **7 PR / ~13.3h / 64 콘텐츠**.
 
 ### 8.1 의존 그래프
 
@@ -816,7 +818,7 @@ PR-2 (클라 UI — 더미로 시각 검증)
   ↓
 PR-3 (ch01 정식 콘텐츠 — 위험 측정 1 챕터)
   ↓
-PR-4 (67 Q&A 일괄)
+PR-4 (60 Q&A 일괄)
   ↓
 PR-5 (조건부 정정)
 ```
@@ -831,12 +833,26 @@ PR-1·PR-2 머지 전에는 사용자가 시각 spot-check 가능 (더미 콘텐
 
 ## §9 Sprint Contract (PR마다 — 측정 가능한 PASS 기준)
 
+### 9.0 PR-0 (qa-stubs title fresh + 정책)
+
+- [ ] CHAPTERS 10 entry title mockup 정합 (qa-titles-fresh-samples.html)
+- [ ] CHAPTERS ch06 qaCount: 10 → 9
+- [ ] FULL_QA_ID 'ch06_q03' → valid id ('ch01_q01' 권장)
+- [ ] 64 Q&A entry title mockup 정합 (id 매핑 1:1)
+- [ ] 64 Q&A entry summary fresh 재작성 (~합니다 0건, 책 8-gram 0건, 30~80자)
+- [ ] CLAUDE.md 책 TOC 차용 0% 정책 강화
+- [ ] SDD §7/§8/§9/§13 정합 (본 PR 자체 self-rewrite)
+- [ ] `cd client && npm run build` PASS
+- [ ] `cd server && npm run build` PASS (서버는 본 PR 변경 0 — 회귀 PASS)
+- [ ] Library/LearnPage 시각 spot-check — 새 title 노출
+- [ ] qa-stubs JSON parse 에러 0건 (TS strict 빌드 통과)
+
 ### 9.1 PR-1 (서버 + 더미)
 
-- [ ] `server/src/data/teacher-explain/ch01_q01.ts` 정식 1개 + 70개 더미 placeholder (모든 필드 "준비 중입니다" 같은 1 문장씩 — 학생 노출 가정 X, 교사 시각만 자연스러우면 PASS)
-- [ ] `server/src/data/teacher-explain/index.ts` 71 record export + `getTeacherExplainBlock(qaId)` helper
+- [ ] `server/src/data/teacher-explain/ch01_q01.ts` 정식 1개 + 63개 더미 placeholder (모든 필드 "준비 중입니다" 같은 1 문장씩 — 학생 노출 가정 X, 교사 시각만 자연스러우면 PASS)
+- [ ] `server/src/data/teacher-explain/index.ts` 64 record export + `getTeacherExplainBlock(qaId)` helper
 - [ ] `server/src/data/teacher-explain/types.ts` zod 스키마 + `TeacherExplainBlock` 타입
-- [ ] **build 검증** (v1.4 견고화 — 외부 검토 v1.4-2번): `cd server && npm run build && find dist/data/teacher-explain -maxdepth 1 -name '*.js' | wc -l` 출력 = `73` (71 + index + types). `find` 가 디렉터리 미존재 시 stderr 출력 + exit≠0 반환하므로 `ls *.js` glob 미매치 사고 회피
+- [ ] **build 검증** (v1.4 견고화 — 외부 검토 v1.4-2번): `cd server && npm run build && find dist/data/teacher-explain -maxdepth 1 -name '*.js' | wc -l` 출력 = `66` (64 + index + types). `find` 가 디렉터리 미존재 시 stderr 출력 + exit≠0 반환하므로 `ls *.js` glob 미매치 사고 회피
 - [ ] `GET /api/teacher-explain/ch01_q01?sessionId={teacher_session_id}` 200 (Bearer 또는 dev `x-dev-teacher-id` 헤더)
 - [ ] `GET /api/teacher-explain/ch01_q01` 400 (sessionId 누락)
 - [ ] `GET /api/teacher-explain/ch01_q01?sessionId={uuid}` 401 (인증 헤더 없음)
@@ -846,10 +862,10 @@ PR-1·PR-2 머지 전에는 사용자가 시각 spot-check 가능 (더미 콘텐
 - [ ] `GET /api/teacher-explain/INVALID?sessionId={teacher_session_id}` 400 (qaId 형식 fail)
 - [ ] `Cache-Control: no-store` 헤더 존재 (외부 검토 ②번)
 - [ ] (선택) `ETag` 헤더 부착 — `If-None-Match` 일치 시 304
-- [ ] 71 TS 모듈 모두 zod 스키마 통과 (validateBlock test)
+- [ ] 64 TS 모듈 모두 zod 스키마 통과 (validateBlock test)
 - [ ] PR #84 QR 버튼 spot-check (회귀 0건)
-- [ ] **`server/src/data/qa-meta.ts` 71 entry 신설** (v2.1 — preflight FAIL 정정) + `getQaChapterId(qaId)` helper export
-- [ ] **schema fail 의도 주입** — 1 모듈을 의도적으로 깨뜨림 (예: `ch01_q01.ts` 의 `tldr` 을 number 로) → 서버 정상 부팅 + console.error 로그 + 해당 qaId 만 404 응답 + 다른 70 qaId 200 응답 PASS (§7.2.1)
+- [ ] **`server/src/data/qa-meta.ts` 64 entry 신설** (v2.1 — preflight FAIL 정정) + `getQaChapterId(qaId)` helper export
+- [ ] **schema fail 의도 주입** — 1 모듈을 의도적으로 깨뜨림 (예: `ch01_q01.ts` 의 `tldr` 을 number 로) → 서버 정상 부팅 + console.error 로그 + 해당 qaId 만 404 응답 + 다른 63 qaId 200 응답 PASS (§7.2.1)
 - [ ] **503 응답** — Supabase env 미설정 환경에서 `getSupabaseAdminClient() === null` → 503 db_not_configured 응답
 
 ### 9.2 PR-2 (클라 UI)
@@ -900,20 +916,30 @@ viewport: 1440×900 (데스크탑) / 393×852 (모바일)
 - [ ] ~합니다 종결 0건 (단 prompts.a는 정보 톤 허용)
 - [ ] 사용자 spot-check 4 Q&A 모두 PASS (목표·멘트·개념 톤 확정)
 
-### 9.4 PR-4 (67 Q&A 일괄)
+### 9.4 PR-4 (60 Q&A 일괄)
 
-- [ ] `ch02~ch10` 67 JSON 모두 §4.2 가독성 룰 통과
+- [ ] `ch02~ch10` 60 TS 모두 §4.2 가독성 룰 통과
 - [ ] prompts 각 Q&A 3~5개 (모두)
 - [ ] 책 본문 8-gram overlap < 5% (모두)
 - [ ] ~합니다 종결 0건 (prompts.a 제외)
-- [ ] 사용자 spot-check 7개 (10% 랜덤) 모두 PASS
-- [ ] 71 JSON 모두 zod 스키마 통과 (validate 스크립트)
+- [ ] 사용자 spot-check 6개 (10% 랜덤) 모두 PASS
+- [ ] 64 TS 모두 zod 스키마 통과 (validate 스크립트)
 
 ### 9.5 PR-5 (조건부 정정)
 
 - [ ] PR-4 사용자 spot-check FAIL 항목 모두 정정 PASS
 - [ ] DESIGN-POLICY 토큰 amber/teal → stone variant 교체 결정 시 시각 검수 PASS
 - [ ] PR #84 QR 회귀 spot-check 1회 PASS
+
+### 9.6 PR-3.5 (teacher-glossary)
+
+- [ ] `client/src/data/teacher-glossary.ts` 30 용어 export
+- [ ] Glossary 컴포넌트 (tooltip 데스크탑 / bottom sheet 모바일)
+- [ ] ARIA — `role="dialog" aria-modal="true"` (모바일) + `aria-describedby` (데스크탑)
+- [ ] 4종 닫힘 (ESC / 외부 클릭 / X 버튼 / 스와이프 다운 — 모바일)
+- [ ] TeacherExplainPanel 의 단어 marker → Glossary 호출 동작
+- [ ] DESIGN-POLICY 토큰 정합 (인라인 hex 0건)
+- [ ] `cd client && npm run build` PASS
 
 ---
 
@@ -928,7 +954,7 @@ viewport: 1440×900 (데스크탑) / 393×852 (모바일)
 | ~~store 명칭 분기 (`teacherChatTab` vs `teacherViewMode`)~~ ✅ v1.2 `teacherChatTab` 단일 | - | §5.2.3 |
 | ~~"세션 주인 전용" 배지 의미와 권한 범위 불일치~~ ✅ v1.2 옵션 B (좁은) 채택 — sessionId 검증 | - | §6.1.1 / §6.1.2 / §6.2 |
 | **DESIGN-POLICY 토큰 amber/teal stone 정합 안 함** | 시각 톤 튀어 PR-2 사후 수정 | 신규 토큰 §5.1.3 표 미리 등록 + PR-2에서 stone variant 교체 시각 검수 동시 진행 |
-| **Claude Sonnet 71 일괄 호출 비용** (v2.1 갱신 — preflight Area 1 #5) | 71 Q&A × 13 필드 ≈ 출력 3000 tok/Q&A × 71 = ~213k output. 입력 prefix ~4500 tok × 71 = 320k input. Sonnet 4.6 단가 (\$3/M in + \$15/M out) → \$0.96 + \$3.20 = **~\$4.2** (재시도 2배 ~\$8). 30 glossary 추가 trivial (<\$0.05) | 절대값 합리. v2.0 까지 명시한 \$1.50 은 출력 토큰 과소 추정 (1500→3000) — v2.1 실측 정정 |
+| **Claude Sonnet 64 일괄 호출 비용** (v2.1 갱신 — preflight Area 1 #5) | 64 Q&A × 13 필드 ≈ 출력 3000 tok/Q&A × 64 = ~192k output. 입력 prefix ~4500 tok × 64 = 288k input. Sonnet 4.6 단가 (\$3/M in + \$15/M out) → \$0.86 + \$2.88 = **~\$3.8** (재시도 2배 ~\$7.6). 30 glossary 추가 trivial (<\$0.05) | 절대값 합리. v2.0 까지 명시한 \$1.50 은 출력 토큰 과소 추정 (1500→3000) — v2.1 실측 정정 |
 | **책 본문 8-gram overlap 검사 부재** | 저작권 리스크 (책 무시 정책에도 우발적 인용 가능) | PR-3·PR-4에 자동 검사 강제 (scripts/check-overlap.mjs 또는 inline). 5% 초과 시 해당 블록 재생성 |
 | **외부 web fetch 자료 라이선스** (사용자 #5 "크롤링") | Wikipedia/MDN 등 CC-BY-SA 라이선스 표기 누락 | master agent가 fetch 시 출처 기록 → about 페이지에 외부 자료 라이선스 표기 한 줄 추가 (PR-4) |
 | ~~모바일 더보기 드롭다운 a11y 누락~~ ✅ v1.5 D-3 폐기 | - | - |
@@ -940,7 +966,7 @@ viewport: 1440×900 (데스크탑) / 393×852 (모바일)
 | ~~`getQaById` server import 불가~~ ✅ v2.1 §6.1.2.1 `qa-meta.ts` 자체 복제 | - | PR-1 §9.1 |
 | ~~Anthropic 비용 추정 ~3배 차이~~ ✅ v2.1 §10 비용 정정 (~$4.2) | - | §10 |
 | **role=teacher URL 조작으로 학생 노출** | 학생이 클라 우회 시도 | 서버단 401/403이 단일 진실원 (§6.1). 클라단은 UX 단축. fetch 실패 시 빈 패널 + 토스트 |
-| **콘텐츠 갱신 시 71 JSON 재배포** | 작은 오타도 1 PR 머지 + 재배포 | 일반적 정적 콘텐츠 운영 패턴. CMS 미도입은 §3.2 Out |
+| **콘텐츠 갱신 시 64 TS 재배포** | 작은 오타도 1 PR 머지 + 재배포 | 일반적 정적 콘텐츠 운영 패턴. CMS 미도입은 §3.2 Out |
 | **AdvancedSection 내부 탭 인지 부담** | 탭 안 탭 — 교사가 못 찾을 수 있음 | demoTip 또는 advanced 둘 중 **하나만** 있으면 탭 없이 직접 노출. 둘 다 있을 때만 2 탭 |
 | **Anthropic 캐시 prefix 갱신 0건** (`server/src/lib/chat-service.ts` 무변경) | 본 SDD는 챗봇 0 영향 — 정적 JSON | server/src/ai.ts 무변경. `SDD-v1.md` §5.4 캐시 영향 0 |
 
@@ -960,7 +986,7 @@ viewport: 1440×900 (데스크탑) / 393×852 (모바일)
 | PR-1 (서버 + 더미) | 1.5h | master agent 단독 |
 | PR-2 (클라 UI) | 2.5h | 4-Phase 또는 master 단독 |
 | PR-3 (ch01 4 Q&A) | 1.5h | Claude 호출 + master 검수 + 사용자 spot-check |
-| PR-4 (67 Q&A 일괄) | 4h | Claude 호출 다회 + 후처리 + 사용자 spot-check 7개 |
+| PR-4 (60 Q&A 일괄) | 4h | Claude 호출 다회 + 후처리 + 사용자 spot-check 6개 |
 | PR-5 (조건부 정정) | 1h | FAIL 항목 + 토큰 교체 |
 | **합계** | **~11h** | 1~2 세션 |
 
@@ -988,7 +1014,7 @@ viewport: 1440×900 (데스크탑) / 393×852 (모바일)
 1. ✅ v1 사용자 검토 완료
 2. ✅ v1.1 D-1 확정 / v1.2 외부 검토 4건 + 열린 질문 / v1.3 외부 검토 추가 2건 / v1.4 외부 검토 추가 3건 반영
 3. **다음 세션 PR-1 시작** — master agent 단독, ~1.8h. 본 §13.2 절차 정확히 따름
-4. PR-1 머지 후 PR-2 시각 spot-check → PR-3 ch01 정식 콘텐츠 작성 → PR-4 67 일괄 → PR-5 (조건부)
+4. PR-1 머지 후 PR-2 시각 spot-check → PR-3 ch01 정식 콘텐츠 작성 → PR-4 60 일괄 → PR-5 (조건부)
 5. 모든 PR 머지 후 본 SDD 를 `archive/SDD-teacher-explain-v1-completed.md` 로 이동
 
 ### 13.1 브랜치 명 규칙 (v1.3 정정)
@@ -997,9 +1023,11 @@ AGENTS 규칙 `codex/<task-id>` 패턴 채택. master agent (Claude) 단독 PR �
 
 | PR | 브랜치 명 |
 |----|-----------|
+| PR-0 | `ao/teacher-explain-pr0` |
 | PR-1 | `codex/teacher-explain-server` |
 | PR-2 | `codex/teacher-explain-client` |
 | PR-3 | `codex/teacher-explain-content-ch01` |
+| PR-3.5 | `codex/teacher-explain-glossary` |
 | PR-4 | `codex/teacher-explain-content-rest` |
 | PR-5 | `codex/teacher-explain-polish` (조건부) |
 
@@ -1040,7 +1068,7 @@ AGENTS 규칙 `codex/<task-id>` 패턴 채택. master agent (Claude) 단독 PR �
    cd /home/claude/architecture/server
    npm run build
    find dist/data/teacher-explain -maxdepth 1 -name '*.js' | wc -l
-   # 출력: 73 (71 + index + types)
+   # 출력: 66 (64 + index + types)
    ```
 8. **권한 / 캐시 / 형식 검증** — §9.1 Sprint Contract 의 9개 케이스 자체 테스트:
    - 200 (정상) / 400×2 (qaId 형식 / sessionId 형식) / 401 (인증 헤더 없음) / 403×2 (not_session_teacher / qa_not_in_session) / 404×2 (session_not_found / qa_not_found) / `Cache-Control: no-store` 헤더
@@ -1055,7 +1083,7 @@ AGENTS 규칙 `codex/<task-id>` 패턴 채택. master agent (Claude) 단독 PR �
     
     - 좁은 권한 (sessionId + teacher_id + chapter_ids 검증)
     - Cache-Control: no-store
-    - 71 TS 모듈 (ch01_q01 정식 1 + 더미 70)
+    - 64 TS 모듈 (ch01_q01 정식 1 + 더미 63)
     - find 빌드 검증 = 73 .js
     ```
 
@@ -1102,7 +1130,7 @@ PR-1 의 §13.2 절차를 PR-2~PR-5 도 동일 패턴 적용:
 | 5 | 책 본문 0% + Claude 작성 + 외부 fetch 허용 | 사용자 결정 #5 + `SDD-v1.md` §2.1 |
 | 6 | 권한 = 서버단 (`/api/teacher-explain/:qaId` 401/403) | 사용자 결정 #6 |
 | 7 | 모바일 = 더보기 ⋯ 드롭다운 | 사용자 결정 #7 |
-| 8 | 71 Q&A 한 번에 1 PR (PR-4) | 사용자 결정 #8 |
+| 8 | 64 Q&A 한 번에 1 PR (PR-4) | 사용자 결정 #8 |
 | 9 | DESIGN-POLICY §10/§9-A2/§9.B 사전 인용 | 사용자 지시 (PR #84 사후 수정 사고 재발 방지) |
 | 10 | 데스크탑 layout D-1 (Chat 컬럼 토글) 권장, D-2/D-3/D-4 옵션 명시 | 본 SDD §5.2.1 — v1.1 D-1 확정 |
 
@@ -1118,7 +1146,7 @@ PR-1 의 §13.2 절차를 PR-2~PR-5 도 동일 패턴 적용:
 
 | # | preflight 영역 / 항목 | Sev | 정정 | 반영 위치 |
 |---|------------------------|-----|------|-----------|
-| 1 | Area 1 #3 / Area 3 #5 — `getQaById` server→client import rootDir 위반 | ❌ FAIL | `server/src/data/qa-meta.ts` 71 entry + `getQaChapterId(qaId)` helper 신설 | §6.1.2 step 5 / §6.1.2.1 / §7.1 / §9.1 |
+| 1 | Area 1 #3 / Area 3 #5 — `getQaById` server→client import rootDir 위반 | ❌ FAIL | `server/src/data/qa-meta.ts` 64 entry + `getQaChapterId(qaId)` helper 신설 | §6.1.2 step 5 / §6.1.2.1 / §7.1 / §9.1 |
 | 2 | Area 1 #4 — Cache-Control: no-store + ETag 모순 (RFC 9111) | ⚠️ WARN | ETag 부착 폐기. PR-1~PR-5 `no-store` 단독. ETag 의미 회복은 안정화 SWR 별도 SDD | §6.1.3 |
 | 3 | Area 3 #7 — zod 시작 시점 throw → 서버 부팅 차단 위험 | ⚠️ WARN | `safeParse` + console.error + skip + placeholder fallback 패턴 강제. schema fail 의도 주입 검증 항목 추가 | §7.2.1 / §9.1 |
 | 4 | Area 4 #9 — chapter 이동 시 previewTab='explain' reset (교사 인지 부담) | ⚠️ WARN | `resetForQa` 분기 — explain 활성 시 보존, 그 외 reset. 교사 자유 점프 흐름 보존 | §5.2.1.3 / learn-store |
@@ -1181,7 +1209,7 @@ mockup HTML 은 v2.0 으로 통째 갱신 — 7개 장치 모두 시각화.
 
 | # | 외부 지적 (Severity) | 반영 위치 | 핵심 변경 |
 |---|----------------------|-----------|-----------|
-| ① | **High** — 배포 시 `server/data/*.json` dist 누락 (build = `tsc` 단독, asset copy 0) | §4.3 옵션 표 갱신 / §4.3.1 신설 / §8 PR-1 / §9.1 build 검증 | 옵션 B 폐기 → **옵션 D (TS 모듈, `server/src/data/teacher-explain/{qaId}.ts` 71 + `index.ts` + `types.ts`)** 채택. tsc 자동 컴파일 → fs 의존 0 |
+| ① | **High** — 배포 시 `server/data/*.json` dist 누락 (build = `tsc` 단독, asset copy 0) | §4.3 옵션 표 갱신 / §4.3.1 신설 / §8 PR-1 / §9.1 build 검증 | 옵션 B 폐기 → **옵션 D (TS 모듈, `server/src/data/teacher-explain/{qaId}.ts` 64 + `index.ts` + `types.ts`)** 채택. tsc 자동 컴파일 → fs 의존 0 |
 | ② | **High** — `Cache-Control: max-age=86400` vs placeholder 교체 충돌 (PR-1 더미 24h 캐시 → PR-3/4 정식 노출 안됨) | §6.1.3 신설 / §9.1 / §9.2 | **`Cache-Control: no-store`** 고정 (PR-1~PR-5). ETag 선택. 안정화 후 SWR 환원 별도 SDD |
 | ③ | **Medium** — 권한 계약 코드베이스 불일치 (실제: `getRequestUser` Bearer/dev-header / `teacher_id` 컬럼 / `arch_pt` 학생 토큰 무관) | §6.1 머리말 / §6.1.2 라우트 명세 / §9.1 검증 케이스 | "Authorization: Bearer ATS / Cookie: ats / created_by / admin role" 모두 정정 → 실제 인증 함수 `getRequestUser(req)` 재사용. 컬럼명 `architecture_sessions.teacher_id`. 학생 쿠키 `arch_pt` 와 교사 인증 무관 명시 |
 | ④ | **Medium** — store 명칭 분기 (`teacherChatTab` ↔ `teacherViewMode`) | §5.2.3 갱신 / §5.2.1.1 cross-link | **`teacherChatTab`** 단일화. `teacherViewMode` 명세 폐기. `mobileTab` 에 `'explain'` 추가만 별도 명시 |
