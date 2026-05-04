@@ -1,0 +1,67 @@
+{
+  "step": "pr18a",
+  "round": 1,
+  "phase": "eval-interaction-round1",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-118",
+  "ts": "2026-05-04T01:26:03Z",
+  "verdict": "FAIL",
+  "branch_under_test": "feat/preview-inline-ch07-q1-q4",
+  "commit_under_test": "3a80def1cbb8642a55a8b156989282be9cbda309",
+  "scope": {
+    "focus": "HANDOFF-pr18a-round1.md \u00a7C interaction verification for ch07_q01~q04 only",
+    "build": {
+      "client": "PASS (root `npm run build` completed; client `tsc -b && vite build` succeeded)",
+      "server": "PASS (root `npm run build` completed; server `tsc` succeeded)"
+    },
+    "branch_diff": "FAIL (`git diff --stat 87d5ecb..HEAD` shows only `HANDOFF-pr18a-round1.md`; the PR head branch contains no product-code diff for ch07)",
+    "component_presence": "FAIL (`client/src/demos/ch07/` does not exist on the branch under test, so `Q01DbType.tsx`, `Q02Crud.tsx`, `Q03Acid.tsx`, and `Q04Index.tsx` are all missing)",
+    "inline_registry": "FAIL (`client/src/demos/registry.ts` stops at `ch06_q10`; there are no `ch07_q01`~`ch07_q04` entries, so `getDemoComponent(qaId)` returns `undefined` for all four target routes)",
+    "demo_fallback_path": "FAIL (`client/src/data/demos.ts` still declares `/demos/ch07/q01.html`~`q04.html`, so `/library/7/ch07_q01`~`q04` can only render the legacy iframe demos, not the required inline React conversions)",
+    "implementation_elsewhere": "INFO (`origin/codex/pr18a` contains the expected ch07 files and registry wiring, but that implementation is not present on the PR head branch required by the handoff)"
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "The detached PR head builds cleanly with the current branch contents."
+    },
+    {
+      "id": "I2",
+      "result": "FAIL",
+      "evidence": "The evaluated PR head branch contains no ch07 implementation diff beyond the handoff markdown, so there is no product change to validate for q01~q04."
+    },
+    {
+      "id": "I3",
+      "result": "FAIL",
+      "evidence": "`client/src/demos/registry.ts` has no `ch07_q01`, `ch07_q02`, `ch07_q03`, or `ch07_q04` entries; the registry ends at `ch06_q10`."
+    },
+    {
+      "id": "I4",
+      "result": "FAIL",
+      "evidence": "The required React demo modules `client/src/demos/ch07/Q01DbType.tsx`, `Q02Crud.tsx`, `Q03Acid.tsx`, and `Q04Index.tsx` do not exist on the branch under test."
+    },
+    {
+      "id": "I5",
+      "result": "FAIL",
+      "evidence": "Because `PreviewPanel` can only mount inline demos when both `demo` metadata and `InlineComponent` exist, ch07_q01~q04 would continue to render the iframe URLs declared in `client/src/data/demos.ts`."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "Regression scope remains intact: the branch keeps the existing ch06 inline registry entries through `ch06_q10` with no unexpected shared-contract changes."
+    }
+  ],
+  "summary": "T4 cannot pass for PR-18a round 1 on the designated PR head branch. `feat/preview-inline-ch07-q1-q4` only adds the handoff markdown and leaves product code identical to `main`, so the target ch07_q01~q04 routes still fall back to legacy iframe demos instead of the required inline PairVertical/PairMatch/PairFlow components.",
+  "fail_items": [
+    "missing-pr18a-implementation: `feat/preview-inline-ch07-q1-q4` contains no product-code diff against `main`; only `HANDOFF-pr18a-round1.md` was added.",
+    "missing-inline-registry-ch07-q01-q04: `client/src/demos/registry.ts` has no `ch07_q01`~`ch07_q04` entries, so inline mounting never occurs for the target routes.",
+    "missing-demo-components-ch07-q01-q04: `client/src/demos/ch07/Q01DbType.tsx`, `Q02Crud.tsx`, `Q03Acid.tsx`, and `Q04Index.tsx` are absent on the PR head branch."
+  ],
+  "revise_items": [],
+  "notes": [
+    "`origin/codex/pr18a` currently holds the expected implementation (`1317daf`), but the handoff explicitly required evaluating `origin/feat/preview-inline-ch07-q1-q4` and that branch still points to wrapper commit `3a80def`.",
+    "No open GitHub PR currently targets `feat/preview-inline-ch07-q1-q4` (`gh pr list --head feat/preview-inline-ch07-q1-q4` returned `[]`)."
+  ]
+}

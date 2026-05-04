@@ -1,0 +1,61 @@
+{
+  "step": "pr18a",
+  "round": 2,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-119",
+  "ts": "2026-05-04T01:39:00Z",
+  "branch": "feat/preview-inline-ch07-q1-q4",
+  "commit": "dadb3f6a3f334489e71166a349879f5723af08ac",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame-regression",
+      "verdict": "PASS",
+      "evidence": "`/library/7/ch07_q01~q04`와 회귀 spot-check `/library/6/ch06_q10`을 desktop/mobile에서 확인한 결과 모두 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`, `pageerror=0`으로 인라인 렌더링이 유지됐다."
+    },
+    {
+      "id": "V2-desktop-3col-structure",
+      "verdict": "PASS",
+      "evidence": "1440x900 desktop에서 대상 5개 페이지 공통으로 학습/채팅/시연 shell 폭이 `280/320/840px`였다. 인라인 host 실폭은 `ch07_q01=640px`, `ch07_q02~q04=776px`, `ch06_q10=776px`로 layout preset 안에서 안정적으로 렌더링됐다."
+    },
+    {
+      "id": "V3-scenario-sync",
+      "verdict": "PASS",
+      "evidence": "`ch07_q01~q04`의 시나리오 탭 16개를 모두 클릭해 확인했다. hash가 각각 `#rdbms/#document/#join/#shard`, `#select/#insert/#update/#delete`, `#atomic/#consistent/#isolated/#durable`, `#scan/#btree/#range/#cost`로 바뀌었고, 각 탭마다 hero title도 서로 다른 문장으로 전환돼 내용 동기화가 유지됐다."
+    },
+    {
+      "id": "V4-contrast-purple700",
+      "verdict": "PASS",
+      "evidence": "ch07 공통 tone은 `design-tokens.css` 기준 `--demo-accent-ch07=#9333ea`, `--demo-accent-soft-ch07=#faf5ff`이며 대비비는 `5.02:1`로 WCAG AA `4.5:1` 기준을 넘긴다."
+    },
+    {
+      "id": "V5-layout-contract",
+      "verdict": "PASS",
+      "evidence": "registry/host 계약이 handoff와 일치했다. `ch07_q01`은 `max-w-[640px]` square, `ch07_q02~q04`와 회귀 spot-check `ch06_q10`은 모두 `max-w-[860px]` wide로 렌더링됐다."
+    },
+    {
+      "id": "V6-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852 모바일에서 외부 `📱 시연` 탭을 연 뒤 시나리오 tablist bottom이 `ch07_q01~q04=238.4px`, spot-check `ch06_q10=276.8px`로 모두 first viewport 안에 들어왔다."
+    },
+    {
+      "id": "V7-label-rule-and-raw-abbrev",
+      "verdict": "PASS",
+      "evidence": "`client/src/demos/ch07/Q01DbType.tsx`~`Q04Index.tsx`의 pair label/sub를 확인했다. `label` 최대 길이는 `q01=5`, `q02=6`, `q03=3`, `q04=5`로 `_shared/labels.ts`의 `maxLabelLength=8` 이하였다. `sub`도 `q01=8`, `q02=6`, `q03=11`, `q04=6`으로 `maxSubLength=16` 이하였다. forbidden raw 단독 약자 규칙(`OS/API/DB/UI/JS/CSS/HTML`)에 걸리는 토큰은 없었다."
+    },
+    {
+      "id": "V8-baseline-regression",
+      "verdict": "PASS",
+      "evidence": "기존 `ch06_q10`을 다시 확인한 결과 desktop/mobile 모두 인라인 렌더링과 5단계 시나리오 전환이 유지됐다. hash가 `#power → #firmware → #bootloader → #kernel → #login`으로 바뀌고 hero title도 각 단계에 맞게 함께 전환됐다."
+    }
+  ],
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr18a-round2.md` §B만 따랐다.",
+    "대상 구현 SHA는 `dadb3f6a3f334489e71166a349879f5723af08ac`로 검증했다. 원격 feat 브랜치 HEAD와의 diff는 handoff 문서 추가뿐이라 앱 코드에는 영향이 없었다.",
+    "실측은 detached worktree `/tmp/architecture-pr18a-visual`에서 root `npm run dev`로 Vite를 `http://127.0.0.1:5186`에 띄운 뒤 `puppeteer-core` + system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "산출물은 `/tmp/pr18a-r2-eval-visual/metrics.json`과 PNG 캡처들(`ch07_q01~q04`, `ch06_q10` desktop/mobile)로 남겼다."
+  ]
+}

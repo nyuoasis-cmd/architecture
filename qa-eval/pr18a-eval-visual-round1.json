@@ -1,0 +1,72 @@
+{
+  "step": "pr18a",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-117",
+  "ts": "2026-05-04T01:38:49Z",
+  "branch": "codex/pr18a",
+  "commit": "1317daf97d003340f64b758dac0b05ec18787405",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame",
+      "verdict": "PASS",
+      "evidence": "`/library/7/ch07_q01`~`ch07_q04` desktop/mobile 모두 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`, `pageerror=0`, `console error=0`이었다. 신규 4개 DB 데모가 전부 React 인라인 렌더로 정상 진입했다."
+    },
+    {
+      "id": "V2-desktop-3col",
+      "verdict": "PASS",
+      "evidence": "1440x900에서 4개 route 공통으로 좌측 학습 `280px`, 채팅 `320px`, 우측 시연 `840px` 3단 셸이 유지됐다. 인라인 데모 내부도 hero → pair block → 상태/비교 섹션 → log 순으로 배치됐고 top 좌표는 q01 `73 < 230.88 < 587.56 < 727.23`, q02 `73 < 208.78 < 557.84 < 697.52`, q03 `73 < 208.78 < 557.84 < 818.81`, q04 `73 < 208.78 < 557.84 < 697.52`로 순서가 일관됐다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "시나리오 탭 16개를 전부 클릭해 확인했다. 각 클릭마다 hash, hero title, 메타포/IT active 카드 2개가 함께 바뀌었다. 예를 들어 q01은 `#rdbms/#document/#join/#shard`와 함께 hero가 `칸을 먼저 맞추면...` → `문서처럼 유연하면...` → `관계를 걸어 두면...` → `양이 커지면...`로 전환됐고, q04도 `#scan/#btree/#range/#cost`에 맞춰 `훑기/전체 스캔` → `가지/B-tree` → `범위/BETWEEN` → `비용/쓰기 비용` 쌍이 동기화됐다."
+    },
+    {
+      "id": "V4-contrast-purple700",
+      "verdict": "PASS",
+      "evidence": "ch07 active accent는 `rgb(147, 51, 234)` (`#9333ea`), active card 배경은 `rgb(250, 245, 255)` (`#faf5ff`)였다. 대비비는 4개 route 모두 `5.38:1`로 측정돼 WCAG AA `4.5:1` 기준을 넘겼다."
+    },
+    {
+      "id": "V5-width-layout",
+      "verdict": "PASS",
+      "evidence": "square인 `ch07_q01` inline host는 computed `max-width=640px`, 실제 폭 `640px`으로 고정됐고, wide인 `ch07_q02~q04`는 computed `max-width=860px`, 실제 폭 `776px`으로 중앙 정렬됐다. 핸드오프의 q01 square / q02~q04 wide 구성이 그대로 반영됐다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "pair block SVG 수는 q01 `8개`, q02~q04 `16개`였다. active 카드 수도 전 route에서 항상 `2개`였고 active SVG 색도 purple accent로 유지돼 메타포와 IT 아이콘이 모두 가시적이었다."
+    },
+    {
+      "id": "V7-baseline-ch06-q10",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check로 `/library/6/ch06_q10`을 확인했다. `iframe=0`, `.phone-frame=0`, `pageerror=0`, 3단 셸 `280/320/840px`, wide host `776px`, 5칸 step row `140.391/140.406px x5`가 모두 유지됐다. active accent도 기존 ch06 red `rgb(185, 28, 28)`이며 대비비 `6.47:1`로 정상이다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852에서 외부 `📱 시연` 탭 전환 후 4개 route 모두 scenario tablist bottom이 `238.39px`로 첫 화면 안에 들어왔다. hero 시작점도 q01 `303.17px`, q02 `303.17px`, q03 `303.17px`, q04 `282.78px`여서 첫 뷰에서 시나리오 칩과 hero를 함께 볼 수 있었다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "mobile 393x852에서 square `ch07_q01`은 host 폭 `361px`의 1열 stack으로 유지됐고, wide `ch07_q02~q04`의 step row는 모두 `gridTemplateColumns=\"155.5px 155.5px\"` 2열로 변환됐다. 좌표도 `left 37 / 200.5` 두 열로 정렬됐으며 `document.documentElement.scrollWidth=393`으로 가로 스크롤이 없었다."
+    }
+  ],
+  "artifacts": {
+    "eval_worktree": "/tmp/architecture-pr18a-visual",
+    "metrics": "/tmp/pr18a-r1-eval-visual/metrics.json",
+    "screenshots": "/tmp/pr18a-r1-eval-visual/ch07_q01-desktop.png,/tmp/pr18a-r1-eval-visual/ch07_q02-desktop.png,/tmp/pr18a-r1-eval-visual/ch07_q03-desktop.png,/tmp/pr18a-r1-eval-visual/ch07_q04-desktop.png,/tmp/pr18a-r1-eval-visual/ch07_q01-mobile.png,/tmp/pr18a-r1-eval-visual/ch07_q02-mobile.png,/tmp/pr18a-r1-eval-visual/ch07_q03-mobile.png,/tmp/pr18a-r1-eval-visual/ch07_q04-mobile.png,/tmp/pr18a-r1-eval-visual/ch06_q10-desktop.png",
+    "browser": "Playwright Core + system Chrome (/usr/bin/google-chrome)"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr18a-round1.md` §B만 따랐다.",
+    "평가 대상 구현은 `origin/codex/pr18a`의 `1317daf97d003340f64b758dac0b05ec18787405`였다.",
+    "빌드는 detached worktree `/tmp/architecture-pr18a-visual`에서 `cd client && npm run build`로 재확인했다.",
+    "브라우저 검증은 정적 빌드 산출물을 `serve -s client/dist`로 `http://127.0.0.1:5191`에 띄워 수행했다."
+  ]
+}

@@ -1,0 +1,1 @@
+{"status":"done","step":"pr18a","role":"gen","model":"codex","session_id":"arch-116","ts":"2026-05-04T01:22:41Z","branch":"codex/pr18a","commit":"1317daf97d003340f64b758dac0b05ec18787405","pr":"https://github.com/nyuoasis-cmd/architecture/pull/57","loc":"+743 -3","note":"ch07 q01~q04 인라인 데모 4종 추가. DB/CRUD/ACID/인덱스 아이콘 확장. data/demos 시나리오 ID와 registry 연결 완료."}
