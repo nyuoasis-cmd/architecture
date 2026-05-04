@@ -61,7 +61,6 @@ function LearnLayout(props: {
           <GuidePanel
             activeScenarioId={scenarioId}
             allSessionQas={props.allSessionQas}
-            availableChapters={props.availableChapters}
             chapter={props.chapter}
             chapterQas={props.chapterQas}
             currentQa={props.qa}

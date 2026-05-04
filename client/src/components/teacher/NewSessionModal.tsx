@@ -11,12 +11,12 @@ const MAX_PARTICIPANT_OPTIONS = [50, 100, 200] as const;
 
 export default function NewSessionModal({ onClose, onCreated }: NewSessionModalProps) {
   const [name, setName] = useState('');
-  const [selectedChapters, setSelectedChapters] = useState<number[]>([6]);
   const [maxParticipants, setMaxParticipants] = useState<(typeof MAX_PARTICIPANT_OPTIONS)[number]>(100);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canSubmit = name.trim().length > 0 && selectedChapters.length > 0 && !isSubmitting;
+  const allChapterIds = CHAPTERS.map((chapter) => chapter.id);
+  const canSubmit = name.trim().length > 0 && !isSubmitting;
 
   async function handleSubmit() {
     if (!canSubmit) {
@@ -29,7 +29,7 @@ export default function NewSessionModal({ onClose, onCreated }: NewSessionModalP
     try {
       const session = await createSession({
         name: name.trim(),
-        chapterIds: selectedChapters,
+        chapterIds: allChapterIds,
         maxParticipants,
       });
       onCreated(session);
@@ -67,35 +67,8 @@ export default function NewSessionModal({ onClose, onCreated }: NewSessionModalP
           </label>
 
           <section>
-            <div className="mb-2 text-sm font-medium text-stone-700">챕터 선택</div>
-            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-              {CHAPTERS.map((chapter) => {
-                const checked = selectedChapters.includes(chapter.id);
-                return (
-                  <label
-                    key={chapter.id}
-                    className={`flex cursor-pointer items-center gap-3 rounded-2xl border px-4 py-3 ${
-                      checked ? 'border-stone-900 bg-stone-950 text-white' : 'border-[var(--color-border)] bg-white'
-                    }`}
-                  >
-                    <input
-                      checked={checked}
-                      className="h-4 w-4"
-                      onChange={() =>
-                        setSelectedChapters((current) =>
-                          checked
-                            ? current.filter((item) => item !== chapter.id)
-                            : [...current, chapter.id].sort((a, b) => a - b),
-                        )
-                      }
-                      type="checkbox"
-                    />
-                    <span className="text-sm">
-                      {chapter.emoji} {chapter.id}장 {chapter.title}
-                    </span>
-                  </label>
-                );
-              })}
+            <div className="rounded-2xl bg-stone-50 px-4 py-3 text-xs text-stone-600">
+              📚 모든 챕터(1장~10장 · 71개 Q&A)가 학생들에게 열립니다.
             </div>
           </section>
 

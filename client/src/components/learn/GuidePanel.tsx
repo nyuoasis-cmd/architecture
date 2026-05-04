@@ -8,7 +8,6 @@ type GuidePanelProps = {
   currentQa: QaStub;
   chapterQas: QaStub[];
   allSessionQas?: QaStub[];
-  availableChapters?: ChapterStub[];
   mode: 'self' | 'session';
   activeScenarioId: string;
   progressMapOverride?: Record<string, { read: boolean; quizScore?: number }>;
@@ -21,7 +20,6 @@ export default function GuidePanel({
   currentQa,
   chapterQas,
   allSessionQas,
-  availableChapters,
   mode,
   activeScenarioId,
   progressMapOverride,
@@ -56,24 +54,12 @@ export default function GuidePanel({
   return (
     <div className="flex h-full flex-col">
       <div className="flex-shrink-0 border-b border-[var(--color-border)] p-3">
-        {availableChapters && availableChapters.length > 1 ? (
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            {availableChapters.map((sessionChapter) => (
-              <button
-                key={sessionChapter.id}
-                className={`rounded-full px-2.5 py-1 text-[11px] ${
-                  sessionChapter.id === chapter.id
-                    ? 'bg-stone-950 text-white'
-                    : 'border border-[var(--color-border)] bg-white text-stone-600'
-                }`}
-                onClick={() => navigateTo(sessionChapter.firstQaId)}
-                type="button"
-              >
-                {sessionChapter.id}장
-              </button>
-            ))}
-          </div>
-        ) : null}
+        <Link
+          to="/library"
+          className="mb-3 inline-flex items-center gap-1 text-[11px] text-stone-600 hover:text-stone-950"
+        >
+          ← 라이브러리에서 다른 챕터 보기
+        </Link>
 
         <div className="mb-2 flex items-center gap-2">
           <span>{chapter.emoji}</span>
