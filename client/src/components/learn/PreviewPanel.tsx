@@ -24,7 +24,6 @@ export default function PreviewPanel({
   initialTab = 'demo',
   quizProps,
 }: PreviewPanelProps) {
-  const iframeRef = useRef<HTMLIFrameElement>(null);
   const inlineHostRef = useRef<HTMLDivElement>(null);
   const previewTab = useLearnStore((state) => state.previewTab);
   const setPreviewTab = useLearnStore((state) => state.setPreviewTab);
@@ -37,45 +36,18 @@ export default function PreviewPanel({
   const inlineMeta = qaId ? getDemoComponent(qaId) : undefined;
 
   const handleScenarioHash = (nextScenarioId: string) => {
-    if (!inlineMeta) {
-      const iframe = iframeRef.current;
-      if (iframe && demo) {
-        iframe.src = `${demo.url}#${nextScenarioId}`;
-      }
-    } else if (typeof window !== 'undefined') {
+    if (typeof window !== 'undefined') {
       window.history.replaceState(null, '', `#${nextScenarioId}`);
     }
     onScenarioChange(nextScenarioId);
   };
 
   const handleReload = () => {
-    if (inlineMeta) {
-      onScenarioChange(scenarioId);
-      return;
-    }
-
-    const iframe = iframeRef.current;
-    if (!iframe) {
-      return;
-    }
-
-    const currentSrc = iframe.src || (demo ? `${demo.url}#${scenarioId}` : '');
-    if (!currentSrc) {
-      return;
-    }
-
-    iframe.src = 'about:blank';
-    requestAnimationFrame(() => {
-      if (iframeRef.current) {
-        iframeRef.current.src = currentSrc;
-      }
-    });
+    onScenarioChange(scenarioId);
   };
 
   const handleFullscreen = async () => {
-    const host = inlineMeta
-      ? inlineHostRef.current
-      : (iframeRef.current?.closest('.phone-frame') as HTMLElement | null);
+    const host = inlineHostRef.current;
     if (host && host.requestFullscreen) {
       try {
         await host.requestFullscreen();
@@ -139,37 +111,6 @@ export default function PreviewPanel({
                 onChange={handleScenarioHash}
                 description={demo.description}
               />
-            </div>
-          ) : demo ? (
-            <div className="flex flex-1 flex-col items-center justify-center">
-              <div className="phone-frame">
-                <div className="phone-notch" />
-                <div className="phone-screen">
-                  <iframe
-                    key={demo.qaId}
-                    ref={iframeRef}
-                    sandbox="allow-scripts"
-                    src={`${demo.url}#${scenarioId}`}
-                    style={{ width: '100%', height: '100%', border: 0 }}
-                    title={demo.title}
-                  />
-                </div>
-              </div>
-              <div className="preview-scenario-dots" aria-label="시연 시나리오 선택">
-                {demo.scenarios.map((scenario) => (
-                  <button
-                    key={scenario.id}
-                    aria-label={scenario.label}
-                    className={`preview-scenario-dot ${scenarioId === scenario.id ? 'is-active' : ''}`}
-                    onClick={() => handleScenarioHash(scenario.id)}
-                    type="button"
-                  />
-                ))}
-              </div>
-              <p className="mt-4 text-[12px]" style={{ color: 'var(--color-text-muted)' }}>
-                ▶ <strong>{demo.scenarios.find((scenario) => scenario.id === scenarioId)?.label}</strong> —{' '}
-                {demo.description}
-              </p>
             </div>
           ) : (
             <div className="rounded-xl border border-[var(--color-border)] bg-white p-6 text-center text-sm">
