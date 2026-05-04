@@ -1,0 +1,120 @@
+{
+  "step": "pr21b",
+  "round": 3,
+  "phase": "eval-interaction-round3",
+  "role": "eval-interaction",
+  "model": "codex",
+  "session_id": "arch-152",
+  "ts": "2026-05-04T05:35:32Z",
+  "branch": "feat/preview-inline-ch10-q5-q7",
+  "evaluated_commit": "09b11558c7dc123c15bbe193bbc64608dad7a758",
+  "verdict": "REVISE",
+  "scope": {
+    "focus": "HANDOFF-pr21b-round3.md §C only. Re-verify interaction behavior for ch10_q01~q07 after the PR-21a cherry-pick recovery, with ch09 regression spot-checks.",
+    "build": {
+      "client": "PASS (cd client && npm install --no-audit --no-fund && npm run build)",
+      "server": "PASS (cd server && npm install --no-audit --no-fund && npm run build)"
+    },
+    "static_checks": {
+      "raw_hex_grep": "PASS (grep -rE \"['\\\"]#[0-9a-fA-F]{3,8}['\\\"]\" client/src/demos/ch10 client/src/demos/ch09 returned 0 matches)",
+      "forbidden_shared_import_grep": "PASS (no forbidden direct _shared leaf imports outside the barrel import path)",
+      "raw_label_abbrev_grep": "PASS (exact raw label/sub acronym grep for OS/API/DB/UI/JS/CSS/HTML/IaaS/PaaS/SaaS/AI/ML/DL/IAM returned 0 matches in ch10/ch09 demos)",
+      "db_substring_grep": "PASS (grep for literal DB substring returned 0 matches in ch10/ch09 TSX files)",
+      "label_length": "REVISE (`client/src/demos/ch10/Q06Cost.tsx` scene chip label `prefix 재사용` is 9 characters, exceeding `client/src/demos/_shared/labels.ts` `maxLabelLength: 8` even though the PairMatch labels/subs themselves still satisfy the contract)",
+      "id_alignment": [
+        "ch10_q01 demos.ts ids iaas/paas/saas/boundary match Q01CloudService.tsx SCENES keys",
+        "ch10_q02 demos.ts ids bundle/image/run/share match Q02Container.tsx SCENES keys",
+        "ch10_q03 demos.ts ids desired/heal/scale/rollout match Q03K8s.tsx SCENES keys",
+        "ch10_q04 demos.ts ids ai/ml/dl/scope match Q04AiHierarchy.tsx SCENES keys",
+        "ch10_q05 demos.ts ids context/predict/repeat/limit match Q05Llm.tsx SCENES keys",
+        "ch10_q06 demos.ts ids percall/pertoken/cache/batch match Q06Cost.tsx SCENES keys",
+        "ch10_q07 demos.ts ids iam/encrypt/segment/monitor match Q07AiSecurity.tsx SCENES keys",
+        "ch09 regression spot-check ids remain aligned for ch09_q01 mono/growth/micro/tradeoff and ch09_q06 measure/scale-up/scale-out/mix"
+      ],
+      "registry_alignment": "PASS (registry.ts now maps ch10_q01~q07, with q01/q04 square and q02/q03/q05/q06/q07 wide, matching the component contracts)",
+      "diff_guard": [
+        "git diff --name-only main..HEAD shows only ch10 demo files, demos.ts, registry.ts, the shared computer icon file, prior visual artifacts, and handoff wrappers",
+        "No ch09 product-code files changed in main..HEAD, so the regression spot-check exercises unchanged app code"
+      ]
+    },
+    "interaction_checks": {
+      "initial_deep_link": [
+        "/library/10/ch10_q01#paas selected the '빌리기 PaaS' tab on load",
+        "/library/10/ch10_q02#image selected the '이미지' tab on load",
+        "/library/10/ch10_q03#heal selected the '자가 복구' tab on load",
+        "/library/10/ch10_q04#ml selected the '학습 ML' tab on load",
+        "/library/10/ch10_q05#predict selected the '다음 토큰' tab on load",
+        "/library/10/ch10_q06#cache selected the '캐시 절감' tab on load",
+        "/library/10/ch10_q07#segment selected the '네트워크 격리' tab on load",
+        "/library/9/ch09_q01#micro selected the '마이크로서비스' tab on load",
+        "/library/9/ch09_q06#scale-out selected the '수평 확장' tab on load"
+      ],
+      "hash_sync": [
+        "/library/10/ch10_q01#paas -> click '책임 경계' => #boundary",
+        "/library/10/ch10_q02#image -> click '커널 공유' => #share",
+        "/library/10/ch10_q03#heal -> click '점진 배포' => #rollout",
+        "/library/10/ch10_q04#ml -> click '포함 관계' => #scope",
+        "/library/10/ch10_q05#predict -> click '검증 한계' => #limit",
+        "/library/10/ch10_q06#cache -> click '배치 절감' => #batch",
+        "/library/10/ch10_q07#segment -> click '로그 감시' => #monitor",
+        "/library/9/ch09_q01#micro -> click '트레이드오프' => #tradeoff",
+        "/library/9/ch09_q06#scale-out -> click '혼합 전략' => #mix"
+      ],
+      "inline_render": "PASS (all nine tested routes kept iframeCount=0 and phoneFrameCount=0 during direct-entry and click replay)",
+      "console_health": "PASS (Playwright saw no actionable console errors, page errors, bad responses, or /api/progress traffic on any tested self-mode route)"
+    }
+  },
+  "checks": [
+    {
+      "id": "I1",
+      "result": "PASS",
+      "evidence": "Client install/build and server install/build both succeeded on the detached PR head."
+    },
+    {
+      "id": "I2",
+      "result": "PASS",
+      "evidence": "Raw hex grep returned 0 matches in client/src/demos/ch10 and client/src/demos/ch09."
+    },
+    {
+      "id": "I3",
+      "result": "PASS",
+      "evidence": "Forbidden direct _shared leaf import grep returned 0 matches; the demos continue to use the shared barrel and local types only."
+    },
+    {
+      "id": "I4",
+      "result": "REVISE",
+      "evidence": "`client/src/demos/ch10/Q06Cost.tsx` includes scene chip label `prefix 재사용`, which is 9 characters and exceeds `_shared/labels.ts` `maxLabelLength: 8`. No other ch09/ch10 extracted label or sub exceeded the contract."
+    },
+    {
+      "id": "I5",
+      "result": "PASS",
+      "evidence": "demos.ts scenario ids align 1:1 with SCENES keys for ch10_q01~q07, and the ch09_q01/ch09_q06 regression routes remain aligned."
+    },
+    {
+      "id": "I6",
+      "result": "PASS",
+      "evidence": "registry.ts wiring now includes all ch10_q01~q07 entries with layouts matching the component-side contracts, and ch09 product code is unchanged from main for the regression check."
+    },
+    {
+      "id": "I7",
+      "result": "PASS",
+      "evidence": "Playwright confirmed both direct hash entry and click-driven hash rewrites for all seven ch10 routes plus the two ch09 regression routes, with the clicked tab switching to aria-selected=true each time."
+    },
+    {
+      "id": "I8",
+      "result": "PASS",
+      "evidence": "All tested routes rendered through the inline React path with iframeCount=0, phoneFrameCount=0, and no /api/progress request in self-mode."
+    }
+  ],
+  "fail_items": [],
+  "revise_items": [
+    "I4-label-length-q06-cache-chip: `client/src/demos/ch10/Q06Cost.tsx` scene chip label `prefix 재사용` exceeds the shared 8-character label contract. Shorten it to 8 characters or fewer, then rerun interaction/visual spot checks for ch10_q06."
+  ],
+  "summary": "HANDOFF-pr21b-round3.md §C 기준 상호작용 재검증 결과는 REVISE. ch10_q01~q07 복구와 ch09 회귀 spot-check의 deep-link, hash sync, inline 렌더링, console/progress 상태는 모두 정상이나, ch10_q06에 8자 초과 scene chip label 1건이 남아 shared label contract를 완전히 만족하지 못한다.",
+  "notes": [
+    "Evaluation was performed from a detached checkout at commit 09b11558c7dc123c15bbe193bbc64608dad7a758, then the artifact files were recorded on the branch worktree for commit/push because the feature branch is already checked out at /home/claude/architecture.",
+    "Playwright verification used a local Vite dev server at http://127.0.0.1:5187 with Playwright 1.52.0 and system Chrome (/usr/bin/google-chrome).",
+    "ao session claim-pr 21 was attempted per session instructions, but the orchestrator rejected it because GitHub PR #21 is already merged. Evaluation continued against the explicit handoff branch feat/preview-inline-ch10-q5-q7."
+  ],
+  "next_action": "REVISE. `prefix 재사용` label을 8자 이하로 줄인 뒤 ch10_q06 중심으로 재검증 필요."
+}

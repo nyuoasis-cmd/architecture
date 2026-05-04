@@ -1,0 +1,73 @@
+{
+  "step": "pr21b",
+  "round": 3,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-151",
+  "ts": "2026-05-04T05:43:13Z",
+  "branch": "feat/preview-inline-ch10-q5-q7",
+  "commit": "09b11558c7dc123c15bbe193bbc64608dad7a758",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame",
+      "verdict": "PASS",
+      "evidence": "`/library/10/ch10_q01`~`ch10_q07` desktop과 회귀 spot-check `/library/9/ch09_q01`~`ch09_q06` desktop에서 모두 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`, `console error=0`, `pageerror=0`이었다. round 2에서 깨졌던 ch10 q01~q04까지 포함해 13개 라우트 전부가 React 인라인 preview로 정상 렌더됐다."
+    },
+    {
+      "id": "V2-desktop-3col",
+      "verdict": "PASS",
+      "evidence": "1440x900에서 ch10 q01~q07 전부 학습/채팅/시연 셸 폭이 `280/320/840px`로 유지됐다. demo host는 q01·q04 `640px`, q02·q03·q05·q06·q07 `776px`로 렌더돼 square/wide 계약이 모두 맞았다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "ch10 7개 라우트의 시나리오 탭 28개를 전부 순회 클릭했다. 모든 전환에서 `window.location.hash`, 활성 tab 라벨, preview hero title이 기대 scene으로 같이 바뀌었고 fallback scene은 재현되지 않았다. 예: q01 `#iaas→#paas→#saas→#boundary`, q07 `#iam→#encrypt→#segment→#monitor`."
+    },
+    {
+      "id": "V4-contrast-pink700",
+      "verdict": "PASS",
+      "evidence": "ch10 tone token은 `--demo-accent-ch10=#be185d`, `--demo-accent-soft-ch10=#fdf2f8`였고 accent와 white 대비비는 `6.04:1`로 WCAG AA `4.5:1` 기준을 넘겼다."
+    },
+    {
+      "id": "V5-layout-contract",
+      "verdict": "PASS",
+      "evidence": "`client/src/demos/registry.ts`와 런타임 host 폭이 일치했다. ch10은 q01·q04 `square=640px`, q02·q03·q05·q06·q07 `wide=776px`였고, 회귀 spot-check ch09에서도 q01 `640px`, q02~q06 `776px`로 기존 매핑이 유지됐다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "desktop DOM에서 ch10 q01·q04는 각각 `visibleSvgCount=8`, q02·q03·q05·q06·q07는 각각 `16`이었다. mobile 393x852에서는 q01·q04 `8`, q02·q03·q05·q06·q07 `10` visible로 집계됐고, 이는 `sm:block` 화살표/커넥터가 접히며 숨는 정상 동작이었다."
+    },
+    {
+      "id": "V7-regression-ch09",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check `/library/9/ch09_q01`~`ch09_q06` desktop 6개 라우트 모두 `iframe=0`, `console error=0`, `pageerror=0`, 3컬럼 `280/320/840px`를 유지했다. host 폭도 q01 `640px`, q02~q06 `776px`로 이전 계약이 깨지지 않았다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852에서 `📱 시연` 탭 전환 후 ch10 q01~q07 모두 scenario tablist가 첫 화면 안에 들어왔다(`tabBottom=182.39px`). hero 시작점은 q01·q02·q03·q04·q05·q07 `292.86px`, q06 `272.47px`였고, 7개 라우트 전부 첫 모바일 뷰포트 안에 시나리오 칩과 hero가 함께 들어왔다."
+    },
+    {
+      "id": "V9-mobile-layout",
+      "verdict": "PASS",
+      "evidence": "mobile 393x852에서 ch10 q01~q07 inline host 폭은 모두 `361px`였고 `document.documentElement.scrollWidth=393`으로 가로 오버플로가 없었다. q01·q04 PairVertical과 q02·q03·q05·q06·q07 wide flow 모두 한 열/두 열 접힘 규칙 안에서 안정적으로 렌더됐다."
+    }
+  ],
+  "artifacts": {
+    "metrics": "/tmp/pr21b-r3-eval-visual/metrics.json",
+    "screenshots_dir": "/tmp/pr21b-r3-eval-visual",
+    "browser": "playwright-core + system Chrome (/usr/bin/google-chrome)",
+    "base_url": "http://127.0.0.1:3008"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr21b-round3.md` §B만 따랐다.",
+    "평가 대상 브랜치 head는 `feat/preview-inline-ch10-q5-q7` @ `09b11558c7dc123c15bbe193bbc64608dad7a758`였고, 이 상태에서 `client/src/demos/ch10/Q01~Q07` 및 `registry.ts`/`data/demos.ts`의 q01~q07 wiring을 확인했다.",
+    "앱은 `/home/claude/architecture`에서 `npm run build` 후 `NODE_ENV=production PORT=3008 npm start`로 기동했다.",
+    "브라우저 검증은 `playwright-core`와 system Chrome(`/usr/bin/google-chrome`) 조합으로 수행했다.",
+    "시각 평가 노이즈만 줄이기 위해 harness에서 `service-nav.js`, `/favicon.ico`, `/api/progress*`만 stub 했고 데모 렌더, 스타일, DOM 자체는 수정하지 않았다."
+  ]
+}

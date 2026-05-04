@@ -1692,3 +1692,253 @@ export function LoginItIcon() {
     </svg>
   );
 }
+
+export function PredictIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M8 28c0-8 5-14 12-14" />
+      <path d="M20 14c7 0 12 6 12 14" />
+      <circle cx="20" cy="14" r="4" />
+      <path d="m24 24 4 4 6-8" />
+    </svg>
+  );
+}
+
+export function LoopIconLlm() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 12h14a6 6 0 0 1 0 12H13" />
+      <path d="m16 9-5 3 5 3" />
+      <path d="M29 28H15a6 6 0 0 1 0-12h12" />
+      <path d="m24 31 5-3-5-3" />
+    </svg>
+  );
+}
+
+export function LimitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="20" cy="20" r="11" />
+      <path d="M20 14v7" />
+      <circle cx="20" cy="26" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function ContextItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="9" width="24" height="22" rx="2" />
+      <path d="M12 15h16M12 20h12M12 25h8" />
+      <path d="M27 23h5" />
+    </svg>
+  );
+}
+
+export function NextTokenIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="12" width="10" height="16" rx="2" />
+      <rect x="22" y="12" width="10" height="16" rx="2" />
+      <path d="M18 20h4" />
+      <path d="m21 17 3 3-3 3" />
+    </svg>
+  );
+}
+
+export function RepeatGenIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="8" width="10" height="10" rx="2" />
+      <rect x="22" y="8" width="10" height="10" rx="2" />
+      <rect x="15" y="22" width="10" height="10" rx="2" />
+      <path d="M18 13h4M25 18l-3 4M15 26l-3-4" />
+    </svg>
+  );
+}
+
+export function VerifyLimitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M20 7 31 11v7c0 7-4.5 12-11 15-6.5-3-11-8-11-15v-7z" />
+      <path d="M20 14v6" />
+      <circle cx="20" cy="24" r="1.5" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+export function CallIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M11 10h18a3 3 0 0 1 3 3v14a3 3 0 0 1-3 3H11a3 3 0 0 1-3-3V13a3 3 0 0 1 3-3z" />
+      <path d="M14 15h12M14 20h8" />
+      <path d="m25 24 4-4-4-4" />
+    </svg>
+  );
+}
+
+export function TokenMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="9" width="26" height="22" rx="2" />
+      <path d="M12 15h6M12 20h10M12 25h14" />
+      <text x="27" y="18" fontSize="5" textAnchor="middle" fill="currentColor" stroke="none" fontWeight="700">
+        T
+      </text>
+    </svg>
+  );
+}
+
+export function CacheCostIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="11" width="16" height="18" rx="2" />
+      <path d="M12 17h8M12 22h6" />
+      <circle cx="29" cy="16" r="4" />
+      <path d="M29 20v6M26 26h6" />
+    </svg>
+  );
+}
+
+export function BatchIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="8" height="20" rx="2" />
+      <rect x="17" y="10" width="8" height="20" rx="2" />
+      <rect x="27" y="10" width="6" height="20" rx="2" />
+      <path d="M7 6h26" />
+    </svg>
+  );
+}
+
+export function CallCostIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="18" height="20" rx="2" />
+      <path d="M12 16h10M12 21h8" />
+      <circle cx="30" cy="24" r="4" />
+      <path d="M30 22v4M28 24h4" />
+    </svg>
+  );
+}
+
+export function TokenCostIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="10" width="12" height="20" rx="2" />
+      <rect x="22" y="10" width="10" height="20" rx="2" />
+      <path d="M14 15v10M27 15v10" />
+      <circle cx="29" cy="10" r="3" />
+    </svg>
+  );
+}
+
+export function CacheSaveIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="8" y="11" width="16" height="18" rx="2" />
+      <path d="M12 17h8M12 22h6" />
+      <path d="m27 20 3 3 6-8" />
+    </svg>
+  );
+}
+
+export function BatchSaveIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="8" height="18" rx="2" />
+      <rect x="17" y="10" width="8" height="18" rx="2" />
+      <rect x="27" y="10" width="6" height="18" rx="2" />
+      <path d="m24 32 3 3 6-8" />
+    </svg>
+  );
+}
+
+export function PermitIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="8" width="22" height="24" rx="2" />
+      <path d="M14 14h12M14 19h9" />
+      <circle cx="26" cy="25" r="4" />
+      <path d="m24.5 25 1.5 1.5 3-3" />
+    </svg>
+  );
+}
+
+export function EncryptMetaIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 19h20v12H10z" />
+      <path d="M14 19v-4a6 6 0 0 1 12 0v4" />
+      <path d="M20 23v4" />
+    </svg>
+  );
+}
+
+export function NetIsolateIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="10" height="18" rx="2" />
+      <rect x="23" y="10" width="10" height="18" rx="2" />
+      <path d="M17 19h6" />
+      <path d="M20 10v18" />
+    </svg>
+  );
+}
+
+export function WatchIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="17" cy="18" r="8" />
+      <path d="M17 18l4 4" />
+      <path d="M23 24l6 6" />
+      <path d="M17 14v4h3" />
+    </svg>
+  );
+}
+
+export function IamIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <circle cx="15" cy="16" r="4" />
+      <circle cx="26" cy="14" r="3" />
+      <path d="M9 29c0-4 3-7 6-7s6 3 6 7" />
+      <path d="M22 27c0-3 2-5 4.5-5S31 24 31 27" />
+      <path d="M27 8h5" />
+    </svg>
+  );
+}
+
+export function EncryptIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="9" y="18" width="22" height="12" rx="2" />
+      <path d="M14 18v-3a6 6 0 0 1 12 0v3" />
+      <path d="m18 24 2 2 4-5" />
+    </svg>
+  );
+}
+
+export function NetIsolateItIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <rect x="7" y="10" width="9" height="18" rx="2" />
+      <rect x="24" y="10" width="9" height="18" rx="2" />
+      <path d="M16 19h8" />
+      <path d="M20 10v18" />
+      <path d="M20 6v4M20 28v4" />
+    </svg>
+  );
+}
+
+export function LogWatchIcon() {
+  return (
+    <svg {...ICON_BASE} aria-hidden>
+      <path d="M10 8h16l4 4v20H10z" />
+      <path d="M26 8v4h4" />
+      <path d="M14 17h10M14 22h8" />
+      <circle cx="26" cy="25" r="4" />
+      <path d="m29 28 4 4" />
+    </svg>
+  );
+}
