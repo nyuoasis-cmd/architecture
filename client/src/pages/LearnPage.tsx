@@ -85,6 +85,7 @@ function LearnLayout(props: {
           className={`${mobileTab === 'preview' || mobileTab === 'quiz' ? 'flex' : 'hidden'} flex-1 flex-col lg:flex`}
         >
           <PreviewPanel
+            availableQaIds={props.allSessionQas?.map((item) => item.id) ?? [props.qa.id]}
             demo={props.demo}
             initialTab={mobileTab === 'quiz' ? 'quiz' : 'demo'}
             onScenarioChange={setScenarioId}
@@ -92,6 +93,8 @@ function LearnLayout(props: {
             quizProps={props.onScore ? { onScore: props.onScore } : undefined}
             scenarioId={scenarioId}
             sessionCode={props.sessionCode}
+            sessionId={props.sessionId}
+            teacherPanel={props.mode === 'session' && Boolean(props.sessionId)}
           />
         </section>
       </div>
@@ -113,6 +116,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
   const [sessionError, setSessionError] = useState<{ status?: number; message: string } | null>(null);
 
   const isTeacherPreview = mode === 'session' && searchParams.get('role') === 'teacher';
+  const sessionId = params.sessionId;
   const chapterId = Number(params.chapterId);
   const qaId = params.qaId ?? '';
 
@@ -263,7 +267,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
         progressMapOverride={viewerProgress}
         qa={qa}
         sessionCode={currentSession.code}
-        sessionId={currentSession.id}
+        sessionId={isTeacherPreview ? sessionId : undefined}
       />
     );
   }

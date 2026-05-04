@@ -133,6 +133,13 @@ export default function GuidePanel({
           {currentQa.title}
         </h3>
 
+        <div className="rounded-xl border border-[var(--color-border)] bg-[var(--color-accent-soft)] px-3 py-2.5">
+          <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-accent)]">
+            Summary
+          </p>
+          <p className="mt-1 text-xs leading-relaxed text-[var(--color-text-body)]">{currentQa.summary}</p>
+        </div>
+
         <div className="space-y-2 text-xs leading-relaxed" style={{ color: 'var(--color-text-body)', lineHeight: 1.8 }}>
           {currentQa.body.split(/\n\n+/).map((para, i) => (
             <p key={i}>{para}</p>

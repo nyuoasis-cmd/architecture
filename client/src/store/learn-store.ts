@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 
 export type MobileTab = 'guide' | 'chat' | 'preview' | 'quiz';
-export type PreviewTab = 'demo' | 'quiz';
+export type PreviewTab = 'demo' | 'quiz' | 'explain';
 
 type LearnStoreState = {
   currentQaId: string;
@@ -25,10 +25,10 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
   setMobileTab: (mobileTab) => set({ mobileTab }),
   setPreviewTab: (previewTab) => set({ previewTab }),
   resetForQa: (currentQaId, scenarioId) =>
-    set({
+    set((state) => ({
       currentQaId,
       scenarioId,
       mobileTab: 'guide',
-      previewTab: 'demo',
-    }),
+      previewTab: state.previewTab === 'explain' ? 'explain' : 'demo',
+    })),
 }));
