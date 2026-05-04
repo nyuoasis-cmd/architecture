@@ -1,0 +1,73 @@
+{
+  "step": "pr18b",
+  "round": 1,
+  "role": "eval-visual",
+  "model": "codex",
+  "session_id": "arch-123",
+  "ts": "2026-05-04T02:02:35Z",
+  "branch": "feat/preview-inline-ch07-q5-q6",
+  "commit": "7face9e4ff098115ec21bebcc0960b6191cf3703",
+  "verdict": "PASS",
+  "fail_items": [],
+  "revise_items": [],
+  "checks": [
+    {
+      "id": "V1-inline-frame",
+      "verdict": "PASS",
+      "evidence": "`/library/7/ch07_q01`~`ch07_q06` desktop와 `ch07_q05`~`q06` mobile에서 `iframe=0`, `.phone-frame=0`, `.phone-notch=0`, `pageerror=0`, `console error=0`이었다. 신규 2개와 ch07 기존 4개 회귀 라우트가 모두 React 인라인 렌더로 열린다."
+    },
+    {
+      "id": "V2-desktop-3col",
+      "verdict": "PASS",
+      "evidence": "1440x900에서 신규 2개 데모 공통으로 학습 `280px` / 채팅 `320px` / 시연 `840px` 3단 셸이 유지됐다. 인라인 데모 내부 순서도 q05 `129 < 286.88 < 635.94 < 896.91`, q06 `129 < 264.78 < 613.84 < 874.81`로 hero → pair flow → 비교 보드 → log가 일관됐다."
+    },
+    {
+      "id": "V3-active-sync",
+      "verdict": "PASS",
+      "evidence": "q05 4개 시나리오(`mixed/split/anomaly/normal3`)와 q06 4개 시나리오(`dirty/committed/repeatable/serial`)를 모두 클릭했다. 각 클릭마다 URL hash, preview hero title, 활성 scenario tab, 메타포/IT active 카드 2개가 함께 전환됐다."
+    },
+    {
+      "id": "V4-contrast-purple700",
+      "verdict": "PASS",
+      "evidence": "q05/q06 active accent는 모두 `rgb(147, 51, 234)`(`purple-700`), active 배경은 `rgb(250, 245, 255)`였다. 대비비는 두 라우트 모두 `5.02:1`로 WCAG AA `4.5:1`을 넘겼다."
+    },
+    {
+      "id": "V5-width-layout",
+      "verdict": "PASS",
+      "evidence": "신규 q05/q06 inline host는 computed 폭 `776px`로 wide 규약을 지켰다. 회귀 spot-check에서도 q01 square host `640px`, q02~q04 wide host `776px`가 유지돼 ch07 전체 layout 매핑이 깨지지 않았다."
+    },
+    {
+      "id": "V6-svg-visibility",
+      "verdict": "PASS",
+      "evidence": "q05/q06 모두 `svgCount=16`이었고 pair flow의 active 카드 수는 항상 `2개`였다. 메타포/IT 아이콘이 모두 렌더됐고 active border/background도 accent 색으로 유지됐다."
+    },
+    {
+      "id": "V7-regression-ch07-q01-q04",
+      "verdict": "PASS",
+      "evidence": "회귀 spot-check로 `/library/7/ch07_q01`~`ch07_q04`를 다시 열었다. 네 라우트 모두 `iframe=0`, `console error=0`, desktop 3단 셸 `280/320/840px`를 유지했고 q01은 square, q02~q04는 wide host 규약이 그대로였다."
+    },
+    {
+      "id": "V8-mobile-first-viewport",
+      "verdict": "PASS",
+      "evidence": "393x852에서 `📱 시연` 탭 전환 후 q05/q06 모두 scenario tablist bottom이 `276.78px`였고 hero 시작점은 q05 `387.25px`, q06 `366.86px`였다. 첫 화면 안에 시나리오 칩과 hero가 함께 들어왔다."
+    },
+    {
+      "id": "V9-mobile-grid",
+      "verdict": "PASS",
+      "evidence": "mobile 393x852에서 q05/q06 pair flow 두 줄 모두 `gridTemplateColumns=\"155.5px 155.5px\"` 2열로 접혔고 inline host 폭은 `361px`였다. `document.documentElement.scrollWidth=393`으로 가로 스크롤도 없었다."
+    }
+  ],
+  "artifacts": {
+    "eval_worktree": "/tmp/architecture-pr18b-visual",
+    "metrics": "/tmp/pr18b-r1-eval-visual/metrics.json",
+    "screenshots": "/tmp/pr18b-r1-eval-visual/ch07_q01-desktop.png,/tmp/pr18b-r1-eval-visual/ch07_q02-desktop.png,/tmp/pr18b-r1-eval-visual/ch07_q03-desktop.png,/tmp/pr18b-r1-eval-visual/ch07_q04-desktop.png,/tmp/pr18b-r1-eval-visual/ch07_q05-desktop.png,/tmp/pr18b-r1-eval-visual/ch07_q06-desktop.png,/tmp/pr18b-r1-eval-visual/ch07_q05-mobile.png,/tmp/pr18b-r1-eval-visual/ch07_q06-mobile.png",
+    "browser": "Playwright Core + system Chrome (/usr/bin/google-chrome)"
+  },
+  "notes": [
+    "검증 범위는 `/home/claude/architecture/HANDOFF-pr18b-round1.md` §B만 따랐다.",
+    "평가 대상 구현은 `origin/feat/preview-inline-ch07-q5-q6`의 `7face9e4ff098115ec21bebcc0960b6191cf3703`였다.",
+    "빌드는 detached worktree `/tmp/architecture-pr18b-visual`에서 `npm run build`로 재확인했다.",
+    "브라우저 검증은 `NODE_ENV=production PORT=3004 npm start`로 띄운 전체 앱을 기준으로 수행했다.",
+    "시각 평가에 무관한 네트워크 노이즈만 제거하려고 harness에서 `/api/progress`는 `200 {\"ok\":true}`, `/favicon.ico`는 `204`로 stub 했다. 데모 렌더/스타일/DOM 자체는 수정하지 않았다."
+  ]
+}
