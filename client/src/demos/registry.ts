@@ -56,6 +56,10 @@ import Q03Pattern from './ch09/Q03Pattern';
 import Q04Cache from './ch09/Q04Cache';
 import Q05Queue from './ch09/Q05Queue';
 import Q06Scaling from './ch09/Q06Scaling';
+import Q01CloudService from './ch10/Q01CloudService';
+import Q02Container from './ch10/Q02Container';
+import Q03K8s from './ch10/Q03K8s';
+import Q04AiHierarchy from './ch10/Q04AiHierarchy';
 import Q05Llm from './ch10/Q05Llm';
 import Q06Cost from './ch10/Q06Cost';
 import Q07AiSecurity from './ch10/Q07AiSecurity';
@@ -120,6 +124,10 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch09_q04: { Component: Q04Cache, layout: 'wide' },
   ch09_q05: { Component: Q05Queue, layout: 'wide' },
   ch09_q06: { Component: Q06Scaling, layout: 'wide' },
+  ch10_q01: { Component: Q01CloudService, layout: 'square' },
+  ch10_q02: { Component: Q02Container, layout: 'wide' },
+  ch10_q03: { Component: Q03K8s, layout: 'wide' },
+  ch10_q04: { Component: Q04AiHierarchy, layout: 'square' },
   ch10_q05: { Component: Q05Llm, layout: 'wide' },
   ch10_q06: { Component: Q06Cost, layout: 'wide' },
   ch10_q07: { Component: Q07AiSecurity, layout: 'wide' },
