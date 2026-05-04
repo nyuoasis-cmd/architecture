@@ -23,6 +23,6 @@ export default {
   },
   demoTip: {
     scenarioOrder: "세 전략 이름을 먼저 쓰지 말고 상황을 설명한 뒤 맞히게 하세요. 이후 이름을 붙이면 개념이 더 오래 남습니다.",
-    studentReaction: "학생은 카나리를 새 이름으로만 기억할 수 있습니다. 전체가 아닌 일부부터 연다는 핵심만 반복하면 훨씬 안정적으로 기억합니다.",
+    studentReaction: "학생은 카나리를 새 이름으로만 기억할 수 있어요. 전체가 아닌 일부부터 연다는 핵심만 반복하면 훨씬 안정적으로 기억해요.",
   },
 } satisfies TeacherExplainBlock;
