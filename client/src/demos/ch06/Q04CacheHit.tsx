@@ -115,14 +115,14 @@ function FiveStepPairFlow({
   return (
     <section className="rounded-2xl border p-5" style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg)' }}>
       <GroupBadge label={metaphorTitle} sub="비유" tone={TONE} />
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         {METAPHOR.map((item, idx) => (
           <IconCard key={`meta-${item.label}`} icon={item.icon} label={item.label} sub={item.sub} active={activeIndex === idx} tone={TONE} />
         ))}
       </div>
       <PairConnector tone={TONE} />
       <GroupBadge label={itTitle} sub="실제" tone={TONE} />
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
         {IT.map((item, idx) => (
           <IconCard key={`it-${item.label}`} icon={item.icon} label={item.label} sub={item.sub} active={activeIndex === idx} tone={TONE} />
         ))}
