@@ -56,7 +56,7 @@ export default function GuidePanel({
   return (
     <div className="flex h-full flex-col">
       <div className="flex-shrink-0 border-b border-[var(--color-border)] p-3">
-        {mode === 'session' && availableChapters && availableChapters.length > 1 ? (
+        {availableChapters && availableChapters.length > 1 ? (
           <div className="mb-3 flex flex-wrap gap-1.5">
             {availableChapters.map((sessionChapter) => (
               <button

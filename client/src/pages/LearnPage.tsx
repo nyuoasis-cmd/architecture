@@ -271,6 +271,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
 
   return (
     <LearnLayout
+      availableChapters={CHAPTERS}
       chapter={chapter}
       chapterQas={chapterQas}
       demo={demo}
