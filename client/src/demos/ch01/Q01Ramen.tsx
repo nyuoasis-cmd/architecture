@@ -85,7 +85,7 @@ export default function Q01Ramen({ scenarioId }: DemoComponentProps) {
   return (
     <div className="flex flex-col gap-3">
       <Hero
-        eyebrow="컴퓨터의 큰 그림"
+        eyebrow="입력·처리·출력 사이클"
         title={scene.title}
         summary={scene.summary}
         tone={TONE}

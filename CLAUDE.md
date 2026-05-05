@@ -29,7 +29,7 @@ architecture/
 │   │   ├── layout/     # ServiceHeader
 │   │   ├── learn/      # ContentPanel, ChatTab, QuizTab
 │   │   └── teacher/    # SessionCard, ParticipantList
-│   ├── content/        # 71 Q&A Markdown (정적)
+│   ├── content/        # 64 Q&A Markdown (정적)
 │   └── store/          # session-store, learn-store (Zustand)
 ├── server/src/
 │   ├── index.ts        # Express
@@ -43,8 +43,8 @@ architecture/
 
 ## 콘텐츠 정책
 
-- 책 본문 **직접 인용 0%**, 목차·질문 제목만 차용
-- Claude가 71 Q&A 본문 작성 → repo 정적 저장 → 챗봇 컨텍스트로 사용
+- **책 TOC·소제목·본문 모두 차용 0%** — 모든 학생 노출 콘텐츠(챕터 title / Q&A title / summary / body / 챗봇 답변)는 fresh 자가 생성. PR-0 (2026-05-04) 정책 강화. 책 『기술노트』는 영감 출처로만 footer/about 표기
+- Claude가 64 Q&A 본문 작성 → repo 정적 저장 → 챗봇 컨텍스트로 사용
 - 출처: 푸터/about에 알렉 『기술노트』(2026) 영감 표기
 
 ## 개발
