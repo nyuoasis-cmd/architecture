@@ -19,7 +19,11 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 items-center px-4 py-8 sm:px-6 sm:py-12">
+    <main
+      className={`mx-auto flex w-full flex-1 items-center px-4 py-8 sm:px-6 sm:py-12 ${
+        isDevBuild ? 'max-w-5xl' : 'max-w-md'
+      }`}
+    >
       <section
         className={`grid w-full gap-8 rounded-[32px] border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-8 lg:p-10 ${
           isDevBuild ? 'lg:grid-cols-[minmax(0,1.2fr)_380px]' : ''
