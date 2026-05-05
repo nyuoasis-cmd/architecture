@@ -12,6 +12,7 @@ type GuidePanelProps = {
   activeScenarioId: string;
   progressMapOverride?: Record<string, { read: boolean; quizScore?: number }>;
   sessionId?: string;
+  isTeacherPreview?: boolean;
   onScenarioChange: (scenarioId: string) => void;
 };
 
@@ -24,6 +25,7 @@ export default function GuidePanel({
   activeScenarioId,
   progressMapOverride,
   sessionId,
+  isTeacherPreview,
   onScenarioChange,
 }: GuidePanelProps) {
   const localProgressMap = useProgressMap();
@@ -44,7 +46,8 @@ export default function GuidePanel({
     }
 
     if (mode === 'session' && sessionId) {
-      navigate(`/learn/${sessionId}?qa=${targetQa.id}`);
+      const rolePart = isTeacherPreview ? '&role=teacher' : '';
+      navigate(`/learn/${sessionId}?qa=${targetQa.id}${rolePart}`);
       return;
     }
 

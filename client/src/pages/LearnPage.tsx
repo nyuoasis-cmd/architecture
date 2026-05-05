@@ -33,6 +33,7 @@ function LearnLayout(props: {
   progressMapOverride?: Record<string, { read: boolean; quizScore?: number }>;
   sessionId?: string;
   sessionCode?: string;
+  isTeacherPreview?: boolean;
   onScore?: (score: number) => void;
 }) {
   const mobileTab = useLearnStore((state) => state.mobileTab);
@@ -65,6 +66,7 @@ function LearnLayout(props: {
             chapter={props.chapter}
             chapterQas={props.chapterQas}
             currentQa={props.qa}
+            isTeacherPreview={props.isTeacherPreview}
             mode={props.mode}
             onScenarioChange={(nextScenarioId) => {
               setScenarioId(nextScenarioId);
@@ -164,7 +166,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
     setSessionStatus('loading');
     setSessionError(null);
 
-    getSession(params.sessionId, isTeacherPreview ? { teacher: true } : undefined)
+    getSession(params.sessionId)
       .then((session) => {
         if (!cancelled) {
           setCurrentSession(session);
@@ -251,6 +253,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
         chapter={chapter}
         chapterQas={chapterQas}
         demo={demo}
+        isTeacherPreview={isTeacherPreview}
         mode={mode}
         onScore={(score) => {
           void patchProgress({ qaId: qa.id, quizScore: score }).then(() => {

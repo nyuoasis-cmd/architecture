@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
 import NewSessionModal from '../components/teacher/NewSessionModal';
 import SessionCard from '../components/teacher/SessionCard';
-import { useAuth } from '../lib/auth';
 import { listTeacherSessions } from '../lib/session-client';
 import { useSessionStore } from '../store/session-store';
 
 export default function TeacherDashboardPage() {
-  const auth = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -51,8 +49,7 @@ export default function TeacherDashboardPage() {
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Teacher Dashboard</p>
           <h1 className="mt-3 text-4xl font-medium text-stone-950">내 세션 관리</h1>
           <p className="mt-3 text-sm leading-7 text-stone-600">
-            {(auth.displayName ?? '교사')} 계정의 세션을 관리합니다. 진행 중 세션을 먼저 보여주고, 종료 세션은 아래로
-            분리합니다.
+            진행 중인 수업과 종료된 수업을 한곳에서 확인하고, 새 수업을 만들 수 있어요.
           </p>
         </div>
         <div className="flex items-end">

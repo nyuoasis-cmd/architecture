@@ -88,8 +88,8 @@ export async function createSession(input: {
   return readJson<SessionRecord>(response);
 }
 
-export async function getSession(sessionId: string, options?: { teacher?: boolean }): Promise<SessionDetail> {
-  const headers = options?.teacher ? await getTeacherAuthHeaders() : undefined;
+export async function getSession(sessionId: string): Promise<SessionDetail> {
+  const headers = await getTeacherAuthHeaders();
   const response = await fetch(`/api/sessions/${sessionId}`, {
     headers,
     credentials: 'include',

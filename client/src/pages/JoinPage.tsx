@@ -40,7 +40,7 @@ export default function JoinPage() {
         participantId: joined.participant_id,
         nickname: joined.nickname,
       });
-      navigate(`/learn/${joined.session_id}`);
+      navigate(`/library?sessionId=${joined.session_id}`);
     } catch (caught) {
       if (caught instanceof SessionClientError) {
         if (caught.status === 404) {

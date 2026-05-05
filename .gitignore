@@ -19,3 +19,4 @@ dist/
 # Local QA artifacts
 screenshots/
 qa/
+qa-eval/
