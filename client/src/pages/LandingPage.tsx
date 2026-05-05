@@ -15,7 +15,7 @@ import { useAuth } from '../lib/auth';
 export default function LandingPage() {
   const navigate = useNavigate();
   const auth = useAuth();
-  const teacherEntryPath = auth.isAuthenticated ? '/teacher' : '/login';
+  const teacherEntryPath = auth.isAuthenticated ? '/teacher' : `/login?returnUrl=${encodeURIComponent('/teacher')}`;
 
   return (
     <>

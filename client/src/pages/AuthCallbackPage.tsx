@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { consumePostLoginRedirect, useAuth } from '../lib/auth';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
+import { defaultAfterLogin } from '../lib/auth-config';
 import { supabaseClient } from '../lib/supabase-client';
 
 function parseHashParams(hash: string) {
@@ -10,9 +11,20 @@ function parseHashParams(hash: string) {
 
 export default function AuthCallbackPage() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const auth = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const incoming = searchParams.get('returnUrl') ?? searchParams.get('redirect');
+
+  function moveToTarget() {
+    if (incoming && /^https:\/\/([a-z0-9-]+\.)*teachermate\.co\.kr(\/|$)/i.test(incoming)) {
+      window.location.href = incoming;
+      return;
+    }
+
+    navigate(incoming?.startsWith('/') ? incoming : defaultAfterLogin, { replace: true });
+  }
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -36,7 +48,7 @@ export default function AuthCallbackPage() {
 
     if (!accessToken || !refreshToken) {
       if (auth.isAuthenticated) {
-        navigate(consumePostLoginRedirect() ?? '/teacher', { replace: true });
+        moveToTarget();
         return;
       }
 
@@ -55,13 +67,9 @@ export default function AuthCallbackPage() {
           return;
         }
 
-        navigate(consumePostLoginRedirect() ?? '/teacher', { replace: true });
+        moveToTarget();
       });
-  }, [auth.isAuthenticated, navigate]);
-
-  if (!auth.isLoading && auth.isAuthenticated && !window.location.hash) {
-    return <Navigate replace to={consumePostLoginRedirect() ?? '/teacher'} />;
-  }
+  }, [auth.isAuthenticated, incoming, navigate]);
 
   return (
     <>

@@ -1,6 +1,6 @@
-import type { ReactNode } from 'react';
-import { Navigate, useLocation } from 'react-router-dom';
-import { setPostLoginRedirect, useAuth } from '../../lib/auth';
+import { useEffect, type ReactNode } from 'react';
+import { useAuth } from '../../lib/auth';
+import { getServiceLoginUrl } from '../../lib/login-url';
 
 type AuthGateProps = {
   children: ReactNode;
@@ -8,7 +8,17 @@ type AuthGateProps = {
 
 export default function AuthGate({ children }: AuthGateProps) {
   const auth = useAuth();
-  const location = useLocation();
+
+  useEffect(() => {
+    if (!auth.isLoading && !auth.isAuthenticated) {
+      if (import.meta.env.DEV) {
+        window.location.href = `/dev-login?returnUrl=${encodeURIComponent(window.location.href)}`;
+        return;
+      }
+
+      window.location.href = getServiceLoginUrl();
+    }
+  }, [auth.isAuthenticated, auth.isLoading]);
 
   if (auth.isLoading) {
     return (
@@ -22,9 +32,7 @@ export default function AuthGate({ children }: AuthGateProps) {
   }
 
   if (!auth.isAuthenticated) {
-    const target = `${location.pathname}${location.search}${location.hash}`;
-    setPostLoginRedirect(target);
-    return <Navigate replace to={`/login?from=${encodeURIComponent(target)}`} />;
+    return null;
   }
 
   return <>{children}</>;

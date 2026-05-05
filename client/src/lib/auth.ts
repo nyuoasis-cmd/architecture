@@ -3,8 +3,6 @@ import { useSyncExternalStore } from 'react';
 import { clearDevUser, getDevUser, subscribeDevUser, type DevUser } from './dev-auth';
 import { supabaseClient } from './supabase-client';
 
-const AUTH_REDIRECT_KEY = 'architecture-auth-redirect';
-
 type AuthSnapshot = {
   isLoading: boolean;
   supabaseUser: User | null;
@@ -105,34 +103,6 @@ function getServerSnapshot(): AuthSnapshot {
   };
 }
 
-export function getPostLoginRedirect() {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  return window.sessionStorage.getItem(AUTH_REDIRECT_KEY);
-}
-
-export function setPostLoginRedirect(target: string) {
-  if (typeof window === 'undefined') {
-    return;
-  }
-
-  window.sessionStorage.setItem(AUTH_REDIRECT_KEY, target);
-}
-
-export function consumePostLoginRedirect() {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  const target = window.sessionStorage.getItem(AUTH_REDIRECT_KEY);
-  if (target) {
-    window.sessionStorage.removeItem(AUTH_REDIRECT_KEY);
-  }
-  return target;
-}
-
 export function useAuth() {
   const snapshot = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
   const source = snapshot.supabaseUser ? 'supabase' : snapshot.devUser ? 'dev' : null;
@@ -179,35 +149,12 @@ export async function getTeacherAuthHeaders() {
   } satisfies Record<string, string>;
 }
 
-export async function signInKakao(target?: string) {
-  if (!supabaseClient) {
-    throw new Error('Supabase 환경변수가 설정되지 않았습니다.');
-  }
-
-  if (target) {
-    setPostLoginRedirect(target);
-  }
-
-  const redirectTo = `${window.location.origin}/auth/callback`;
-  const { error } = await supabaseClient.auth.signInWithOAuth({
-    provider: 'kakao',
-    options: {
-      redirectTo,
-    },
-  });
-
-  if (error) {
-    throw error;
-  }
-}
-
 export async function signOut() {
   if (supabaseClient) {
     await supabaseClient.auth.signOut();
   }
 
   clearDevUser();
-  consumePostLoginRedirect();
 
   if (typeof window !== 'undefined') {
     window.location.assign('/');

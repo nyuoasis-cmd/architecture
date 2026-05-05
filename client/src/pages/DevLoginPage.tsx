@@ -1,7 +1,27 @@
 import { useState } from 'react';
 import { Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
+import { defaultAfterLogin } from '../lib/auth-config';
 import { clearDevUser, getDevUser, setDevUser } from '../lib/dev-auth';
+
+function getReturnUrl(raw: string | null): string {
+  if (!raw) {
+    return defaultAfterLogin;
+  }
+
+  try {
+    const url = new URL(raw);
+    if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
+      return `${url.pathname}${url.search}${url.hash}` || defaultAfterLogin;
+    }
+  } catch {
+    if (raw.startsWith('/')) {
+      return raw;
+    }
+  }
+
+  return defaultAfterLogin;
+}
 
 export default function DevLoginPage() {
   const auth = useAuth();
@@ -11,7 +31,7 @@ export default function DevLoginPage() {
   const [id, setId] = useState(saved?.id ?? '');
   const [name, setName] = useState(saved?.name ?? 'DEV Teacher');
 
-  const target = searchParams.get('from') ?? '/teacher';
+  const target = getReturnUrl(searchParams.get('returnUrl') ?? searchParams.get('from'));
   const isDevBuild = Boolean(import.meta.env.DEV);
 
   if (!isDevBuild) {

@@ -1,22 +1,31 @@
-import { useState } from 'react';
-import { Link, Navigate, useSearchParams } from 'react-router-dom';
-import { getPostLoginRedirect, signInKakao, useAuth } from '../lib/auth';
+import { useEffect, useState } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
+import { defaultAfterLogin } from '../lib/auth-config';
+import { getServiceLoginUrl } from '../lib/login-url';
 
 const isDevBuild = Boolean(import.meta.env.DEV);
-const hasSupabaseEnv = Boolean(
-  import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY,
-);
 
 export default function LoginPage() {
   const auth = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const target = searchParams.get('from') ?? getPostLoginRedirect() ?? '/teacher';
+  const incoming = searchParams.get('returnUrl') ?? searchParams.get('redirect');
+  const target = incoming?.startsWith('/') ? incoming : defaultAfterLogin;
 
-  if (!auth.isLoading && auth.isAuthenticated) {
-    return <Navigate replace to={target} />;
-  }
+  useEffect(() => {
+    if (auth.isLoading || !auth.isAuthenticated) {
+      return;
+    }
+
+    if (incoming && /^https:\/\/([a-z0-9-]+\.)*teachermate\.co\.kr(\/|$)/i.test(incoming)) {
+      window.location.href = incoming;
+      return;
+    }
+
+    navigate(target, { replace: true });
+  }, [auth.isAuthenticated, auth.isLoading, incoming, navigate, target]);
 
   return (
     <main
@@ -39,17 +48,10 @@ export default function LoginPage() {
           <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
             <button
               className="flex w-full min-h-12 items-center justify-center rounded-2xl bg-[#FEE500] px-6 text-sm font-semibold text-[#191600] transition hover:brightness-[0.97] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
-              disabled={!hasSupabaseEnv || isSubmitting}
-              onClick={async () => {
-                setError(null);
+              disabled={isSubmitting}
+              onClick={() => {
                 setIsSubmitting(true);
-
-                try {
-                  await signInKakao(target);
-                } catch (caught) {
-                  setError(caught instanceof Error ? caught.message : '카카오 로그인을 시작하지 못했습니다.');
-                  setIsSubmitting(false);
-                }
+                window.location.href = getServiceLoginUrl(target);
               }}
               type="button"
             >
@@ -59,17 +61,12 @@ export default function LoginPage() {
             {isDevBuild ? (
               <Link
                 className="flex w-full min-h-12 items-center justify-center rounded-2xl border border-[var(--color-border)] px-5 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-50 sm:w-auto"
-                to={`/dev-login?from=${encodeURIComponent(target)}`}
+                to={`/dev-login?returnUrl=${encodeURIComponent(target)}`}
               >
                 DEV 로그인
               </Link>
             ) : null}
           </div>
-
-          {error ? <p className="mt-4 text-sm text-rose-700">{error}</p> : null}
-          {isDevBuild && !hasSupabaseEnv ? (
-            <p className="mt-4 text-sm text-amber-700">VITE_SUPABASE_URL 또는 VITE_SUPABASE_ANON_KEY가 비어 있습니다.</p>
-          ) : null}
         </div>
 
         {isDevBuild ? (
