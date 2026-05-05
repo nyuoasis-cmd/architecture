@@ -22,7 +22,7 @@ export default function LibraryPage() {
     let cancelled = false;
     setSessionError(null);
 
-    getSession(sessionId, { teacher: true })
+    getSession(sessionId)
       .then((session) => {
         if (!cancelled) {
           setPreviewSession(session);
@@ -50,10 +50,21 @@ export default function LibraryPage() {
     isPreviewMode && allowedChapterIds
       ? CHAPTERS.filter((chapter) => allowedChapterIds.includes(chapter.id))
       : CHAPTERS;
+  const isStudentMode = Boolean(previewSession?.viewer);
+  const headerTitle = isPreviewMode
+    ? isStudentMode
+      ? '챕터 라이브러리'
+      : '수업 시연 — 챕터 선택'
+    : '라이브러리';
+  const headerDescription = isPreviewMode
+    ? isStudentMode
+      ? '오늘 수업에서 열린 챕터예요. 들어가고 싶은 챕터를 골라주세요.'
+      : '시연을 시작할 챕터를 선택하세요. 세션에 포함된 챕터만 보입니다.'
+    : '10개 챕터, 71개 Q&A.';
 
   return (
     <main className="mx-auto w-full max-w-[1100px] px-6 py-10">
-      {isPreviewMode ? (
+      {isPreviewMode && !isStudentMode ? (
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <Link
             className="inline-flex min-h-9 items-center rounded-xl border border-[var(--color-border)] bg-white px-3 text-sm font-medium text-stone-700 hover:bg-stone-50"
@@ -61,6 +72,14 @@ export default function LibraryPage() {
           >
             ← 내 세션 관리
           </Link>
+          {sessionId ? (
+            <Link
+              className="inline-flex min-h-9 items-center rounded-xl bg-stone-950 px-3 text-sm font-medium text-white hover:bg-stone-800"
+              to={`/teacher/session/${sessionId}`}
+            >
+              수업 세션 페이지 →
+            </Link>
+          ) : null}
           {previewSession ? (
             <span className="text-xs text-stone-500">
               시연 세션 · {previewSession.name} · 코드 {previewSession.code}
@@ -69,12 +88,15 @@ export default function LibraryPage() {
         </div>
       ) : null}
 
-      <h1 className="mb-6 text-2xl font-medium">{isPreviewMode ? '수업 시연 — 챕터 선택' : '라이브러리'}</h1>
-      <p className="mb-8 text-stone-600">
-        {isPreviewMode
-          ? '시연을 시작할 챕터를 선택하세요. 세션에 포함된 챕터만 보입니다.'
-          : '10개 챕터, 71개 Q&A.'}
-      </p>
+      {isStudentMode && previewSession ? (
+        <div className="mb-6 rounded-2xl border border-[var(--color-border)] bg-stone-50 px-4 py-3 text-sm text-stone-700">
+          <span className="font-medium text-stone-900">{previewSession.viewer?.nickname}</span>님,{' '}
+          <span className="font-medium">{previewSession.name}</span> 수업에 참여 중이에요.
+        </div>
+      ) : null}
+
+      <h1 className="mb-6 text-2xl font-medium">{headerTitle}</h1>
+      <p className="mb-8 text-stone-600">{headerDescription}</p>
 
       {sessionError ? (
         <div className="mb-6 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{sessionError}</div>
@@ -91,7 +113,9 @@ export default function LibraryPage() {
           const progress = getChapterProgress(chapter.id);
           const linkTarget =
             isPreviewMode && sessionId
-              ? `/learn/${sessionId}?role=teacher&qa=${chapter.firstQaId}`
+              ? isStudentMode
+                ? `/learn/${sessionId}?qa=${chapter.firstQaId}`
+                : `/learn/${sessionId}?role=teacher&qa=${chapter.firstQaId}`
               : `/library/${chapter.id}/${chapter.firstQaId}`;
 
           return (

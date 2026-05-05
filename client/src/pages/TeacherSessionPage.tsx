@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import QrFullscreenModal from '../components/common/QrFullscreenModal';
 import QrInline from '../components/common/QrInline';
 import ParticipantList from '../components/teacher/ParticipantList';
 import { CHAPTERS, getQasByChapterId } from '../data/qa-stubs';
@@ -12,6 +13,7 @@ export default function TeacherSessionPage() {
   const [error, setError] = useState<string | null>(null);
   const [isEnding, setIsEnding] = useState(false);
   const [isForbidden, setIsForbidden] = useState(false);
+  const [isQrFullscreen, setIsQrFullscreen] = useState(false);
   const currentSession = useSessionStore((state) => state.currentSession);
   const participants = useSessionStore((state) => state.participants);
   const setCurrentSession = useSessionStore((state) => state.setCurrentSession);
@@ -24,7 +26,7 @@ export default function TeacherSessionPage() {
 
     let cancelled = false;
 
-    getSession(id, { teacher: true })
+    getSession(id)
       .then((session) => {
         if (!cancelled) {
           setCurrentSession(session);
@@ -132,6 +134,14 @@ export default function TeacherSessionPage() {
               ▶ 수업 시연 시작
             </button>
             <button
+              className="inline-flex min-h-11 items-center rounded-2xl border border-[var(--color-border)] bg-white px-5 text-sm font-medium text-stone-800 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60"
+              disabled={currentSession.status === 'ended'}
+              onClick={() => setIsQrFullscreen(true)}
+              type="button"
+            >
+              📱 QR 전체화면
+            </button>
+            <button
               className="inline-flex min-h-11 items-center rounded-2xl bg-rose-600 px-5 text-sm font-medium text-white"
               disabled={isEnding || currentSession.status === 'ended'}
               onClick={async () => {
@@ -166,6 +176,10 @@ export default function TeacherSessionPage() {
         </div>
         <ParticipantList participants={participants} totalQas={totalQas} />
       </section>
+
+      {isQrFullscreen ? (
+        <QrFullscreenModal code={currentSession.code} onClose={() => setIsQrFullscreen(false)} />
+      ) : null}
     </main>
   );
 }

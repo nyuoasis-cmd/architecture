@@ -165,7 +165,7 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  res.status(200).json({ id: session.id, code: session.code, name: session.name });
+  res.status(200).json({ ...session, participant_count: 0 });
 });
 
 router.get('/', async (req, res) => {
