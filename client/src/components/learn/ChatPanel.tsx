@@ -112,6 +112,10 @@ export default function ChatPanel({ qaId, qaTitle }: ChatPanelProps) {
     }
   }
 
+  const placeholder = qaTitle
+    ? `예: ${qaTitle}에 대해 일상 비유로 설명해줘`
+    : '예: 지금 문항을 일상 비유로 설명해줘';
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <header className="flex-shrink-0 border-b border-[var(--color-border)] px-4 py-3">
@@ -224,7 +228,7 @@ export default function ChatPanel({ qaId, qaTitle }: ChatPanelProps) {
                 void sendQuestion(draft);
               }
             }}
-            placeholder="예: 프로그램과 프로세스를 라면 끓이기에 비유해서 설명해줘"
+            placeholder={placeholder}
             rows={2}
             value={draft}
           />

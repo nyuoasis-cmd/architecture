@@ -9,12 +9,14 @@ import joinRouter from './routes/join';
 import progressRouter from './routes/progress';
 import quizRouter from './routes/quiz';
 import sessionsRouter from './routes/sessions';
+import teacherExplainRouter from './routes/teacher-explain';
 
 const app = express();
 const clientDistPath = resolve(__dirname, '../../client/dist');
 const copyrightIndex = buildCopyrightIndex();
 
 app.disable('x-powered-by');
+app.set('etag', false);
 app.use(cors());
 app.use(express.json());
 
@@ -28,6 +30,7 @@ app.use('/api/join', joinRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/quiz', quizRouter);
 app.use('/api/sessions', sessionsRouter);
+app.use('/api/teacher-explain', teacherExplainRouter);
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Not Found' });

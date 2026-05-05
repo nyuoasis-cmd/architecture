@@ -12,6 +12,12 @@
   --color-accent: #6366f1;
   --color-bg-input: #f5f5f4;
   --color-bg-card: var(--color-surface);
+  --color-time-before: #22c55e;
+  --color-time-during: #f59e0b;
+  --color-time-after: #3b82f6;
+  --color-misconception-bg: #fef2f2;
+  --color-misconception-border: #fecaca;
+  --color-misconception-label: #7f1d1d;
 }
 
 @layer base {
@@ -217,6 +223,583 @@
   color: var(--color-text-primary);
   word-break: keep-all;
   margin: 0 0 28px;
+}
+
+.teacher-explain-panel {
+  width: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 16px 0 24px;
+}
+
+.teacher-explain-panel__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.teacher-explain-panel__toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  background: var(--color-bg-input);
+  border-radius: 999px;
+}
+
+.teacher-explain-panel__toggle button {
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 12px;
+}
+
+.teacher-explain-panel__toggle button.is-active {
+  background: var(--color-accent);
+  color: #ffffff;
+}
+
+.teacher-explain-panel__print {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: #ffffff;
+  color: var(--color-text-muted);
+  cursor: pointer;
+}
+
+.teacher-explain-panel__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.teacher-explain-panel__eyebrow {
+  margin: 0 0 6px;
+  color: var(--color-accent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.teacher-explain-panel__title {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.teacher-explain-panel__badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg-input);
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.teacher-explain-tldr {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, var(--color-accent) 30%, white);
+  border-left: 4px solid var(--color-accent);
+  border-radius: 12px;
+  background: var(--color-accent-soft);
+}
+
+.teacher-explain-tldr__icon {
+  font-size: 18px;
+  line-height: 1;
+}
+
+.teacher-explain-tldr__text {
+  margin: 0;
+  color: color-mix(in srgb, var(--color-accent) 75%, black);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.teacher-explain-flow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.teacher-explain-flow__chip {
+  padding: 3px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-bg-input);
+  color: var(--color-text-faint);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.teacher-explain-flow__chip.is-current {
+  border-color: color-mix(in srgb, var(--color-accent) 30%, white);
+  background: var(--color-accent-soft);
+  color: var(--color-accent);
+}
+
+.teacher-explain-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.teacher-explain-card,
+.teacher-explain-related {
+  position: relative;
+  margin-bottom: 10px;
+  padding: 12px 14px 12px 16px;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.teacher-explain-card--subtle {
+  background: var(--color-bg-input);
+}
+
+.teacher-explain-card--tabs {
+  overflow: hidden;
+  padding: 0;
+}
+
+.teacher-explain-card--prompts {
+  background: color-mix(in srgb, var(--color-time-during) 10%, white);
+  border-color: color-mix(in srgb, var(--color-time-during) 35%, white);
+}
+
+.teacher-explain-card--misconception {
+  background: var(--color-misconception-bg);
+  border-color: var(--color-misconception-border);
+}
+
+.teacher-explain-card__band {
+  position: absolute;
+  top: 8px;
+  bottom: 8px;
+  left: 0;
+  width: 3px;
+  border-radius: 999px;
+}
+
+.teacher-explain-card__band--before {
+  background: var(--color-time-before);
+}
+
+.teacher-explain-card__band--during {
+  background: var(--color-time-during);
+}
+
+.teacher-explain-card__band--after {
+  background: var(--color-time-after);
+}
+
+.teacher-explain-card__label {
+  margin: 0 0 6px;
+  color: var(--color-accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.teacher-explain-card__label--misconception {
+  color: var(--color-misconception-label);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.teacher-explain-card__dot {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 6px;
+  border-radius: 999px;
+  vertical-align: 2px;
+}
+
+.teacher-explain-card__dot--before {
+  background: var(--color-time-before);
+}
+
+.teacher-explain-card__dot--during {
+  background: var(--color-time-during);
+}
+
+.teacher-explain-card__dot--after {
+  background: var(--color-time-after);
+}
+
+.teacher-explain-card__body {
+  color: var(--color-text-body);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.teacher-explain-card__body p,
+.teacher-explain-prompts__answer p {
+  margin: 0 0 8px;
+}
+
+.teacher-explain-card__body p:last-child,
+.teacher-explain-prompts__answer p:last-child {
+  margin-bottom: 0;
+}
+
+.teacher-explain-card__body--misconception {
+  color: color-mix(in srgb, var(--color-misconception-label) 88%, black);
+}
+
+.teacher-explain-card__section + .teacher-explain-card__section {
+  margin-top: 12px;
+}
+
+.teacher-explain-card__subheading {
+  margin: 0 0 6px;
+  color: var(--color-accent);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.teacher-explain-card__warning {
+  font-size: 12px;
+}
+
+.teacher-explain-tabs {
+  display: flex;
+  gap: 2px;
+  padding: 8px 12px 0 14px;
+}
+
+.teacher-explain-tabs__button {
+  border: 0;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 10px;
+}
+
+.teacher-explain-tabs__button.is-active {
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+}
+
+.teacher-explain-tabs__panel {
+  background: var(--color-bg-input);
+  padding: 12px 14px;
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.teacher-explain-prompts {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.teacher-explain-prompts li + li {
+  margin-top: 12px;
+}
+
+.teacher-explain-prompts__question {
+  margin: 0 0 4px;
+  color: color-mix(in srgb, var(--color-time-during) 70%, black);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.teacher-explain-prompts__answer {
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--color-time-during) 12%, white);
+  color: color-mix(in srgb, var(--color-time-during) 82%, black);
+  font-size: 12px;
+  line-height: 1.7;
+}
+
+.teacher-explain-related {
+  margin-top: 14px;
+  margin-bottom: 0;
+}
+
+.teacher-explain-related__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.teacher-explain-related__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-bg-input);
+  color: var(--color-text-body);
+  cursor: pointer;
+  font-size: 11px;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.teacher-explain-related__chip:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--color-accent) 30%, white);
+  background: var(--color-accent-soft);
+  color: color-mix(in srgb, var(--color-accent) 70%, black);
+}
+
+.teacher-explain-related__chip.is-disabled,
+.teacher-explain-related__chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.teacher-explain-related__meta {
+  color: var(--color-text-faint);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.glossary-term-wrapper {
+  display: inline;
+}
+
+.glossary-term {
+  position: relative;
+  border: 0;
+  border-bottom: 1px dashed var(--color-accent);
+  background: transparent;
+  color: var(--color-text-primary);
+  cursor: help;
+  font: inherit;
+  font-weight: 500;
+  padding: 0;
+}
+
+.glossary-term:hover .glossary-tooltip,
+.glossary-term:focus-visible .glossary-tooltip {
+  display: block;
+}
+
+.glossary-tooltip {
+  display: none;
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 6px);
+  z-index: 30;
+  width: 240px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--color-text-primary);
+  color: #ffffff;
+  box-shadow: 0 6px 18px rgba(28, 25, 23, 0.2);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  transform: translateX(-50%);
+  white-space: normal;
+}
+
+.glossary-tooltip::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  border: 5px solid transparent;
+  border-top-color: var(--color-text-primary);
+  transform: translateX(-50%);
+}
+
+.glossary-tooltip__term {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--color-accent-soft);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.glossary-sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(12, 10, 9, 0.4);
+}
+
+.glossary-sheet {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  min-height: 30vh;
+  padding: 14px 18px 20px;
+  border-top: 1px solid var(--color-border-strong);
+  border-radius: 16px 16px 0 0;
+  background: #ffffff;
+  box-shadow: 0 -4px 18px rgba(28, 25, 23, 0.15);
+}
+
+.glossary-sheet__handle {
+  display: block;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0 0 10px;
+}
+
+.glossary-sheet__handle-bar {
+  display: block;
+  width: 36px;
+  height: 4px;
+  margin: 0 auto;
+  border-radius: 999px;
+  background: var(--color-border);
+}
+
+.glossary-sheet__close {
+  position: absolute;
+  top: 10px;
+  right: 14px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 1;
+}
+
+.glossary-sheet__title {
+  margin: 0 0 4px;
+  color: color-mix(in srgb, var(--color-accent) 70%, black);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.glossary-sheet__category {
+  margin: 0 0 8px;
+  color: var(--color-text-faint);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.glossary-sheet__body {
+  margin: 0;
+  color: var(--color-text-body);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 767px) {
+  .teacher-explain-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .teacher-explain-panel__controls {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .teacher-explain-panel__toggle button {
+    padding-inline: 10px;
+  }
+
+  .teacher-explain-panel__header {
+    flex-direction: column;
+  }
+
+  .glossary-tooltip {
+    display: none !important;
+  }
+}
+
+@media print {
+  body {
+    background: #ffffff;
+  }
+
+  body * {
+    visibility: hidden;
+  }
+
+  .teacher-explain-print,
+  .teacher-explain-print * {
+    visibility: visible;
+  }
+
+  .teacher-explain-print {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: none;
+    padding: 0;
+  }
+
+  .teacher-explain-panel {
+    max-width: none;
+    padding: 0;
+  }
+
+  .teacher-explain-panel__controls {
+    display: none;
+  }
+
+  .teacher-explain-card,
+  .teacher-explain-related,
+  .teacher-explain-tldr {
+    break-inside: avoid;
+  }
+
+  .teacher-explain-card__body,
+  .teacher-explain-prompts__answer,
+  .teacher-explain-related__chip,
+  .teacher-explain-tldr__text {
+    font-size: 12pt;
+  }
+
+  .glossary-tooltip {
+    display: block;
+    position: static;
+    width: auto;
+    margin-top: 4px;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .glossary-tooltip::after {
+    display: none;
+  }
 }
 .hero-caption {
   font-size: var(--type-body-landing-size);
