@@ -13,23 +13,21 @@ export default function LoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const target = searchParams.get('from') ?? getPostLoginRedirect() ?? '/teacher';
-  const supportTitle = isDevBuild ? '진입 경로 (개발용)' : '로그인 안내';
-  const supportDescription = isDevBuild
-    ? (
-        <>
-          로그인 완료 후 <span className="font-mono text-stone-900">{target}</span> 로 이동합니다.
-        </>
-      )
-    : '카카오 계정 하나로 수업 생성, 진행 확인, 종료 관리까지 같은 흐름으로 이어집니다.';
 
   if (!auth.isLoading && auth.isAuthenticated) {
     return <Navigate replace to={target} />;
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-5xl flex-1 items-center px-4 py-8 sm:px-6 sm:py-12">
+    <main
+      className={`mx-auto flex w-full flex-1 items-center px-4 py-8 sm:px-6 sm:py-12 ${
+        isDevBuild ? 'max-w-5xl' : 'max-w-md'
+      }`}
+    >
       <section
-        className="grid w-full gap-8 rounded-[32px] border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-8 lg:grid-cols-[minmax(0,1.2fr)_380px] lg:p-10"
+        className={`grid w-full gap-8 rounded-[32px] border border-[var(--color-border)] bg-white p-5 shadow-sm sm:p-8 lg:p-10 ${
+          isDevBuild ? 'lg:grid-cols-[minmax(0,1.2fr)_380px]' : ''
+        }`}
       >
         <div>
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Teacher Access</p>
@@ -74,19 +72,19 @@ export default function LoginPage() {
           ) : null}
         </div>
 
-        <aside className="rounded-[28px] bg-stone-50 p-6">
-          <p className="text-sm font-medium text-stone-900">{supportTitle}</p>
-          <p className="mt-3 text-sm leading-7 text-stone-600">{supportDescription}</p>
-          <div className="mt-6 space-y-3 text-sm text-stone-600">
-            <p>1. 카카오 OAuth는 Supabase Auth Provider 설정을 사용합니다.</p>
-            <p>2. 권한이 없는 세션은 `/forbidden`으로 이동합니다.</p>
-            {isDevBuild ? (
-              <p>3. DEV 로그인은 개발 빌드에서만 노출됩니다.</p>
-            ) : (
-              <p>3. 로그인 후에는 교사 대시보드에서 수업 생성과 진행 현황을 바로 이어서 확인할 수 있습니다.</p>
-            )}
-          </div>
-        </aside>
+        {isDevBuild ? (
+          <aside className="rounded-[28px] bg-stone-50 p-6">
+            <p className="text-sm font-medium text-stone-900">진입 경로 (개발용)</p>
+            <p className="mt-3 text-sm leading-7 text-stone-600">
+              로그인 완료 후 <span className="font-mono text-stone-900">{target}</span> 로 이동합니다.
+            </p>
+            <div className="mt-6 space-y-3 text-sm text-stone-600">
+              <p>1. 카카오 OAuth는 Supabase Auth Provider 설정을 사용합니다.</p>
+              <p>2. DEV 로그인은 개발 빌드에서만 노출됩니다.</p>
+              <p>3. 권한이 없는 세션은 `/forbidden`으로 이동합니다.</p>
+            </div>
+          </aside>
+        ) : null}
       </section>
     </main>
   );
