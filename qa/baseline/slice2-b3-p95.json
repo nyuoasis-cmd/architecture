@@ -1,9 +1,10 @@
 {
-  "run_id": "PLACEHOLDER",
-  "p95_ms": 0,
-  "success_rate": 0,
+  "run_id": "b2-live-150803",
+  "p95_ms": 3542,
+  "success_rate": 1,
   "rejection_rate": 0,
   "cost_usd": 0,
   "memory_peak_mb": 0,
-  "captured_at": "PLACEHOLDER — Round 0 (QA_BASELINE_MODE=true) 후 candidate 값으로 교체"
+  "captured_at": "2026-05-30 (Round 0 라이브 실측 — 로컬 서버 3003 + 공유 prod DB 직격, N=30 join burst)",
+  "_note": "로컬 서버 측정(Render 네트워크 레이턴시 미포함, DB/REST 동시성은 실측). Render prod QA 활성화 시 prod 직격으로 재baseline 권장. 성공100%·거부0%·누수0·하드실패0."
 }
