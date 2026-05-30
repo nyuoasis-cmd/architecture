@@ -1,0 +1,27 @@
+{
+  "_comment": "real-flow-qa Layer A — 콘솔 에러 fingerprint allowlist. 각 항목은 소유자·만료일·사유 명시(versioned). 매칭되는 콘솔 에러는 FAIL 로 카운트하지 않음. 만료일 지난 항목은 크롤러가 WARN.",
+  "version": 1,
+  "entries": [
+    {
+      "fingerprint": "ResizeObserver loop",
+      "match": "substring",
+      "reason": "브라우저 ResizeObserver 양성 노이즈(기능 무영향)",
+      "owner": "qa",
+      "expires": "2026-12-31"
+    },
+    {
+      "fingerprint": "Failed to load resource: net::ERR_",
+      "match": "substring",
+      "reason": "외부 리소스 일시 네트워크(분석/폰트 등) — 5xx 네트워크 오라클이 별도 판정",
+      "owner": "qa",
+      "expires": "2026-12-31"
+    },
+    {
+      "fingerprint": "[vite] connecting",
+      "match": "substring",
+      "reason": "Vite dev HMR 연결 로그(로컬 QA 한정)",
+      "owner": "qa",
+      "expires": "2026-12-31"
+    }
+  ]
+}

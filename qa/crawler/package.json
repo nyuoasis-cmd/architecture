@@ -1,0 +1,10 @@
+{
+  "name": "architecture-qa-crawler",
+  "private": true,
+  "type": "module",
+  "description": "real-flow-qa Layer A 크롤러 격리 deps (root package.json 무수정 → PR2와 .gitignore/deps 충돌 0). 라이브: cd qa/crawler && npm i && QA_*=... npx tsx crawl.ts",
+  "dependencies": {
+    "puppeteer": "^24.10.0",
+    "tsx": "^4.19.2"
+  }
+}
