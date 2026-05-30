@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { signParticipantToken } from '../lib/participant-token';
 import { getSupabaseAdminClient } from '../lib/supabase';
+import { qaTagFields } from '../lib/qa-context';
 
 const router = Router();
 
@@ -95,6 +96,7 @@ router.post('/', async (req, res) => {
     .insert({
       session_id: session.id,
       nickname: parsed.data.nickname,
+      ...qaTagFields(),
     })
     .select('id, session_id, nickname')
     .single();
