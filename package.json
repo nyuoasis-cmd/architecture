@@ -6,9 +6,11 @@
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
     "build": "cd client && npm install --include=dev && npm run build && cd ../server && npm install --include=dev && npm run build",
-    "start": "node server/dist/index.js"
+    "start": "node server/dist/index.js",
+    "qa:layerb": "playwright test -c qa/playwright-slice2.config.ts"
   },
   "devDependencies": {
+    "@playwright/test": "^1.60.0",
     "concurrently": "^8.2.2"
   }
 }

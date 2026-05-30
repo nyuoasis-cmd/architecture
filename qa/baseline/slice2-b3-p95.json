@@ -1,0 +1,9 @@
+{
+  "run_id": "PLACEHOLDER",
+  "p95_ms": 0,
+  "success_rate": 0,
+  "rejection_rate": 0,
+  "cost_usd": 0,
+  "memory_peak_mb": 0,
+  "captured_at": "PLACEHOLDER — Round 0 (QA_BASELINE_MODE=true) 후 candidate 값으로 교체"
+}
