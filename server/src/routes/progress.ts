@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getRequestUser } from '../lib/auth';
 import { getParticipantTokenFromRequest, verifyParticipantToken } from '../lib/participant-token';
 import { getSupabaseAdminClient } from '../lib/supabase';
+import { qaTagFields } from '../lib/qa-context';
 
 const router = Router();
 
@@ -106,7 +107,7 @@ async function writeProgress(identity: ProgressIdentity, input: z.infer<typeof p
     return;
   }
 
-  const { error } = await supabase.from('architecture_progress').insert(payload);
+  const { error } = await supabase.from('architecture_progress').insert({ ...payload, ...qaTagFields() });
   if (error) {
     throw new Error('progress_insert_failed');
   }

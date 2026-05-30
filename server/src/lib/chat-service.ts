@@ -4,6 +4,8 @@ import { getChapterContext, getQaContextById } from '../data/chapter-content';
 import { env } from '../env';
 import { checkCopyright } from './copyright-index';
 import { getSupabaseAdminClient } from './supabase';
+import { qaTagFields } from './qa-context';
+import { guardEffect, isQaBlocked } from './effect-gate';
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 const SONNET_MODEL = 'claude-sonnet-4-6';
@@ -192,6 +194,7 @@ async function persistChatRecord(input: {
   }
 
   const { error } = await supabase.from('architecture_chats').insert({
+    ...qaTagFields(),
     anonymous_id: input.actorId,
     qa_id: input.qaId,
     question_hash: input.questionHash,
@@ -382,16 +385,25 @@ export async function createChatReply(input: {
         systemBlocks.push({ type: 'text', text: followupInstruction });
       }
 
-      const response = await withTimeout(
-        anthropic.messages.create({
-          model: modelUsed,
-          max_tokens: 1500,
-          temperature: 0.35,
-          system: systemBlocks,
-          messages: toAnthropicMessages(input.history, input.question),
-        }),
-        REQUEST_TIMEOUT_MS,
+      // EffectGate: QA run 이면 Anthropic 외부 호출을 default-deny no-op (Layer A 크롤러 비용 차단).
+      // 비-QA(실학생 anon 채팅)는 컨텍스트 미설정이라 그대로 실행 — 회귀 0.
+      const response = await guardEffect('external:chat-llm', () =>
+        withTimeout(
+          anthropic.messages.create({
+            model: modelUsed,
+            max_tokens: 1500,
+            temperature: 0.35,
+            system: systemBlocks,
+            messages: toAnthropicMessages(input.history, input.question),
+          }),
+          REQUEST_TIMEOUT_MS,
+        ),
       );
+
+      if (isQaBlocked(response)) {
+        answer = '[QA] chat LLM call suppressed under QA run';
+        break;
+      }
 
       registerUsageCost(estimateRequestCostUsd(modelUsed, response.usage, chapterContext.cachePrefixUsable));
 

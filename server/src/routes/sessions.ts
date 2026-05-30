@@ -5,6 +5,7 @@ import { getRequestUser } from '../lib/auth';
 import { getParticipantTokenFromRequest, verifyParticipantToken } from '../lib/participant-token';
 import { generateSessionCode } from '../lib/session-code';
 import { getSupabaseAdminClient } from '../lib/supabase';
+import { qaTagFields } from '../lib/qa-context';
 
 const router = Router();
 
@@ -150,6 +151,7 @@ router.post('/', async (req, res) => {
         teacher_id: teacherId,
         chapter_ids: chapterIds,
         max_participants: parsed.data.max_participants,
+        ...qaTagFields(),
       })
       .select('id, code, name, teacher_id, chapter_ids, status, max_participants, created_at, ended_at')
       .single();
