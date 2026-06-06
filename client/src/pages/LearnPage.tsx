@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { StudentExitGuard } from '../components/StudentExitGuard';
 import ChatPanel from '../components/learn/ChatPanel';
 import GuidePanel from '../components/learn/GuidePanel';
 import PreviewPanel from '../components/learn/PreviewPanel';
@@ -251,7 +252,9 @@ export default function LearnPage({ mode }: LearnPageProps) {
     }
 
     return (
-      <LearnLayout
+      <>
+        <StudentExitGuard when={!isTeacherPreview} />
+        <LearnLayout
         allSessionQas={sessionQas}
         availableChapters={sessionChapters}
         chapter={chapter}
@@ -272,6 +275,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
         sessionCode={currentSession.code}
         sessionId={isTeacherPreview ? sessionId : undefined}
       />
+      </>
     );
   }
 

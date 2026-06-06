@@ -1,7 +1,7 @@
 @import "@teachermate/shared/design-tokens.css";
 @import "tailwindcss";
 @source ".";
-@source "../../node_modules/@teachermate/shared/dist/**/*.{js,ts}";
+@source "../node_modules/@teachermate/shared/dist/**/*.{js,ts}";
 
 @theme {
   --color-bg-page: var(--color-surface);
