@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
 import AuthGate from './components/auth/AuthGate';
 import ServiceHeader from './components/layout/ServiceHeader';
 import AuthCallbackPage from './pages/AuthCallbackPage';
@@ -15,12 +15,19 @@ import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import TeacherSessionPage from './pages/TeacherSessionPage';
 import ShowcasePage from './demos/_preview/ShowcasePage';
 
-export default function App() {
+// 학생 진입/세션 라우트 = 교사 공통 네비(teachermate-nav) 미렌더 (DESIGN-POLICY §9.H-19 역방향 금지).
+// 교사·공개 라우트(랜딩·/teacher·/library·about 등)는 네비 유지.
+function isStudentRoute(pathname: string): boolean {
+  return pathname === '/join' || pathname.startsWith('/learn/');
+}
+
+function AppShell() {
+  const { pathname } = useLocation();
+  const hideNav = isStudentRoute(pathname);
   return (
-    <BrowserRouter>
-      <div className="app-shell flex min-h-screen flex-col">
-        <ServiceHeader />
-        <Routes>
+    <div className="app-shell flex min-h-screen flex-col">
+      {!hideNav && <ServiceHeader />}
+      <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<AboutPage />} />
           <Route path="/login" element={<LoginPage />} />
@@ -50,7 +57,14 @@ export default function App() {
           <Route path="/demos-preview/showcase" element={<ShowcasePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
-      </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppShell />
     </BrowserRouter>
   );
 }
