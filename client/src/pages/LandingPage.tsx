@@ -25,13 +25,13 @@ export default function LandingPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          padding: 120px 64px;
+          padding: 64px 32px;
           text-align: center;
           background: #ffffff;
         }
         .landing-hero-inner {
           width: 100%;
-          max-width: 760px;
+          max-width: 880px;
           display: flex;
           flex-direction: column;
           align-items: center;
