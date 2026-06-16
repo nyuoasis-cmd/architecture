@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { CHAPTERS } from '../../data/qa-stubs';
 import { formatRelativeTime } from '../../lib/format';
-import { deleteSession, SessionClientError, type SessionRecord } from '../../lib/session-client';
+import { deleteSession, endSession, SessionClientError, type SessionRecord } from '../../lib/session-client';
 import { useSessionStore } from '../../store/session-store';
 import QrInline from '../common/QrInline';
 
@@ -15,12 +15,34 @@ export default function SessionCard({ session }: SessionCardProps) {
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isConfirmingEnd, setIsConfirmingEnd] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
+  const [endError, setEndError] = useState<string | null>(null);
   const removeTeacherSession = useSessionStore((state) => state.removeTeacherSession);
+  const updateTeacherSession = useSessionStore((state) => state.updateTeacherSession);
 
   const chapterLabels = session.chapter_ids
     .map((chapterId) => CHAPTERS.find((chapter) => chapter.id === chapterId)?.title)
     .filter(Boolean)
     .join(' · ');
+
+  const handleEnd = async () => {
+    setIsEnding(true);
+    setEndError(null);
+    try {
+      const updated = await endSession(session.id);
+      updateTeacherSession(updated);
+    } catch (caught) {
+      setIsEnding(false);
+      const message =
+        caught instanceof SessionClientError
+          ? caught.message
+          : caught instanceof Error
+            ? caught.message
+            : '세션을 종료하지 못했습니다.';
+      setEndError(message);
+    }
+  };
 
   const handleDelete = async () => {
     setIsDeleting(true);
@@ -68,6 +90,18 @@ export default function SessionCard({ session }: SessionCardProps) {
           <button className="btn-ghost-sm" onClick={() => setShowQr((current) => !current)} type="button">
             {showQr ? 'QR 닫기' : 'QR 보기'}
           </button>
+          {session.status === 'active' ? (
+            <button
+              className="btn-ghost-sm"
+              onClick={() => {
+                setIsConfirmingEnd(true);
+                setEndError(null);
+              }}
+              type="button"
+            >
+              종료
+            </button>
+          ) : null}
           <button
             className="btn-ghost-sm text-rose-700 hover:bg-rose-50"
             onClick={() => {
@@ -83,6 +117,37 @@ export default function SessionCard({ session }: SessionCardProps) {
           </Link>
         </div>
       </div>
+
+      {session.status === 'active' && isConfirmingEnd ? (
+        <div className="mt-4 rounded-2xl border border-[var(--color-border)] bg-stone-50 p-4">
+          <p className="text-sm font-medium text-stone-900">이 수업을 종료할까요?</p>
+          <p className="mt-1 text-sm text-stone-600">
+            학생들이 더 이상 참여할 수 없어요. 이미 저장된 학습 기록은 그대로 남아요.
+          </p>
+          {endError ? <p className="mt-2 text-sm text-rose-700">{endError}</p> : null}
+          <div className="mt-3 flex gap-2">
+            <button
+              className="inline-flex min-h-9 items-center rounded-xl bg-stone-900 px-3 text-sm font-medium text-white disabled:opacity-60"
+              disabled={isEnding}
+              onClick={handleEnd}
+              type="button"
+            >
+              {isEnding ? '종료 중…' : '종료하기'}
+            </button>
+            <button
+              className="inline-flex min-h-9 items-center rounded-xl border border-[var(--color-border)] bg-white px-3 text-sm font-medium text-stone-700 disabled:opacity-60"
+              disabled={isEnding}
+              onClick={() => {
+                setIsConfirmingEnd(false);
+                setEndError(null);
+              }}
+              type="button"
+            >
+              취소
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {isConfirmingDelete ? (
         <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4">
