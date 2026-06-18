@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useImeSafeInput } from '@teachermate/shared';
 import { joinSession, SessionClientError } from '../lib/session-client';
 import { setSessionTokenHint } from '../lib/session-token';
 
@@ -10,6 +11,7 @@ export default function JoinPage() {
   const [nickname, setNickname] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const codeInput = useImeSafeInput(setCode, (value) => value.toUpperCase());
 
   const banner = useMemo(() => {
     if (searchParams.get('expired') === '1') {
@@ -74,7 +76,7 @@ export default function JoinPage() {
             <input
               className="w-full rounded-2xl border border-[var(--color-border)] bg-stone-50 px-4 py-3 font-mono text-2xl tracking-[0.45em] uppercase outline-none focus:border-stone-400"
               maxLength={6}
-              onChange={(event) => setCode(event.target.value.toUpperCase())}
+              {...codeInput}
               placeholder="ABC123"
               value={code}
             />
