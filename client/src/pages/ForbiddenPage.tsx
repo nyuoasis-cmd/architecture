@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { getServiceLoginUrl } from '../lib/login-url';
 
 export default function ForbiddenPage() {
   return (
@@ -11,12 +12,13 @@ export default function ForbiddenPage() {
           돌아가세요.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-3">
-          <Link
+          <button
+            type="button"
             className="inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white"
-            to="/login"
+            onClick={() => { window.location.href = getServiceLoginUrl('/teacher'); }}
           >
-            로그인으로 이동
-          </Link>
+            다른 계정으로 로그인
+          </button>
           <Link
             className="inline-flex min-h-11 items-center rounded-2xl border border-[var(--color-border)] px-5 text-sm font-medium text-stone-700"
             to="/"
