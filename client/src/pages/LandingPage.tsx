@@ -10,12 +10,11 @@
  * design-tokens.css는 demos 전용이라 hex 직접 사용
  */
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../lib/auth';
 
 export default function LandingPage() {
   const navigate = useNavigate();
-  const auth = useAuth();
-  const teacherEntryPath = auth.isAuthenticated ? '/teacher' : `/login?returnUrl=${encodeURIComponent('/teacher')}`;
+  // 허브 직행 통일: 항상 /teacher 진입 — 미인증이면 AuthGate가 중앙 허브로 bounce
+  const teacherEntryPath = '/teacher';
 
   return (
     <>

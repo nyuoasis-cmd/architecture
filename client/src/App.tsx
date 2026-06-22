@@ -1,4 +1,4 @@
-import { BrowserRouter, Route, Routes, useLocation } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import AuthGate from './components/auth/AuthGate';
 import ServiceHeader from './components/layout/ServiceHeader';
 import AuthCallbackPage from './pages/AuthCallbackPage';
@@ -9,7 +9,6 @@ import JoinPage from './pages/JoinPage';
 import LandingPage from './pages/LandingPage';
 import LearnPage from './pages/LearnPage';
 import LibraryPage from './pages/LibraryPage';
-import LoginPage from './pages/LoginPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import TeacherSessionPage from './pages/TeacherSessionPage';
@@ -30,7 +29,7 @@ function AppShell() {
       <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/about" element={<AboutPage />} />
-          <Route path="/login" element={<LoginPage />} />
+          <Route path="/login" element={<Navigate to="/teacher" replace />} />
           <Route path="/auth/callback" element={<AuthCallbackPage />} />
           <Route path="/dev-login" element={<DevLoginPage />} />
           <Route path="/forbidden" element={<ForbiddenPage />} />
