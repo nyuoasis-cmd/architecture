@@ -1,7 +1,8 @@
 // 하네스 심화 트랙 — 모듈 6(종합 · 졸업) 작업대 페이지.
 // 라우트: /harness/module6 (학생/교사 흐름과 분리된 프리뷰. 네임스페이스 분리 결정 반영).
 // 공용 키트(_kit)의 WorkbenchFrame이 배너·스위처·앵커·이전/다음을 처리. 페이지는 졸업 스킬
-// 입력 상태(STEP 간 공유)만 소유한다. 제출 상태(localStorage)는 GraduationStep이 자체 소유.
+// 입력 상태(STEP 간 공유)를 소유하며, 이전에 제출된 값이 있으면 localStorage에서 복원해
+// "제출 완료" 카드와 폼 내용이 어긋나지 않게 한다. 제출 완료 여부 자체는 GraduationStep이 소유.
 import { useState } from 'react';
 import { ConceptAnchor, PlaybackStepView, UnderstandingCheck, WorkbenchFrame, type NavItem } from './_kit';
 import {
@@ -12,6 +13,7 @@ import {
   EMPTY_GRADUATION,
   GraduationStep,
   IntroScreen,
+  loadSubmission,
   STEP1,
   STEP2,
   TONE,
@@ -32,7 +34,7 @@ const NAV: NavItem[] = [
 const ANCHOR_ACTIVE = ['', 'cycle', 'automate', 'graduate', 'graduate', 'done'];
 
 export default function HarnessModule6Page() {
-  const [skill, setSkill] = useState<GraduationSkill>(EMPTY_GRADUATION);
+  const [skill, setSkill] = useState<GraduationSkill>(() => loadSubmission()?.skill ?? EMPTY_GRADUATION);
 
   const renderAnchor = (idx: number) => (
     <ConceptAnchor phases={ANCHOR_PHASES} active={ANCHOR_ACTIVE[idx]} headline={ANCHOR_HEADLINE} doneNote={ANCHOR_DONE} tone={TONE} />

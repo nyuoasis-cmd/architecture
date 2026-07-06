@@ -114,32 +114,45 @@ export function requiredFilledCount(v: GraduationSkill): number {
 
 type SubmissionState = { skill: GraduationSkill; submittedAt: number };
 
-function loadSubmission(): SubmissionState | null {
+function isSubmissionState(v: unknown): v is SubmissionState {
+  if (!v || typeof v !== 'object') return false;
+  const candidate = v as Record<string, unknown>;
+  return typeof candidate.submittedAt === 'number' && typeof candidate.skill === 'object' && candidate.skill !== null;
+}
+
+export function loadSubmission(): SubmissionState | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as SubmissionState) : null;
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    return isSubmissionState(parsed) ? parsed : null;
   } catch {
     return null;
   }
 }
 
-function saveSubmission(state: SubmissionState) {
+function saveSubmission(state: SubmissionState): boolean {
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    return true;
   } catch {
-    // localStorage 불가 환경(프라이빗 모드 등) — 제출 상태는 세션 내 메모리로만 유지됨.
+    // localStorage 불가 환경(프라이빗 모드·용량 초과 등) — 제출 상태는 이 세션 내 메모리로만 유지됨.
+    return false;
   }
 }
 
 export function GraduationStep({ skill, onChange }: { skill: GraduationSkill; onChange: (v: GraduationSkill) => void }) {
-  const [submitted, setSubmitted] = useState<SubmissionState | null>(() => loadSubmission());
+  const [submitted, setSubmitted] = useState<{ state: SubmissionState; persisted: boolean } | null>(() => {
+    const stored = loadSubmission();
+    return stored ? { state: stored, persisted: true } : null;
+  });
   const requiredCount = requiredFilledCount(skill);
   const ready = requiredCount === REQUIRED_FIELDS.length;
 
   const handleSubmit = () => {
     const state: SubmissionState = { skill, submittedAt: Date.now() };
-    saveSubmission(state);
-    setSubmitted(state);
+    const persisted = saveSubmission(state);
+    setSubmitted({ state, persisted });
   };
 
   return (
@@ -205,11 +218,17 @@ export function GraduationStep({ skill, onChange }: { skill: GraduationSkill; on
       {submitted ? (
         <section className="rounded-2xl border p-4" style={{ borderColor: TONE.accentBorder, background: TONE.accentSoft }}>
           <p className="m-0 text-[13px] font-semibold" style={{ color: TONE.accent }}>
-            ✅ 제출 완료 — {submitted.skill.name || '나만의 스킬'}
+            ✅ 제출 완료 — {submitted.state.skill.name || '나만의 스킬'}
           </p>
-          <p className="m-0 mt-1.5 text-[11px] leading-[1.6]" style={{ color: 'var(--color-text-body)' }}>
-            🧪 이 프리뷰는 이 브라우저에만 저장돼요(로컬 프루프). 실제 강사 제출·서버 저장은 별도 인프라 확정 후 연결됩니다.
-          </p>
+          {submitted.persisted ? (
+            <p className="m-0 mt-1.5 text-[11px] leading-[1.6]" style={{ color: 'var(--color-text-body)' }}>
+              🧪 이 프리뷰는 이 브라우저에만 저장돼요(로컬 프루프). 실제 강사 제출·서버 저장은 별도 인프라 확정 후 연결됩니다.
+            </p>
+          ) : (
+            <p className="m-0 mt-1.5 text-[11px] leading-[1.6]" style={{ color: 'var(--color-danger, #dc2626)' }}>
+              ⚠️ 이 브라우저에 저장하지 못했어요(프라이빗 모드 등). 새로고침하면 이 화면이 사라질 수 있어요 — 지금 화면을 캡처해두세요.
+            </p>
+          )}
         </section>
       ) : null}
     </div>
@@ -247,8 +266,8 @@ export function IntroScreen() {
           오늘 할 일
         </p>
         <p className="m-0 mt-1.5 text-[12px] leading-[1.7]" style={{ color: 'var(--color-text-body)' }}>
-          마지막으로, <strong>여러분의 졸업 작품</strong> — 모듈 2에서 시작한 '나만의 스킬'을 완성해서 제출합니다. 이걸 내면
-          졸업이에요. 🎓
+          마지막으로, <strong>여러분의 졸업 작품</strong> — 모듈 2에서 시작한 '나만의 스킬'을 완성해서 제출해요. (이 프리뷰에서는
+          이 브라우저에 로컬로 기록되고, 실제 졸업 인정은 강사 확인을 거칩니다.)
         </p>
         <p className="m-0 mt-2 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
           아래 <strong>다음 →</strong>을 눌러 시작하세요.
