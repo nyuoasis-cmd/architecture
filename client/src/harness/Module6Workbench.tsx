@@ -3,15 +3,14 @@
 // 흐름: 도입 → STEP1 한 바퀴 요약(각본: 규칙→기획→테스트→커밋) → STEP2 /tdd-loop 맛보기(각본) →
 //       STEP3 졸업 스킬 완성(학생 입력, PART4 규격 5칸+선택 1칸)+제출 → 이해 체크 → 마무리.
 // 공용 키트(_kit)의 검증된 부품 재사용. STEP3 졸업 스킬 폼+제출만 모듈 6 고유(인터랙티브).
-// ⚠️ 3-B(졸업 제출 슬롯 DB) 인프라가 아직 없어 이 프리뷰는 제출을 브라우저 localStorage에만
-//    저장한다(로컬 프루프). 실제 강사 전달·서버 저장은 3-B 확정 후 별도 구현.
+// 3-B: 제출은 서버(architecture_submissions, module_id='module6')에 저장된다. 식별은 익명
+// 브라우저 토큰(submission-client)이며, 3-C에서 실제 세션/참가자 모델로 교체될 예정.
 import { useState } from 'react';
 import { Hero, getTone } from '../demos/_shared';
+import { fetchModuleSubmission, saveModuleSubmission } from './submission-client';
 import { type CheckData, type PlaybackStep } from './_kit';
 
 export const TONE = getTone(6); // 모듈 6 accent (ch06 톤)
-
-const STORAGE_KEY = 'harness-module6-graduation-draft';
 
 // ── F1: 개념 앵커 (종합 → 자동화 → 졸업) ─────────────────────────────────────
 export const ANCHOR_PHASES = [
@@ -112,7 +111,7 @@ export function requiredFilledCount(v: GraduationSkill): number {
   return REQUIRED_FIELDS.filter((f) => v[f.key].trim()).length;
 }
 
-type SubmissionState = { skill: GraduationSkill; submittedAt: number };
+export type SubmittedGraduation = { skill: GraduationSkill; updatedAt: string };
 
 const GRADUATION_SKILL_KEYS: (keyof GraduationSkill)[] = ['name', 'purpose', 'input', 'steps', 'output', 'reuseNote'];
 
@@ -122,45 +121,46 @@ function isGraduationSkill(v: unknown): v is GraduationSkill {
   return GRADUATION_SKILL_KEYS.every((k) => typeof candidate[k] === 'string');
 }
 
-function isSubmissionState(v: unknown): v is SubmissionState {
-  if (!v || typeof v !== 'object') return false;
-  const candidate = v as Record<string, unknown>;
-  return typeof candidate.submittedAt === 'number' && isGraduationSkill(candidate.skill);
-}
+export type GraduationFetchResult =
+  | { status: 'ok'; submission: SubmittedGraduation | null }
+  | { status: 'error' };
 
-export function loadSubmission(): SubmissionState | null {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed: unknown = JSON.parse(raw);
-    return isSubmissionState(parsed) ? parsed : null;
-  } catch {
-    return null;
+// 조회 실패(네트워크/서버 에러)를 "제출 없음"과 구분한다 — 구분하지 않으면 일시적 실패를
+// 신규로 오인해 기존 제출이 안 보이는 빈 폼을 편집 가능 상태로 열어줄 위험이 있다.
+export async function fetchGraduationSubmission(): Promise<GraduationFetchResult> {
+  const result = await fetchModuleSubmission('module6');
+  if (result.status === 'error') return { status: 'error' };
+  if (!result.submission || !isGraduationSkill(result.submission.content)) {
+    return { status: 'ok', submission: null };
   }
+  return { status: 'ok', submission: { skill: result.submission.content, updatedAt: result.submission.updatedAt } };
 }
 
-function saveSubmission(state: SubmissionState): boolean {
-  try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    return true;
-  } catch {
-    // localStorage 불가 환경(프라이빗 모드·용량 초과 등) — 제출 상태는 이 세션 내 메모리로만 유지됨.
-    return false;
-  }
+async function submitGraduationSkill(skill: GraduationSkill): Promise<boolean> {
+  return saveModuleSubmission('module6', skill);
 }
 
-export function GraduationStep({ skill, onChange }: { skill: GraduationSkill; onChange: (v: GraduationSkill) => void }) {
-  const [submitted, setSubmitted] = useState<{ state: SubmissionState; persisted: boolean } | null>(() => {
-    const stored = loadSubmission();
-    return stored ? { state: stored, persisted: true } : null;
-  });
+export function GraduationStep({
+  skill,
+  onChange,
+  initialSubmission,
+}: {
+  skill: GraduationSkill;
+  onChange: (v: GraduationSkill) => void;
+  initialSubmission: SubmittedGraduation | null;
+}) {
+  const [submitted, setSubmitted] = useState<{ state: SubmittedGraduation; persisted: boolean } | null>(
+    initialSubmission ? { state: initialSubmission, persisted: true } : null,
+  );
+  const [submitting, setSubmitting] = useState(false);
   const requiredCount = requiredFilledCount(skill);
   const ready = requiredCount === REQUIRED_FIELDS.length;
 
-  const handleSubmit = () => {
-    const state: SubmissionState = { skill, submittedAt: Date.now() };
-    const persisted = saveSubmission(state);
-    setSubmitted({ state, persisted });
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    const persisted = await submitGraduationSkill(skill);
+    setSubmitted({ state: { skill, updatedAt: new Date().toISOString() }, persisted });
+    setSubmitting(false);
   };
 
   return (
@@ -216,10 +216,11 @@ export function GraduationStep({ skill, onChange }: { skill: GraduationSkill; on
         <button
           type="button"
           onClick={handleSubmit}
-          className="rounded-xl border px-5 py-3 text-[14px] font-bold transition"
+          disabled={submitting}
+          className="rounded-xl border px-5 py-3 text-[14px] font-bold transition disabled:opacity-60"
           style={{ borderColor: TONE.accent, background: TONE.accentSoft, color: TONE.accent }}
         >
-          🎓 졸업 산출물 제출
+          {submitting ? '제출 중…' : '🎓 졸업 산출물 제출'}
         </button>
       )}
 
@@ -238,20 +239,53 @@ export function GraduationStep({ skill, onChange }: { skill: GraduationSkill; on
           >
             {submitted.persisted
               ? `✅ 제출 완료 — ${submitted.state.skill.name || '나만의 스킬'}`
-              : `⚠️ 저장 실패 — ${submitted.state.skill.name || '나만의 스킬'} (이 브라우저에 기록되지 않음)`}
+              : `⚠️ 저장 실패 — ${submitted.state.skill.name || '나만의 스킬'} (서버에 저장되지 않음)`}
           </p>
           {submitted.persisted ? (
             <p className="m-0 mt-1.5 text-[11px] leading-[1.6]" style={{ color: 'var(--color-text-body)' }}>
-              🧪 이 프리뷰는 이 브라우저에만 저장돼요(로컬 프루프). 실제 강사 제출·서버 저장은 별도 인프라 확정 후 연결됩니다.
+              🧪 이 프리뷰는 제출을 서버에 저장해요. 같은 브라우저로 재방문해도 유지됩니다. 실제 강사 확인은 세션 연동(3-C) 이후
+              연결됩니다.
             </p>
           ) : (
             <p className="m-0 mt-1.5 text-[11px] leading-[1.6]" style={{ color: 'var(--color-text-body)' }}>
-              이 브라우저(프라이빗 모드 등)에는 저장할 수 없었어요. 새로고침하면 이 화면이 사라져요 — 지금 화면을 캡처해두세요.
+              네트워크 또는 서버 문제로 저장하지 못했어요. 다시 시도해 주세요 — 새로고침하면 이 화면의 입력값이 사라져요.
             </p>
           )}
         </section>
       ) : null}
     </div>
+  );
+}
+
+export function GraduationLoading() {
+  return (
+    <section
+      className="rounded-2xl border border-dashed p-4 text-center text-[12px]"
+      style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg-alt)', color: 'var(--color-text-body)' }}
+    >
+      이전 제출 확인 중…
+    </section>
+  );
+}
+
+export function GraduationLoadError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <section
+      className="rounded-2xl border p-4 text-center text-[12px] leading-[1.6]"
+      style={{ borderColor: 'var(--color-danger, #dc2626)', background: 'var(--demo-card-bg-alt)', color: 'var(--color-text-body)' }}
+    >
+      이전 제출을 확인하지 못했어요. 폼을 열기 전에 다시 확인해야 기존 제출을 실수로 덮어쓰지 않아요.
+      <div className="mt-2">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-lg border px-3 py-1.5 text-[12px] font-semibold"
+          style={{ borderColor: 'var(--color-danger, #dc2626)', color: 'var(--color-danger, #dc2626)' }}
+        >
+          다시 확인
+        </button>
+      </div>
+    </section>
   );
 }
 
@@ -287,7 +321,7 @@ export function IntroScreen() {
         </p>
         <p className="m-0 mt-1.5 text-[12px] leading-[1.7]" style={{ color: 'var(--color-text-body)' }}>
           마지막으로, <strong>여러분의 졸업 작품</strong> — 모듈 2에서 시작한 '나만의 스킬'을 완성해서 제출해요. (이 프리뷰에서는
-          이 브라우저에 로컬로 기록되고, 실제 졸업 인정은 강사 확인을 거칩니다.)
+          서버에 저장되고, 실제 졸업 인정은 강사 확인을 거칩니다.)
         </p>
         <p className="m-0 mt-2 text-[11px]" style={{ color: 'var(--color-text-muted)' }}>
           아래 <strong>다음 →</strong>을 눌러 시작하세요.

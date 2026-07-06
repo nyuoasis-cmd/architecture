@@ -1,9 +1,10 @@
 // 하네스 심화 트랙 — 모듈 6(종합 · 졸업) 작업대 페이지.
 // 라우트: /harness/module6 (학생/교사 흐름과 분리된 프리뷰. 네임스페이스 분리 결정 반영).
 // 공용 키트(_kit)의 WorkbenchFrame이 배너·스위처·앵커·이전/다음을 처리. 페이지는 졸업 스킬
-// 입력 상태(STEP 간 공유)를 소유하며, 이전에 제출된 값이 있으면 localStorage에서 복원해
-// "제출 완료" 카드와 폼 내용이 어긋나지 않게 한다. 제출 완료 여부 자체는 GraduationStep이 소유.
-import { useState } from 'react';
+// 입력 상태(STEP 간 공유)를 소유하며, 마운트 시 서버(3-B)에서 이전 제출을 비동기 조회해 복원한다.
+// 조회 상태는 loading/loaded/error 3단계 — 조회 실패를 "제출 없음"으로 오인해 기존 제출을
+// 빈 폼으로 덮어쓸 위험을 막기 위해, 실패 시엔 편집 폼 자체를 열지 않고 재시도만 제공한다.
+import { useCallback, useEffect, useState } from 'react';
 import { ConceptAnchor, PlaybackStepView, UnderstandingCheck, WorkbenchFrame, type NavItem } from './_kit';
 import {
   ANCHOR_DONE,
@@ -11,14 +12,17 @@ import {
   ANCHOR_PHASES,
   CHECK,
   EMPTY_GRADUATION,
+  fetchGraduationSubmission,
+  GraduationLoadError,
+  GraduationLoading,
   GraduationStep,
   IntroScreen,
-  loadSubmission,
   STEP1,
   STEP2,
   TONE,
   WrapScreen,
   type GraduationSkill,
+  type SubmittedGraduation,
 } from './Module6Workbench';
 
 const NAV: NavItem[] = [
@@ -33,8 +37,34 @@ const NAV: NavItem[] = [
 // idx → 개념 앵커에서 켤 phase key.
 const ANCHOR_ACTIVE = ['', 'cycle', 'automate', 'graduate', 'graduate', 'done'];
 
+type LoadState = 'loading' | 'loaded' | 'error';
+
 export default function HarnessModule6Page() {
-  const [skill, setSkill] = useState<GraduationSkill>(() => loadSubmission()?.skill ?? EMPTY_GRADUATION);
+  const [loadState, setLoadState] = useState<LoadState>('loading');
+  const [skill, setSkill] = useState<GraduationSkill>(EMPTY_GRADUATION);
+  const [initialSubmission, setInitialSubmission] = useState<SubmittedGraduation | null>(null);
+
+  const load = useCallback(() => {
+    setLoadState('loading');
+    let cancelled = false;
+    fetchGraduationSubmission().then((result) => {
+      if (cancelled) return;
+      if (result.status === 'error') {
+        setLoadState('error');
+        return;
+      }
+      if (result.submission) {
+        setSkill(result.submission.skill);
+        setInitialSubmission(result.submission);
+      }
+      setLoadState('loaded');
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => load(), [load]);
 
   const renderAnchor = (idx: number) => (
     <ConceptAnchor phases={ANCHOR_PHASES} active={ANCHOR_ACTIVE[idx]} headline={ANCHOR_HEADLINE} doneNote={ANCHOR_DONE} tone={TONE} />
@@ -49,7 +79,9 @@ export default function HarnessModule6Page() {
       case 2:
         return <PlaybackStepView step={STEP2} tone={TONE} />;
       case 3:
-        return <GraduationStep skill={skill} onChange={setSkill} />;
+        if (loadState === 'error') return <GraduationLoadError onRetry={load} />;
+        if (loadState === 'loading') return <GraduationLoading />;
+        return <GraduationStep skill={skill} onChange={setSkill} initialSubmission={initialSubmission} />;
       case 4:
         return <UnderstandingCheck check={CHECK} tone={TONE} />;
       default:
@@ -64,7 +96,7 @@ export default function HarnessModule6Page() {
       banner={
         <>
           🧪 <strong>격리 프리뷰</strong> — 하네스 심화 트랙 · 모듈 6(종합·졸업). 라이브 학습 콘텐츠와 분리된 검증용 화면입니다.
-          STEP1~2는 각본형, STEP3 졸업 제출은 이 브라우저 localStorage에만 저장되는 로컬 프루프입니다(3-B 서버 슬롯 준비 중).
+          STEP1~2는 각본형, STEP3 졸업 제출은 서버(3-B 제출 슬롯)에 저장됩니다.
         </>
       }
       renderAnchor={renderAnchor}

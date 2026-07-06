@@ -4,7 +4,11 @@
 //       STEP3 수직 슬라이스로 쪼개기(각본) → STEP4 조각 2·3에 AC 3줄 직접 작성(학생 입력,
 //       조각1은 예시 제공) → 이해 체크 → 마무리.
 // 공용 키트(_kit)의 검증된 부품 재사용. STEP4 AC 작성 칸만 모듈 3 고유(인터랙티브, 각본 재생 아님).
+// 3-B: AC 입력은 디바운스 자동저장으로 서버(architecture_submissions, module_id='module3')에
+// 보관된다. 명시적 제출 버튼은 없음(기존 UX에 그런 지점이 없어 자동저장으로 설계).
+import { useEffect, useRef, useState } from 'react';
 import { Hero, getTone } from '../demos/_shared';
+import { fetchModuleSubmission, saveModuleSubmission } from './submission-client';
 import { type CheckData, type PlaybackStep } from './_kit';
 
 export const TONE = getTone(5); // 모듈 3 accent (ch05 톤 — 콘텐츠 원본 대응 4/6/7강)
@@ -137,6 +141,63 @@ export function acFilledCount(ac: Module3AC): number {
   return fields.reduce((n, e) => n + (e.given.trim() ? 1 : 0) + (e.when.trim() ? 1 : 0) + (e.then.trim() ? 1 : 0), 0);
 }
 
+const AC_ENTRY_KEYS: (keyof ACEntry)[] = ['given', 'when', 'then'];
+
+function isACEntry(v: unknown): v is ACEntry {
+  if (!v || typeof v !== 'object') return false;
+  const candidate = v as Record<string, unknown>;
+  return AC_ENTRY_KEYS.every((k) => typeof candidate[k] === 'string');
+}
+
+function isModule3AC(v: unknown): v is Module3AC {
+  if (!v || typeof v !== 'object') return false;
+  const candidate = v as Record<string, unknown>;
+  return isACEntry(candidate.slice2) && isACEntry(candidate.slice3);
+}
+
+export type Module3AcFetchResult = { status: 'ok'; ac: Module3AC | null } | { status: 'error' };
+
+// 조회 실패(네트워크/서버 에러)를 "제출 없음"과 구분한다 — 구분하지 않으면 일시적 실패를
+// 신규로 오인해 기존 저장분을 빈 값 기반 자동저장으로 덮어쓸 위험이 있다.
+export async function fetchModule3Ac(): Promise<Module3AcFetchResult> {
+  const result = await fetchModuleSubmission('module3');
+  if (result.status === 'error') return { status: 'error' };
+  if (!result.submission || !isModule3AC(result.submission.content)) return { status: 'ok', ac: null };
+  return { status: 'ok', ac: result.submission.content };
+}
+
+export function ACLoading() {
+  return (
+    <section
+      className="rounded-2xl border border-dashed p-4 text-center text-[12px]"
+      style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg-alt)', color: 'var(--color-text-body)' }}
+    >
+      이전 입력 확인 중…
+    </section>
+  );
+}
+
+export function ACLoadError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <section
+      className="rounded-2xl border p-4 text-center text-[12px] leading-[1.6]"
+      style={{ borderColor: 'var(--color-danger, #dc2626)', background: 'var(--demo-card-bg-alt)', color: 'var(--color-text-body)' }}
+    >
+      이전 입력을 확인하지 못했어요. 폼을 열기 전에 다시 확인해야 기존 입력을 실수로 덮어쓰지 않아요.
+      <div className="mt-2">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-lg border px-3 py-1.5 text-[12px] font-semibold"
+          style={{ borderColor: 'var(--color-danger, #dc2626)', color: 'var(--color-danger, #dc2626)' }}
+        >
+          다시 확인
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function ACFieldGroup({
   title,
   value,
@@ -181,6 +242,56 @@ function ACFieldGroup({
 export function ACWriteStep({ ac, onChange }: { ac: Module3AC; onChange: (v: Module3AC) => void }) {
   const count = acFilledCount(ac);
   const done = count === 6;
+  const [syncFailed, setSyncFailed] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skipFirstRef = useRef(true);
+  // 최신 ac + "아직 서버에 반영 안 된 변경 있음" 플래그를 ref로 들고 있다가, STEP 이탈 등으로
+  // 디바운스(800ms)가 끝나기 전에 언마운트되면 unmount-effect에서 최신값을 즉시 flush한다.
+  // (그렇지 않으면 STEP4 재방문 UI에는 값이 보여도 서버엔 저장 안 된 채 새로고침 시 유실됨.)
+  const latestAcRef = useRef(ac);
+  latestAcRef.current = ac;
+  const pendingSaveRef = useRef(false);
+  // 저장 in-flight 중에 사용자가 "더" 바꾸면(= 더 최신 변경이 이미 예약됨) 그 저장이 끝났다고
+  // pendingSaveRef를 지우면 안 된다 — 지우면 그 뒤 곧바로 STEP 이탈 시 unmount flush가
+  // "저장할 게 없다"고 오판해 최신 입력을 건너뛴다(codex 3-B 3차 리뷰 지적). dirtyGen으로
+  // "이 저장이 시작된 시점 이후 더 최신 변경이 없었는지"를 확인한 뒤에만 pending을 지운다.
+  const dirtyGenRef = useRef(0);
+
+  useEffect(() => {
+    // 마운트 시(서버에서 막 복원한 초기값)엔 저장하지 않음 — 사용자가 실제로 바꾼 뒤부터 자동저장.
+    if (skipFirstRef.current) {
+      skipFirstRef.current = false;
+      return;
+    }
+    dirtyGenRef.current += 1;
+    const myGen = dirtyGenRef.current;
+    pendingSaveRef.current = true;
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+      saveModuleSubmission('module3', latestAcRef.current).then((ok) => {
+        // 실패 시엔 pending을 지우면 안 됨 — 지우면 재시도할 게 없다고 오판해 이탈 flush가
+        // 건너뛴다(codex 3-B 4차 리뷰 지적). 성공했을 때만, 그것도 그새 더 최신 변경이
+        // 없었을 때만(dirtyGen 일치) pending을 해제한다.
+        if (ok && dirtyGenRef.current === myGen) {
+          pendingSaveRef.current = false;
+        }
+        setSyncFailed(!ok);
+      });
+    }, 800);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [ac]);
+
+  useEffect(() => {
+    return () => {
+      if (pendingSaveRef.current) {
+        saveModuleSubmission('module3', latestAcRef.current);
+      }
+    };
+  }, []);
+
   return (
     <div className="flex flex-col gap-3">
       <Hero
@@ -207,6 +318,11 @@ export function ACWriteStep({ ac, onChange }: { ac: Module3AC; onChange: (v: Mod
       </section>
       <ACFieldGroup title="조각 2 — 별표한 노트가 맨 위로 정렬" value={ac.slice2} onChange={(v) => onChange({ ...ac, slice2: v })} />
       <ACFieldGroup title="조각 3 — 새로고침해도 별표 유지" value={ac.slice3} onChange={(v) => onChange({ ...ac, slice3: v })} />
+      {syncFailed ? (
+        <p className="m-0 text-[11px]" style={{ color: 'var(--color-danger, #dc2626)' }}>
+          ⚠️ 저장 동기화 실패 — 네트워크를 확인해주세요. 다음 입력에서 다시 시도합니다.
+        </p>
+      ) : null}
       {done ? (
         <p className="m-0 text-[12px]" style={{ color: TONE.accent }}>
           ✅ AC 3줄 x 2조각 완성 — 기획 카드 세트가 완성됐어요.
