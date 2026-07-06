@@ -16,6 +16,7 @@ import ShowcasePage from './demos/_preview/ShowcasePage';
 import HarnessHubPage from './harness/HarnessHubPage';
 import HarnessModule1Page from './harness/HarnessModule1Page';
 import HarnessModule2Page from './harness/HarnessModule2Page';
+import HarnessModule3Page from './harness/HarnessModule3Page';
 import HarnessModule4Page from './harness/HarnessModule4Page';
 import HarnessModule5Page from './harness/HarnessModule5Page';
 
@@ -63,6 +64,7 @@ function AppShell() {
           <Route path="/harness" element={<HarnessHubPage />} />
           <Route path="/harness/module1" element={<HarnessModule1Page />} />
           <Route path="/harness/module2" element={<HarnessModule2Page />} />
+          <Route path="/harness/module3" element={<HarnessModule3Page />} />
           <Route path="/harness/module4" element={<HarnessModule4Page />} />
           <Route path="/harness/module5" element={<HarnessModule5Page />} />
           {/* 구 프리뷰 경로 유지(모듈4 머지 시 라우트 · 새내기 QA 어댑터 호환) */}
