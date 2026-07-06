@@ -15,7 +15,7 @@ type ModuleCard = {
 
 const MODULES: ModuleCard[] = [
   { n: 1, title: '왜 하네스인가 · CLAUDE.md', blurb: 'AI에게 주는 팀 규칙 문서 한 장. 규칙 없이 제각각 → 규칙 넣고 일관.', chapter: 1, to: '/harness/module1' },
-  { n: 2, title: '나만의 스킬 · /init', blurb: '규칙 문서를 AI가 자동 생성(/init)하고, 반복 작업을 스킬로 박제.', chapter: 2 },
+  { n: 2, title: '나만의 스킬 · /init', blurb: '규칙 문서를 AI가 자동 생성(/init)하고, 반복 작업을 스킬로 박제.', chapter: 2, to: '/harness/module2' },
   { n: 3, title: '기획 · 요구사항·이슈·AC', blurb: '만들 것을 먼저 말로 정리 — 인터뷰 → 요구사항 → 완료 조건(AC).', chapter: 5 },
   { n: 4, title: 'TDD 한 바퀴', blurb: '테스트(약속) 먼저 → 통과 → 다듬기. Red → Green → Refactor.', chapter: 3, to: '/harness/module4' },
   { n: 5, title: '커밋·PR·보안', blurb: '변경을 안전하게 저장(커밋)·제안(PR)하고, 비밀키가 새지 않게 점검.', chapter: 4 },
