@@ -4,7 +4,11 @@
 //       STEP3 수직 슬라이스로 쪼개기(각본) → STEP4 조각 2·3에 AC 3줄 직접 작성(학생 입력,
 //       조각1은 예시 제공) → 이해 체크 → 마무리.
 // 공용 키트(_kit)의 검증된 부품 재사용. STEP4 AC 작성 칸만 모듈 3 고유(인터랙티브, 각본 재생 아님).
+// 3-B: AC 입력은 디바운스 자동저장으로 서버(architecture_submissions, module_id='module3')에
+// 보관된다. 명시적 제출 버튼은 없음(기존 UX에 그런 지점이 없어 자동저장으로 설계).
+import { useEffect, useRef, useState } from 'react';
 import { Hero, getTone } from '../demos/_shared';
+import { fetchModuleSubmission, saveModuleSubmission } from './submission-client';
 import { type CheckData, type PlaybackStep } from './_kit';
 
 export const TONE = getTone(5); // 모듈 3 accent (ch05 톤 — 콘텐츠 원본 대응 4/6/7강)
@@ -137,6 +141,38 @@ export function acFilledCount(ac: Module3AC): number {
   return fields.reduce((n, e) => n + (e.given.trim() ? 1 : 0) + (e.when.trim() ? 1 : 0) + (e.then.trim() ? 1 : 0), 0);
 }
 
+const AC_ENTRY_KEYS: (keyof ACEntry)[] = ['given', 'when', 'then'];
+
+function isACEntry(v: unknown): v is ACEntry {
+  if (!v || typeof v !== 'object') return false;
+  const candidate = v as Record<string, unknown>;
+  return AC_ENTRY_KEYS.every((k) => typeof candidate[k] === 'string');
+}
+
+function isModule3AC(v: unknown): v is Module3AC {
+  if (!v || typeof v !== 'object') return false;
+  const candidate = v as Record<string, unknown>;
+  return isACEntry(candidate.slice2) && isACEntry(candidate.slice3);
+}
+
+/** 서버에 자동저장된 AC 입력을 조회. 없거나(신규) 형식이 깨졌으면 null(신규 취급). */
+export async function fetchModule3Ac(): Promise<Module3AC | null> {
+  const submission = await fetchModuleSubmission('module3');
+  if (!submission || !isModule3AC(submission.content)) return null;
+  return submission.content;
+}
+
+export function ACLoading() {
+  return (
+    <section
+      className="rounded-2xl border border-dashed p-4 text-center text-[12px]"
+      style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg-alt)', color: 'var(--color-text-body)' }}
+    >
+      이전 입력 확인 중…
+    </section>
+  );
+}
+
 function ACFieldGroup({
   title,
   value,
@@ -181,6 +217,25 @@ function ACFieldGroup({
 export function ACWriteStep({ ac, onChange }: { ac: Module3AC; onChange: (v: Module3AC) => void }) {
   const count = acFilledCount(ac);
   const done = count === 6;
+  const [syncFailed, setSyncFailed] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const skipFirstRef = useRef(true);
+
+  useEffect(() => {
+    // 마운트 시(서버에서 막 복원한 초기값)엔 저장하지 않음 — 사용자가 실제로 바꾼 뒤부터 자동저장.
+    if (skipFirstRef.current) {
+      skipFirstRef.current = false;
+      return;
+    }
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      saveModuleSubmission('module3', ac).then((ok) => setSyncFailed(!ok));
+    }, 800);
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, [ac]);
+
   return (
     <div className="flex flex-col gap-3">
       <Hero
@@ -207,6 +262,11 @@ export function ACWriteStep({ ac, onChange }: { ac: Module3AC; onChange: (v: Mod
       </section>
       <ACFieldGroup title="조각 2 — 별표한 노트가 맨 위로 정렬" value={ac.slice2} onChange={(v) => onChange({ ...ac, slice2: v })} />
       <ACFieldGroup title="조각 3 — 새로고침해도 별표 유지" value={ac.slice3} onChange={(v) => onChange({ ...ac, slice3: v })} />
+      {syncFailed ? (
+        <p className="m-0 text-[11px]" style={{ color: 'var(--color-danger, #dc2626)' }}>
+          ⚠️ 저장 동기화 실패 — 네트워크를 확인해주세요. 다음 입력에서 다시 시도합니다.
+        </p>
+      ) : null}
       {done ? (
         <p className="m-0 text-[12px]" style={{ color: TONE.accent }}>
           ✅ AC 3줄 x 2조각 완성 — 기획 카드 세트가 완성됐어요.

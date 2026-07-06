@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { env } from './env';
 import { buildCopyrightIndex } from './lib/copyright-index';
 import chatRouter from './routes/chat';
+import harnessSubmissionsRouter from './routes/harness-submissions';
 import joinRouter from './routes/join';
 import progressRouter from './routes/progress';
 import quizRouter from './routes/quiz';
@@ -38,6 +39,7 @@ if (process.env.QA_AUTH_ENABLED === 'true') {
 }
 
 app.use('/api/chat', chatRouter);
+app.use('/api/harness/submissions', harnessSubmissionsRouter);
 app.use('/api/join', joinRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/quiz', quizRouter);
