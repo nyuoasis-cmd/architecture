@@ -103,6 +103,7 @@ async function crawlRoute(
   resolvedPath: string,
   role: CrawlRole,
   teacherToken: string | null,
+  participantCookie: string | null,
   skippedForbidden: string[],
 ): Promise<RouteResult> {
   const t0 = Date.now();
@@ -132,6 +133,15 @@ async function crawlRoute(
         localStorage.setItem('sb-auth-token', payload);
       } catch { /* */ }
     }, teacherToken);
+  }
+
+  // participant 인증 주입 — setup()이 /api/join 으로 미리 발급받은 arch_pt 쿠키.
+  // domain 은 QA_CLIENT_URL 의 host 만 지정(포트 무관 — 쿠키는 host 단위로 매칭되고, vite dev
+  // proxy(/api → QA_BASE_URL)로 브라우저에선 client host 로만 요청이 나가므로 이걸로 충분).
+  if (role === 'participant' && participantCookie) {
+    const [name, ...rest] = participantCookie.split('=');
+    const value = rest.join('=');
+    await page.setCookie({ name, value, url: QA_CLIENT_URL, path: '/' });
   }
 
   // 리스너: 콘솔 에러 / pageerror / 네트워크 4xx·5xx
@@ -264,7 +274,7 @@ async function main() {
       if (!manifest.roles.includes(seed.role)) continue;
       const resolved = seed.dynamic && dynCtx ? manifest.dynamicRouteFactories.resolve(seed.path, dynCtx) : seed.path;
       console.log(`[crawl] → ${seed.role} ${resolved}`);
-      const result = await crawlRoute(browser, seed.path, resolved, seed.role, teacherToken, skippedForbidden);
+      const result = await crawlRoute(browser, seed.path, resolved, seed.role, teacherToken, dynCtx?.participantCookie ?? null, skippedForbidden);
       routes.push(result);
       console.log(`[crawl]   ${result.status} (clicked=${result.clicked} findings=${result.findings.length})`);
     }
