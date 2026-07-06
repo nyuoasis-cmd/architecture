@@ -251,6 +251,11 @@ export function ACWriteStep({ ac, onChange }: { ac: Module3AC; onChange: (v: Mod
   const latestAcRef = useRef(ac);
   latestAcRef.current = ac;
   const pendingSaveRef = useRef(false);
+  // 저장 in-flight 중에 사용자가 "더" 바꾸면(= 더 최신 변경이 이미 예약됨) 그 저장이 끝났다고
+  // pendingSaveRef를 지우면 안 된다 — 지우면 그 뒤 곧바로 STEP 이탈 시 unmount flush가
+  // "저장할 게 없다"고 오판해 최신 입력을 건너뛴다(codex 3-B 3차 리뷰 지적). dirtyGen으로
+  // "이 저장이 시작된 시점 이후 더 최신 변경이 없었는지"를 확인한 뒤에만 pending을 지운다.
+  const dirtyGenRef = useRef(0);
 
   useEffect(() => {
     // 마운트 시(서버에서 막 복원한 초기값)엔 저장하지 않음 — 사용자가 실제로 바꾼 뒤부터 자동저장.
@@ -258,12 +263,16 @@ export function ACWriteStep({ ac, onChange }: { ac: Module3AC; onChange: (v: Mod
       skipFirstRef.current = false;
       return;
     }
+    dirtyGenRef.current += 1;
+    const myGen = dirtyGenRef.current;
     pendingSaveRef.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
       timerRef.current = null;
       saveModuleSubmission('module3', latestAcRef.current).then((ok) => {
-        pendingSaveRef.current = false;
+        if (dirtyGenRef.current === myGen) {
+          pendingSaveRef.current = false;
+        }
         setSyncFailed(!ok);
       });
     }, 800);
