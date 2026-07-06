@@ -42,7 +42,7 @@ export default function JoinPage() {
         participantId: joined.participant_id,
         nickname: joined.nickname,
       });
-      navigate(`/library?sessionId=${joined.session_id}`);
+      navigate(joined.mode === 'harness' ? '/harness' : `/library?sessionId=${joined.session_id}`);
     } catch (caught) {
       if (caught instanceof SessionClientError) {
         if (caught.status === 404) {
