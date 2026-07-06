@@ -114,10 +114,18 @@ export function requiredFilledCount(v: GraduationSkill): number {
 
 type SubmissionState = { skill: GraduationSkill; submittedAt: number };
 
+const GRADUATION_SKILL_KEYS: (keyof GraduationSkill)[] = ['name', 'purpose', 'input', 'steps', 'output', 'reuseNote'];
+
+function isGraduationSkill(v: unknown): v is GraduationSkill {
+  if (!v || typeof v !== 'object') return false;
+  const candidate = v as Record<string, unknown>;
+  return GRADUATION_SKILL_KEYS.every((k) => typeof candidate[k] === 'string');
+}
+
 function isSubmissionState(v: unknown): v is SubmissionState {
   if (!v || typeof v !== 'object') return false;
   const candidate = v as Record<string, unknown>;
-  return typeof candidate.submittedAt === 'number' && typeof candidate.skill === 'object' && candidate.skill !== null;
+  return typeof candidate.submittedAt === 'number' && isGraduationSkill(candidate.skill);
 }
 
 export function loadSubmission(): SubmissionState | null {
@@ -216,17 +224,29 @@ export function GraduationStep({ skill, onChange }: { skill: GraduationSkill; on
       )}
 
       {submitted ? (
-        <section className="rounded-2xl border p-4" style={{ borderColor: TONE.accentBorder, background: TONE.accentSoft }}>
-          <p className="m-0 text-[13px] font-semibold" style={{ color: TONE.accent }}>
-            ✅ 제출 완료 — {submitted.state.skill.name || '나만의 스킬'}
+        <section
+          className="rounded-2xl border p-4"
+          style={
+            submitted.persisted
+              ? { borderColor: TONE.accentBorder, background: TONE.accentSoft }
+              : { borderColor: 'var(--color-danger, #dc2626)', background: 'var(--demo-card-bg-alt)' }
+          }
+        >
+          <p
+            className="m-0 text-[13px] font-semibold"
+            style={{ color: submitted.persisted ? TONE.accent : 'var(--color-danger, #dc2626)' }}
+          >
+            {submitted.persisted
+              ? `✅ 제출 완료 — ${submitted.state.skill.name || '나만의 스킬'}`
+              : `⚠️ 저장 실패 — ${submitted.state.skill.name || '나만의 스킬'} (이 브라우저에 기록되지 않음)`}
           </p>
           {submitted.persisted ? (
             <p className="m-0 mt-1.5 text-[11px] leading-[1.6]" style={{ color: 'var(--color-text-body)' }}>
               🧪 이 프리뷰는 이 브라우저에만 저장돼요(로컬 프루프). 실제 강사 제출·서버 저장은 별도 인프라 확정 후 연결됩니다.
             </p>
           ) : (
-            <p className="m-0 mt-1.5 text-[11px] leading-[1.6]" style={{ color: 'var(--color-danger, #dc2626)' }}>
-              ⚠️ 이 브라우저에 저장하지 못했어요(프라이빗 모드 등). 새로고침하면 이 화면이 사라질 수 있어요 — 지금 화면을 캡처해두세요.
+            <p className="m-0 mt-1.5 text-[11px] leading-[1.6]" style={{ color: 'var(--color-text-body)' }}>
+              이 브라우저(프라이빗 모드 등)에는 저장할 수 없었어요. 새로고침하면 이 화면이 사라져요 — 지금 화면을 캡처해두세요.
             </p>
           )}
         </section>
