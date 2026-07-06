@@ -17,18 +17,24 @@ export function getOwnerToken(): string {
 
 export type ModuleSubmission = { content: unknown; updatedAt: string };
 
-export async function fetchModuleSubmission(moduleId: string): Promise<ModuleSubmission | null> {
+// "조회 실패"와 "제출 없음(null)"을 구분해야 함 — 구분하지 않으면 일시적 네트워크 실패를
+// "신규"로 오인해 기존 저장분을 빈 값으로 덮어쓸 위험이 있다(codex 3-B 리뷰 지적).
+export type FetchSubmissionResult =
+  | { status: 'ok'; submission: ModuleSubmission | null }
+  | { status: 'error' };
+
+export async function fetchModuleSubmission(moduleId: string): Promise<FetchSubmissionResult> {
   try {
     const res = await fetch(`/api/harness/submissions/${moduleId}`, {
       headers: { [OWNER_TOKEN_HEADER]: getOwnerToken() },
     });
     if (!res.ok) {
-      return null;
+      return { status: 'error' };
     }
     const body: unknown = await res.json();
-    return body as ModuleSubmission | null;
+    return { status: 'ok', submission: body as ModuleSubmission | null };
   } catch {
-    return null;
+    return { status: 'error' };
   }
 }
 

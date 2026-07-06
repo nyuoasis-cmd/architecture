@@ -2,9 +2,9 @@
 // 라우트: /harness/module6 (학생/교사 흐름과 분리된 프리뷰. 네임스페이스 분리 결정 반영).
 // 공용 키트(_kit)의 WorkbenchFrame이 배너·스위처·앵커·이전/다음을 처리. 페이지는 졸업 스킬
 // 입력 상태(STEP 간 공유)를 소유하며, 마운트 시 서버(3-B)에서 이전 제출을 비동기 조회해 복원한다.
-// 조회가 끝나기 전에는 STEP3에 로딩 표시만 두어(GraduationStep 자체는 조회 완료 후에만 마운트)
-// "제출 완료" 카드와 폼 내용이 어긋나는 상태가 절대 나타나지 않게 한다.
-import { useEffect, useState } from 'react';
+// 조회 상태는 loading/loaded/error 3단계 — 조회 실패를 "제출 없음"으로 오인해 기존 제출을
+// 빈 폼으로 덮어쓸 위험을 막기 위해, 실패 시엔 편집 폼 자체를 열지 않고 재시도만 제공한다.
+import { useCallback, useEffect, useState } from 'react';
 import { ConceptAnchor, PlaybackStepView, UnderstandingCheck, WorkbenchFrame, type NavItem } from './_kit';
 import {
   ANCHOR_DONE,
@@ -13,6 +13,7 @@ import {
   CHECK,
   EMPTY_GRADUATION,
   fetchGraduationSubmission,
+  GraduationLoadError,
   GraduationLoading,
   GraduationStep,
   IntroScreen,
@@ -36,25 +37,34 @@ const NAV: NavItem[] = [
 // idx → 개념 앵커에서 켤 phase key.
 const ANCHOR_ACTIVE = ['', 'cycle', 'automate', 'graduate', 'graduate', 'done'];
 
+type LoadState = 'loading' | 'loaded' | 'error';
+
 export default function HarnessModule6Page() {
-  const [loaded, setLoaded] = useState(false);
+  const [loadState, setLoadState] = useState<LoadState>('loading');
   const [skill, setSkill] = useState<GraduationSkill>(EMPTY_GRADUATION);
   const [initialSubmission, setInitialSubmission] = useState<SubmittedGraduation | null>(null);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoadState('loading');
     let cancelled = false;
-    fetchGraduationSubmission().then((submission) => {
+    fetchGraduationSubmission().then((result) => {
       if (cancelled) return;
-      if (submission) {
-        setSkill(submission.skill);
-        setInitialSubmission(submission);
+      if (result.status === 'error') {
+        setLoadState('error');
+        return;
       }
-      setLoaded(true);
+      if (result.submission) {
+        setSkill(result.submission.skill);
+        setInitialSubmission(result.submission);
+      }
+      setLoadState('loaded');
     });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => load(), [load]);
 
   const renderAnchor = (idx: number) => (
     <ConceptAnchor phases={ANCHOR_PHASES} active={ANCHOR_ACTIVE[idx]} headline={ANCHOR_HEADLINE} doneNote={ANCHOR_DONE} tone={TONE} />
@@ -69,11 +79,9 @@ export default function HarnessModule6Page() {
       case 2:
         return <PlaybackStepView step={STEP2} tone={TONE} />;
       case 3:
-        return loaded ? (
-          <GraduationStep skill={skill} onChange={setSkill} initialSubmission={initialSubmission} />
-        ) : (
-          <GraduationLoading />
-        );
+        if (loadState === 'error') return <GraduationLoadError onRetry={load} />;
+        if (loadState === 'loading') return <GraduationLoading />;
+        return <GraduationStep skill={skill} onChange={setSkill} initialSubmission={initialSubmission} />;
       case 4:
         return <UnderstandingCheck check={CHECK} tone={TONE} />;
       default:

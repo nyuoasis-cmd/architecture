@@ -121,11 +121,19 @@ function isGraduationSkill(v: unknown): v is GraduationSkill {
   return GRADUATION_SKILL_KEYS.every((k) => typeof candidate[k] === 'string');
 }
 
-/** 서버에 저장된 졸업 제출을 조회. 없거나(신규) 형식이 깨졌으면 null(신규 취급). */
-export async function fetchGraduationSubmission(): Promise<SubmittedGraduation | null> {
-  const submission = await fetchModuleSubmission('module6');
-  if (!submission || !isGraduationSkill(submission.content)) return null;
-  return { skill: submission.content, updatedAt: submission.updatedAt };
+export type GraduationFetchResult =
+  | { status: 'ok'; submission: SubmittedGraduation | null }
+  | { status: 'error' };
+
+// 조회 실패(네트워크/서버 에러)를 "제출 없음"과 구분한다 — 구분하지 않으면 일시적 실패를
+// 신규로 오인해 기존 제출이 안 보이는 빈 폼을 편집 가능 상태로 열어줄 위험이 있다.
+export async function fetchGraduationSubmission(): Promise<GraduationFetchResult> {
+  const result = await fetchModuleSubmission('module6');
+  if (result.status === 'error') return { status: 'error' };
+  if (!result.submission || !isGraduationSkill(result.submission.content)) {
+    return { status: 'ok', submission: null };
+  }
+  return { status: 'ok', submission: { skill: result.submission.content, updatedAt: result.submission.updatedAt } };
 }
 
 async function submitGraduationSkill(skill: GraduationSkill): Promise<boolean> {
@@ -256,6 +264,27 @@ export function GraduationLoading() {
       style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg-alt)', color: 'var(--color-text-body)' }}
     >
       이전 제출 확인 중…
+    </section>
+  );
+}
+
+export function GraduationLoadError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <section
+      className="rounded-2xl border p-4 text-center text-[12px] leading-[1.6]"
+      style={{ borderColor: 'var(--color-danger, #dc2626)', background: 'var(--demo-card-bg-alt)', color: 'var(--color-text-body)' }}
+    >
+      이전 제출을 확인하지 못했어요. 폼을 열기 전에 다시 확인해야 기존 제출을 실수로 덮어쓰지 않아요.
+      <div className="mt-2">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-lg border px-3 py-1.5 text-[12px] font-semibold"
+          style={{ borderColor: 'var(--color-danger, #dc2626)', color: 'var(--color-danger, #dc2626)' }}
+        >
+          다시 확인
+        </button>
+      </div>
     </section>
   );
 }

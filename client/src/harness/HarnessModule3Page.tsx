@@ -2,9 +2,12 @@
 // 라우트: /harness/module3 (학생/교사 흐름과 분리된 프리뷰. 네임스페이스 분리 결정 반영).
 // 공용 키트(_kit)의 WorkbenchFrame이 배너·스위처·앵커·이전/다음을 처리. 페이지는 AC(조각 2·3)
 // 입력 상태(STEP 간 공유)를 소유하며, 마운트 시 서버(3-B)에서 이전 자동저장 값을 비동기 복원한다.
-import { useEffect, useState } from 'react';
+// 조회 상태는 loading/loaded/error 3단계 — 조회 실패를 "입력 없음"으로 오인해 기존 저장분을
+// 빈 값 기반 자동저장으로 덮어쓸 위험을 막기 위해, 실패 시엔 입력 폼 자체를 열지 않는다.
+import { useCallback, useEffect, useState } from 'react';
 import { ConceptAnchor, PlaybackStepView, UnderstandingCheck, WorkbenchFrame, type NavItem } from './_kit';
 import {
+  ACLoadError,
   ACLoading,
   ACWriteStep,
   ANCHOR_DONE,
@@ -35,23 +38,32 @@ const NAV: NavItem[] = [
 // idx → 개념 앵커에서 켤 phase key.
 const ANCHOR_ACTIVE = ['', 'spec', 'prd', 'slice', 'ac', 'ac', 'done'];
 
+type LoadState = 'loading' | 'loaded' | 'error';
+
 export default function HarnessModule3Page() {
-  const [loaded, setLoaded] = useState(false);
+  const [loadState, setLoadState] = useState<LoadState>('loading');
   const [ac, setAc] = useState<Module3AC>(EMPTY_MODULE3_AC);
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setLoadState('loading');
     let cancelled = false;
-    fetchModule3Ac().then((restored) => {
+    fetchModule3Ac().then((result) => {
       if (cancelled) return;
-      if (restored) {
-        setAc(restored);
+      if (result.status === 'error') {
+        setLoadState('error');
+        return;
       }
-      setLoaded(true);
+      if (result.ac) {
+        setAc(result.ac);
+      }
+      setLoadState('loaded');
     });
     return () => {
       cancelled = true;
     };
   }, []);
+
+  useEffect(() => load(), [load]);
 
   const renderAnchor = (idx: number) => (
     <ConceptAnchor phases={ANCHOR_PHASES} active={ANCHOR_ACTIVE[idx]} headline={ANCHOR_HEADLINE} doneNote={ANCHOR_DONE} tone={TONE} />
@@ -68,7 +80,9 @@ export default function HarnessModule3Page() {
       case 3:
         return <PlaybackStepView step={STEP3} tone={TONE} />;
       case 4:
-        return loaded ? <ACWriteStep ac={ac} onChange={setAc} /> : <ACLoading />;
+        if (loadState === 'error') return <ACLoadError onRetry={load} />;
+        if (loadState === 'loading') return <ACLoading />;
+        return <ACWriteStep ac={ac} onChange={setAc} />;
       case 5:
         return <UnderstandingCheck check={CHECK} tone={TONE} />;
       default:

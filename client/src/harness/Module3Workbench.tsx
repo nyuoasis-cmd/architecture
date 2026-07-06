@@ -155,11 +155,15 @@ function isModule3AC(v: unknown): v is Module3AC {
   return isACEntry(candidate.slice2) && isACEntry(candidate.slice3);
 }
 
-/** 서버에 자동저장된 AC 입력을 조회. 없거나(신규) 형식이 깨졌으면 null(신규 취급). */
-export async function fetchModule3Ac(): Promise<Module3AC | null> {
-  const submission = await fetchModuleSubmission('module3');
-  if (!submission || !isModule3AC(submission.content)) return null;
-  return submission.content;
+export type Module3AcFetchResult = { status: 'ok'; ac: Module3AC | null } | { status: 'error' };
+
+// 조회 실패(네트워크/서버 에러)를 "제출 없음"과 구분한다 — 구분하지 않으면 일시적 실패를
+// 신규로 오인해 기존 저장분을 빈 값 기반 자동저장으로 덮어쓸 위험이 있다.
+export async function fetchModule3Ac(): Promise<Module3AcFetchResult> {
+  const result = await fetchModuleSubmission('module3');
+  if (result.status === 'error') return { status: 'error' };
+  if (!result.submission || !isModule3AC(result.submission.content)) return { status: 'ok', ac: null };
+  return { status: 'ok', ac: result.submission.content };
 }
 
 export function ACLoading() {
@@ -169,6 +173,27 @@ export function ACLoading() {
       style={{ borderColor: 'var(--color-border)', background: 'var(--demo-card-bg-alt)', color: 'var(--color-text-body)' }}
     >
       이전 입력 확인 중…
+    </section>
+  );
+}
+
+export function ACLoadError({ onRetry }: { onRetry: () => void }) {
+  return (
+    <section
+      className="rounded-2xl border p-4 text-center text-[12px] leading-[1.6]"
+      style={{ borderColor: 'var(--color-danger, #dc2626)', background: 'var(--demo-card-bg-alt)', color: 'var(--color-text-body)' }}
+    >
+      이전 입력을 확인하지 못했어요. 폼을 열기 전에 다시 확인해야 기존 입력을 실수로 덮어쓰지 않아요.
+      <div className="mt-2">
+        <button
+          type="button"
+          onClick={onRetry}
+          className="rounded-lg border px-3 py-1.5 text-[12px] font-semibold"
+          style={{ borderColor: 'var(--color-danger, #dc2626)', color: 'var(--color-danger, #dc2626)' }}
+        >
+          다시 확인
+        </button>
+      </div>
     </section>
   );
 }
@@ -220,6 +245,12 @@ export function ACWriteStep({ ac, onChange }: { ac: Module3AC; onChange: (v: Mod
   const [syncFailed, setSyncFailed] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skipFirstRef = useRef(true);
+  // 최신 ac + "아직 서버에 반영 안 된 변경 있음" 플래그를 ref로 들고 있다가, STEP 이탈 등으로
+  // 디바운스(800ms)가 끝나기 전에 언마운트되면 unmount-effect에서 최신값을 즉시 flush한다.
+  // (그렇지 않으면 STEP4 재방문 UI에는 값이 보여도 서버엔 저장 안 된 채 새로고침 시 유실됨.)
+  const latestAcRef = useRef(ac);
+  latestAcRef.current = ac;
+  const pendingSaveRef = useRef(false);
 
   useEffect(() => {
     // 마운트 시(서버에서 막 복원한 초기값)엔 저장하지 않음 — 사용자가 실제로 바꾼 뒤부터 자동저장.
@@ -227,14 +258,27 @@ export function ACWriteStep({ ac, onChange }: { ac: Module3AC; onChange: (v: Mod
       skipFirstRef.current = false;
       return;
     }
+    pendingSaveRef.current = true;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => {
-      saveModuleSubmission('module3', ac).then((ok) => setSyncFailed(!ok));
+      timerRef.current = null;
+      saveModuleSubmission('module3', latestAcRef.current).then((ok) => {
+        pendingSaveRef.current = false;
+        setSyncFailed(!ok);
+      });
     }, 800);
     return () => {
       if (timerRef.current) clearTimeout(timerRef.current);
     };
   }, [ac]);
+
+  useEffect(() => {
+    return () => {
+      if (pendingSaveRef.current) {
+        saveModuleSubmission('module3', latestAcRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="flex flex-col gap-3">

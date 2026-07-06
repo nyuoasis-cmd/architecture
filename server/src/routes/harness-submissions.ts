@@ -98,19 +98,22 @@ router.put('/:moduleId', async (req, res) => {
     return;
   }
 
-  const existingQuery = identity.ownerToken
-    ? supabase
-        .from('architecture_submissions')
-        .select('id')
-        .eq('owner_token', identity.ownerToken)
-        .eq('module_id', moduleId)
-    : supabase
-        .from('architecture_submissions')
-        .select('id')
-        .eq('user_id', identity.userId)
-        .eq('module_id', moduleId);
+  const findExisting = () =>
+    identity.ownerToken
+      ? supabase
+          .from('architecture_submissions')
+          .select('id')
+          .eq('owner_token', identity.ownerToken)
+          .eq('module_id', moduleId)
+          .limit(1)
+      : supabase
+          .from('architecture_submissions')
+          .select('id')
+          .eq('user_id', identity.userId)
+          .eq('module_id', moduleId)
+          .limit(1);
 
-  const { data: existingRows, error: existingError } = await existingQuery.limit(1);
+  const { data: existingRows, error: existingError } = await findExisting();
   if (existingError) {
     res.status(500).json({ error: 'submission_lookup_failed' });
     return;
@@ -137,8 +140,28 @@ router.put('/:moduleId', async (req, res) => {
       ...qaTagFields(),
     });
     if (error) {
-      res.status(500).json({ error: 'submission_insert_failed' });
-      return;
+      // 23505 = unique_violation — 동시 첫 저장(TOCTOU, 예: 두 탭)으로 그 사이 다른 요청이
+      // 먼저 insert했을 가능성. existing 재조회 후 update로 재시도(멱등 저장 슬롯 의미 유지).
+      if (error.code !== '23505') {
+        res.status(500).json({ error: 'submission_insert_failed' });
+        return;
+      }
+
+      const { data: retryRows, error: retryLookupError } = await findExisting();
+      const retryExisting = retryRows?.[0] as { id: string } | undefined;
+      if (retryLookupError || !retryExisting) {
+        res.status(500).json({ error: 'submission_insert_failed' });
+        return;
+      }
+
+      const { error: retryUpdateError } = await supabase
+        .from('architecture_submissions')
+        .update({ content: parsed.data.content, updated_at: now })
+        .eq('id', retryExisting.id);
+      if (retryUpdateError) {
+        res.status(500).json({ error: 'submission_update_failed' });
+        return;
+      }
     }
   }
 
