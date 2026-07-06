@@ -13,6 +13,8 @@ import NotFoundPage from './pages/NotFoundPage';
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
 import TeacherSessionPage from './pages/TeacherSessionPage';
 import ShowcasePage from './demos/_preview/ShowcasePage';
+import HarnessHubPage from './harness/HarnessHubPage';
+import HarnessModule1Page from './harness/HarnessModule1Page';
 import HarnessModule4Page from './harness/HarnessModule4Page';
 
 // 학생 진입/세션 라우트 = 교사 공통 네비(teachermate-nav) 미렌더 (DESIGN-POLICY §9.H-19 역방향 금지).
@@ -55,6 +57,11 @@ function AppShell() {
           <Route path="/library/:chapterId/:qaId" element={<LearnPage mode="self" />} />
           <Route path="/learn/:sessionId" element={<LearnPage mode="session" />} />
           <Route path="/demos-preview/showcase" element={<ShowcasePage />} />
+          {/* 하네스 심화 트랙 — 네임스페이스 분리(/harness/*). 라이브 /learn 콘텐츠와 격리. */}
+          <Route path="/harness" element={<HarnessHubPage />} />
+          <Route path="/harness/module1" element={<HarnessModule1Page />} />
+          <Route path="/harness/module4" element={<HarnessModule4Page />} />
+          {/* 구 프리뷰 경로 유지(모듈4 머지 시 라우트 · 새내기 QA 어댑터 호환) */}
           <Route path="/harness-preview/module4" element={<HarnessModule4Page />} />
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
