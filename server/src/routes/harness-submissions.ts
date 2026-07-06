@@ -2,6 +2,7 @@ import type { Request } from 'express';
 import { Router } from 'express';
 import { z } from 'zod';
 import { getRequestUser } from '../lib/auth';
+import { getParticipantTokenFromRequest, verifyParticipantToken } from '../lib/participant-token';
 import { getSupabaseAdminClient } from '../lib/supabase';
 import { qaTagFields } from '../lib/qa-context';
 
@@ -15,20 +16,69 @@ const contentSchema = z.object({
   content: z.record(z.unknown()),
 });
 
-type SubmissionIdentity = { ownerToken: string; userId?: undefined } | { ownerToken?: undefined; userId: string };
+// 3-C: 참가자 토큰(세션 참가) > 로그인 유저 > 익명 owner-token(3-B, 하위호환) 순으로 시도.
+// participant_id·user_id·owner_token 중 정확히 하나만 채워지는 게 DB XOR 제약(3-way)과 대응.
+type SubmissionIdentity =
+  | { kind: 'participant'; participantId: string }
+  | { kind: 'user'; userId: string }
+  | { kind: 'owner'; ownerToken: string };
 
 async function resolveSubmissionIdentity(req: Request): Promise<SubmissionIdentity | null> {
+  const participantToken = getParticipantTokenFromRequest(req);
+  if (participantToken) {
+    // progress.ts의 resolveProgressIdentity와 동일 시맨틱: 참가자 쿠키가 있으면 그게 권위
+    // 신원이다 — 무효/만료여도 익명 owner-token으로 조용히 폴백하지 않고 바로 실패시킨다.
+    const payload = verifyParticipantToken(participantToken);
+    if (!payload) {
+      return null;
+    }
+
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) {
+      return null;
+    }
+
+    const { data: participant, error } = await supabase
+      .from('architecture_participants')
+      .select('id, session_id')
+      .eq('id', payload.participant_id)
+      .eq('session_id', payload.session_id)
+      .single();
+
+    if (error || !participant) {
+      return null;
+    }
+
+    const { data: session, error: sessionError } = await supabase
+      .from('architecture_sessions')
+      .select('status')
+      .eq('id', payload.session_id)
+      .single();
+
+    if (sessionError || !session || session.status !== 'active') {
+      throw new Error('session_closed');
+    }
+
+    return { kind: 'participant', participantId: participant.id };
+  }
+
   const user = await getRequestUser(req);
   if (user) {
-    return { userId: user.id };
+    return { kind: 'user', userId: user.id };
   }
 
   const token = req.get(OWNER_TOKEN_HEADER);
   if (token && UUID_PATTERN.test(token)) {
-    return { ownerToken: token };
+    return { kind: 'owner', ownerToken: token };
   }
 
   return null;
+}
+
+function identityColumn(identity: SubmissionIdentity): { column: 'participant_id' | 'user_id' | 'owner_token'; value: string } {
+  if (identity.kind === 'participant') return { column: 'participant_id', value: identity.participantId };
+  if (identity.kind === 'user') return { column: 'user_id', value: identity.userId };
+  return { column: 'owner_token', value: identity.ownerToken };
 }
 
 router.get('/:moduleId', async (req, res) => {
@@ -38,7 +88,18 @@ router.get('/:moduleId', async (req, res) => {
     return;
   }
 
-  const identity = await resolveSubmissionIdentity(req);
+  let identity: SubmissionIdentity | null;
+  try {
+    identity = await resolveSubmissionIdentity(req);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'session_closed') {
+      res.status(410).json({ error: 'session_closed' });
+      return;
+    }
+    res.status(500).json({ error: 'identity_resolution_failed' });
+    return;
+  }
+
   if (!identity) {
     res.status(401).json({ error: 'unauthorized' });
     return;
@@ -50,19 +111,14 @@ router.get('/:moduleId', async (req, res) => {
     return;
   }
 
-  const query = identity.ownerToken
-    ? supabase
-        .from('architecture_submissions')
-        .select('content, updated_at')
-        .eq('owner_token', identity.ownerToken)
-        .eq('module_id', moduleId)
-    : supabase
-        .from('architecture_submissions')
-        .select('content, updated_at')
-        .eq('user_id', identity.userId)
-        .eq('module_id', moduleId);
+  const { column, value } = identityColumn(identity);
+  const { data, error } = await supabase
+    .from('architecture_submissions')
+    .select('content, updated_at')
+    .eq(column, value)
+    .eq('module_id', moduleId)
+    .limit(1);
 
-  const { data, error } = await query.limit(1);
   if (error) {
     res.status(500).json({ error: 'submission_lookup_failed' });
     return;
@@ -86,7 +142,18 @@ router.put('/:moduleId', async (req, res) => {
     return;
   }
 
-  const identity = await resolveSubmissionIdentity(req);
+  let identity: SubmissionIdentity | null;
+  try {
+    identity = await resolveSubmissionIdentity(req);
+  } catch (error) {
+    if (error instanceof Error && error.message === 'session_closed') {
+      res.status(410).json({ error: 'session_closed' });
+      return;
+    }
+    res.status(500).json({ error: 'identity_resolution_failed' });
+    return;
+  }
+
   if (!identity) {
     res.status(401).json({ error: 'unauthorized' });
     return;
@@ -98,20 +165,9 @@ router.put('/:moduleId', async (req, res) => {
     return;
   }
 
+  const { column, value } = identityColumn(identity);
   const findExisting = () =>
-    identity.ownerToken
-      ? supabase
-          .from('architecture_submissions')
-          .select('id')
-          .eq('owner_token', identity.ownerToken)
-          .eq('module_id', moduleId)
-          .limit(1)
-      : supabase
-          .from('architecture_submissions')
-          .select('id')
-          .eq('user_id', identity.userId)
-          .eq('module_id', moduleId)
-          .limit(1);
+    supabase.from('architecture_submissions').select('id').eq(column, value).eq('module_id', moduleId).limit(1);
 
   const { data: existingRows, error: existingError } = await findExisting();
   if (existingError) {
@@ -136,7 +192,7 @@ router.put('/:moduleId', async (req, res) => {
       module_id: moduleId,
       content: parsed.data.content,
       updated_at: now,
-      ...(identity.ownerToken ? { owner_token: identity.ownerToken } : { user_id: identity.userId }),
+      [column]: value,
       ...qaTagFields(),
     });
     if (error) {

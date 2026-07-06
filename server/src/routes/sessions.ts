@@ -9,11 +9,20 @@ import { qaTagFields } from '../lib/qa-context';
 
 const router = Router();
 
-const createSessionSchema = z.object({
-  name: z.string().trim().min(1).max(60),
-  chapter_ids: z.array(z.number().int().min(1).max(10)).min(1).max(10),
-  max_participants: z.union([z.literal(50), z.literal(100), z.literal(200)]).default(100),
-});
+const createSessionSchema = z
+  .object({
+    name: z.string().trim().min(1).max(60),
+    mode: z.enum(['learn', 'harness']).default('learn'),
+    // harness 모드는 챕터가 없음(서버가 무조건 []로 강제, 아래 참조) — learn 모드만 1~10개 필수.
+    chapter_ids: z.array(z.number().int().min(1).max(10)).max(10),
+    max_participants: z.union([z.literal(50), z.literal(100), z.literal(200)]).default(100),
+  })
+  .refine((value) => value.mode !== 'learn' || value.chapter_ids.length >= 1, {
+    message: 'learn 모드는 챕터를 1개 이상 선택해야 합니다.',
+    path: ['chapter_ids'],
+  });
+
+const SESSION_SELECT = 'id, code, name, teacher_id, chapter_ids, status, max_participants, created_at, ended_at, mode';
 
 type SessionRow = {
   id: string;
@@ -25,6 +34,7 @@ type SessionRow = {
   max_participants: number;
   created_at: string;
   ended_at: string | null;
+  mode: 'learn' | 'harness';
 };
 
 type ParticipantRow = {
@@ -138,7 +148,9 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  const chapterIds = [...new Set(parsed.data.chapter_ids)].sort((a, b) => a - b);
+  // harness 모드는 챕터 개념이 없음 — 클라이언트가 뭘 보내든 서버가 무조건 []로 강제.
+  const chapterIds =
+    parsed.data.mode === 'harness' ? [] : [...new Set(parsed.data.chapter_ids)].sort((a, b) => a - b);
   let session: SessionRow | null = null;
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -150,10 +162,11 @@ router.post('/', async (req, res) => {
         name: parsed.data.name,
         teacher_id: teacherId,
         chapter_ids: chapterIds,
+        mode: parsed.data.mode,
         max_participants: parsed.data.max_participants,
         ...qaTagFields(),
       })
-      .select('id, code, name, teacher_id, chapter_ids, status, max_participants, created_at, ended_at')
+      .select(SESSION_SELECT)
       .single();
 
     if (!error && data) {
@@ -187,7 +200,7 @@ router.get('/', async (req, res) => {
 
   const { data, error } = await supabase
     .from('architecture_sessions')
-    .select('id, code, name, teacher_id, chapter_ids, status, max_participants, created_at, ended_at')
+    .select(SESSION_SELECT)
     .eq('teacher_id', teacherId)
     .order('created_at', { ascending: false });
 
@@ -229,7 +242,7 @@ router.get('/:id', async (req, res) => {
 
   const { data: session, error } = await supabase
     .from('architecture_sessions')
-    .select('id, code, name, teacher_id, chapter_ids, status, max_participants, created_at, ended_at')
+    .select(SESSION_SELECT)
     .eq('id', req.params.id)
     .maybeSingle();
 
@@ -369,7 +382,7 @@ router.post('/:id/end', async (req, res) => {
       ended_at: new Date().toISOString(),
     })
     .eq('id', session.id)
-    .select('id, code, name, teacher_id, chapter_ids, status, max_participants, created_at, ended_at')
+    .select(SESSION_SELECT)
     .single();
 
   if (updateError || !updated) {

@@ -1,7 +1,6 @@
 // 하네스 심화 트랙 — 허브(모듈 목록). 라우트: /harness
 // 네임스페이스 분리 결정 반영: 라이브 IT지식 과정(/learn·10챕터)과 분리된 '프로 트랙' 진입점.
-// 세션·참여·진도·챗·퀴즈 인프라는 재사용하되, 콘텐츠셋/라우트는 /harness/* 아래로 독립.
-// 각본형(정해진 결과 재생)이라 실제 AI 호출 없음. 세션 연동/졸업 제출은 다음 슬라이스.
+// 세션·참여·진도·챗·퀴즈 인프라는 재사용(3-C). 각본형(정해진 결과 재생)이라 실제 AI 호출 없음.
 import { Link } from 'react-router-dom';
 import { getTone } from '../demos/_shared';
 
@@ -44,7 +43,10 @@ export default function HarnessHubPage() {
         style={{ borderColor: getTone(1).accentBorder, background: getTone(1).accentSoft, color: 'var(--color-text-body)' }}
       >
         🧪 <strong>격리 프리뷰</strong> — 검증용 화면입니다. 각본형이라 실제 AI를 호출하지 않고, 라이브 학습 콘텐츠와 분리돼 있어요.
-        (세션 연동·졸업 제출은 준비 중)
+        모듈3 AC·모듈6 졸업 제출은 서버에 저장됩니다. 선생님이 알려준 6자리 코드가 있다면{' '}
+        <Link to="/join" style={{ color: getTone(1).accent, fontWeight: 700 }}>
+          참가하기 →
+        </Link>
       </div>
 
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-2">

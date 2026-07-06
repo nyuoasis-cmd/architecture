@@ -67,7 +67,7 @@ router.post('/', async (req, res) => {
 
   const { data: session, error: sessionError } = await supabase
     .from('architecture_sessions')
-    .select('id, code, status, max_participants')
+    .select('id, code, status, max_participants, mode')
     .eq('code', parsed.data.code)
     .maybeSingle();
 
@@ -128,6 +128,7 @@ router.post('/', async (req, res) => {
     session_id: participant.session_id,
     participant_id: participant.id,
     nickname: participant.nickname,
+    mode: session.mode as 'learn' | 'harness',
   });
 });
 

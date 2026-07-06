@@ -1,6 +1,7 @@
-// 하네스 심화 트랙(/harness/*) 제출 슬롯 클라이언트(3-B). 모듈 3(AC 자동저장)·모듈 6(졸업 제출) 공용.
-// /harness/*는 로그인·세션 참가 없는 오픈 프리뷰라 익명 브라우저 토큰(서명 없음, 3-C에서 실제
-// 세션/참가자 모델로 교체 예정)으로 식별한다. 패턴 출처: data-class client/src/lib/clientId.ts.
+// 하네스 심화 트랙(/harness/*) 제출 슬롯 클라이언트(3-B+3-C). 모듈 3(AC 자동저장)·모듈 6(졸업
+// 제출) 공용. 서버가 참가자 쿠키(arch_pt, credentials:'include'로 자동 첨부)를 익명
+// owner-token보다 우선 신원으로 사용한다(3-C) — 세션 미참가 시엔 owner-token으로 폴백.
+// 익명 토큰 발급 패턴 출처: data-class client/src/lib/clientId.ts.
 const OWNER_TOKEN_STORAGE_KEY = 'harness-owner-id';
 const OWNER_TOKEN_HEADER = 'X-Harness-Owner-Token';
 
@@ -26,6 +27,7 @@ export type FetchSubmissionResult =
 export async function fetchModuleSubmission(moduleId: string): Promise<FetchSubmissionResult> {
   try {
     const res = await fetch(`/api/harness/submissions/${moduleId}`, {
+      credentials: 'include',
       headers: { [OWNER_TOKEN_HEADER]: getOwnerToken() },
     });
     if (!res.ok) {
@@ -51,6 +53,7 @@ export async function saveModuleSubmission(moduleId: string, content: object): P
     try {
       const res = await fetch(`/api/harness/submissions/${moduleId}`, {
         method: 'PUT',
+        credentials: 'include',
         headers: { 'Content-Type': 'application/json', [OWNER_TOKEN_HEADER]: getOwnerToken() },
         body: JSON.stringify({ content }),
       });
