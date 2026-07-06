@@ -23,8 +23,15 @@ import HarnessModule6Page from './harness/HarnessModule6Page';
 
 // 학생 진입/세션 라우트 = 교사 공통 네비(teachermate-nav) 미렌더 (DESIGN-POLICY §9.H-19 역방향 금지).
 // 교사·공개 라우트(랜딩·/teacher·/library·about 등)는 네비 유지.
+// 하네스 심화 트랙(/harness*)도 참가 코드로 들어온 학생 화면 — "로그인" 버튼이 그대로 보이던 문제 수정.
 function isStudentRoute(pathname: string): boolean {
-  return pathname === '/join' || pathname.startsWith('/learn/');
+  return (
+    pathname === '/join' ||
+    pathname.startsWith('/learn/') ||
+    pathname === '/harness' ||
+    pathname.startsWith('/harness/') ||
+    pathname.startsWith('/harness-preview/')
+  );
 }
 
 function AppShell() {
