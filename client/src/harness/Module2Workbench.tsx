@@ -129,6 +129,8 @@ export function SkillDraftForm({ value, onChange }: { value: SkillDraft; onChang
 // ── STEP 3 (각본, 입력값 반영): 스킬 실행 2회 → "매번 같은 형식" 확인 ────────
 export function SkillRunStep({ draft }: { draft: SkillDraft }) {
   const name = draft.name.trim() || '아키텍처 그림 스킬';
+  const input = draft.input.trim() || '분석할 소스 폴더';
+  const steps = draft.steps.trim() || '①폴더 분석 → ②부품 관계 파악 → ③다이어그램 생성 → ④브라우저로 열기';
   const output = draft.output.trim() || '구조 다이어그램(브라우저에서 열림)';
   return (
     <div className="flex flex-col gap-3">
@@ -190,11 +192,13 @@ export function SkillRunStep({ draft }: { draft: SkillDraft }) {
           label="원본 로그 — 스킬 2회 실행"
           text={[
             `$ ${name} 실행  [1회차]`,
-            '→ src/ 분석 → 부품 관계 파악 → diagram.html 생성 → 브라우저 열기 ✅',
+            `→ 입력: ${input}`,
+            `→ ${steps}`,
+            `→ 결과: ${output} ✅`,
             '',
             `$ ${name} 실행  [2회차]`,
-            '→ 같은 절차, 같은 형식(색·레이아웃 동일)',
-            '→ 달라진 건 최신 코드가 반영된 것뿐 ✅',
+            '→ 같은 절차, 같은 형식(레이아웃 동일)',
+            '→ 달라진 건 최신 내용이 반영된 것뿐 ✅',
             '',
             '→ 두 번 다 동일한 형식 = 스킬이 박제되었다는 증거',
           ].join('\n')}
@@ -269,7 +273,15 @@ export function WrapScreen({ draft }: { draft: SkillDraft }) {
           )}
         </p>
         <p className="m-0 mt-2 text-[12px] leading-[1.7]" style={{ color: 'var(--color-text-body)' }}>
-          오늘 만든 스킬 초안, 잘 저장해뒀어요 — <strong>모듈 6 졸업 작품</strong>이 됩니다.
+          {count === FIELDS.length ? (
+            <>
+              오늘 만든 스킬 초안, 잘 저장해뒀어요 — <strong>모듈 6 졸업 작품</strong>이 됩니다.
+            </>
+          ) : (
+            <>
+              STEP 2로 돌아가 5칸을 마저 채우면, 그 초안이 <strong>모듈 6 졸업 작품</strong>의 시작이 됩니다.
+            </>
+          )}
         </p>
       </section>
     </div>
