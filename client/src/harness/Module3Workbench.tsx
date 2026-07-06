@@ -270,7 +270,10 @@ export function ACWriteStep({ ac, onChange }: { ac: Module3AC; onChange: (v: Mod
     timerRef.current = setTimeout(() => {
       timerRef.current = null;
       saveModuleSubmission('module3', latestAcRef.current).then((ok) => {
-        if (dirtyGenRef.current === myGen) {
+        // 실패 시엔 pending을 지우면 안 됨 — 지우면 재시도할 게 없다고 오판해 이탈 flush가
+        // 건너뛴다(codex 3-B 4차 리뷰 지적). 성공했을 때만, 그것도 그새 더 최신 변경이
+        // 없었을 때만(dirtyGen 일치) pending을 해제한다.
+        if (ok && dirtyGenRef.current === myGen) {
           pendingSaveRef.current = false;
         }
         setSyncFailed(!ok);
