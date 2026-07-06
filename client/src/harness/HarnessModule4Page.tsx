@@ -4,7 +4,7 @@
 //       라이브 콘텐츠 무오염으로 재생되는지 검증. 세션/제출/서버채점은 다음 슬라이스.
 import { useState } from 'react';
 import { getTone } from '../demos/_shared';
-import { MODULE4_STEPS, StepView, UnderstandingCheck } from './Module4Workbench';
+import { CycleAnchor, MODULE4_STEPS, StepView, UnderstandingCheck } from './Module4Workbench';
 
 const TONE = getTone(3);
 
@@ -57,8 +57,11 @@ export default function HarnessModule4Page() {
         </div>
       </nav>
 
-      {/* 본문 */}
-      {isCheck ? <UnderstandingCheck /> : <StepView step={MODULE4_STEPS[idx]} />}
+      {/* F1: TDD 사이클 개념 앵커 — 상시 노출 + '지금 여기' */}
+      <CycleAnchor active={isCheck ? 'done' : MODULE4_STEPS[idx].cycle} />
+
+      {/* 본문. StepView는 key={step.id}로 스텝 전환 시 ▶실행 상태 초기화(F2). */}
+      {isCheck ? <UnderstandingCheck /> : <StepView key={MODULE4_STEPS[idx].id} step={MODULE4_STEPS[idx]} />}
 
       {/* 이전/다음 */}
       <div className="mt-1 flex items-center justify-between">
