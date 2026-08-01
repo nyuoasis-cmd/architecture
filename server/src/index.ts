@@ -1,4 +1,5 @@
 import cors from 'cors';
+import { classCheckBlock } from './lib/classCheck';
 import express from 'express';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -24,9 +25,14 @@ app.set('etag', false);
 app.use(cors());
 app.use(express.json());
 
+// `classCheck` 블록: 수업점검이 「이 배포가 어떤 provider 키를 쓰는지」를 밖에서 확정할 수
+//   없어(Render 배포 payload 에 env 스냅샷이 없다 — 2026-08-02 실측) 런타임이 직접 말한다.
+//   이 앱은 앱 레벨 AI 캡이 없어 capPolicy='none' 으로 «없음» 을 명시한다 — 빈 객체를
+//   「캡 없음」으로 추론하게 두면 버그로 빈 객체가 나온 경우와 구분되지 않는다.
+//   나가는 것은 키 해시 앞 8자뿐이고 비밀 원문·env 전체는 없다. 이 예외를 넓히지 말 것.
 app.get('/api/health', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  res.json({ status: 'ok', ts: Date.now() });
+  res.json({ status: 'ok', ts: Date.now(), classCheck: classCheckBlock() });
 });
 
 // QA test-only 인증·컨텍스트 — QA_AUTH_ENABLED==='true' 일 때만 mount (prod 기본 OFF).
