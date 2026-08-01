@@ -1,0 +1,46 @@
+# L1 — 빠른 축. PR 과 main push 에서 돈다. (2026-08-01 신설, QA 체계 3단계)
+#
+# 왜 생겼나: 이 레포에는 워크플로가 하나도 없었다. 라이브 앱인데 «컴파일도 안 되는 코드» 를
+# 막는 장치가 0 이었다.
+#
+# ⚠️ 이 레포에는 단위 테스트가 0 이다(2026-08-01 실측). 그래서 이 관문이 지금 막을 수 있는
+#    것은 «타입·빌드» 까지다. 테스트를 만들면 여기 단계를 추가한다 — 없는 검사를 있는 척
+#    이름 붙이지 않는다.
+#
+# 🔑 루트 build 스크립트는 안에서 `npm install` 을 한 번 더 한다(Render 용). CI 에서는
+#    lockfile 고정(`npm ci`)이 목적이라 workspace 별 build 를 직접 부른다.
+#
+# 🚨 무거운 축을 넣지 말 것 — private 레포라 Actions 분이 과금되고 한도(월 2000분)는
+#    조직 전체 공용이다. playwright(qa:layerb)는 브라우저가 필요해 올리지 않는다.
+name: L1 fast
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: l1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  fast:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: 의존성 설치 (client · server)
+        run: |
+          npm --prefix client ci --no-audit --no-fund
+          npm --prefix server ci --no-audit --no-fund
+
+      - name: 빌드 — client (tsc -b + vite)
+        run: npm --prefix client run build
+
+      - name: 빌드 — server (tsc)
+        run: npm --prefix server run build
