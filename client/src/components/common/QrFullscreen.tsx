@@ -25,12 +25,12 @@ export default function QrFullscreen({ code, onClose }: QrFullscreenProps) {
   return (
     <div
       aria-modal="true"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4 py-6"
+      className="fixed inset-0 z-50 flex overflow-auto bg-black/70 px-4 py-6"
       onClick={onClose}
       role="dialog"
     >
       <div
-        className="relative flex w-full max-w-md flex-col items-center gap-5 rounded-3xl bg-white p-8 shadow-[0_30px_80px_rgba(28,25,23,0.32)]"
+        className="relative m-auto flex max-w-[92vw] flex-col items-center gap-5 rounded-3xl bg-white p-8 shadow-[0_30px_80px_rgba(28,25,23,0.32)]"
         onClick={(event) => event.stopPropagation()}
       >
         <button
@@ -42,11 +42,11 @@ export default function QrFullscreen({ code, onClose }: QrFullscreenProps) {
           ✕
         </button>
         <div className="rounded-2xl border border-[var(--color-border)] bg-white p-3 shadow-lg">
-          <QRCodeSVG bgColor="#ffffff" fgColor="#111827" includeMargin size={320} value={joinUrl} />
+          <QRCodeSVG bgColor="#ffffff" className="block h-auto w-[min(70vw,70vh)] md:w-[min(45vw,45vh)]" fgColor="#111827" includeMargin value={joinUrl} />
         </div>
         <p className="text-xs text-stone-400">QR 코드를 스캔하거나 코드를 입력하세요</p>
         <div className="text-center">
-          <div className="font-mono text-3xl tracking-[0.4em] text-stone-950">{code}</div>
+          <div className="font-mono text-[clamp(96px,18vw,200px)] font-bold leading-none tracking-[0.12em] text-stone-950">{code}</div>
           <div className="mt-2 break-all text-xs text-stone-500">{joinUrl}</div>
         </div>
       </div>
