@@ -16,15 +16,15 @@
 - 챗봇 컨텍스트 = 서버 `data/chapter-content.ts`·`qa-meta.ts` — 신규 문도 등재해야 챗봇이 답한다.
 
 ## 작업 목록
-- [ ] **PR0** `feat/vibecoding-pr0-template` — 형판 인프라
+- [x] **PR0** = #125 (열림, main 베이스) — 형판 인프라 ✅ client build 통과
   - VibeQa 타입(사고사례·재생데모·견학·내차례 필드), 5탭 VibeLearnLayout, LearnPage 분기(카테고리 «바이브코딩»)
   - 재생 데모(A형) 공용 컴포넌트, 견학 미션 카드 공용 컴포넌트
   - CHAPTERS 미등록(가시 변화 0) — 콘텐츠는 PR1부터
-- [ ] **PR1** `feat/vibecoding-pr1-ch13` — 13장 파일럿 6문
+- [x] **PR1** = #126 (열림, 베이스=PR0 브랜치) — 13장 6문 완성 ✅ 빌드+테스트 19/19+런타임 스모크
   - 본문 5문단+사고사례+키워드+체크포인트 ×6, 퀴즈(클라+서버), 데모 3종(누가정했을까 포함), 견학 3미션, 챗봇 컨텍스트 등재, CHAPTERS에 13장 등록
-- [ ] **PR8** `feat/vibecoding-pr8-myturn` — «내 차례» 라이브
+- [x] **PR8** = #127 (열림, 베이스=PR1 브랜치) — 내 차례 API ✅ 테스트 21/21 + 라이브 실측(판정/429/404)
   - `POST /api/vibe/my-turn` Haiku 4.5 + 스키마 강제 + 문당 1회 + 쿨타임 5분 + 세션 총량 캡, MyTurnTab 연결
-- [ ] A형 데모 사전 생성 재료(루트 .env 키로 스크립트 1회 실행, 결과 정적 저장)
+- [x] A형 데모 재료 4종 실제 생성(Haiku, ~2K tok) → `client/src/data/vibe-pregen-ch13.ts` (PR1 포함)
 - [ ] PR2~7 본문 초안 → `docs/drafts/vibecoding/` (머지 대상 아님, 파일럿 검수 후 확정 전환)
 
 ## 아침 jery 할 일
@@ -34,3 +34,6 @@
 
 ## 진행 로그
 - 00:00경 킥오프. codex=trip 사용 중 확인, 직렬화 방침.
+- PR0 #125 / PR1 #126 / PR8 #127 열림 (스택: main←PR0←PR1←PR8. 🚨 머지는 반드시 이 순서 + 각 단계 베이스를 main으로 재지정)
+- 파일럿 미포함(후속 보강 후보): q03·q05 전용 시연 / q01 외 문항의 «내 차례» / 챗봇 탭은 형판에 6번째 탭으로 포함(목업 5탭+α — 아침 검수 대상)
+- ⚠️ 아침 항목 추가: my-turn 배포 전 AI 봉인 가드 목록 점검 (architecture covers.class=none)
