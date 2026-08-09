@@ -68,6 +68,12 @@ export const QA_META: QaMetaEntry[] = [
   { qaId: 'ch10_q05', chapterId: 10 },
   { qaId: 'ch10_q06', chapterId: 10 },
   { qaId: 'ch10_q07', chapterId: 10 },
+  { qaId: 'ch13_q01', chapterId: 13 },
+  { qaId: 'ch13_q02', chapterId: 13 },
+  { qaId: 'ch13_q03', chapterId: 13 },
+  { qaId: 'ch13_q04', chapterId: 13 },
+  { qaId: 'ch13_q05', chapterId: 13 },
+  { qaId: 'ch13_q06', chapterId: 13 },
 ];
 
 const QA_CHAPTER_ID_MAP = new Map(QA_META.map((entry) => [entry.qaId, entry.chapterId]));

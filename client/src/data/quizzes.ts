@@ -1,3 +1,5 @@
+import { VIBE_QUIZZES } from './vibe-stubs';
+
 const QA_COUNTS = [4, 4, 7, 7, 7, 10, 6, 7, 6, 7] as const;
 
 export type QuizQuestion = {
@@ -2109,4 +2111,4 @@ function createQuizRecord(): Record<string, QuizSet> {
   return Object.fromEntries(entries);
 }
 
-export const QUIZZES: Record<string, QuizSet> = createQuizRecord();
+export const QUIZZES: Record<string, QuizSet> = { ...createQuizRecord(), ...VIBE_QUIZZES };
