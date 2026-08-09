@@ -1,3 +1,5 @@
+import { VIBE_CHAPTERS, VIBE_QAS } from './vibe-stubs';
+
 export type QaStatus = 'done' | 'current' | 'todo';
 
 export type QaStub = {
@@ -22,7 +24,7 @@ export type ChapterStub = {
   firstQaId: string;
 };
 
-export const CHAPTERS: ChapterStub[] = [
+const BASE_CHAPTERS: ChapterStub[] = [
   { id: 1, category: '컴퓨터 기초', emoji: '🧭', title: '컴퓨터가 1초 안에 하는 일', qaCount: 4, firstQaId: 'ch01_q01' },
   { id: 2, category: '개발', emoji: '🛠️', title: '프로그램, 한 종류가 아닙니다', qaCount: 4, firstQaId: 'ch02_q01' },
   { id: 3, category: '개발', emoji: '🧪', title: '코드를 세상에 내보내는 길', qaCount: 7, firstQaId: 'ch03_q01' },
@@ -35,7 +37,10 @@ export const CHAPTERS: ChapterStub[] = [
   { id: 10, category: 'AI', emoji: '🤖', title: '거대한 컴퓨터를 빌리는 시대', qaCount: 7, firstQaId: 'ch10_q01' },
 ];
 
-const QA_COUNTS = CHAPTERS.map((chapter) => chapter.qaCount);
+// 카테고리 «바이브코딩»(11~17장)은 vibe-stubs.ts에서 산다 — 기존 10장 생성 로직과 분리.
+export const CHAPTERS: ChapterStub[] = [...BASE_CHAPTERS, ...VIBE_CHAPTERS];
+
+const QA_COUNTS = BASE_CHAPTERS.map((chapter) => chapter.qaCount);
 
 const FULL_QA_ID = 'ch01_q01';
 const CHAPTER_ONE_QAS: QaStub[] = [
@@ -852,7 +857,7 @@ function createStubQa(chapterId: number, order: number): QaStub {
   };
 }
 
-export const QA_STUBS: QaStub[] = QA_COUNTS.flatMap((count, chapterIndex) => {
+const BASE_QA_STUBS: QaStub[] = QA_COUNTS.flatMap((count, chapterIndex) => {
   const chapterId = chapterIndex + 1;
   return Array.from({ length: count }, (_, idx) => {
     const order = idx + 1;
@@ -891,6 +896,8 @@ export const QA_STUBS: QaStub[] = QA_COUNTS.flatMap((count, chapterIndex) => {
     return stub;
   });
 });
+
+export const QA_STUBS: QaStub[] = [...BASE_QA_STUBS, ...VIBE_QAS];
 
 export function getQaById(qaId: string) {
   return QA_STUBS.find((qa) => qa.id === qaId);

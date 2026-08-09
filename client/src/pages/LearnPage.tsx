@@ -5,6 +5,8 @@ import ChatPanel from '../components/learn/ChatPanel';
 import GuidePanel from '../components/learn/GuidePanel';
 import PreviewPanel from '../components/learn/PreviewPanel';
 import { CHAPTERS, getChapterById, getQaById, getQasByChapterId, type QaStub } from '../data/qa-stubs';
+import { VIBE_CATEGORY } from '../data/vibe-stubs';
+import VibeLearnLayout from '../components/learn/vibe/VibeLearnLayout';
 import { getDemoByQaId } from '../data/demos';
 import { markRead } from '../lib/progress';
 import { getSession, patchProgress, SessionClientError } from '../lib/session-client';
@@ -36,11 +38,25 @@ function LearnLayout(props: {
   sessionCode?: string;
   isTeacherPreview?: boolean;
   onScore?: (score: number) => void;
+  makeQaHref: (qaId: string) => string;
 }) {
   const mobileTab = useLearnStore((state) => state.mobileTab);
   const scenarioId = useLearnStore((state) => state.scenarioId);
   const setMobileTab = useLearnStore((state) => state.setMobileTab);
   const setScenarioId = useLearnStore((state) => state.setScenarioId);
+
+  // 카테고리 «바이브코딩»(11~17장)은 전용 탭형 레이아웃을 쓴다 — 기존 3컬럼 화면은 그대로.
+  if (props.chapter.category === VIBE_CATEGORY) {
+    return (
+      <VibeLearnLayout
+        chapter={props.chapter}
+        chapterQas={props.chapterQas}
+        makeQaHref={props.makeQaHref}
+        onScore={props.onScore}
+        qa={props.qa}
+      />
+    );
+  }
 
   return (
     <div className="flex h-[calc(100dvh-56px)] min-h-0 flex-col">
@@ -270,6 +286,9 @@ export default function LearnPage({ mode }: LearnPageProps) {
             });
           });
         }}
+        makeQaHref={(targetQaId) =>
+          `/learn/${params.sessionId}?qa=${targetQaId}${isTeacherPreview ? '&role=teacher' : ''}`
+        }
         progressMapOverride={viewerProgress}
         qa={qa}
         sessionCode={currentSession.code}
@@ -289,6 +308,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
       chapter={chapter}
       chapterQas={chapterQas}
       demo={demo}
+      makeQaHref={(targetQaId) => `/library/${chapter.id}/${targetQaId}`}
       mode={mode}
       qa={qa}
     />
