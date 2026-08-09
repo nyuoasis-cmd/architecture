@@ -795,6 +795,30 @@ export const DEMOS: DemoMeta[] = [
       { id: 'monitor', label: '로그 감시' },
     ],
   },
+  {
+    qaId: 'ch13_q01',
+    title: '누가 정했을까?',
+    url: '/demos/ch13/q01.html',
+    description: '같은 도서 대출 앱을 두 부탁문으로 실제 생성해 저장한 결과에서, 규칙을 정한 사람이 누구인지 비교합니다.',
+    scenarios: [
+      { id: 'v1', label: '① 부탁문 그대로 — 규칙 찾기' },
+      { id: 'v2', label: '② 정책 5줄을 넣으면?' },
+    ],
+  },
+  {
+    qaId: 'ch13_q02',
+    title: '어긋난 입력 실험실',
+    url: '/demos/ch13/q02.html',
+    description: '각본 없는 앱에 빈 값·이상한 값·연타를 실제로 넣어 본 반응 기록을 읽고, 각본의 작가를 확인합니다.',
+    scenarios: [{ id: 'replay', label: '세 가지 어긋난 입력' }],
+  },
+  {
+    qaId: 'ch13_q06',
+    title: 'AI 기획서 검사대',
+    url: '/demos/ch13/q06.html',
+    description: 'AI가 실제로 써 준 기획서를 정책·예외·데이터 세 칸 검사표로 훑어 빈칸을 찾습니다.',
+    scenarios: [{ id: 'probe', label: '세 칸 검사' }],
+  },
 ];
 
 export function getDemoByQaId(qaId: string) {

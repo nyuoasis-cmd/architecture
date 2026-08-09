@@ -63,6 +63,9 @@ import Q04AiHierarchy from './ch10/Q04AiHierarchy';
 import Q05Llm from './ch10/Q05Llm';
 import Q06Cost from './ch10/Q06Cost';
 import Q07AiSecurity from './ch10/Q07AiSecurity';
+import Q01WhoDecided from './ch13/Q01WhoDecided';
+import Q02EdgeReplay from './ch13/Q02EdgeReplay';
+import Q06PlanGaps from './ch13/Q06PlanGaps';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -131,6 +134,9 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch10_q05: { Component: Q05Llm, layout: 'wide' },
   ch10_q06: { Component: Q06Cost, layout: 'wide' },
   ch10_q07: { Component: Q07AiSecurity, layout: 'wide' },
+  ch13_q01: { Component: Q01WhoDecided, layout: 'wide' },
+  ch13_q02: { Component: Q02EdgeReplay, layout: 'wide' },
+  ch13_q06: { Component: Q06PlanGaps, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
