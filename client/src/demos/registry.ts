@@ -88,6 +88,12 @@ import Q03GreenLie from './ch15/Q03GreenLie';
 import Q04BreakIt from './ch15/Q04BreakIt';
 import Q05CrossCheck from './ch15/Q05CrossCheck';
 import Q06DiagnoseFirst from './ch15/Q06DiagnoseFirst';
+import Q01PassFail from './ch16/Q01PassFail';
+import Q02AskableItems from './ch16/Q02AskableItems';
+import Q03ZeroReject from './ch16/Q03ZeroReject';
+import Q04WhenItInvents from './ch16/Q04WhenItInvents';
+import Q05RiskMap from './ch16/Q05RiskMap';
+import Q06SignVsLock from './ch16/Q06SignVsLock';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -181,6 +187,12 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch15_q04: { Component: Q04BreakIt, layout: 'wide' },
   ch15_q05: { Component: Q05CrossCheck, layout: 'wide' },
   ch15_q06: { Component: Q06DiagnoseFirst, layout: 'wide' },
+  ch16_q01: { Component: Q01PassFail, layout: 'wide' },
+  ch16_q02: { Component: Q02AskableItems, layout: 'wide' },
+  ch16_q03: { Component: Q03ZeroReject, layout: 'wide' },
+  ch16_q04: { Component: Q04WhenItInvents, layout: 'wide' },
+  ch16_q05: { Component: Q05RiskMap, layout: 'wide' },
+  ch16_q06: { Component: Q06SignVsLock, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
