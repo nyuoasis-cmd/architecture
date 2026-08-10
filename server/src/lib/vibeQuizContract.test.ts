@@ -76,3 +76,38 @@ test('⑥ 가드가 실패할 수 있는 계측인지 — 대조 대상이 비�
   assert.ok(Object.keys(VIBE_QUIZZES).length > 0, '클라 선지가 0건이면 위 검사는 전부 공짜로 통과한다')
   assert.ok(VIBE_QAS.length > 0, '문항이 0건이면 ⑤가 공짜로 통과한다')
 })
+
+// ⑦⑧ 정답 자리 쏠림 — 내용이 맞아도 «찍어서 맞히는» 퀴즈가 되는 자리.
+// 2026-08-10 prod QA 실측: 126문항 중 A·B가 93%(C·D는 9문항뿐)였고, 11개 문은 3문항 정답이 전부 같은 자리였다.
+// «B만 찍으면 60점»인 상태라 문항 하나하나가 맞는 것과 별개로 퀴즈 전체가 무력해진다.
+test('⑦ 한 문의 문항들이 전부 같은 자리를 정답으로 두지 않는다', () => {
+  const flat: string[] = []
+  for (const [qaId, set] of Object.entries(VIBE_QUIZ_ANSWERS)) {
+    if (!VIBE_QUIZZES[qaId]) continue
+    const idxs = set.answers.map((a) => a.correctIdx)
+    if (idxs.length > 1 && new Set(idxs).size === 1) {
+      flat.push(`${qaId}(전부 ${String.fromCharCode(65 + idxs[0])})`)
+    }
+  }
+  assert.deepEqual(flat, [], `정답이 한 자리에 몰린 문: ${flat.join(', ')}`)
+})
+
+test('⑧ 정답 자리가 한쪽으로 쏠리지 않는다 (어느 자리도 45% 미만)', () => {
+  const dist = [0, 0, 0, 0]
+  let total = 0
+  for (const [qaId, set] of Object.entries(VIBE_QUIZ_ANSWERS)) {
+    if (!VIBE_QUIZZES[qaId]) continue
+    for (const a of set.answers) {
+      if (a.correctIdx >= 0 && a.correctIdx < 4) dist[a.correctIdx] += 1
+      total += 1
+    }
+  }
+  assert.ok(total >= 30, `문항이 ${total}개뿐이면 이 검사는 의미가 없다 — 대조 대상 부족`)
+  const worst = Math.max(...dist)
+  const share = worst / total
+  assert.ok(
+    share < 0.45,
+    `정답이 ${String.fromCharCode(65 + dist.indexOf(worst))} 자리에 ${Math.round(share * 100)}% 몰려 있다 ` +
+      `(분포 ${dist.map((n, i) => `${String.fromCharCode(65 + i)}:${n}`).join(' ')}, 총 ${total}문항)`,
+  )
+})

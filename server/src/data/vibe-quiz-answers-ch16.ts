@@ -9,17 +9,17 @@ export const CH16_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch16_q01',
     answers: [
       {
-        correctIdx: 1,
+        correctIdx: 3,
         explanation:
           '평균은 잘한 항목이 못한 항목을 가려 줍니다. 교실에서 실제로 일어나는 일은 «열 번에 한 번 남의 이름으로 기록됨»이고, 그것은 «90점만큼 괜찮음»이 아닙니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 0,
         explanation:
           '"안전도 92점"이라는 판정은 없습니다. 풀린 볼트 8개가 있으면 불합격입니다. 타도 되거나, 안 되거나 둘 중 하나입니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 1,
         explanation:
           '"꽤 잘 됐어"는 사람마다 다르게 읽히지만 "17개 중 15개 합격, 2개 불합격"은 누구에게나 같습니다. 다음 할 일도 «불합격 2개 고치기»로 분명해집니다.',
       },
@@ -29,7 +29,7 @@ export const CH16_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch16_q02',
     answers: [
       {
-        correctIdx: 1,
+        correctIdx: 0,
         explanation:
           '"보안"·"사용성 개선"·"데이터 관리"는 방향이지 점검 항목이 아닙니다. 예/아니오로 답할 수 있어야 항목이 됩니다.',
       },
@@ -39,7 +39,7 @@ export const CH16_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '"막았는가?"라고 물으면 "직접 해 봤어? 뭐라고 떴어?"가 자연스럽게 따라옵니다. 점검표는 느낌을 증거로 바꾸는 장치입니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 2,
         explanation:
           '"아마 될 걸"은 예가 아닙니다. 확인하지 않은 항목을 합격으로 세면 점검표 전체가 감상이 됩니다.',
       },
@@ -54,12 +54,12 @@ export const CH16_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '0%는 «어긋난 것이 없다»일 수도, «어긋남을 잡는 장치가 없다»일 수도 있습니다. 숫자를 만드는 장치가 살아 있는지부터 확인해야 합니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 2,
         explanation:
           '끊긴 답도 앱 입장에서는 «답이 왔다»입니다. 오류가 아니라 아무 경보도 울리지 않고, 학생 화면에는 말이 끊긴 안내문이 그대로 뜹니다. 이런 것이 조용한 실패입니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 3,
         explanation:
           '기차가 안 다니거나, 차단기가 고장 났거나 둘 중 하나입니다. 차단기만 봐서는 구분할 수 없어서, 실제로 이상한 것이 있었는지를 함께 봐야 합니다.',
       },
@@ -69,17 +69,17 @@ export const CH16_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch16_q04',
     answers: [
       {
-        correctIdx: 1,
+        correctIdx: 2,
         explanation:
           '실제 실행에서 "소개해 줘"라고 물었을 때는 "정보를 찾을 수 없습니다"라고 답했고, "독후감 예시를 써 줘"라고 만들라고 시키자 줄거리와 인물이 나왔습니다. 위험한 것은 질문이 아니라 주문입니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 3,
         explanation:
           '지어낸 답일수록 오히려 매끈하고 당당해서 말투로는 구분할 수 없습니다. 같은 것을 두세 번 물어 답이 흔들리는지 보는 것이 도구 없이 할 수 있는 확실한 확인법입니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 0,
         explanation:
           '세 번 다 그럴듯한 안내문이 나왔지만 권수(3권 / 3권 / 저학년 2권·고학년 3권)와 연체 처리(대출 금지 / 1일 100원)가 서로 달랐습니다. 진짜 규칙이었다면 세 번 다 같았을 것입니다.',
       },
@@ -89,7 +89,7 @@ export const CH16_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch16_q05',
     answers: [
       {
-        correctIdx: 0,
+        correctIdx: 3,
         explanation:
           '되돌릴 수 있는가, 그리고 받는 사람이 틀렸다는 것을 알아챌 수 있는가. 이 두 가지가 같은 지어냄의 대가를 갈라놓습니다.',
       },
@@ -119,7 +119,7 @@ export const CH16_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '실측에서 "지어내지 마"는 실제로 막았습니다. 다만 AI의 답은 매번 조금씩 달라서 그 성공은 «이번엔 지켰다»입니다. 30명이 열 번씩 쓰면 백 번에 한 번도 여러 번이 됩니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 2,
         explanation:
           '기준은 어긋났을 때의 피해입니다. 되돌리기 어렵거나 사용자가 알아채기 어려운 자리는 자물쇠로, 나머지는 팻말로. 전부 자물쇠는 만들고 관리하는 비용 때문에 답이 아닙니다.',
       },

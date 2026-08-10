@@ -14,12 +14,12 @@ export const CH14_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '통짜로 시키면 결과가 한 덩어리로 옵니다. 어디서 어긋났는지 짚기 어렵고, 중간에 "그건 아닌데"라고 말할 자리가 아예 없습니다. 거절하거나 반드시 오류를 내는 것이 아니라, 그럴듯한 덩어리가 나와서 더 곤란합니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 2,
         explanation:
           '핵심은 속도가 아니라 확인 지점입니다. 방마다 확인하며 옮기면 문제를 일찍 만나고, 일찍 만난 문제는 되돌릴 것이 적습니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 3,
         explanation:
           '같은 잘못이라도 계획 단계에서 고치면 문장 한 줄이고, 다 만든 뒤에 고치면 화면·데이터·이미 저장된 것까지 따라 움직입니다. 비용은 뒤로 갈수록 커집니다.',
       },
@@ -29,7 +29,7 @@ export const CH14_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch14_q02',
     answers: [
       {
-        correctIdx: 1,
+        correctIdx: 2,
         explanation:
           '"아직 만들지 말고"가 핵심입니다. 이 한 줄이 없으면 AI는 대개 계획과 결과물을 한꺼번에 내놓아, 승인할 기회가 사라집니다.',
       },
@@ -39,7 +39,7 @@ export const CH14_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '전문용어를 다 이해할 필요는 없습니다. 확인할 것은 화면 목록·데이터 표·안 시킨 것의 유무 — 전부 내가 정한 것과 맞는지 대조하는 일입니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 0,
         explanation:
           'AI는 친절이 지나쳐 안 시킨 기능을 얹어 옵니다(실제 실행에서 별점·인기 순위·선생님 승인 3개가 섞여 들어왔습니다). 그것을 빼기 가장 싼 시점이 아직 종이인 설계 단계입니다.',
       },
@@ -54,7 +54,7 @@ export const CH14_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '본문이 든 세 가지는 순서·진행·이어가기입니다. 번호 개수는 기능의 양과 아무 상관이 없습니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 0,
         explanation:
           '좋은 작업은 "한 번에 하나, 끝나면 눈으로 확인 가능"입니다. "앱 완성하기"나 "만족시키기"는 목표이지 작업이 아닙니다 — 끝났는지 눌러서 확인할 수 없습니다.',
       },
@@ -69,17 +69,17 @@ export const CH14_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch14_q04',
     answers: [
       {
-        correctIdx: 3,
+        correctIdx: 0,
         explanation:
           '한 번에 알아듣고 처리하는 것은 책상이 아직 넉넉하다는 뜻입니다. 끊어야 할 신호는 같은 실수 반복·엉뚱한 참조·느려짐 셋입니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 1,
         explanation:
           '문서(무엇을) · 진행 위치(어디까지) · 다음 할 일(어디로) 세 칸입니다. 지난 대화 전체를 옮기는 것은 이어받기가 아니라 새 책상을 다시 채우는 일이라, 끊은 이유가 사라집니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 2,
         explanation:
           '쪽지가 거짓말을 한 것이 아니라, 쓸 때는 정말 없었을 뿐입니다. 쪽지의 «현재 상태»는 관측이 아니라 기록이므로, 특히 «없다·안 된다»는 항목은 시작 전에 한 번 눈으로 확인합니다.',
       },
@@ -94,12 +94,12 @@ export const CH14_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '어느 재료가 최고냐는 초보에게 중요한 질문이 아닙니다. 같은 재료를 쓰면 앞 앱의 문제와 해결이 그대로 다시 쓰여 배움이 저금처럼 쌓입니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 2,
         explanation:
           '도구를 바꾸는 것 자체가 나쁜 게 아닙니다. 배움이 쌓이기 전에 자꾸 바꾸면 그때마다 저금이 리셋된다는 것이 요점입니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 3,
         explanation:
           '통일은 공짜가 아닙니다. 재료의 약점도 같은 재료로 만든 앱 전부에 퍼지고, 혼자 다른 재료로 만들어진 앱은 요령이 안 통해 부담으로 남습니다 — 알고 감수하는 대가입니다.',
       },
