@@ -1,4 +1,6 @@
 import type { ChapterStub, QaStub } from './qa-stubs';
+import type { QuizSet } from './quizzes';
+import { CH13_CHAPTER, CH13_EXTRAS, CH13_QAS, CH13_QUIZZES } from './vibe-ch13';
 
 // 카테고리 «바이브코딩» (11~17장) — AI에게 일을 시켜 소프트웨어를 만드는 법.
 // 콘텐츠 정책: 참고 도서의 목차·소제목·본문 차용 0%, 전부 자가 생성 (기존 10장과 동일).
@@ -66,13 +68,16 @@ export type VibeExtras = {
   myTurn?: VibeMyTurnConfig;
 };
 
-// ─── 데이터 홀더 — 장별 콘텐츠 PR에서 채운다 (이 PR은 형판만) ───
+// ─── 데이터 홀더 — 장별 콘텐츠 PR에서 채운다 ───
 
-export const VIBE_CHAPTERS: ChapterStub[] = [];
+export const VIBE_CHAPTERS: ChapterStub[] = [CH13_CHAPTER];
 
-export const VIBE_QAS: QaStub[] = [];
+export const VIBE_QAS: QaStub[] = [...CH13_QAS];
 
-export const VIBE_EXTRAS: Record<string, VibeExtras> = {};
+export const VIBE_EXTRAS: Record<string, VibeExtras> = { ...CH13_EXTRAS };
+
+/** 클라이언트 퀴즈 선지 — quizzes.ts의 QUIZZES에 합류한다(정답·해설은 서버). */
+export const VIBE_QUIZZES: Record<string, QuizSet> = { ...CH13_QUIZZES };
 
 export function getVibeExtras(qaId: string): VibeExtras | undefined {
   return VIBE_EXTRAS[qaId];

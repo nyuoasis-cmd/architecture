@@ -1,3 +1,5 @@
+import { VIBE_CHAPTER_META, VIBE_QA_CONTEXTS } from './vibe-chapter-content';
+
 const CHAPTERS = [
   { id: 1, title: '컴퓨터의 큰 그림', count: 4, category: '컴퓨터 기초' },
   { id: 2, title: '소프트웨어의 종류와 특징', count: 4, category: '개발' },
@@ -408,7 +410,7 @@ function createPlaceholderQa(chapterId: number, order: number, chapterTitle: str
   };
 }
 
-export const QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
+const BASE_QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
   Array.from({ length: chapter.count }, (_, index) => {
     const order = index + 1;
     if (chapter.id === 6 && order === 3) {
@@ -820,6 +822,8 @@ export const QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
   }),
 );
 
+export const QA_CONTEXTS: QaContext[] = [...BASE_QA_CONTEXTS, ...VIBE_QA_CONTEXTS];
+
 export function getQaContextById(qaId: string): QaContext | undefined {
   return QA_CONTEXTS.find((qa) => qa.id === qaId);
 }
@@ -835,7 +839,9 @@ export function buildChapterContextText(qaId: string): string | null {
   }
 
   const chapterQas = getChapterContexts(currentQa.chapterId);
-  const chapterMeta = CHAPTERS.find((chapter) => chapter.id === currentQa.chapterId);
+  const chapterMeta =
+    CHAPTERS.find((chapter) => chapter.id === currentQa.chapterId) ??
+    VIBE_CHAPTER_META.find((chapter) => chapter.id === currentQa.chapterId);
   const header = [
     `현재 챕터: ${currentQa.chapterId}장 ${currentQa.chapterTitle}`,
     `카테고리: ${chapterMeta?.category ?? '일반'}`,
