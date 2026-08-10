@@ -2,6 +2,16 @@ import { useState } from 'react';
 import { CHAPTERS } from '../../data/qa-stubs';
 import { createSession, type SessionRecord } from '../../lib/session-client';
 
+// 🚨 서버가 세션의 chapter_ids 를 1~10 으로 막는다(server/src/routes/sessions.ts).
+//    즉 11장 이후(바이브코딩)는 수업 세션으로 열 수 없고 라이브러리 자습으로만 닿는다.
+//    이 상한이 바뀌면 여기 문구도 함께 움직여야 한다 — 예전에는 문항 수가 손으로 적혀 있었고,
+//    실제(64개)와 어긋난 채 교사에게 그대로 보여지고 있었다.
+const SESSION_MAX_CHAPTER_ID = 10;
+const SESSION_QA_COUNT = CHAPTERS.filter((chapter) => chapter.id <= SESSION_MAX_CHAPTER_ID).reduce(
+  (sum, chapter) => sum + chapter.qaCount,
+  0,
+);
+
 type NewSessionModalProps = {
   onClose: () => void;
   onCreated: (session: SessionRecord) => void;
@@ -65,7 +75,7 @@ export default function NewSessionModal({ onClose, onCreated }: NewSessionModalP
 
           <section>
             <div className="rounded-2xl bg-stone-50 px-4 py-3 text-xs text-stone-600">
-              📚 모든 챕터(1장~10장 · 71개 Q&A)가 학생들에게 열립니다.
+              📚 수업에서 열리는 챕터: 1장~{SESSION_MAX_CHAPTER_ID}장 · {SESSION_QA_COUNT}개 Q&A.
             </div>
           </section>
         </div>

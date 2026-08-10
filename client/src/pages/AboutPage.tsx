@@ -9,7 +9,7 @@ const policyItems = [
   {
     title: '콘텐츠 정책',
     description:
-      '책 본문은 직접 인용하지 않고, 71개 Q&A 본문은 Claude가 재구성한 학습 콘텐츠만 제공합니다.',
+      '책 본문은 직접 인용하지 않고, 모든 Q&A 본문은 Claude가 재구성한 학습 콘텐츠만 제공합니다.',
   },
   {
     title: '개인정보 처리',
