@@ -9,12 +9,12 @@ export const CH12_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch12_q01',
     answers: [
       {
-        correctIdx: 1,
+        correctIdx: 3,
         explanation:
           'AI의 성능 문제가 아닙니다. AI는 부탁문에 없는 정보를 알 수 없어서, 정보가 비면 평균을 만들거나 되묻습니다. 실패의 원인은 능력이 아니라 정보의 부재입니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 0,
         explanation:
           '미용사의 실력(=AI의 성능)은 그대로인데 사진 한 장으로 결과가 달라집니다. 그 사진에 해당하는 것이 부탁문에 담는 정보 — 무엇을·누구를 위해·어떤 규칙으로입니다.',
       },
@@ -29,7 +29,7 @@ export const CH12_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch12_q02',
     answers: [
       {
-        correctIdx: 1,
+        correctIdx: 0,
         explanation:
           '앱은 이미 «답»입니다. 문제를 적지 않고 답부터 정하면, 더 나은 답(예: 이름표 스티커)이 있었는지 비교할 기회를 잃습니다.',
       },
@@ -39,7 +39,7 @@ export const CH12_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '문제 문장은 시작할 때보다 만드는 도중에 더 큰 일을 합니다. 기능을 넣을까 말까 하는 순간마다 "이게 이 문제를 푸나?"로 판정해 주는 심판이 됩니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 2,
         explanation:
           '"누가 + 어떤 상황에서 + 무엇이 불편하다" 세 조각이 들어가면 문제가 구체적으로 잡힙니다. 이 한 문장을 부탁문 맨 앞에 붙이면 AI의 선택도 문제 쪽으로 기울어집니다.',
       },
@@ -54,12 +54,12 @@ export const CH12_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           'AI는 세상에 흔한 것을 닮게 만듭니다. 세상의 앱 대부분이 어른용이라, 사용자를 말하지 않으면 어른 사무용 앱의 평균으로 기울어집니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 2,
         explanation:
           '사용자 한 줄은 «글자 크게·버튼 적게·입력 최소»처럼 수십 개의 결정을 한꺼번에 대신합니다. 그 결정들을 하나하나 지시할 필요가 없어집니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 3,
         explanation:
           '두 사용자를 각각 적되 주인공을 정해야 합니다. 모두를 똑같이 배려한 화면 하나는 대개 누구에게도 편하지 않은 화면이 됩니다.',
       },
@@ -69,17 +69,17 @@ export const CH12_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch12_q04',
     answers: [
       {
-        correctIdx: 1,
+        correctIdx: 2,
         explanation:
           '"검색 기능"은 주어가 없지만 "학생이 검색할 수 있다"는 주어가 강제됩니다. 그래서 사용자 관점이 저절로 들어가고, 나중에 "정말 할 수 있나?"라는 검사 문장으로 그대로 쓰입니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 3,
         explanation:
           '"앱을 쓸 수 있다"는 너무 굵고 "버튼이 파란색"은 생김새입니다. 사용자가 해내는 하나의 일(빌리기·반납하기)이 알맞은 크기입니다.',
       },
       {
-        correctIdx: 1,
+        correctIdx: 0,
         explanation:
           '다 적는 것 자체는 좋습니다. 다만 "이게 없으면 문제가 안 풀리나?"로 걸러야 하고, 걸러낸 것은 버리지 말고 «나중에 목록»에 옮겨 둡니다.',
       },
@@ -89,7 +89,7 @@ export const CH12_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch12_q05',
     answers: [
       {
-        correctIdx: 1,
+        correctIdx: 3,
         explanation:
           '필수(없으면 앱이 아님) · 나중(있으면 좋음) · 안 함(이번엔 하지 않기로 정함). 난이도가 아니라 «문제와의 거리»로 나누는 것이 핵심입니다.',
       },
@@ -99,7 +99,7 @@ export const CH12_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '«안 함»은 게으름이 아니라 결정입니다. 명시적으로 적지 않은 기능은 계속 "이것도 넣을까"로 되돌아와 판단을 흔듭니다. 나중에 다시 꺼내 만들어도 됩니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 1,
         explanation:
           '적지 않은 것은 AI에게 «해도 된다»로 읽힙니다. 안 함을 명시하면 금지로 읽혀서, 부탁하지 않은 기능이 얹히는 것을 막을 수 있습니다.',
       },
@@ -114,12 +114,12 @@ export const CH12_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
           '사람의 기억이 흐려지는 데다, AI는 대화가 끝나면 아예 백지가 됩니다(11장 «책상» 비유). 그래서 결정은 대화가 아니라 문서에 담아야 합니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 1,
         explanation:
           '문제 · 사용자 · 기능(필수/나중/안 함) · 정책 · 예외 · 데이터. 12장에서 배운 것과 13장에서 배울 세 칸이 이 한 장에 모입니다.',
       },
       {
-        correctIdx: 3,
+        correctIdx: 2,
         explanation:
           '문서는 자동 제작기가 아닙니다. 새 대화에 붙여 넣는 재료, 모둠의 기억, 완성 검사표 — 이 세 가지가 한 장 문서의 쓰임새입니다.',
       },
@@ -129,17 +129,17 @@ export const CH12_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
     qaId: 'ch12_q07',
     answers: [
       {
-        correctIdx: 0,
+        correctIdx: 1,
         explanation:
           '성공 기준의 유일한 조건은 «검사할 수 있는가»입니다. 누가 읽어도 같은 판정이 나와야 하고, 그러려면 대개 숫자가 필요합니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 2,
         explanation:
           '만든 뒤에 정하면 만들어진 결과에 기준을 맞추게 됩니다. 시험 친 뒤에 "이 정도면 목표였지"라고 말하는 것과 같습니다.',
       },
       {
-        correctIdx: 0,
+        correctIdx: 3,
         explanation:
           '기능을 다 만들었어도(완료) 책이 계속 사라지면 실패입니다. 완료는 «만들기로 한 것», 성공은 «그래서 문제가 풀렸는가»를 봅니다.',
       },
