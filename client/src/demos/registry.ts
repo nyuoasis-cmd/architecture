@@ -67,6 +67,13 @@ import Q01OneLineApp from './ch11/Q01OneLineApp';
 import Q02TokenSlice from './ch11/Q02TokenSlice';
 import Q03SameAskThrice from './ch11/Q03SameAskThrice';
 import Q04ContextDesk from './ch11/Q04ContextDesk';
+import Q01NoContext from './ch12/Q01NoContext';
+import Q02ProblemSentence from './ch12/Q02ProblemSentence';
+import Q03WhoUses from './ch12/Q03WhoUses';
+import Q04FeatureCards from './ch12/Q04FeatureCards';
+import Q05Priority from './ch12/Q05Priority';
+import Q06Telephone from './ch12/Q06Telephone';
+import Q07Measurable from './ch12/Q07Measurable';
 import Q01WhoDecided from './ch13/Q01WhoDecided';
 import Q02EdgeReplay from './ch13/Q02EdgeReplay';
 import Q06PlanGaps from './ch13/Q06PlanGaps';
@@ -142,6 +149,13 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch11_q02: { Component: Q02TokenSlice, layout: 'wide' },
   ch11_q03: { Component: Q03SameAskThrice, layout: 'wide' },
   ch11_q04: { Component: Q04ContextDesk, layout: 'wide' },
+  ch12_q01: { Component: Q01NoContext, layout: 'wide' },
+  ch12_q02: { Component: Q02ProblemSentence, layout: 'wide' },
+  ch12_q03: { Component: Q03WhoUses, layout: 'wide' },
+  ch12_q04: { Component: Q04FeatureCards, layout: 'wide' },
+  ch12_q05: { Component: Q05Priority, layout: 'wide' },
+  ch12_q06: { Component: Q06Telephone, layout: 'wide' },
+  ch12_q07: { Component: Q07Measurable, layout: 'wide' },
   ch13_q01: { Component: Q01WhoDecided, layout: 'wide' },
   ch13_q02: { Component: Q02EdgeReplay, layout: 'wide' },
   ch13_q06: { Component: Q06PlanGaps, layout: 'wide' },
