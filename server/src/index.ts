@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { env } from './env';
 import { buildCopyrightIndex } from './lib/copyright-index';
 import chatRouter from './routes/chat';
+import vibeRouter from './routes/vibe';
 import harnessSubmissionsRouter from './routes/harness-submissions';
 import joinRouter from './routes/join';
 import progressRouter from './routes/progress';
@@ -49,6 +50,7 @@ app.use('/api/harness/submissions', harnessSubmissionsRouter);
 app.use('/api/join', joinRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/quiz', quizRouter);
+app.use('/api/vibe', vibeRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/teacher-explain', teacherExplainRouter);
 

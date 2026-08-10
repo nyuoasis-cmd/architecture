@@ -5,14 +5,29 @@ import { classCheckBlock, providerFingerprints } from './classCheck'
 
 // 수업점검(class-check)이 /health 에서 읽는 블록의 계약.
 //
-// 이 앱은 **앱 레벨 AI 캡이 없다.** 그래서 caps 가 비어 있는데, 빈 객체를 「캡 없음」으로
-// 추론하게 두면 **버그로 빈 객체가 나온 경우와 구분되지 않는다.** capPolicy 로 명시한다.
+// 빈 객체를 「캡 없음」으로 추론하게 두면 **버그로 빈 객체가 나온 경우와 구분되지 않는다.**
+// 그래서 capPolicy 로 «있음/없음»을 항상 명시한다.
+//
+// 🚨 2026-08-10 변경: «내 차례»(POST /api/vibe/my-turn)가 전역 일일 캡을 들여왔다.
+//    그 전까지 이 앱은 캡이 없어 'none' 이 참이었지만, 이제 'none' 은 거짓말이다.
+//    (롤백 스위치로 통제를 끄면 다시 실제로 캡이 없는 상태라 'none' 이 참이 된다 — 아래 둘 다 덮는다.)
 
-test('classCheckBlock: 앱 캡이 없다는 사실을 «명시»한다', () => {
-  const cc = classCheckBlock()
-  assert.equal(cc.capPolicy, 'none', '캡 정책을 명시해야 «침묵»과 «없음»이 구분된다')
-  assert.deepEqual(cc.caps, {})
-  assert.equal(cc.used, null, '셀 카운터가 아예 없다 ≠ 오늘 0회 썼다')
+test('classCheckBlock: 캡이 있으면 있다고, 없으면 없다고 «명시»한다', () => {
+  const saved = process.env.MYTURN_GUARD_ENABLED
+
+  delete process.env.MYTURN_GUARD_ENABLED
+  const on = classCheckBlock()
+  assert.equal(on.capPolicy, 'app-daily', '전역 일일 캡이 있는데 none 이라 말하면 판정하는 쪽이 여유를 과대평가한다')
+  assert.ok(Object.keys(on.caps).length > 0, '정책이 app-daily 인데 caps 가 비면 읽는 쪽이 값을 지어내야 한다')
+  assert.equal(on.used, null, '셀 카운터가 아예 없다 ≠ 오늘 0회 썼다')
+
+  process.env.MYTURN_GUARD_ENABLED = '0'
+  const off = classCheckBlock()
+  assert.equal(off.capPolicy, 'none', '통제를 껐으면 캡이 있는 척하지 않는다')
+  assert.deepEqual(off.caps, {})
+
+  if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED
+  else process.env.MYTURN_GUARD_ENABLED = saved
 })
 
 test('classCheckBlock: 폐쇄 목록 — 키를 늘리려면 이 테스트도 같이 고쳐야 한다', () => {
