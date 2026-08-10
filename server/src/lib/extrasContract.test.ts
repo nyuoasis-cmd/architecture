@@ -10,6 +10,8 @@ import assert from 'node:assert/strict'
 import path from 'node:path'
 import { test } from 'node:test'
 
+import { QA_CONTEXTS } from '../data/chapter-content'
+
 const ROOT = path.resolve(__dirname, '..', '..', '..')
 const load = (rel: string) => require(path.resolve(ROOT, 'client', 'src', 'data', rel))
 
@@ -21,7 +23,7 @@ const { ALL_EXTRAS, EXTRAS_CHAPTER_IDS, chapterIdOfQaId, chapterUsesExtrasLayout
 }
 const { BASE_EXTRAS } = load('base-extras') as { BASE_EXTRAS: Record<string, Extras> }
 const { QA_STUBS, CHAPTERS } = load('qa-stubs') as {
-  QA_STUBS: Array<{ id: string; chapterId: number }>
+  QA_STUBS: Array<{ id: string; chapterId: number; order: number }>
   CHAPTERS: Array<{ id: number; qaCount: number }>
 }
 
@@ -183,4 +185,47 @@ test('⑩ 장 문항 수 선언이 실제 문항 수와 같다 — 손으로 적
     if (actual !== chapter.qaCount) mismatched.push(`${chapter.id}장: 선언 ${chapter.qaCount} ≠ 실제 ${actual}`)
   }
   assert.deepEqual(mismatched, [], `장 문항 수 선언이 어긋난다: ${mismatched.join(' / ')}`)
+})
+
+test('⑪ 각 장의 문항 순번이 1..N 으로 빈틈·중복 없이 이어진다', () => {
+  // 🚨 order 는 표시용 숫자가 아니라 **이동에 쓰인다** — 이전/다음 버튼이 `chapterQas[order - 2]`,
+  //    `chapterQas[order]` 로 이웃을 집는다(GuidePanel). 그래서 순번이 겹치거나 비면
+  //    «다음»이 자기 자신으로 가거나 문항 하나를 건너뛴다. 화면은 멀쩡해 보이고 아무도 안 알려 준다.
+  // 🔑 2026-08-11 ch06_q03 을 채우며 q04~q10 순번을 한 칸씩 밀었다. 그때 밀다 만 상태를
+  //    잡아 줄 것이 아무것도 없었다(변이 시험에서 초록으로 통과했다).
+  const broken: string[] = []
+  const byChapter = new Map<number, number[]>()
+  for (const qa of QA_STUBS) {
+    const list = byChapter.get(qa.chapterId) ?? []
+    list.push(qa.order)
+    byChapter.set(qa.chapterId, list)
+  }
+  for (const [chapterId, orders] of byChapter) {
+    const sorted = [...orders].sort((a, b) => a - b)
+    const expected = Array.from({ length: sorted.length }, (_, idx) => idx + 1)
+    if (JSON.stringify(sorted) !== JSON.stringify(expected)) {
+      broken.push(`${chapterId}장: ${sorted.join(',')} (기대 ${expected.join(',')})`)
+    }
+  }
+  assert.deepEqual(broken, [], `순번이 어긋나면 이전/다음 이동이 조용히 어긋난다: ${broken.join(' / ')}`)
+
+  assert.ok(byChapter.size > 0, '장이 0개면 이 검사가 공짜로 통과한다')
+})
+
+test('⑫ 학생에게 열린 모든 문항이 챗봇 맥락에 등재돼 있다', () => {
+  // 🚨 챗봇은 문항 맥락을 서버에서 찾는다. 없으면 그 문항 챗봇은 404 로 죽는다 —
+  //    화면은 멀쩡하고, 그 문항을 여는 학생만 «답이 안 와요»를 겪는다.
+  // 🔑 바이브코딩 장에는 같은 검사가 있었지만(vibeQuizContract ⑤) **기초 1~10장에는 없었다.**
+  //    실제로 ch06_q03 은 서버에만 있고 학생 화면엔 없는 채로 남아 있었고, 아무것도 빨개지지 않았다.
+  const contextIds = new Set(QA_CONTEXTS.map((qa) => qa.id))
+  const missing = QA_STUBS.filter((qa) => !contextIds.has(qa.id)).map((qa) => qa.id)
+  assert.deepEqual(missing, [], `이 문항들은 챗봇이 맥락을 못 찾는다(404): ${missing.join(', ')}`)
+
+  // 반대 방향 — 서버에만 있고 학생은 못 여는 문항. 콘텐츠를 써 놓고 안 내보내는 상태다.
+  const stubIds = new Set(QA_STUBS.map((qa) => qa.id))
+  const unreachable = QA_CONTEXTS.filter((qa) => !stubIds.has(qa.id)).map((qa) => qa.id)
+  assert.deepEqual(unreachable, [], `서버에는 있는데 학생 화면에 없는 문항: ${unreachable.join(', ')}`)
+
+  // 반공백 — 양쪽이 다 비면 위 둘이 공짜로 통과한다.
+  assert.ok(contextIds.size > 0 && stubIds.size > 0, '양쪽 중 하나가 0건이면 이 검사는 의미가 없다')
 })
