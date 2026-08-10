@@ -5,6 +5,10 @@ import { CH03_EXTRAS } from './base-extras-ch03';
 import { CH04_EXTRAS } from './base-extras-ch04';
 import { CH05_EXTRAS } from './base-extras-ch05';
 import { CH06_EXTRAS } from './base-extras-ch06';
+import { CH07_EXTRAS } from './base-extras-ch07';
+import { CH08_EXTRAS } from './base-extras-ch08';
+import { CH09_EXTRAS } from './base-extras-ch09';
+import { CH10_EXTRAS } from './base-extras-ch10';
 
 // 기초 1~10장의 견학·사례. 장별 파일 하나씩 늘려 간다(장당 1 PR).
 //
@@ -19,4 +23,8 @@ export const BASE_EXTRAS: Record<string, VibeExtras> = {
   ...CH04_EXTRAS,
   ...CH05_EXTRAS,
   ...CH06_EXTRAS,
+  ...CH07_EXTRAS,
+  ...CH08_EXTRAS,
+  ...CH09_EXTRAS,
+  ...CH10_EXTRAS,
 };
