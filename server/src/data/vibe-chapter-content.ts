@@ -1,12 +1,15 @@
 // 카테고리 «바이브코딩» — 챗봇 컨텍스트용 QA 본문 (클라이언트 vibe-ch13.ts와 동일 내용).
 // 콘텐츠 정본은 클라이언트 쪽 — 수정 시 양쪽을 함께 고친다.
 import type { QaContext } from './chapter-content';
+import { CH11_QA_CONTEXTS } from './vibe-chapter-content-ch11';
 
 export const VIBE_CHAPTER_META = [
+  { id: 11, title: 'AI에게 일을 시킨다는 것', count: 5, category: '바이브코딩' },
   { id: 13, title: '아무도 안 적는 세 칸', count: 6, category: '바이브코딩' },
 ] as const;
 
 export const VIBE_QA_CONTEXTS: QaContext[] = [
+  ...CH11_QA_CONTEXTS,
   {
     id: 'ch13_q01',
     chapterId: 13,
