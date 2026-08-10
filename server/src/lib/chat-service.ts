@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createHash } from 'node:crypto';
 import { getChapterContext, getQaContextById } from '../data/chapter-content';
 import { env } from '../env';
+import { isParticipantKey } from './actor-id';
 import { checkCopyright } from './copyright-index';
 import { getSupabaseAdminClient } from './supabase';
 import { qaTagFields } from './qa-context';
@@ -13,9 +14,46 @@ const CACHE_TTL_DAYS = 7;
 const REQUEST_TIMEOUT_MS = 12_000;
 const CHAT_HISTORY_LIMIT = 6;
 const UPGRADE_WINDOW = 200;
-const USER_MINUTE_LIMIT = 100;
-const USER_DAILY_LIMIT = 1000;
-const GLOBAL_MINUTE_LIMIT = 1000;
+// 호출 통제 — 2026-08-11 재설정. 통제 키가 IP → **학생별**로 바뀌면서 한도를 같이 다시 잡았다.
+//
+// 🚨 왜 같이 바꿔야 하나: 예전에는 한 교실이 공인 IP 하나로 나가 «하루 1000» 을 반 전체가
+//    **나눠 썼다**. 키만 학생별로 바꾸면 같은 1000 이 **1인 몫**이 되어 30명 교실의 상한이
+//    30배로 뛴다. 키와 숫자는 한 몸이다 — 한쪽만 고치면 조용히 지출 상한이 열린다.
+//
+// 🔑 전부 env 로 뺀 이유: 수업 당일 막혔을 때 **배포 없이** 올릴 수 있어야 한다.
+//    코드 상수로만 두면 그날 손쓸 방법이 없다(「내 차례」와 같은 이유).
+//
+// 🚨 전역 일일 캡은 **새로 생긴 제약**이다(그전에는 분당만 있었다). 150명 수업이면
+//    1인 7문만 물어도 1050 회라 기본값 1000 에 걸린다 — 대규모 수업 전에는
+//    `CHAT_GLOBAL_DAILY_CAP` 을 올리고 수업 후 원복한다.
+//
+// 돈 천장은 여전히 월 예산 가드가 잡는다(CHAT_MONTHLY_BUDGET_USD, 1.5배에서 완전 차단).
+function chatEnvInt(key: string, fallback: number): number {
+  const raw = process.env[key];
+  if (raw === undefined || raw.trim() === '') return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
+}
+
+/**
+ * 🔑 상수가 아니라 **함수**인 이유는 「내 차례」의 myTurnGuardEnabled 와 같다 —
+ *    통제하는 쪽과 그것을 밖에 말하는 쪽(/health 선언·테스트)이 **같은 값을 같은 시점에** 읽어야 한다.
+ *    모듈 로드 때 굳혀 두면 env 를 바꿔도 안 따라오고, 그러면 검사는 실제 동작이 아니라
+ *    «로드 순간의 잔상» 을 확인하게 된다.
+ *
+ * 🚨 공유 통(shared)은 여러 명이 뭉쳐 있을 수 있으므로 학생 한 명보다 반드시 넉넉해야 한다 —
+ *    한 명 몫을 적용하면 자습하던 다른 학생들이 남의 질문 때문에 막힌다.
+ */
+export function chatLimits() {
+  return {
+    participantPerMin: chatEnvInt('CHAT_ACTOR_PER_MIN', 20),
+    participantDaily: chatEnvInt('CHAT_ACTOR_DAILY_CAP', 40),
+    sharedPerMin: chatEnvInt('CHAT_SHARED_PER_MIN', 100),
+    sharedDaily: chatEnvInt('CHAT_SHARED_DAILY_CAP', 400),
+    globalPerMin: chatEnvInt('CHAT_GLOBAL_PER_MIN', 1000),
+    globalDaily: chatEnvInt('CHAT_GLOBAL_DAILY_CAP', 1000),
+  };
+}
 const MAX_CONCURRENT_REQUESTS = 3;
 const HAIKU_INPUT_PER_MILLION_USD = 1;
 const HAIKU_OUTPUT_PER_MILLION_USD = 5;
@@ -81,6 +119,7 @@ const metricsWindow: ChatMetricsEntry[] = [];
 const perMinuteBuckets = new Map<string, { count: number; resetAt: number }>();
 const perDayBuckets = new Map<string, { count: number; resetAt: number }>();
 const globalBuckets = new Map<string, { count: number; resetAt: number }>();
+const globalDayBuckets = new Map<string, { count: number; resetAt: number }>();
 let activeRequests = 0;
 
 function normalizeQuestion(question: string): string {
@@ -108,26 +147,46 @@ function getBucket(
   return current;
 }
 
-function takeRateLimitToken(actorId: string): RateLimitResult {
+export function takeRateLimitToken(actorId: string): RateLimitResult {
   const now = Date.now();
+  // 🔑 «학생 한 명»인가 «여럿이 뭉친 통»인가에 따라 다른 한도를 쓴다.
+  //    공유 통에 한 명 몫을 적용하면, 자습하던 다른 학생이 남의 질문 때문에 막힌다.
+  const limits = chatLimits();
+  const isOne = isParticipantKey(actorId);
+  const minuteLimit = isOne ? limits.participantPerMin : limits.sharedPerMin;
+  const dailyLimit = isOne ? limits.participantDaily : limits.sharedDaily;
+
   const minuteBucket = getBucket(perMinuteBuckets, actorId, 60_000);
   const dayBucket = getBucket(perDayBuckets, actorId, 86_400_000);
   const globalBucket = getBucket(globalBuckets, String(Math.floor(now / 60_000)), 60_000);
+  const globalDayBucket = getBucket(globalDayBuckets, 'all', 86_400_000);
 
-  if (minuteBucket.count >= USER_MINUTE_LIMIT) {
+  if (minuteBucket.count >= minuteLimit) {
     return { allowed: false, retryAfter: Math.ceil((minuteBucket.resetAt - now) / 1000) };
   }
-  if (dayBucket.count >= USER_DAILY_LIMIT) {
+  if (dayBucket.count >= dailyLimit) {
     return { allowed: false, retryAfter: Math.ceil((dayBucket.resetAt - now) / 1000) };
   }
-  if (globalBucket.count >= GLOBAL_MINUTE_LIMIT) {
+  if (globalBucket.count >= limits.globalPerMin) {
     return { allowed: false, retryAfter: Math.ceil((globalBucket.resetAt - now) / 1000) };
+  }
+  if (globalDayBucket.count >= limits.globalDaily) {
+    return { allowed: false, retryAfter: Math.ceil((globalDayBucket.resetAt - now) / 1000) };
   }
 
   minuteBucket.count += 1;
   dayBucket.count += 1;
   globalBucket.count += 1;
+  globalDayBucket.count += 1;
   return { allowed: true };
+}
+
+/** 테스트 전용 — 통을 비운다. 통이 프로세스에 남아 있으면 검사끼리 서로의 카운트를 오염시킨다. */
+export function __resetRateLimitBucketsForTest(): void {
+  perMinuteBuckets.clear();
+  perDayBuckets.clear();
+  globalBuckets.clear();
+  globalDayBuckets.clear();
 }
 
 function extractTextFromResponse(response: Anthropic.Messages.Message): string {
