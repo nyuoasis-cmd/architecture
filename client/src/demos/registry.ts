@@ -77,6 +77,11 @@ import Q07Measurable from './ch12/Q07Measurable';
 import Q01WhoDecided from './ch13/Q01WhoDecided';
 import Q02EdgeReplay from './ch13/Q02EdgeReplay';
 import Q06PlanGaps from './ch13/Q06PlanGaps';
+import Q01PlanFirst from './ch14/Q01PlanFirst';
+import Q02DesignDoc from './ch14/Q02DesignDoc';
+import Q03TaskOrder from './ch14/Q03TaskOrder';
+import Q04HandoffNote from './ch14/Q04HandoffNote';
+import Q05SameStack from './ch14/Q05SameStack';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -159,6 +164,11 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch13_q01: { Component: Q01WhoDecided, layout: 'wide' },
   ch13_q02: { Component: Q02EdgeReplay, layout: 'wide' },
   ch13_q06: { Component: Q06PlanGaps, layout: 'wide' },
+  ch14_q01: { Component: Q01PlanFirst, layout: 'wide' },
+  ch14_q02: { Component: Q02DesignDoc, layout: 'wide' },
+  ch14_q03: { Component: Q03TaskOrder, layout: 'wide' },
+  ch14_q04: { Component: Q04HandoffNote, layout: 'wide' },
+  ch14_q05: { Component: Q05SameStack, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { VIBE_PREGEN_CH12 } from '../../data/vibe-pregen-ch12';
+import type { VibePregenEntry } from '../../data/vibe-pregen-ch13';
 import PregenBlock from '../ch13/PregenBlock';
 
 // 12장 A형 «짝 비교» 공용 뷰 — 정보를 담기 «전/후»를 나란히 재생한다.
@@ -17,12 +18,15 @@ export type PairCompareProps = {
   lookFor: React.ReactNode;
   /** 눌러서 여는 판정 */
   verdict: React.ReactNode;
+  /** 재생할 사전 생성 재료 묶음 — 생략하면 12장 것. 14장 등 다른 장이 같은 뷰를 쓸 때만 넘긴다. */
+  source?: Record<string, VibePregenEntry>;
 };
 
-export default function PairCompare({ sharedAsk, addedInfo, left, right, lookFor, verdict }: PairCompareProps) {
+export default function PairCompare({ sharedAsk, addedInfo, left, right, lookFor, verdict, source }: PairCompareProps) {
   const [revealed, setRevealed] = useState(false);
-  const leftEntry = VIBE_PREGEN_CH12[left.pregenKey];
-  const rightEntry = VIBE_PREGEN_CH12[right.pregenKey];
+  const pregen = source ?? VIBE_PREGEN_CH12;
+  const leftEntry = pregen[left.pregenKey];
+  const rightEntry = pregen[right.pregenKey];
   const stamp = leftEntry ?? rightEntry;
 
   const panels = [

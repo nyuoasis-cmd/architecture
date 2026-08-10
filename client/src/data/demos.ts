@@ -906,6 +906,41 @@ export const DEMOS: DemoMeta[] = [
     description: 'AI가 실제로 써 준 기획서를 정책·예외·데이터 세 칸 검사표로 훑어 빈칸을 찾습니다.',
     scenarios: [{ id: 'probe', label: '세 칸 검사' }],
   },
+  {
+    qaId: 'ch14_q01',
+    title: '통짜로 시키기 vs 계획부터 시키기',
+    url: '/demos/ch14/q01.html',
+    description: '같은 부탁문에 «아직 만들지 마, 계획부터» 한 줄만 더 붙여 실제로 두 번 실행한 결과를 비교합니다.',
+    scenarios: [{ id: 'pair', label: '두 번의 결과 비교' }],
+  },
+  {
+    qaId: 'ch14_q02',
+    title: '진짜 설계 문서 열어 보기',
+    url: '/demos/ch14/q02.html',
+    description: '이 학습 서비스의 실제 설계 문서를 펼쳐, 코드를 쓰기 전 종이 위에서 버그 하나가 잡힌 자리를 찾습니다.',
+    scenarios: [{ id: 'doc', label: '문서 펼쳐 읽기' }],
+  },
+  {
+    qaId: 'ch14_q03',
+    title: '작업 카드 순서 세우기',
+    url: '/demos/ch14/q03.html',
+    description: '설계에서 쪼개 나온 작업 카드 6장을 «확인할 수 있는 순서»로 세워 봅니다.',
+    scenarios: [{ id: 'order', label: '여섯 장 순서 매기기' }],
+  },
+  {
+    qaId: 'ch14_q04',
+    title: '인수인계 쪽지 만들기',
+    url: '/demos/ch14/q04.html',
+    description: '새 대화의 첫 부탁문에 담을 것을 골라, 세 칸이 찼는지·과정 기록이 실렸는지 판정을 받아 봅니다.',
+    scenarios: [{ id: 'note', label: '쪽지 조립하기' }],
+  },
+  {
+    qaId: 'ch14_q05',
+    title: '같은 재료로 다섯 개 만들기',
+    url: '/demos/ch14/q05.html',
+    description: '재료를 통일한 쪽과 매번 바꾼 쪽의 «남는 배움»을 나란히 쌓아 보고, 통일의 대가도 함께 봅니다.',
+    scenarios: [{ id: 'stack', label: '다섯 개 만들어 보기' }],
+  },
 ];
 
 export function getDemoByQaId(qaId: string) {
