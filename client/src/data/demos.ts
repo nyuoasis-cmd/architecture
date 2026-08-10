@@ -941,6 +941,48 @@ export const DEMOS: DemoMeta[] = [
     description: '재료를 통일한 쪽과 매번 바꾼 쪽의 «남는 배움»을 나란히 쌓아 보고, 통일의 대가도 함께 봅니다.',
     scenarios: [{ id: 'stack', label: '다섯 개 만들어 보기' }],
   },
+  {
+    qaId: 'ch15_q01',
+    title: '"됐다"의 증거 모으기',
+    url: '/demos/ch15/q01.html',
+    description: 'AI의 완성 보고부터 «막히는 장면»까지, 증거로 인정할 것을 골라 규칙별 확인 상태를 판정받습니다.',
+    scenarios: [{ id: 'evidence', label: '증거 고르기' }],
+  },
+  {
+    qaId: 'ch15_q02',
+    title: '완성 판정 문장이 있을 때와 없을 때',
+    url: '/demos/ch15/q02.html',
+    description: '같은 기능을 판정 문장 없이/있게 시킨 두 번의 실제 실행에서, «이렇게 확인하세요» 칸이 어떻게 달라지는지 봅니다.',
+    scenarios: [{ id: 'pair', label: '두 번의 결과 비교' }],
+  },
+  {
+    qaId: 'ch15_q03',
+    title: '초록불 세 개 열어 보기',
+    url: '/demos/ch15/q03.html',
+    description: '겉면이 똑같이 «전부 통과»인 검사 3개를 열어, 실제로 몇 개를 검사했는지 확인합니다.',
+    scenarios: [{ id: 'open', label: '열어서 개수 보기' }],
+  },
+  {
+    qaId: 'ch15_q04',
+    title: '규칙을 일부러 부숴 보기',
+    url: '/demos/ch15/q04.html',
+    description: '규칙을 하나씩 고의로 망가뜨려, 검사가 우는지(빨간불) 조용한지 확인합니다.',
+    scenarios: [{ id: 'break', label: '하나씩 부수기' }],
+  },
+  {
+    qaId: 'ch15_q05',
+    title: '만든 AI와 검사한 AI',
+    url: '/demos/ch15/q05.html',
+    description: '한 대화가 만들고, 만든 과정을 모르는 다른 대화가 기준 문서만 들고 검사한 실제 기록을 나란히 봅니다.',
+    scenarios: [{ id: 'cross', label: '교차 검사 기록' }],
+  },
+  {
+    qaId: 'ch15_q06',
+    title: '추측 수리 vs 증거 수집',
+    url: '/demos/ch15/q06.html',
+    description: '막힌 앱 앞에서 추측으로 고칠지 증거부터 모을지 골라 가며, 두 길의 끝을 비교합니다.',
+    scenarios: [{ id: 'diagnose', label: '길 골라 가기' }],
+  },
 ];
 
 export function getDemoByQaId(qaId: string) {
