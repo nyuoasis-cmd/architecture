@@ -796,6 +796,38 @@ export const DEMOS: DemoMeta[] = [
     ],
   },
   {
+    qaId: 'ch11_q01',
+    title: '한 줄로 앱이 나온다',
+    url: '/demos/ch11/q01.html',
+    description: '한국어 한 줄 부탁으로 실제 생성해 저장한 앱 요약을 읽고, 아무도 정하지 않은 규칙을 찾습니다.',
+    scenarios: [{ id: 'oneline', label: '한 줄 부탁 → 결과' }],
+  },
+  {
+    qaId: 'ch11_q02',
+    title: '조각으로 잘라 읽기',
+    url: '/demos/ch11/q02.html',
+    description: '같은 부탁을 세 가지로 써 보며 조각 수가 어떻게 달라지는지 비교합니다(실제 토크나이저 아닌 근사).',
+    scenarios: [
+      { id: 'short', label: '① 짧은 부탁문' },
+      { id: 'padded', label: '② 길기만 한 부탁문' },
+      { id: 'specific', label: '③ 규칙을 적은 부탁문' },
+    ],
+  },
+  {
+    qaId: 'ch11_q03',
+    title: '같은 부탁 세 번',
+    url: '/demos/ch11/q03.html',
+    description: '글자 하나 바꾸지 않고 세 번 보낸 실제 기록에서, 투표 마감 시각이 매번 달라진 것을 확인합니다.',
+    scenarios: [{ id: 'thrice', label: '세 번의 결과 비교' }],
+  },
+  {
+    qaId: 'ch11_q04',
+    title: 'AI의 책상',
+    url: '/demos/ch11/q04.html',
+    description: '대화를 이어 갈수록 오래된 서류가 책상에서 밀려 떨어지는 과정을 직접 눌러 봅니다.',
+    scenarios: [{ id: 'desk', label: '책상에서 밀어내기' }],
+  },
+  {
     qaId: 'ch13_q01',
     title: '누가 정했을까?',
     url: '/demos/ch13/q01.html',
