@@ -4,6 +4,7 @@ import { CH12_QUIZ_ANSWERS } from './vibe-quiz-answers-ch12';
 import { CH14_QUIZ_ANSWERS } from './vibe-quiz-answers-ch14';
 import { CH15_QUIZ_ANSWERS } from './vibe-quiz-answers-ch15';
 import { CH16_QUIZ_ANSWERS } from './vibe-quiz-answers-ch16';
+import { CH17_QUIZ_ANSWERS } from './vibe-quiz-answers-ch17';
 
 // 13장 «아무도 안 적는 세 칸» 퀴즈 정답·해설.
 // 선지 순서는 클라이언트 vibe-ch13.ts CH13_QUIZZES와 1:1 — 수정 시 양쪽을 함께 고친다.
@@ -137,4 +138,5 @@ export const VIBE_QUIZ_ANSWERS: Record<string, QuizAnswerSet> = {
   ...CH14_QUIZ_ANSWERS,
   ...CH15_QUIZ_ANSWERS,
   ...CH16_QUIZ_ANSWERS,
+  ...CH17_QUIZ_ANSWERS,
 };

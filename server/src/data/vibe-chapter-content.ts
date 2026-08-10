@@ -6,6 +6,7 @@ import { CH12_QA_CONTEXTS } from './vibe-chapter-content-ch12';
 import { CH14_QA_CONTEXTS } from './vibe-chapter-content-ch14';
 import { CH15_QA_CONTEXTS } from './vibe-chapter-content-ch15';
 import { CH16_QA_CONTEXTS } from './vibe-chapter-content-ch16';
+import { CH17_QA_CONTEXTS } from './vibe-chapter-content-ch17';
 
 export const VIBE_CHAPTER_META = [
   { id: 11, title: 'AI에게 일을 시킨다는 것', count: 5, category: '바이브코딩' },
@@ -14,6 +15,7 @@ export const VIBE_CHAPTER_META = [
   { id: 14, title: '일 시키는 순서', count: 5, category: '바이브코딩' },
   { id: 15, title: '믿지 않고 확인하는 법', count: 6, category: '바이브코딩' },
   { id: 16, title: '합격, 불합격, 그리고 거짓말', count: 6, category: '바이브코딩' },
+  { id: 17, title: '재고, 지키고, 운영하기', count: 7, category: '바이브코딩' },
 ] as const;
 
 export const VIBE_QA_CONTEXTS: QaContext[] = [
@@ -88,4 +90,5 @@ export const VIBE_QA_CONTEXTS: QaContext[] = [
   ...CH14_QA_CONTEXTS,
   ...CH15_QA_CONTEXTS,
   ...CH16_QA_CONTEXTS,
+  ...CH17_QA_CONTEXTS,
 ];

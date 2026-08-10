@@ -94,6 +94,13 @@ import Q03ZeroReject from './ch16/Q03ZeroReject';
 import Q04WhenItInvents from './ch16/Q04WhenItInvents';
 import Q05RiskMap from './ch16/Q05RiskMap';
 import Q06SignVsLock from './ch16/Q06SignVsLock';
+import Q01BeforeAfter from './ch17/Q01BeforeAfter';
+import Q02OneSample from './ch17/Q02OneSample';
+import Q03FindOrSay from './ch17/Q03FindOrSay';
+import Q04ReportCard from './ch17/Q04ReportCard';
+import Q05ExitGate from './ch17/Q05ExitGate';
+import Q06RateLimit from './ch17/Q06RateLimit';
+import Q07Cache from './ch17/Q07Cache';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -193,6 +200,13 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch16_q04: { Component: Q04WhenItInvents, layout: 'wide' },
   ch16_q05: { Component: Q05RiskMap, layout: 'wide' },
   ch16_q06: { Component: Q06SignVsLock, layout: 'wide' },
+  ch17_q01: { Component: Q01BeforeAfter, layout: 'wide' },
+  ch17_q02: { Component: Q02OneSample, layout: 'wide' },
+  ch17_q03: { Component: Q03FindOrSay, layout: 'wide' },
+  ch17_q04: { Component: Q04ReportCard, layout: 'wide' },
+  ch17_q05: { Component: Q05ExitGate, layout: 'wide' },
+  ch17_q06: { Component: Q06RateLimit, layout: 'wide' },
+  ch17_q07: { Component: Q07Cache, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {
