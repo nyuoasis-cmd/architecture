@@ -30,7 +30,7 @@ const BASE_CHAPTERS: ChapterStub[] = [
   { id: 3, category: '개발', emoji: '🧪', title: '코드를 세상에 내보내는 길', qaCount: 7, firstQaId: 'ch03_q01' },
   { id: 4, category: '데이터', emoji: '🗂️', title: '데이터를 길들이는 법', qaCount: 7, firstQaId: 'ch04_q01' },
   { id: 5, category: '개발', emoji: '🧩', title: '보이는 쪽과 안 보이는 쪽', qaCount: 7, firstQaId: 'ch05_q01' },
-  { id: 6, category: '컴퓨터 기초', emoji: '💻', title: '컴퓨터 안을 분해해 봅니다', qaCount: 9, firstQaId: 'ch06_q01' },
+  { id: 6, category: '컴퓨터 기초', emoji: '💻', title: '컴퓨터 안을 분해해 봅니다', qaCount: 10, firstQaId: 'ch06_q01' },
   { id: 7, category: '데이터', emoji: '🗄️', title: '데이터를 보관하는 창고', qaCount: 6, firstQaId: 'ch07_q01' },
   { id: 8, category: '네트워크', emoji: '🌐', title: '인터넷 너머의 보이지 않는 길', qaCount: 7, firstQaId: 'ch08_q01' },
   { id: 9, category: '아키텍처', emoji: '🏗️', title: '큰 시스템의 뼈대 그리는 법', qaCount: 6, firstQaId: 'ch09_q01' },
@@ -432,9 +432,20 @@ const CHAPTER_SIX_QAS: QaStub[] = [
     demoQaId: 'ch06_q02',
   },
   {
-    id: 'ch06_q04',
+    id: 'ch06_q03',
     chapterId: 6,
     order: 3,
+    title: '프로그램, 프로세스, 프로세서의 차이가 뭔가요?',
+    summary: '저장된 파일, 실행 중인 상태, 계산하는 부품을 각각 갈라서 봅니다.',
+    body:
+      '프로그램, 프로세스, 프로세서는 글자가 비슷해서 자주 섞이지만 가리키는 대상이 전혀 다릅니다. 하나는 저장돼 있는 파일이고, 하나는 그 파일이 지금 움직이고 있는 상태이며, 나머지 하나는 그 움직임을 실제로 계산하는 부품입니다. 이 셋을 갈라 두면 컴퓨터가 앱을 여는 순간에 무슨 일이 벌어지는지 훨씬 또렷해집니다.\n\n프로그램은 저장소에 놓여 있는 실행 파일입니다. 아직 아무 일도 하지 않고, 전원을 꺼도 그대로 남아 있습니다. 요리로 치면 서랍에 접혀 있는 조리법 종이에 가깝습니다. 종이는 스스로 요리하지 않지만, 무엇을 어떤 순서로 할지는 전부 적혀 있습니다.\n\n프로세스는 그 프로그램이 메모리에 올라와 실제로 실행되고 있는 상태입니다. 이때 운영체제는 그 실행에게 쓸 메모리 공간과 차례를 나눠 주고, 어디까지 진행했는지도 함께 관리합니다. 조리법 종이를 꺼내 재료를 늘어놓고 불을 켠 순간이 프로세스입니다 — 같은 종이로 두 사람이 동시에 요리하면 냄비는 두 개가 됩니다.\n\n그래서 같은 앱을 두 번 열면 프로세스는 두 개가 생기지만 프로그램 파일은 여전히 하나입니다. 메모장을 창 두 개로 띄우면 각 창이 따로 글자를 기억하는 것도 이 때문입니다. 한쪽을 닫아도 다른 쪽이 멀쩡한 이유는 둘이 서로 다른 실행이기 때문이고, 저장소의 파일은 어느 쪽에도 영향을 받지 않습니다.\n\n프로세서는 이 모든 계산을 실제로 수행하는 부품, 즉 CPU입니다. 프로그램이 조리법이고 프로세스가 요리 중인 장면이라면, 프로세서는 불과 손에 해당합니다. 정리하면 프로그램은 저장된 것, 프로세스는 실행 중인 것, 프로세서는 실행시키는 것입니다.',
+    keywords: ['프로그램', '프로세스', '프로세서', 'CPU'],
+    checkpoint: '프로그램, 프로세스, 프로세서를 각각 한 줄로 구분할 수 있다.',
+  },
+  {
+    id: 'ch06_q04',
+    chapterId: 6,
+    order: 4,
     title: '자주 쓰는 데이터를 가까이 두는 작은 비밀은?',
     summary: '자주 쓰는 데이터를 가까이 두는 캐시의 원리를 생활 비유와 함께 살펴봅니다.',
     body:
@@ -446,7 +457,7 @@ const CHAPTER_SIX_QAS: QaStub[] = [
   {
     id: 'ch06_q05',
     chapterId: 6,
-    order: 4,
+    order: 5,
     title: '키보드를 누른 신호는 CPU를 어떻게 부르나요?',
     summary: '키보드 같은 사건이 CPU의 주의를 어떻게 끄는지 인터럽트 흐름으로 따라가 봅니다.',
     body:
@@ -458,7 +469,7 @@ const CHAPTER_SIX_QAS: QaStub[] = [
   {
     id: 'ch06_q06',
     chapterId: 6,
-    order: 5,
+    order: 6,
     title: '동시에 여러 앱이 도는 건 진짜로 동시일까요?',
     summary: '여러 앱이 동시에 도는 듯 보이는 이유를 시간 분할과 전환 감각으로 봅니다.',
     body:
@@ -470,7 +481,7 @@ const CHAPTER_SIX_QAS: QaStub[] = [
   {
     id: 'ch06_q07',
     chapterId: 6,
-    order: 6,
+    order: 7,
     title: '메모리가 부족한데 앱이 안 죽는 이유는?',
     summary: 'RAM이 부족해도 앱이 버티는 이유를 가상 메모리와 스왑의 역할로 풀어 봅니다.',
     body:
@@ -482,7 +493,7 @@ const CHAPTER_SIX_QAS: QaStub[] = [
   {
     id: 'ch06_q08',
     chapterId: 6,
-    order: 7,
+    order: 8,
     title: '내 PC가 파일을 잃어버리지 않는 비결은?',
     summary: '파일이 사라지지 않도록 저장 장치를 정리하는 규칙을 파일 시스템으로 봅니다.',
     body:
@@ -494,7 +505,7 @@ const CHAPTER_SIX_QAS: QaStub[] = [
   {
     id: 'ch06_q09',
     chapterId: 6,
-    order: 8,
+    order: 9,
     title: '운영체제는 새 부품을 어떻게 알아볼까요?',
     summary: '새 부품을 꽂았을 때 운영체제가 말을 알아듣는 방법을 드라이버로 이해해 봅니다.',
     body:
@@ -506,7 +517,7 @@ const CHAPTER_SIX_QAS: QaStub[] = [
   {
     id: 'ch06_q10',
     chapterId: 6,
-    order: 9,
+    order: 10,
     title: '전원을 누른 뒤 화면이 뜰 때까지 무슨 일이?',
     summary: '전원을 누른 뒤 운영체제가 올라오기까지 어떤 순서가 이어지는지 훑어봅니다.',
     body:
@@ -853,7 +864,7 @@ function createStubQa(chapterId: number, order: number): QaStub {
     body: '이 문항의 본문과 시연, 퀴즈는 후속 콘텐츠 PR에서 연결됩니다.',
     keywords: ['준비중'],
     checkpoint: '후속 PR에서 체크포인트가 연결됩니다.',
-    status: chapterId === 6 && order < 3 ? 'done' : chapterId === 6 && order > 3 && order <= 10 ? 'todo' : 'todo',
+    status: 'todo',
   };
 }
 
