@@ -1025,6 +1025,55 @@ export const DEMOS: DemoMeta[] = [
     description: '같은 질문에 가드를 세 단계(없음·말로·구조로)로 걸어 실행한 실제 답을 비교합니다.',
     scenarios: [{ id: 'guard', label: '세 단계 비교' }],
   },
+  {
+    qaId: 'ch17_q01',
+    title: '고치기 전에 재 둘까, 그냥 고칠까',
+    url: '/demos/ch17/q01.html',
+    description: '전 상태를 재 두고 고친 경우와 그냥 고친 경우, 나중에 «좋아졌다»를 말할 수 있는지 비교합니다.',
+    scenarios: [{ id: 'ba', label: '두 길 가 보기' }],
+  },
+  {
+    qaId: 'ch17_q02',
+    title: '진짜 80%짜리를 열 번 재 보기',
+    url: '/demos/ch17/q02.html',
+    description: '진짜 성공률을 알고 시작해도 측정값이 얼마나 튀는지, 직접 여러 번 재며 확인합니다.',
+    scenarios: [{ id: 'sample', label: '반복 측정' }],
+  },
+  {
+    qaId: 'ch17_q03',
+    title: '못 찾음인가, 잘못 말함인가',
+    url: '/demos/ch17/q03.html',
+    description: '정답지 6문으로 검색형 도우미의 실패를 두 종류로 분류하고, 고칠 곳이 다름을 확인합니다.',
+    scenarios: [{ id: 'triage', label: '실패 분류하기' }],
+  },
+  {
+    qaId: 'ch17_q04',
+    title: 'AI 일꾼 성적표 만들기',
+    url: '/demos/ch17/q04.html',
+    description: '두 주의 작업 기록으로 세 숫자를 내 보고, 차이를 만든 것이 부탁문이었음을 확인합니다.',
+    scenarios: [{ id: 'card', label: '성적표 내기' }],
+  },
+  {
+    qaId: 'ch17_q05',
+    title: '출구 검사에 무엇을 넣을까',
+    url: '/demos/ch17/q05.html',
+    description: '실제로 돌아온 답 3개를 검사 항목을 켜고 끄며 내보내, 무엇이 새는지 봅니다.',
+    scenarios: [{ id: 'gate', label: '검사 골라 켜기' }],
+  },
+  {
+    qaId: 'ch17_q06',
+    title: '한도 시뮬레이터',
+    url: '/demos/ch17/q06.html',
+    description: '학생 수와 누르는 횟수를 올려 분당 벽과 하루 벽에 언제 부딪히는지 찾습니다.',
+    scenarios: [{ id: 'limit', label: '인원 올려 보기' }],
+  },
+  {
+    qaId: 'ch17_q07',
+    title: '캐시 켜고 끄기',
+    url: '/demos/ch17/q07.html',
+    description: '30명 교실에서 캐시 방식을 바꿔 호출 수를 세고, 전부 캐시할 때 생기는 사고를 봅니다.',
+    scenarios: [{ id: 'cache', label: '세 방식 비교' }],
+  },
 ];
 
 export function getDemoByQaId(qaId: string) {
