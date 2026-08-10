@@ -39,9 +39,7 @@ test('buildVerdict: 모델이 칸을 통째로 빠뜨려도 «안 정함»으로
 
 // ── 호출 통제의 «신원»과 «선언» — 둘 다 조용히 틀릴 수 있는 자리다 ────────────────
 test('학생 키는 참여자 토큰에서 나온다 — IP 로 재면 교실 전체가 한 명이 된다', async () => {
-  process.env.HMAC_SECRET = process.env.HMAC_SECRET || 'test-secret-for-participant-token';
   const { resolveActorId } = await import('../routes/vibe');
-  const { signParticipantToken } = await import('./participant-token');
 
   const mk = (cookie?: string) =>
     ({
@@ -50,16 +48,23 @@ test('학생 키는 참여자 토큰에서 나온다 — IP 로 재면 교실 �
       get: (name: string) => (name.toLowerCase() === 'cookie' ? cookie : undefined),
     }) as never;
 
-  assert.equal(resolveActorId(mk()), 'ip:1.2.3.4', '토큰이 없으면 IP 로 떨어지고, 그 사실이 키에 남아야 한다');
+  // 서명 비밀 없이도 «키를 어떻게 만드는가» 를 검사한다 — 검증 자체는 participant-token 의 몫.
+  const fakeVerify = (token: string) => (token.startsWith('ok-') ? { participant_id: token.slice(3) } : null);
 
-  const t1 = signParticipantToken({ participantId: 'p-1', sessionId: 's-1' });
-  const t2 = signParticipantToken({ participantId: 'p-2', sessionId: 's-1' });
-  assert.equal(resolveActorId(mk(`arch_pt=${t1}`)), 'pt:p-1');
+  assert.equal(resolveActorId(mk(), fakeVerify), 'ip:1.2.3.4', '토큰이 없으면 IP 로 떨어지고, 그 사실이 키에 남아야 한다');
+  assert.equal(resolveActorId(mk('arch_pt=ok-alpha'), fakeVerify), 'pt:alpha');
   assert.notEqual(
-    resolveActorId(mk(`arch_pt=${t1}`)),
-    resolveActorId(mk(`arch_pt=${t2}`)),
+    resolveActorId(mk('arch_pt=ok-alpha'), fakeVerify),
+    resolveActorId(mk('arch_pt=ok-beta'), fakeVerify),
     '같은 IP(교실 공유 NAT)에서 온 두 학생이 같은 키를 받으면, 한 명이 쓰는 순간 반 전체가 쿨타임에 걸린다',
   );
+  assert.equal(
+    resolveActorId(mk('arch_pt=위조'), fakeVerify),
+    'ip:1.2.3.4',
+    '검증에 실패한 토큰을 신원으로 받아주면 아무나 남의 키를 주장할 수 있다',
+  );
+  // 기본 인자가 진짜 검증기인지 — 위조 토큰이 참여자 키로 통과하면 안 된다.
+  assert.equal(resolveActorId(mk('arch_pt=위조')), 'ip:1.2.3.4');
 });
 
 test('/health 의 캡 선언이 실제 통제값과 같다 — 선언만 바뀌면 거짓말이 된다', async () => {

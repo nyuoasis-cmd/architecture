@@ -25,9 +25,15 @@ const bodySchema = z.object({
  * 토큰이 없는 경우(라이브러리 자습 등)만 IP 로 떨어진다. 이때는 교실 공유 IP 로 뭉칠 수 있으므로
  * `ip:` 접두사를 붙여 «참여자 키가 아니다» 를 호출부에서 구분할 수 있게 남긴다.
  */
-export function resolveActorId(req: Parameters<Parameters<typeof router.post>[1]>[0]): string {
+export function resolveActorId(
+  req: Parameters<Parameters<typeof router.post>[1]>[0],
+  // 🚨 검증 함수를 인자로 받는 이유는 오직 하나 — 이 «키를 어떻게 만드는가» 를 서명 비밀 없이
+  //    검사할 수 있게 하기 위해서다. 비밀은 CI 에 없고, 없다고 검사를 건너뛰면
+  //    「교실 전체가 한 명으로 묶이는」 회귀를 아무도 못 잡는다.
+  verify: (token: string) => { participant_id: string } | null = verifyParticipantToken,
+): string {
   const token = getParticipantTokenFromRequest(req);
-  const payload = token ? verifyParticipantToken(token) : null;
+  const payload = token ? verify(token) : null;
   if (payload?.participant_id) {
     return `pt:${payload.participant_id}`;
   }
