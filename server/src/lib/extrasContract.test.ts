@@ -85,10 +85,12 @@ test('④ 견학 미션에 «전달할 문장»(feedback)이 비어 있지 않�
   assert.deepEqual(empty, [], `견학 미션의 필수 문구가 비었다: ${empty.join(', ')}`)
 })
 
-// 🚨 이미 들어와 있는 예외 2건. 둘 다 «떠올려 적어 봐» 형태라 확인 수단 없이 회상만 시킨다.
-//    조용히 규칙을 느슨하게 하는 대신 **이름을 적어** 남긴다 — 이 목록은 줄어들기만 해야 하고,
-//    여기 없는 새 위반은 그 자리에서 빨개진다. (느슨한 규칙은 위반을 영영 안 보이게 만든다.)
-const TOURS_WITHOUT_CONFIRMATION_STEP = new Set(['ch13_q02_t2', 'ch13_q03_t1'])
+// 🚨 확인 수단 없이 «떠올려 적어 봐»만 시키는 미션의 예외 목록 — **지금은 비어 있다.**
+//    시작값은 2건(`ch13_q02_t2` · `ch13_q03_t1`)이었고, 13장을 채우는 PR 에서 두 미션에
+//    실제로 눌러 볼 것을 붙여 목록을 비웠다. 이 목록은 줄어들기만 한다 —
+//    비었다는 것은 «지금 규칙에 예외가 하나도 없다»는 뜻이고, 새 위반은 그 자리에서 빨개진다.
+//    (느슨한 규칙은 위반을 영영 안 보이게 만든다. 예외를 다시 늘려야 한다면 이유를 여기 적을 것.)
+const TOURS_WITHOUT_CONFIRMATION_STEP = new Set<string>([])
 
 test('⑤ 견학 미션에 «눌러서 볼 것»이 하나는 있다 — 안내만 있고 확인할 게 없으면 견학이 아니다', () => {
   const bare: string[] = []
@@ -102,9 +104,23 @@ test('⑤ 견학 미션에 «눌러서 볼 것»이 하나는 있다 — 안내�
 })
 
 test('⑤-b 예외 목록이 «이미 고쳐진 것»을 붙들고 있지 않다 — 죽은 예외는 규칙을 몰래 갉아먹는다', () => {
-  const allTourIds = new Set(entries.flatMap(([, extras]) => (extras.tour ?? []).map((tour) => tour.id)))
-  const stale = [...TOURS_WITHOUT_CONFIRMATION_STEP].filter((id) => !allTourIds.has(id))
+  const allTours = new Map(entries.flatMap(([, extras]) => (extras.tour ?? []).map((tour) => [tour.id, tour] as const)))
+  const stale = [...TOURS_WITHOUT_CONFIRMATION_STEP].filter((id) => !allTours.has(id))
   assert.deepEqual(stale, [], `이 예외는 대상이 사라졌다. 목록에서 지워라: ${stale.join(', ')}`)
+
+  // 🚨 «대상이 사라졌는가»만 보면 절반이다. 미션이 그대로 있으면서 **이미 확인 수단을 갖췄는데도**
+  //    예외에 남아 있는 경우를 아무도 안 잡았다(변이 시험에서 초록으로 통과했다).
+  //    그러면 고쳐 놓은 미션이 조용히 규칙 밖으로 빠져나가고, 나중에 누가 확인 수단을 도로
+  //    지워도 빨개지지 않는다 — 예외 목록이 «면제권»이 되는 순간이다.
+  const alreadyFixed = [...TOURS_WITHOUT_CONFIRMATION_STEP].filter((id) => {
+    const tour = allTours.get(id)
+    return tour ? Boolean(tour.steps?.length || tour.reveals?.length || tour.link) : false
+  })
+  assert.deepEqual(
+    alreadyFixed,
+    [],
+    `이 미션들은 이미 확인 수단이 있다. 예외에서 지워야 규칙이 다시 이들을 지킨다: ${alreadyFixed.join(', ')}`,
+  )
 })
 
 test('⑥ 견학 미션 id 가 중복되지 않는다 — 겹치면 React 가 한쪽을 삼킨다', () => {
@@ -157,8 +173,8 @@ test('⑧ 가드가 실패할 수 있는 계측인지 — 대조 대상이 0건�
 
 // 🚨 아직 문항 전부를 덮지 못한 장. **줄어들기만 해야 하는 목록**이다 —
 //    장 하나를 채우는 PR 이 여기서 그 번호를 지운다. 목록에 없는 장이 반쪽이면 그 자리에서 빨개진다.
-//    (2026-08-11 시작값 = 13·15·16·17장. 12장은 이 PR 에서 지웠다.)
-const CHAPTERS_NOT_YET_FULLY_COVERED = new Set([13, 15, 16, 17])
+//    (2026-08-11 시작값 = 13·15·16·17장. 12장·13장은 각각의 PR 에서 지웠다.)
+const CHAPTERS_NOT_YET_FULLY_COVERED = new Set([15, 16, 17])
 
 test('⑨ 형판을 쓰는 장은 그 장의 문항 «전부»를 덮는다 — 반만 옮기면 문항마다 화면이 달라진다', () => {
   // 🚨 형판은 장 단위로 걸린다. 그 장의 문항 중 일부만 extras 가 있으면, 나머지 문항은
