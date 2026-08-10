@@ -983,6 +983,48 @@ export const DEMOS: DemoMeta[] = [
     description: '막힌 앱 앞에서 추측으로 고칠지 증거부터 모을지 골라 가며, 두 길의 끝을 비교합니다.',
     scenarios: [{ id: 'diagnose', label: '길 골라 가기' }],
   },
+  {
+    qaId: 'ch16_q01',
+    title: '점수로 볼까, 합/불로 볼까',
+    url: '/demos/ch16/q01.html',
+    description: '같은 앱 점검 결과를 점수와 합/불 두 방식으로 판정해, 결론이 반대로 갈리는 것을 봅니다.',
+    scenarios: [{ id: 'judge', label: '두 방식으로 판정' }],
+  },
+  {
+    qaId: 'ch16_q02',
+    title: '애매한 항목을 질문으로 바꾸기',
+    url: '/demos/ch16/q02.html',
+    description: '«보안»·«사용성» 같은 항목을 예/아니오로 답할 수 있는 «~했는가?» 질문으로 고쳐 봅니다.',
+    scenarios: [{ id: 'rewrite', label: '질문으로 고치기' }],
+  },
+  {
+    qaId: 'ch16_q03',
+    title: '끊긴 답을 내보내 보기',
+    url: '/demos/ch16/q03.html',
+    description: '실제로 문장 중간에서 끊긴 AI 답을, 검사를 켠 앱과 끈 앱에 각각 통과시켜 봅니다.',
+    scenarios: [{ id: 'gate', label: '검사 켜고 끄기' }],
+  },
+  {
+    qaId: 'ch16_q04',
+    title: 'AI가 지어내는 순간 잡기',
+    url: '/demos/ch16/q04.html',
+    description: '없는 책을 물었을 때와 만들라고 시켰을 때, 그리고 같은 질문 3회의 답이 서로 다른 것을 봅니다.',
+    scenarios: [{ id: 'invent', label: '세 번의 실험' }],
+  },
+  {
+    qaId: 'ch16_q05',
+    title: '위험도 지도에 놓아 보기',
+    url: '/demos/ch16/q05.html',
+    description: 'AI가 답하는 자리들을 «되돌리기»와 «알아채기» 두 축으로 놓아, 막는 세기를 정합니다.',
+    scenarios: [{ id: 'map', label: '자리 놓기' }],
+  },
+  {
+    qaId: 'ch16_q06',
+    title: '팻말과 자물쇠',
+    url: '/demos/ch16/q06.html',
+    description: '같은 질문에 가드를 세 단계(없음·말로·구조로)로 걸어 실행한 실제 답을 비교합니다.',
+    scenarios: [{ id: 'guard', label: '세 단계 비교' }],
+  },
 ];
 
 export function getDemoByQaId(qaId: string) {

@@ -5,6 +5,7 @@ import { CH12_CHAPTER, CH12_EXTRAS, CH12_QAS, CH12_QUIZZES } from './vibe-ch12';
 import { CH13_CHAPTER, CH13_EXTRAS, CH13_QAS, CH13_QUIZZES } from './vibe-ch13';
 import { CH14_CHAPTER, CH14_EXTRAS, CH14_QAS, CH14_QUIZZES } from './vibe-ch14';
 import { CH15_CHAPTER, CH15_EXTRAS, CH15_QAS, CH15_QUIZZES } from './vibe-ch15';
+import { CH16_CHAPTER, CH16_EXTRAS, CH16_QAS, CH16_QUIZZES } from './vibe-ch16';
 
 // 카테고리 «바이브코딩» (11~17장) — AI에게 일을 시켜 소프트웨어를 만드는 법.
 // 콘텐츠 정책: 참고 도서의 목차·소제목·본문 차용 0%, 전부 자가 생성 (기존 10장과 동일).
@@ -74,14 +75,14 @@ export type VibeExtras = {
 
 // ─── 데이터 홀더 — 장별 콘텐츠 PR에서 채운다 ───
 
-export const VIBE_CHAPTERS: ChapterStub[] = [CH11_CHAPTER, CH12_CHAPTER, CH13_CHAPTER, CH14_CHAPTER, CH15_CHAPTER];
+export const VIBE_CHAPTERS: ChapterStub[] = [CH11_CHAPTER, CH12_CHAPTER, CH13_CHAPTER, CH14_CHAPTER, CH15_CHAPTER, CH16_CHAPTER];
 
-export const VIBE_QAS: QaStub[] = [...CH11_QAS, ...CH12_QAS, ...CH13_QAS, ...CH14_QAS, ...CH15_QAS];
+export const VIBE_QAS: QaStub[] = [...CH11_QAS, ...CH12_QAS, ...CH13_QAS, ...CH14_QAS, ...CH15_QAS, ...CH16_QAS];
 
-export const VIBE_EXTRAS: Record<string, VibeExtras> = { ...CH11_EXTRAS, ...CH12_EXTRAS, ...CH13_EXTRAS, ...CH14_EXTRAS, ...CH15_EXTRAS };
+export const VIBE_EXTRAS: Record<string, VibeExtras> = { ...CH11_EXTRAS, ...CH12_EXTRAS, ...CH13_EXTRAS, ...CH14_EXTRAS, ...CH15_EXTRAS, ...CH16_EXTRAS };
 
 /** 클라이언트 퀴즈 선지 — quizzes.ts의 QUIZZES에 합류한다(정답·해설은 서버). */
-export const VIBE_QUIZZES: Record<string, QuizSet> = { ...CH11_QUIZZES, ...CH12_QUIZZES, ...CH13_QUIZZES, ...CH14_QUIZZES, ...CH15_QUIZZES };
+export const VIBE_QUIZZES: Record<string, QuizSet> = { ...CH11_QUIZZES, ...CH12_QUIZZES, ...CH13_QUIZZES, ...CH14_QUIZZES, ...CH15_QUIZZES, ...CH16_QUIZZES };
 
 export function getVibeExtras(qaId: string): VibeExtras | undefined {
   return VIBE_EXTRAS[qaId];
