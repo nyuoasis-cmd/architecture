@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { ChapterStub, QaStub } from '../../../data/qa-stubs';
 import { getDemoByQaId } from '../../../data/demos';
 import { getDemoComponent } from '../../../demos/registry';
-import { getVibeExtras } from '../../../data/vibe-stubs';
+import { getExtras } from '../../../data/learn-extras';
 import ChatPanel from '../ChatPanel';
 import QuizTab from '../QuizTab';
 import VibeMyTurnTab from './VibeMyTurnTab';
@@ -35,7 +35,7 @@ const TAB_LABELS: Record<VibeTabId, string> = {
  * 정본 목업: mockups/vibecoding-ch13q01-learn.html (v3).
  */
 export default function VibeLearnLayout({ chapter, chapterQas, qa, makeQaHref, onScore }: VibeLearnLayoutProps) {
-  const extras = getVibeExtras(qa.id);
+  const extras = getExtras(qa.id);
   const demoMeta = getDemoByQaId(qa.id);
   const demoComponent = getDemoComponent(qa.id);
 
