@@ -82,6 +82,12 @@ import Q02DesignDoc from './ch14/Q02DesignDoc';
 import Q03TaskOrder from './ch14/Q03TaskOrder';
 import Q04HandoffNote from './ch14/Q04HandoffNote';
 import Q05SameStack from './ch14/Q05SameStack';
+import Q01ProveIt from './ch15/Q01ProveIt';
+import Q02CriteriaFirst from './ch15/Q02CriteriaFirst';
+import Q03GreenLie from './ch15/Q03GreenLie';
+import Q04BreakIt from './ch15/Q04BreakIt';
+import Q05CrossCheck from './ch15/Q05CrossCheck';
+import Q06DiagnoseFirst from './ch15/Q06DiagnoseFirst';
 import type { DemoComponentMeta } from './types';
 
 export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
@@ -169,6 +175,12 @@ export const DEMO_REGISTRY: Record<string, DemoComponentMeta> = {
   ch14_q03: { Component: Q03TaskOrder, layout: 'wide' },
   ch14_q04: { Component: Q04HandoffNote, layout: 'wide' },
   ch14_q05: { Component: Q05SameStack, layout: 'wide' },
+  ch15_q01: { Component: Q01ProveIt, layout: 'wide' },
+  ch15_q02: { Component: Q02CriteriaFirst, layout: 'wide' },
+  ch15_q03: { Component: Q03GreenLie, layout: 'wide' },
+  ch15_q04: { Component: Q04BreakIt, layout: 'wide' },
+  ch15_q05: { Component: Q05CrossCheck, layout: 'wide' },
+  ch15_q06: { Component: Q06DiagnoseFirst, layout: 'wide' },
 };
 
 export function getDemoComponent(qaId: string): DemoComponentMeta | undefined {

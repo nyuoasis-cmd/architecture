@@ -4,12 +4,14 @@ import type { QaContext } from './chapter-content';
 import { CH11_QA_CONTEXTS } from './vibe-chapter-content-ch11';
 import { CH12_QA_CONTEXTS } from './vibe-chapter-content-ch12';
 import { CH14_QA_CONTEXTS } from './vibe-chapter-content-ch14';
+import { CH15_QA_CONTEXTS } from './vibe-chapter-content-ch15';
 
 export const VIBE_CHAPTER_META = [
   { id: 11, title: 'AI에게 일을 시킨다는 것', count: 5, category: '바이브코딩' },
   { id: 12, title: '만들 것을 정하는 법', count: 7, category: '바이브코딩' },
   { id: 13, title: '아무도 안 적는 세 칸', count: 6, category: '바이브코딩' },
   { id: 14, title: '일 시키는 순서', count: 5, category: '바이브코딩' },
+  { id: 15, title: '믿지 않고 확인하는 법', count: 6, category: '바이브코딩' },
 ] as const;
 
 export const VIBE_QA_CONTEXTS: QaContext[] = [
@@ -82,4 +84,5 @@ export const VIBE_QA_CONTEXTS: QaContext[] = [
     checkpoint: 'AI가 쓴 기획서에서 정책·예외·데이터 빈칸을 직접 찾아 표시할 수 있다.',
   },
   ...CH14_QA_CONTEXTS,
+  ...CH15_QA_CONTEXTS,
 ];
