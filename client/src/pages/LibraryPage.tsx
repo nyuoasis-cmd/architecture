@@ -60,7 +60,7 @@ export default function LibraryPage() {
     ? isStudentMode
       ? '오늘 수업에서 열린 챕터예요. 들어가고 싶은 챕터를 골라주세요.'
       : '시연을 시작할 챕터를 선택하세요. 세션에 포함된 챕터만 보입니다.'
-    : '10개 챕터, 71개 Q&A.';
+    : `${CHAPTERS.length}개 챕터, ${CHAPTERS.reduce((sum, chapter) => sum + chapter.qaCount, 0)}개 Q&A.`;
 
   return (
     <main className="mx-auto w-full max-w-[1100px] px-6 py-10">

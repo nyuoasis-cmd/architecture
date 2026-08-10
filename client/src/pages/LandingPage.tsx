@@ -10,6 +10,14 @@
  * design-tokens.css는 demos 전용이라 hex 직접 사용
  */
 import { useNavigate } from 'react-router-dom';
+import { CHAPTERS } from '../data/qa-stubs';
+
+// 🚨 손으로 적은 문항 수는 콘텐츠가 늘고 줄어도 안 따라온다 — 실제와 어긋난 채 학생에게 보여졌다.
+//    수업 세션은 서버가 1~10장으로 막으므로(server/src/routes/sessions.ts), 랜딩도 그 범위를 말한다.
+const LANDING_MAX_CHAPTER_ID = 10;
+const LANDING_CHAPTERS = CHAPTERS.filter((chapter) => chapter.id <= LANDING_MAX_CHAPTER_ID);
+const LANDING_CHAPTER_COUNT = LANDING_CHAPTERS.length;
+const LANDING_QA_COUNT = LANDING_CHAPTERS.reduce((sum, chapter) => sum + chapter.qaCount, 0);
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -169,7 +177,7 @@ export default function LandingPage() {
             한 화면 학습이 됩니다.
           </h1>
           <p className="landing-hero-caption">
-            10개 챕터 71문항으로 IT 전체 그림을 따라가요.
+            {LANDING_CHAPTER_COUNT}개 챕터 {LANDING_QA_COUNT}문항으로 IT 전체 그림을 따라가요.
             <br />
             교사 세션 코드 하나로 반 전체가 함께 학습해요.
           </p>
