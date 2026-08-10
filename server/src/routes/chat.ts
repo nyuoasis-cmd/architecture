@@ -1,8 +1,19 @@
-import { Router } from 'express';
+import { Router, type Request } from 'express';
 import { z } from 'zod';
+import { isParticipantKey, resolveActorId } from '../lib/actor-id';
 import { BudgetError, createChatReply, RateLimitError, type ChatHistoryEntry } from '../lib/chat-service';
 
 const router = Router();
+
+// 🚨 verify 를 인자로 받는 이유는 resolveActorId 와 같다 — 서명 비밀 없이도 «키를 어떻게 만드는가» 를
+//    검사할 수 있어야 한다. 비밀은 CI 에 없고, 로컬 .env 에 기대는 테스트는 CI 에서만 빨강이 된다.
+export function getChatBucketKey(req: Request, verify?: (token: string) => { participant_id: string } | null) {
+  const actorId = verify ? resolveActorId(req, verify) : resolveActorId(req);
+  if (isParticipantKey(actorId)) return actorId;
+  // 토큰이 없는 통은 기기(User-Agent)로 한 번 더 가른다 — 자습 중인 서로 다른 기기까지 뭉치지 않게.
+  const userAgent = req.get('user-agent') ?? 'unknown';
+  return `${actorId}:${userAgent}`;
+}
 
 const chatSchema = z.object({
   qaId: z.string().min(1),
@@ -29,7 +40,10 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  const actorId = req.ip || req.socket.remoteAddress || 'unknown';
+  // 🚨 IP 로 재면 교실 전체가 한 명이 된다 — 학교는 반 전체가 공인 IP 하나로 나가기 때문에,
+  //    첫 학생이 한도를 쓰는 순간 나머지가 전부 429 를 맞는다.
+  //    (2026-08-10 채점 라우트에서 같은 결함을 고쳤고(#139), 챗봇만 남아 있었다.)
+  const actorId = getChatBucketKey(req);
   const history: ChatHistoryEntry[] = parsed.data.history.map((entry) => ({
     role: entry.role,
     content: entry.content,
