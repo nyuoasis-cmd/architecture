@@ -6,15 +6,22 @@ import { getParticipantTokenFromRequest, verifyParticipantToken } from '../lib/p
 import { generateSessionCode } from '../lib/session-code';
 import { getSupabaseAdminClient } from '../lib/supabase';
 import { qaTagFields } from '../lib/qa-context';
+import { ALL_CHAPTER_IDS } from '../data/chapter-content';
 
 const router = Router();
 
-const createSessionSchema = z
+// 🔑 export 하는 이유: 테스트가 «소스를 정규식으로 읽는» 대신 스키마를 실제로 돌려 보고
+//    무엇이 통과·거절되는지로 판정하게 하려는 것. 선언을 읽는 계측은 동작이 바뀌어도 초록일 수 있다.
+export const createSessionSchema = z
   .object({
     name: z.string().trim().min(1).max(60),
     mode: z.enum(['learn', 'harness']).default('learn'),
-    // harness 모드는 챕터가 없음(서버가 무조건 []로 강제, 아래 참조) — learn 모드만 1~10개 필수.
-    chapter_ids: z.array(z.number().int().min(1).max(10)).max(10),
+    // harness 모드는 챕터가 없음(서버가 무조건 []로 강제, 아래 참조) — learn 모드만 1개 이상 필수.
+    // 🔑 범위·개수를 손으로 적지 않는다. 등록부에서 파생시켜야 장이 늘 때 저절로 따라온다.
+    //    (2026-08-11 이전에는 max(10) 이 박혀 있어 바이브코딩 11~17장이 수업에 못 담겼다.)
+    chapter_ids: z
+      .array(z.number().int().refine((id) => ALL_CHAPTER_IDS.includes(id), { message: '없는 장입니다.' }))
+      .max(ALL_CHAPTER_IDS.length),
     max_participants: z.union([z.literal(50), z.literal(100), z.literal(200)]).default(100),
   })
   .refine((value) => value.mode !== 'learn' || value.chapter_ids.length >= 1, {

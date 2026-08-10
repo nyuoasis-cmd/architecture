@@ -12,10 +12,18 @@ import { classCheckBlock, providerFingerprints } from './classCheck'
 //    그 전까지 이 앱은 캡이 없어 'none' 이 참이었지만, 이제 'none' 은 거짓말이다.
 //    (롤백 스위치로 통제를 끄면 다시 실제로 캡이 없는 상태라 'none' 이 참이 된다 — 아래 둘 다 덮는다.)
 
+// 🚨 2026-08-11 jery 결정: 「내 차례」 호출 통제의 **기본값을 껐다**(바이브코딩 수업 개방과 함께).
+//    그래서 env 를 안 주면 capPolicy = 'none' 이 **참**이다. 이 테스트는 그 «기본이 무엇인가»와
+//    «켰을 때 제대로 말하는가»를 둘 다 못 박는다 — 한쪽만 두면 기본값이 몰래 뒤집혀도 초록이다.
 test('classCheckBlock: 캡이 있으면 있다고, 없으면 없다고 «명시»한다', () => {
   const saved = process.env.MYTURN_GUARD_ENABLED
 
   delete process.env.MYTURN_GUARD_ENABLED
+  const byDefault = classCheckBlock()
+  assert.equal(byDefault.capPolicy, 'none', '기본이 «통제 끔»인데 캡이 있는 척하면, 읽는 쪽이 없는 상한을 믿는다')
+  assert.deepEqual(byDefault.caps, {}, '캡이 없다고 말해 놓고 값을 흘리면 둘 중 하나는 거짓말이다')
+
+  process.env.MYTURN_GUARD_ENABLED = '1'
   const on = classCheckBlock()
   assert.equal(on.capPolicy, 'app-daily', '전역 일일 캡이 있는데 none 이라 말하면 판정하는 쪽이 여유를 과대평가한다')
   assert.ok(Object.keys(on.caps).length > 0, '정책이 app-daily 인데 caps 가 비면 읽는 쪽이 값을 지어내야 한다')

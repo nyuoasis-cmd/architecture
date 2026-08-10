@@ -824,6 +824,19 @@ const BASE_QA_CONTEXTS: QaContext[] = CHAPTERS.flatMap((chapter) =>
 
 export const QA_CONTEXTS: QaContext[] = [...BASE_QA_CONTEXTS, ...VIBE_QA_CONTEXTS];
 
+/**
+ * 이 앱이 가진 «모든 장» 의 등록부 — 기초 10장 + 바이브코딩 7장.
+ * 🚨 장 범위를 숫자로 적어 둔 곳(수업 세션 스키마 등)이 이걸 읽게 한다.
+ *    「1~10」 을 손으로 박아 두면 장이 늘어도 아무것도 빨개지지 않은 채 새 장이 조용히 막힌다 —
+ *    실제로 그렇게 11~17장이 수업에 못 담기고 자습으로만 닿았다(2026-08-11).
+ */
+export const ALL_CHAPTER_META = [...CHAPTERS, ...VIBE_CHAPTER_META];
+
+export const ALL_CHAPTER_IDS: number[] = ALL_CHAPTER_META.map((chapter) => chapter.id).sort((a, b) => a - b);
+
+export const MIN_CHAPTER_ID = Math.min(...ALL_CHAPTER_IDS);
+export const MAX_CHAPTER_ID = Math.max(...ALL_CHAPTER_IDS);
+
 export function getQaContextById(qaId: string): QaContext | undefined {
   return QA_CONTEXTS.find((qa) => qa.id === qaId);
 }

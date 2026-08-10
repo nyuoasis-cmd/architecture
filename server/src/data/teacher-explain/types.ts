@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-const qaIdSchema = z.string().regex(/^ch(0[1-9]|10)_q(0[1-9]|10)$/);
+// 🔑 장 범위를 정규식에 박지 않는다. 「1~10장」 을 여기 적어 두면 11~17장이 조용히 404 가 되고,
+//    그건 «없는 문항» 과 «있는데 막힌 문항» 을 구분할 수 없게 만든다.
+//    모양만 본다 — 실재 여부는 아래 실제 데이터 조회가 판정한다.
+const qaIdSchema = z.string().regex(/^ch\d{2}_q\d{2}$/);
 
 export const teacherExplainPromptSchema = z.object({
   q: z.string().trim().min(1).max(80),

@@ -11,6 +11,10 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { test } from 'node:test'
 
+import { ALL_CHAPTER_IDS, MAX_CHAPTER_ID, QA_CONTEXTS } from '../data/chapter-content'
+import { HAND_LISTED_LEGACY, getQaChapterId } from '../data/qa-meta'
+import { createSessionSchema } from '../routes/sessions'
+
 const ROOT = path.resolve(__dirname, '..', '..', '..')
 const read = (rel: string) => readFileSync(path.join(ROOT, rel), 'utf8')
 
@@ -20,20 +24,54 @@ const clientQa: { CHAPTERS: { id: number; qaCount: number }[] } = require(
 
 const SESSION_ROUTE = 'server/src/routes/sessions.ts'
 const MODAL = 'client/src/components/teacher/NewSessionModal.tsx'
+
+const sampleSession = (chapterIds: number[]) => ({
+  name: '테스트 수업',
+  mode: 'learn' as const,
+  chapter_ids: chapterIds,
+  max_participants: 100 as const,
+})
 const SURFACES = [MODAL, 'client/src/pages/LibraryPage.tsx', 'client/src/pages/LandingPage.tsx', 'client/src/pages/AboutPage.tsx']
 
-test('세션 모달이 말하는 챕터 상한이 서버가 실제로 막는 값과 같다', () => {
-  const schema = read(SESSION_ROUTE)
-  const bound = schema.match(/chapter_ids:\s*z\s*\.array\(z\.number\(\)\.int\(\)\.min\(1\)\.max\((\d+)\)\)/)
-  assert.ok(bound, `${SESSION_ROUTE} 에서 chapter_ids 상한을 못 읽었다 — 스키마 모양이 바뀌었으면 이 검사도 고쳐야 한다`)
+// 🚨 이 검사는 예전에 sessions.ts 를 **정규식으로 읽어** 상한을 집어냈다. 그러면 스키마 모양을
+//    바꾸는 순간 「못 읽었다」로 죽고, 더 나쁘게는 정규식이 우연히 맞으면 실제 동작과 무관한 숫자를
+//    대조하게 된다. 이제 스키마를 **평가해서** 실제로 무엇이 통과·거절되는지로 판정한다.
+test('교사에게 보여 주는 챕터 범위 = 서버가 실제로 통과시키는 범위', () => {
+  // 서버가 실제로 받아 주는 장 = 스키마에 넣어 보고 결과로 확인한다(선언 읽기 아님).
+  const accepted = ALL_CHAPTER_IDS.filter((id) => createSessionSchema.safeParse(sampleSession([id])).success)
+  assert.deepEqual(accepted, ALL_CHAPTER_IDS, '등록부에 있는 장인데 세션에 못 담기면, 그 장 콘텐츠는 교실에서 못 쓰인다')
 
-  const declared = read(MODAL).match(/const SESSION_MAX_CHAPTER_ID = (\d+)/)
-  assert.ok(declared, `${MODAL} 에서 SESSION_MAX_CHAPTER_ID 를 못 읽었다`)
+  // 등록부에 없는 장은 거절돼야 한다 — 안 그러면 위 검사가 «전부 통과»로 공짜가 된다(음성 대조군).
+  for (const bogus of [0, -1, MAX_CHAPTER_ID + 1, 999]) {
+    assert.equal(
+      createSessionSchema.safeParse(sampleSession([bogus])).success,
+      false,
+      `없는 장(${bogus})이 통과하면 상한 검사 자체가 의미를 잃는다`,
+    )
+  }
+
+  // 교사 화면이 말하는 상한이 그 실제 범위와 같은가.
+  const declared = read(MODAL).match(/const SESSION_MAX_CHAPTER_ID = Math\.max/)
+  assert.ok(declared, `${MODAL} 의 상한이 손으로 적힌 숫자로 돌아갔다 — 데이터에서 계산해야 한다`)
   assert.equal(
-    declared[1],
-    bound[1],
-    '교사에게 보여 주는 «1장~N장»이 서버가 실제로 허용하는 범위와 다르면, 없는 범위를 약속하는 것이다',
+    Math.max(...clientQa.CHAPTERS.map((chapter) => chapter.id)),
+    MAX_CHAPTER_ID,
+    '교사에게 보여 주는 «1장~N장»이 서버가 실제로 허용하는 범위와 다르면, 없는 범위를 약속하거나 있는 범위를 숨기는 것이다',
   )
+})
+
+test('모든 문항이 자기 장을 안다 — 손나열이 콘텐츠를 못 따라오면 교사 해설이 조용히 죽는다', () => {
+  const orphans = QA_CONTEXTS.filter((qa) => getQaChapterId(qa.id) === null).map((qa) => qa.id)
+  assert.deepEqual(orphans, [], `이 문항들은 chapterId 를 못 찾아 교사 해설이 404 가 된다: ${orphans.join(', ')}`)
+
+  // 음성 대조군 — 없는 문항까지 «안다»고 하면 위 검사는 아무것도 못 잡는다.
+  assert.equal(getQaChapterId('ch99_q99'), null, '없는 문항에 장을 붙여 주면 조회 자체가 무의미하다')
+
+  // 파생이 옛 손목록을 덮는가(회귀 방어). 손목록은 얼어붙은 대조군이다.
+  for (const legacy of HAND_LISTED_LEGACY) {
+    assert.equal(getQaChapterId(legacy.qaId), legacy.chapterId, `${legacy.qaId} 가 파생 목록에서 빠지거나 장이 달라졌다`)
+  }
+  assert.ok(QA_CONTEXTS.length > HAND_LISTED_LEGACY.length, '파생 목록이 손목록보다 작으면 콘텐츠를 잃은 것이다')
 })
 
 test('학생·교사 화면에 문항 수가 손으로 박혀 있지 않다', () => {

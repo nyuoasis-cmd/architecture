@@ -29,13 +29,21 @@ export const MY_TURN_LIMITS = {
 };
 
 /**
- * 롤백 스위치 — 0 이면 통제를 끈다(사고 시 즉시 되돌리기용, 기본 켜짐).
+ * 호출 통제 스위치 — 0 이면 통제를 끈다.
+ *
+ * 🚨 2026-08-11 jery 결정: **기본값을 «끔» 으로 둔다.** 바이브코딩을 수업 세션으로 열면서
+ *    「한도가 필요하면 나중에 만든다」는 방침. 그래서 통제 «로직» 은 그대로 남기고 값만 껐다 —
+ *    나중에 필요해지는 날 Render env 에 `MYTURN_GUARD_ENABLED=1` 한 줄이면 **배포 없이** 켜지고,
+ *    한도 숫자도 MYTURN_* env 로 그 자리에서 조정된다. 코드 작업이 다시 필요하지 않다.
+ *
+ * 🔑 끈 상태에서 /health 는 capPolicy 를 'none' 으로 정직하게 말한다(classCheck.ts).
+ *    켜 놓고 «없다» 고 말하거나 꺼 놓고 «있다» 고 말하면, 캡을 보고 여유를 계산하는 쪽이 속는다.
  * 🚨 함수로 둔 이유: 통제하는 쪽(takeToken)과 그것을 밖에 말하는 쪽(/health classCheck)이
  *    **같은 값을 읽어야** 한다. 각자 env 를 읽으면 한쪽만 고쳐졌을 때 «켜 놓고 없다고 말하는»
  *    상태가 생기고, 그건 캡을 보고 판정하는 쪽을 조용히 속인다.
  */
 export function myTurnGuardEnabled(): boolean {
-  return (process.env.MYTURN_GUARD_ENABLED ?? '1') !== '0';
+  return (process.env.MYTURN_GUARD_ENABLED ?? '0') !== '0';
 }
 
 const COOLDOWN_MS = MY_TURN_LIMITS.cooldownSeconds * 1000;
