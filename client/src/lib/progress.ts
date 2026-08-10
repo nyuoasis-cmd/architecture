@@ -105,13 +105,27 @@ function readDevUserId(): string | null {
   }
 }
 
+// 서버 동기화는 «신원이 있는» 학생만 할 수 있다(참여자 토큰 또는 로그인).
+// 라이브러리 자습처럼 신원이 없는 열람은 401 이 돌아오는데, 참여자 쿠키가 httpOnly 라
+// 클라이언트가 미리 알 방법이 없다. 그래서 «한 번 거절당하면 그 브라우징 동안은 더 부르지 않는다».
+// 🔑 진도 자체는 localStorage 에 계속 남는다 — 꺼지는 것은 서버 동기화뿐이다.
+let remoteSyncDisabled = false;
+
+/** 세션에 참여해 신원이 생겼을 때 다시 켠다(참여 전 열람에서 꺼졌을 수 있다). */
+export function enableProgressSync() {
+  remoteSyncDisabled = false;
+}
+
 async function syncProgressRemote(qaId: string, payload: { readAt?: string; quizScore?: number }) {
   if (import.meta.env.DEV) {
     return;
   }
+  if (remoteSyncDisabled) {
+    return;
+  }
   try {
     const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-    await fetch('/api/progress', {
+    const response = await fetch('/api/progress', {
       method: 'PATCH',
       headers,
       credentials: 'include',
@@ -121,6 +135,10 @@ async function syncProgressRemote(qaId: string, payload: { readAt?: string; quiz
         quiz_score: payload.quizScore,
       }),
     });
+    if (response.status === 401 || response.status === 403) {
+      // 신원이 없는 열람 — 매 문마다 401 을 쌓지 않는다.
+      remoteSyncDisabled = true;
+    }
   } catch {
     // local cache 유지, 다음 호출에서 재시도
   }

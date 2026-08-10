@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useImeSafeInput } from '@teachermate/shared';
 import { joinSession, SessionClientError } from '../lib/session-client';
+import { enableProgressSync } from '../lib/progress';
 import { setSessionTokenHint } from '../lib/session-token';
 
 export default function JoinPage() {
@@ -37,6 +38,8 @@ export default function JoinPage() {
 
     try {
       const joined = await joinSession({ code, nickname });
+      // 참여 전 라이브러리 열람에서 진도 동기화가 꺼졌을 수 있다 — 신원이 생겼으니 다시 켠다.
+      enableProgressSync();
       setSessionTokenHint({
         sessionId: joined.session_id,
         participantId: joined.participant_id,
