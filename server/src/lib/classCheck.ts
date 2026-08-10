@@ -1,3 +1,4 @@
+import { MY_TURN_LIMITS, myTurnGuardEnabled } from "./vibe-my-turn";
 import { createHash } from "node:crypto";
 
 /**
@@ -37,10 +38,28 @@ export function providerFingerprints(): Record<string, string> {
 }
 
 export function classCheckBlock() {
+  // 🚨 2026-08-10: «내 차례»(POST /api/vibe/my-turn)가 앱 레벨 전역 캡을 들여오면서
+  //    capPolicy 가 "none" 이면 **런타임 선언이 거짓**이 된다. 캡이 생겼는데 「없음」이라고
+  //    말하면, 캡을 보고 판정하는 쪽이 제공자 한도만 보고 여유를 과대평가한다.
+  //    그래서 실효값을 그대로 말한다 — 값은 env 로 바뀌므로 코드 기본값이 아니라 런타임 값이다.
+  //    (챗봇 /api/chat 은 여전히 사용자당 한도만 있고 전역 일일 캡이 없다. 아래 캡은
+  //     «내 차례» 라우트의 것이라는 뜻으로 MYTURN_ 접두사를 그대로 노출한다.)
+  if (!myTurnGuardEnabled()) {
+    // 롤백 스위치로 통제를 끈 상태 = 앱 캡이 실제로 없는 상태. 있는 척하지 않는다.
+    return {
+      capPolicy: "none" as const,
+      caps: {},
+      used: null,
+      providerFingerprint: providerFingerprints(),
+    };
+  }
   return {
-    // 이 앱은 앱 레벨 AI 캡이 없다. 제공자 한도가 유일한 방어선이라는 뜻이다.
-    capPolicy: "none" as const,
-    caps: {},
+    capPolicy: "app-daily" as const,
+    caps: {
+      MYTURN_DAILY_CAP: MY_TURN_LIMITS.globalDaily,
+      MYTURN_PER_MIN: MY_TURN_LIMITS.globalPerMin,
+      MYTURN_ACTOR_DAILY_CAP: MY_TURN_LIMITS.actorDaily,
+    },
     used: null,
     providerFingerprint: providerFingerprints(),
   };

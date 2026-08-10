@@ -9,10 +9,39 @@ import { env } from '../env';
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 
-const COOLDOWN_MS = 5 * 60_000;
-const ACTOR_DAILY_LIMIT = 12;
-const GLOBAL_MINUTE_LIMIT = 60;
-const GLOBAL_DAILY_LIMIT = 500;
+// 호출 통제 값 — 전부 Render env 로 «무배포» 조정한다(대규모 수업 전 상향 → 수업 후 원복).
+// 🚨 코드 상수로만 두면 상향에 배포가 필요해서, 수업 당일 막혔을 때 손쓸 수가 없다.
+//    기본값은 30명 1차시(문항 2개)를 기준으로 잡았다 — 학생당 12회는 넉넉하고,
+//    전역 일일 500 은 30명 × 2문 × 재시도 여유(≈8배) 안에 든다.
+// 🚨 이 값들이 바뀌면 /health 의 classCheck 선언도 같이 움직여야 한다(둘의 정합은 테스트가 지킨다).
+function envInt(key: string, fallback: number): number {
+  const raw = process.env[key];
+  if (raw === undefined || raw.trim() === '') return fallback;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
+}
+
+export const MY_TURN_LIMITS = {
+  cooldownSeconds: envInt('MYTURN_COOLDOWN_SEC', 300),
+  actorDaily: envInt('MYTURN_ACTOR_DAILY_CAP', 12),
+  globalPerMin: envInt('MYTURN_PER_MIN', 60),
+  globalDaily: envInt('MYTURN_DAILY_CAP', 500),
+};
+
+/**
+ * 롤백 스위치 — 0 이면 통제를 끈다(사고 시 즉시 되돌리기용, 기본 켜짐).
+ * 🚨 함수로 둔 이유: 통제하는 쪽(takeToken)과 그것을 밖에 말하는 쪽(/health classCheck)이
+ *    **같은 값을 읽어야** 한다. 각자 env 를 읽으면 한쪽만 고쳐졌을 때 «켜 놓고 없다고 말하는»
+ *    상태가 생기고, 그건 캡을 보고 판정하는 쪽을 조용히 속인다.
+ */
+export function myTurnGuardEnabled(): boolean {
+  return (process.env.MYTURN_GUARD_ENABLED ?? '1') !== '0';
+}
+
+const COOLDOWN_MS = MY_TURN_LIMITS.cooldownSeconds * 1000;
+const ACTOR_DAILY_LIMIT = MY_TURN_LIMITS.actorDaily;
+const GLOBAL_MINUTE_LIMIT = MY_TURN_LIMITS.globalPerMin;
+const GLOBAL_DAILY_LIMIT = MY_TURN_LIMITS.globalDaily;
 
 export type MyTurnSlot = {
   key: string;
@@ -81,6 +110,7 @@ let globalMinute = { count: 0, resetAt: 0 };
 let globalDay = { count: 0, resetAt: 0 };
 
 function takeToken(actorId: string): void {
+  if (!myTurnGuardEnabled()) return;
   const now = Date.now();
 
   const last = actorLastCall.get(actorId);
