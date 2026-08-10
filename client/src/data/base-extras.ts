@@ -2,6 +2,8 @@ import type { VibeExtras } from './vibe-stubs';
 import { CH01_EXTRAS } from './base-extras-ch01';
 import { CH02_EXTRAS } from './base-extras-ch02';
 import { CH03_EXTRAS } from './base-extras-ch03';
+import { CH04_EXTRAS } from './base-extras-ch04';
+import { CH05_EXTRAS } from './base-extras-ch05';
 
 // 기초 1~10장의 견학·사례. 장별 파일 하나씩 늘려 간다(장당 1 PR).
 //
@@ -13,4 +15,6 @@ export const BASE_EXTRAS: Record<string, VibeExtras> = {
   ...CH01_EXTRAS,
   ...CH02_EXTRAS,
   ...CH03_EXTRAS,
+  ...CH04_EXTRAS,
+  ...CH05_EXTRAS,
 };
