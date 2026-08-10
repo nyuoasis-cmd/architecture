@@ -5,7 +5,7 @@ import ChatPanel from '../components/learn/ChatPanel';
 import GuidePanel from '../components/learn/GuidePanel';
 import PreviewPanel from '../components/learn/PreviewPanel';
 import { CHAPTERS, getChapterById, getQaById, getQasByChapterId, type QaStub } from '../data/qa-stubs';
-import { VIBE_CATEGORY } from '../data/vibe-stubs';
+import { chapterUsesExtrasLayout } from '../data/learn-extras';
 import VibeLearnLayout from '../components/learn/vibe/VibeLearnLayout';
 import { getDemoByQaId } from '../data/demos';
 import { markRead } from '../lib/progress';
@@ -45,8 +45,10 @@ function LearnLayout(props: {
   const setMobileTab = useLearnStore((state) => state.setMobileTab);
   const setScenarioId = useLearnStore((state) => state.setScenarioId);
 
-  // 카테고리 «바이브코딩»(11~17장)은 전용 탭형 레이아웃을 쓴다 — 기존 3컬럼 화면은 그대로.
-  if (props.chapter.category === VIBE_CATEGORY) {
+  // 🔑 형판은 카테고리가 아니라 «이 장에 견학·사례 데이터가 있는가»로 고른다.
+  //    그래야 1~10장을 **한 장씩** 옮겨 갈 수 있고, 문제가 생기면 그 장 데이터만 되돌리면
+  //    원래 3컬럼 화면으로 돌아온다. (분류 체계를 건드리지 않고 콘텐츠로만 움직인다.)
+  if (chapterUsesExtrasLayout(props.chapter.id)) {
     return (
       <VibeLearnLayout
         chapter={props.chapter}
