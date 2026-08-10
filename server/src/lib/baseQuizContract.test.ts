@@ -100,7 +100,20 @@ test('⑦ 정답 자리가 한쪽으로 쏠리지 않는다 (어느 자리도 35
   )
 })
 
-test('⑧ 가드가 실패할 수 있는 계측인지 — 대조 대상이 비어 있지 않다', () => {
+// ⑧ 변이 시험에서 찾은 구멍: 선지를 하나 지워도 correctIdx 가 우연히 범위 안이면 ④가 못 잡는다.
+// 4지선다인데 조용히 3지선다가 되면 정답 확률이 올라가고 화면·빌드·④ 전부 초록이다.
+test('⑧ 모든 퀴즈가 4지선다다', () => {
+  const bad: string[] = []
+  for (const [qaId, set] of Object.entries(BASE_QUIZZES)) {
+    set.questions.forEach((q, i) => {
+      if (q.options.length !== 4) bad.push(`${qaId}#${i + 1}: 선지 ${q.options.length}개`)
+      if (new Set(q.options.map((o) => o.trim())).size !== q.options.length) bad.push(`${qaId}#${i + 1}: 같은 선지 중복`)
+    })
+  }
+  assert.deepEqual(bad, [], bad.join(' / '))
+})
+
+test('⑨ 가드가 실패할 수 있는 계측인지 — 대조 대상이 비어 있지 않다', () => {
   assert.ok(Object.keys(BASE_QUIZZES).length >= 60, '클라 선지가 비면 위 검사는 전부 공짜로 통과한다')
   assert.ok(baseAnswerIds.length >= 60, '서버 정답에 1~10장이 없으면 ②가 공짜로 통과한다')
   const withMultiple = Object.keys(BASE_QUIZZES).filter((id) => (QUIZ_ANSWERS[id]?.answers ?? []).length > 1).length
