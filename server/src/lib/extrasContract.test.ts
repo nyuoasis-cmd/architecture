@@ -137,6 +137,17 @@ test('⑧ 가드가 실패할 수 있는 계측인지 — 대조 대상이 0건�
   const incidentCount = entries.filter(([, extras]) => extras.incident).length
   assert.ok(incidentCount > 0, '사례가 0건이면 ⑦ 이 공짜로 통과한다')
 
+  // 🚨 양성 대조군 — 이게 없으면 chapterUsesExtrasLayout 이 **항상 false** 를 줘도 초록이다.
+  //    (실제로 그 변이가 이 파일을 통과했다. «없는 장은 false» 만 보면 «있는 장은 true» 를 아무도 안 본다.)
+  //    그러면 형판 전환이 통째로 죽고 1장은 옛 3컬럼 화면에 남는데, 검사는 아무 말도 안 한다.
+  for (const chapterId of EXTRAS_CHAPTER_IDS) {
+    assert.equal(
+      chapterUsesExtrasLayout(chapterId),
+      true,
+      `${chapterId}장에 extras 가 있는데 형판을 안 쓴다고 하면, 만든 콘텐츠가 화면에 안 나온다`,
+    )
+  }
+
   // 음성 대조군 — 없는 장·이상한 qaId 가 «형판을 쓴다»고 나오면 판정이 헛돈다.
   assert.equal(chapterUsesExtrasLayout(99), false, '없는 장이 형판을 쓴다고 하면 선언이 의미를 잃는다')
   assert.ok(Number.isNaN(chapterIdOfQaId('엉터리')), 'qaId 모양이 아닌 것이 어느 장에 붙으면 안 된다')
