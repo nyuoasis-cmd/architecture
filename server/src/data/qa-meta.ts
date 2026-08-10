@@ -1,9 +1,17 @@
+import { QA_CONTEXTS } from './chapter-content';
+
 export type QaMetaEntry = {
   qaId: string;
   chapterId: number;
 };
 
-export const QA_META: QaMetaEntry[] = [
+// 🚨 2026-08-11: 이 목록은 손나열이었고, 그래서 썩었다.
+//    11·12·14~17장(바이브코딩 42문 중 36문)이 통째로 빠진 채 «정상»으로 보였다 —
+//    빠진 문항은 getQaChapterId 가 null 을 주고, 교사 해설이 404 로 죽는다.
+//    손나열은 콘텐츠가 늘 때마다 사람이 따라 적어야 하는데, 안 적어도 아무것도 빨개지지 않는다.
+//    → 문항의 정본(QA_CONTEXTS)에서 **파생**시킨다. 이제 장을 추가하면 이 목록이 저절로 따라온다.
+//    (아래 HAND_LISTED_LEGACY 는 파생 결과가 옛 손목록을 덮는지 확인하는 대조군으로만 남긴다.)
+export const HAND_LISTED_LEGACY: QaMetaEntry[] = [
   { qaId: 'ch01_q01', chapterId: 1 },
   { qaId: 'ch01_q02', chapterId: 1 },
   { qaId: 'ch01_q03', chapterId: 1 },
@@ -75,6 +83,16 @@ export const QA_META: QaMetaEntry[] = [
   { qaId: 'ch13_q05', chapterId: 13 },
   { qaId: 'ch13_q06', chapterId: 13 },
 ];
+
+/**
+ * 정본에서 파생한 qaId → chapterId 목록.
+ * 🔑 QA_CONTEXTS 는 챕터 등록부(chapter-content.ts CHAPTERS + VIBE_CHAPTER_META)에서 만들어지므로,
+ *    장·문항이 늘면 이 목록도 같이 는다. 사람이 따라 적을 것이 없다 = 썩을 곳이 없다.
+ */
+export const QA_META: QaMetaEntry[] = QA_CONTEXTS.map((qa) => ({
+  qaId: qa.id,
+  chapterId: qa.chapterId,
+}));
 
 const QA_CHAPTER_ID_MAP = new Map(QA_META.map((entry) => [entry.qaId, entry.chapterId]));
 

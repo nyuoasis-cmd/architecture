@@ -2,15 +2,13 @@ import { useState } from 'react';
 import { CHAPTERS } from '../../data/qa-stubs';
 import { createSession, type SessionRecord } from '../../lib/session-client';
 
-// 🚨 서버가 세션의 chapter_ids 를 1~10 으로 막는다(server/src/routes/sessions.ts).
-//    즉 11장 이후(바이브코딩)는 수업 세션으로 열 수 없고 라이브러리 자습으로만 닿는다.
-//    이 상한이 바뀌면 여기 문구도 함께 움직여야 한다 — 예전에는 문항 수가 손으로 적혀 있었고,
-//    실제(64개)와 어긋난 채 교사에게 그대로 보여지고 있었다.
-const SESSION_MAX_CHAPTER_ID = 10;
-const SESSION_QA_COUNT = CHAPTERS.filter((chapter) => chapter.id <= SESSION_MAX_CHAPTER_ID).reduce(
-  (sum, chapter) => sum + chapter.qaCount,
-  0,
-);
+// 🚨 2026-08-11: 서버가 chapter_ids 를 1~10 으로 막던 것을 풀었다(등록부 전체 허용).
+//    이제 바이브코딩 11~17장도 수업 세션으로 열린다 — 그전에는 라이브러리 자습으로만 닿았다.
+// 🔑 상한도 문항 수도 손으로 적지 않는다. 둘 다 챕터 데이터에서 계산한다 —
+//    예전에 손으로 적힌 문항 수가 실제(64개)와 어긋난 채 교사에게 그대로 보여지고 있었다.
+//    서버 등록부와 이 값이 어긋나지 않는지는 qaCountCopy.test.ts 가 «평가해서» 대조한다.
+const SESSION_MAX_CHAPTER_ID = Math.max(...CHAPTERS.map((chapter) => chapter.id));
+const SESSION_QA_COUNT = CHAPTERS.reduce((sum, chapter) => sum + chapter.qaCount, 0);
 
 type NewSessionModalProps = {
   onClose: () => void;
