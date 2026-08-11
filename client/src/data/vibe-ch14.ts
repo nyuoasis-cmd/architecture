@@ -152,6 +152,19 @@ export const CH14_EXTRAS: Record<string, VibeExtras> = {
           '진행이 보이는 화면과 안 보이는 화면의 차이는 번호 하나야. 네 작업 목록에도 번호를 붙이면, 언제든 «몇 개 중 몇 번»으로 답할 수 있는 상태가 돼.',
       },
     ],
+    myTurn: {
+      intro:
+        '이번엔 네 차례야. 앱 전체를 한 번에 시키지 말고 «첫 작업 하나»만 부탁해 봐. 무엇부터 · 이번엔 어디까지 · 끝났다는 걸 어떻게 아는지 · 어떻게 확인하는지 · 그다음은 무엇인지 — 안 정한 칸은 AI 가 대신 정해 버려.',
+      placeholder:
+        '먼저 ___ 부터 해줘. 이번 작업은 ___ 까지만 하고, ___ 가 되면 끝난 거야. 나는 ___ 로 확인할게. 그다음은 ___ 야.',
+      slots: [
+        { key: 'first', label: '첫 작업', inventedExample: '앱 전체를 한 번에 만들기 (작업이 아니라 목표)' },
+        { key: 'scope', label: '이번 작업의 범위', inventedExample: '눈에 보이는 기능 전부 (어디서 끊을지 정해지지 않음)' },
+        { key: 'done', label: '끝났다는 조건', inventedExample: '잘 만들어지면 끝 (판정할 수 없는 조건)' },
+        { key: 'check', label: '확인 방법', inventedExample: '코드를 읽어 보고 판단 (눈으로 확인할 장면 없음)' },
+        { key: 'next', label: '다음 작업', inventedExample: '나머지 전부 (이어서 시작할 지점이 안 남음)' },
+      ],
+    },
   },
   ch14_q04: {
     qaId: 'ch14_q04',

@@ -120,6 +120,42 @@ export const MY_TURN_TASKS: Record<string, MyTurnTask> = {
       },
     ],
   },
+  ch14_q03: {
+    qaId: 'ch14_q03',
+    topic: '앱 전체가 아니라 «첫 작업 하나»만 시키는 부탁문',
+    slots: [
+      {
+        key: 'first',
+        label: '첫 작업',
+        hint: '«앱 만들기» 같은 목표가 아니라, 한 번에 하나로 끝나는 작업 하나가 지목됐는지',
+        inventedExample: '앱 전체를 한 번에 만들기 (작업이 아니라 목표)',
+      },
+      {
+        key: 'scope',
+        label: '이번 작업의 범위',
+        hint: '이번에 어디까지 하고 어디서 끊는지가 적혀 있는지',
+        inventedExample: '눈에 보이는 기능 전부 (어디서 끊을지 정해지지 않음)',
+      },
+      {
+        key: 'done',
+        label: '끝났다는 조건',
+        hint: '누가 봐도 «끝났다»를 똑같이 판정할 수 있는 조건인지',
+        inventedExample: '잘 만들어지면 끝 (판정할 수 없는 조건)',
+      },
+      {
+        key: 'check',
+        label: '확인 방법',
+        hint: '학생이 직접 눌러 보고 눈으로 확인할 장면이 적혀 있는지',
+        inventedExample: '코드를 읽어 보고 판단 (눈으로 확인할 장면 없음)',
+      },
+      {
+        key: 'next',
+        label: '다음 작업',
+        hint: '중단했다가 이어갈 지점(다음 번호)이 남아 있는지',
+        inventedExample: '나머지 전부 (이어서 시작할 지점이 안 남음)',
+      },
+    ],
+  },
 };
 
 const verdictSchema = z.object({
