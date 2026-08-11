@@ -6,33 +6,54 @@ import { env } from '../env';
 // «내 차례» — 학생이 쓴 부탁문을 Haiku 4.5로 실제 실행해, 다섯 칸 중
 // «학생이 정한 칸 / AI가 대신 정하게 되는 칸»을 판정한다.
 // 모델 = Haiku 4.5 재사용 (jery 승인 2026-08-10, 기존 챗봇과 동일 모델).
-// 호출 통제: 학생(IP) 쿨타임 5분 · 학생 하루 12회 · 전체 분당 60 · 전체 하루 500.
+// 호출 통제: 학생 분당 10 · 학생 하루 300 · 전체 분당 60 · 전체 하루 500 (쿨타임 없음).
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 
 // 호출 통제 값 — 전부 Render env 로 «무배포» 조정한다(대규모 수업 전 상향 → 수업 후 원복).
 // 🚨 코드 상수로만 두면 상향에 배포가 필요해서, 수업 당일 막혔을 때 손쓸 수가 없다.
-//    기본값은 30명 1차시(문항 2개)를 기준으로 잡았다 — 학생당 12회는 넉넉하고,
-//    전역 일일 500 은 30명 × 2문 × 재시도 여유(≈8배) 안에 든다.
+// 🚨 2026-08-11 상향(jery 확정) — 실습 강이 들어오면서 «쓰고 판정받고 고치고»가 수업의 본체가 됐다.
+//    5분 쿨타임은 한 차시 안에 학생이 두세 번밖에 못 고치게 만드는 병목이었다(비용이 아니라 수업이 막힌다).
+//    그래서 **쿨타임 0 · 학생 하루 300** 으로 올리고, 대신 **학생 분당 10** 을 새로 둔다.
+//    분당 10 은 돈 때문이 아니라 **연타 오작동 방지**다 — 쿨타임을 없애면 버튼 연타가 그대로 호출이 된다.
 // 🚨 이 값들이 바뀌면 /health 의 classCheck 선언도 같이 움직여야 한다(둘의 정합은 테스트가 지킨다).
-function envInt(key: string, fallback: number): number {
+/**
+ * env 정수 읽기.
+ * 🚨 `allowZero` 가 없으면 «0 을 넣어 끄는» 조정이 조용히 무시된다 — 0 은 «양수 아님»이라
+ *    기본값으로 되돌아가기 때문이다. 쿨타임은 0(=없음)이 정상 설정값이라 이 갈래가 필요하다.
+ *    (이걸 안 갈라 두면 Render 에 MYTURN_COOLDOWN_SEC=0 을 넣고도 5분이 그대로 걸린다.)
+ */
+export function envInt(key: string, fallback: number, allowZero = false): number {
   const raw = process.env[key];
   if (raw === undefined || raw.trim() === '') return fallback;
   const n = Number(raw);
-  return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
+  const floor = allowZero ? 0 : 1;
+  return Number.isFinite(n) && n >= floor ? Math.floor(n) : fallback;
 }
 
 export const MY_TURN_LIMITS = {
-  cooldownSeconds: envInt('MYTURN_COOLDOWN_SEC', 300),
-  actorDaily: envInt('MYTURN_ACTOR_DAILY_CAP', 12),
+  // 🔑 기본 0 = 쿨타임 없음. 되돌리려면 Render 에 MYTURN_COOLDOWN_SEC=300 한 줄(무배포).
+  cooldownSeconds: envInt('MYTURN_COOLDOWN_SEC', 0, true),
+  actorDaily: envInt('MYTURN_ACTOR_DAILY_CAP', 300),
+  // 🚨 쿨타임을 없앤 자리를 이게 받는다. 이 줄이 빠지면 학생 한 명이 버튼을 연타하는 만큼
+  //    그대로 호출이 나가고, 전역 분당 60 이 한 명에게 다 먹힌다 — 같은 반의 다른 학생이 막힌다.
+  actorPerMin: envInt('MYTURN_ACTOR_PER_MIN', 10),
   // 🚨 공유 통(참여자 토큰이 없는 «라이브러리 자습») 전용 한도.
   //    학교는 교실 전체가 공인 IP 하나로 나가서, 한 명 몫(쿨타임 5분)을 여기 적용하면
   //    첫 학생이 제출하는 순간 반 전체가 5분 잠긴다. 그래서 **쿨타임을 걸지 않고**
   //    분당·일일 한도로만 잰다(챗봇 chat-service 가 이미 쓰는 방식과 같다).
   sharedPerMin: envInt('MYTURN_SHARED_PER_MIN', 10),
-  sharedDaily: envInt('MYTURN_SHARED_DAILY_CAP', 200),
-  globalPerMin: envInt('MYTURN_PER_MIN', 60),
-  globalDaily: envInt('MYTURN_DAILY_CAP', 500),
+  // 🚨 공유 통은 **학생 한 명보다 커야 한다** — 여럿이 뭉쳐 있는 통이기 때문이다.
+  //    학생 300 인데 공유가 200 이면 «자습하는 반»이 «세션 반»보다 먼저 막힌다(2026-08-11 상향 때 실제로 뒤집혔다).
+  sharedDaily: envInt('MYTURN_SHARED_DAILY_CAP', 1000),
+  // 🔑 전역은 «하루 몇 차시를 받을 수 있는가»다. 실습 1차시 ≈ 24명 × 문항 4개 ≈ 96~192회 →
+  //    4,000 이면 하루 20~40차시. 예전 500 은 하루 2~3반에서 닿았다(jery 확정 2026-08-11).
+  //    분당 120 = 40명 학급이 동시에 눌러도 흡수. 포화 시 상한 ≈ $16/일.
+  // 🚨 지금 「내 차례」에는 **이것 말고 돈 천장이 없다** — CHAT_MONTHLY_BUDGET_USD 는 챗봇 전용이라
+  //    이 라우트의 지출을 세지 않는다(registerUsageCost 는 chat-service 안에만 있다).
+  //    즉 이 두 줄이 곧 지출 상한이다. 올릴 때는 그 사실을 알고 올린다.
+  globalPerMin: envInt('MYTURN_PER_MIN', 120),
+  globalDaily: envInt('MYTURN_DAILY_CAP', 4000),
 };
 
 /**
@@ -59,6 +80,7 @@ export function myTurnGuardEnabled(): boolean {
 }
 
 const COOLDOWN_MS = MY_TURN_LIMITS.cooldownSeconds * 1000;
+const ACTOR_MINUTE_LIMIT = MY_TURN_LIMITS.actorPerMin;
 const SHARED_MINUTE_LIMIT = MY_TURN_LIMITS.sharedPerMin;
 const SHARED_DAILY_LIMIT = MY_TURN_LIMITS.sharedDaily;
 const ACTOR_DAILY_LIMIT = MY_TURN_LIMITS.actorDaily;
@@ -82,6 +104,229 @@ export type MyTurnTask = {
 
 /** 문항별 «내 차례» 판정 과제 — 클라이언트 vibe-ch13.ts myTurn.slots와 key·label을 맞춘다. */
 export const MY_TURN_TASKS: Record<string, MyTurnTask> = {
+  // 13강(속 ch19) «나만의 스킬» — 학생이 반복해 온 일 하나를 스킬 세 칸으로 옮겼는지 판정한다.
+  ch19_q04: {
+    qaId: 'ch19_q04',
+    topic: '내가 세 번 이상 반복한 일 하나를 옮긴 «스킬» 한 장 (이름·언제 쓰나·단계)',
+    slots: [
+      {
+        key: 'name',
+        label: '이름',
+        hint: '결과가 아니라 «일»로 불렀는지 — «예쁜 발표»는 결과라 언제 꺼낼지 안 보인다',
+        inventedExample: '발표 잘하기 (결과라서 언제 꺼낼지 안 보임)',
+      },
+      {
+        key: 'when',
+        label: '언제 쓰나',
+        hint: '이 스킬을 꺼내는 상황이 좁혀져 있는지 — 없으면 스킬이 쌓였을 때 아무도 못 고른다',
+        inventedExample: '필요할 때 (상황이 정해지지 않아 고를 수가 없음)',
+      },
+      {
+        key: 'steps',
+        label: '단계',
+        hint: '무엇을 어떤 차례로 하는지가 번호로 적혀 있는지(서너 단계면 충분하다)',
+        inventedExample: '준비하고 발표한다 (누가 읽어도 같은 일을 못 함)',
+      },
+      {
+        key: 'grain',
+        label: '단계 수위',
+        hint: '한 단계마다 «결과물이 하나» 나오는 크기인지 — 너무 굵거나 너무 잘지 않은지',
+        inventedExample: '잘 만든다 (결과물이 하나 나오는 크기가 아님)',
+      },
+      {
+        key: 'repeat',
+        label: '반복 근거',
+        hint: '실제로 여러 번 해 본 일인지가 드러나는지 — 상상한 단계는 빈 곳이 안 드러난다',
+        inventedExample: '한 번 해 봄 (상상한 단계는 빈 곳이 안 드러남)',
+      },
+    ],
+  },
+  // 16강(속 ch20) «기획 · 완료 조건» — «끝났다»를 누가 봐도 같게 판정할 수 있게 적었는지 본다.
+  ch20_q04: {
+    qaId: 'ch20_q04',
+    topic: '아직 안 끝난 일 하나의 «완료 조건» (무엇이 · 어떻게 되면 · 어떻게 확인 · 막혀야 하는 것)',
+    slots: [
+      {
+        key: 'what',
+        label: '무엇이',
+        hint: '«누가 무엇을 하면»이 장면으로 적혀 있는지 — 일의 이름을 다시 적은 것은 조건이 아니다',
+        inventedExample: '앱이 완성되면 (누가 무엇을 하는 장면인지 없음)',
+      },
+      {
+        key: 'then',
+        label: '어떻게 되면',
+        hint: '무슨 일이 일어나야 하는지가 눈으로 볼 수 있게 적혀 있는지',
+        inventedExample: '잘 동작한다 (무엇을 봐야 하는지 없음)',
+      },
+      {
+        key: 'how',
+        label: '어떻게 확인',
+        hint: '누가 어느 화면에서 무엇을 눌러 보는지가 적혀 있는지 — «보면 안다»는 확인 방법이 아니다',
+        inventedExample: '보면 안다 (누가 무엇을 눌러 보는지 없음)',
+      },
+      {
+        key: 'blocked',
+        label: '막혀야 하는 것',
+        hint: '«이러면 안 된다»가 짝으로 적혀 있는지 — 성공 장면만 있으면 반쪽 검사표다',
+        inventedExample: '특별히 막을 것 없음 (성공 장면만 있는 반쪽 검사표)',
+      },
+      {
+        key: 'number',
+        label: '숫자',
+        hint: '몇 명·몇 초·몇 건 같은 판정선이 들어갔는지 — «빠르게·많이»는 사람마다 다르게 읽힌다',
+        inventedExample: '빠르게·많이 (판정이 사람마다 갈리는 낱말)',
+      },
+    ],
+  },
+  // 19강(속 ch21) «TDD 한 바퀴» — 완료 조건을 기계가 확인할 수 있는 «약속 문장»으로 옮겼는지 본다.
+  ch21_q04: {
+    qaId: 'ch21_q04',
+    topic: '완료 조건 하나를 옮긴 «약속 문장» (넣는 것 · 나와야 하는 것 · 왜 그게 맞나 · 막혀야 하는 경우)',
+    slots: [
+      {
+        key: 'input',
+        label: '넣는 것',
+        hint: '실제 값이 적혀 있는지 — «책을 빌리면»처럼 값이 없으면 기계가 무엇을 넣을지 모른다',
+        inventedExample: '책을 빌리면 (실제 값이 없어 무엇을 넣을지 모름)',
+      },
+      {
+        key: 'expected',
+        label: '나와야 하는 것',
+        hint: '어디에 무엇이 어떻게 되는지까지 적혀 있는지 — «무언가 표시된다»는 뭘 해도 통과한다',
+        inventedExample: '무언가 표시된다 (뭘 해도 통과하는 흐린 결과)',
+      },
+      {
+        key: 'why',
+        label: '왜 그게 맞나',
+        hint: '이 약속이 지키려는 것이 한 줄로 적혀 있는지 — 이유 없는 약속은 나중에 아무도 못 건드린다',
+        inventedExample: '적지 않음 (나중에 고칠지 지울지 아무도 판단 못 함)',
+      },
+      {
+        key: 'blocked',
+        label: '막혀야 하는 경우',
+        hint: '«이러면 거절된다»가 짝으로 적혀 있는지 — 성공하는 경우만 있으면 잘못된 길이 안 막힌다',
+        inventedExample: '따로 없음 (잘못된 길이 아무 데서도 안 막힘)',
+      },
+      {
+        key: 'falsifiable',
+        label: '틀릴 수 있는가',
+        hint: '어떤 결과가 나와도 통과한다고 말할 수 있는 약속은 아니어야 한다',
+        inventedExample: '어떤 결과가 나와도 통과 (아무것도 재지 못하는 약속)',
+      },
+    ],
+  },
+  // 22강(속 ch22) «커밋·PR·보안» — 내가 한 일을 남이 알아볼 수 있게 넘겼는지 본다.
+  ch22_q04: {
+    qaId: 'ch22_q04',
+    topic: '최근에 한 일 하나의 «넘김 쪽지» (무엇을 · 왜 · 안 한 것 · 확인한 것)',
+    slots: [
+      {
+        key: 'what',
+        label: '무엇을',
+        hint: '읽는 사람이 결과물을 안 열어 봐도 그림이 그려지는지 — «수정함·업데이트»는 아무것도 안 알려 준다',
+        inventedExample: '수정함 (읽는 사람이 그림을 못 그림)',
+      },
+      {
+        key: 'why',
+        label: '왜',
+        hint: '무엇이 곤란해서 그렇게 했는지가 적혀 있는지 — «필요해서»는 이유의 자리를 채운 말일 뿐이다',
+        inventedExample: '필요해서 (이유의 자리를 채운 말일 뿐 이유가 아님)',
+      },
+      {
+        key: 'notdone',
+        label: '안 한 것',
+        hint: '이번에 일부러 미룬 것이 적혀 있는지 — 없으면 받는 사람이 «잊었나?»에서 멈춘다',
+        inventedExample: '적지 않음 (받는 사람이 «잊었나?»에서 멈춤)',
+      },
+      {
+        key: 'checked',
+        label: '확인한 것',
+        hint: '이름·긴 숫자·열쇠 낱말을 실제로 찾아봤는지, 무엇을 어떻게 봤는지가 구체적인지',
+        inventedExample: '확인함 (무엇을 어떻게 봤는지 없음)',
+      },
+      {
+        key: 'size',
+        label: '덩어리 크기',
+        hint: '한 번에 넘기는 양이 쪽지 한두 줄로 적힐 크기인지 — «이것저것 많이»면 쪼갤 때다',
+        inventedExample: '이것저것 많이 고침 (쪽지가 안 써질 만큼 큰 덩어리)',
+      },
+    ],
+  },
+  // 23강(속 ch23) «종합 = 졸업» — 앞 다섯 강의 산출물을 하나로 묶었는지, 각 장의 핵심 칸이 살아 있는지 본다.
+  ch23_q04: {
+    qaId: 'ch23_q04',
+    topic: '실습 다섯 강의 산출물을 하나로 묶은 «나만의 묶음» (규칙 · 스킬 · 완료 조건 · 약속 문장 · 넘김 쪽지)',
+    slots: [
+      {
+        key: 'rules',
+        label: '규칙 (12강)',
+        hint: '규칙이 있는지, 그리고 그 안에 «이번엔 안 하는 것»이 적혀 있는지 — 침묵은 승낙으로 읽힌다',
+        inventedExample: '적지 않음 — «안 하는 것» 칸이 비어 침묵이 승낙으로 읽힘',
+      },
+      {
+        key: 'skill',
+        label: '스킬 (13강)',
+        hint: '반복하는 일이 이름·단계로 적혀 있는지, 그리고 «언제 쓰나»가 있는지',
+        inventedExample: '적지 않음 — «언제 쓰나»가 없어 꺼낼 상황이 안 정해짐',
+      },
+      {
+        key: 'done',
+        label: '완료 조건 (16강)',
+        hint: '«끝»이 판정 가능하게 적혀 있는지, 그리고 «막혀야 하는 것»이 짝으로 있는지',
+        inventedExample: '적지 않음 — «막혀야 하는 것»이 없는 반쪽 검사표',
+      },
+      {
+        key: 'promise',
+        label: '약속 문장 (19강)',
+        hint: '넣는 것과 나와야 하는 것이 분명한지, 그리고 «왜 그게 맞나»가 있는지 — 틀릴 수 있는 약속인지',
+        inventedExample: '적지 않음 — 뭘 해도 통과해 아무것도 재지 못함',
+      },
+      {
+        key: 'handoff',
+        label: '넘김 쪽지 (22강)',
+        hint: '무엇을 왜 했는지가 적혀 있는지 — «필요해서»는 이유가 아니다',
+        inventedExample: '적지 않음 — «왜»가 없어 나중에 되돌릴지 판단 못 함',
+      },
+    ],
+  },
+  // 12강(속 ch18) «왜 하네스인가» — 학생이 쓴 «우리 반 규칙 문서»를 네 칸으로 판정한다.
+  //    🔑 클라이언트 vibe-ch18.ts 의 myTurn.slots 와 key·label 이 1:1 이어야 한다(계약이 지킨다).
+  ch18_q04: {
+    qaId: 'ch18_q04',
+    topic: '우리 반에서 «말 안 해도 다들 지키는 것» 하나를 문서로 옮긴 규칙 한 장',
+    slots: [
+      {
+        key: 'scope',
+        label: '대상',
+        hint: '이 규칙이 어디에 적용되는지가 좁혀져 있는지(«교실 생활 전반» 같은 통짜는 대상이 아니다)',
+        inventedExample: '교실 생활 전반 (어디까지인지 정해지지 않아 어디에도 안 걸림)',
+      },
+      {
+        key: 'rules',
+        label: '규칙 문장',
+        hint: '늘 지켜야 하는 것이 몇 줄로 적혀 있는지(세 줄 안팎이면 충분하다)',
+        inventedExample: '깨끗하게 생활한다 (지켰는지 판정할 수 없는 문장)',
+      },
+      {
+        key: 'checkable',
+        label: '판정 가능성',
+        hint: '누가 읽어도 지켰는지 안 지켰는지 똑같이 판정할 수 있는 문장인지 — «친절하게·성실하게»는 판정할 수 없다',
+        inventedExample: '친절하게·성실하게 (사람마다 다르게 읽히는 낱말)',
+      },
+      {
+        key: 'exception',
+        label: '예외',
+        hint: '«이럴 때는 안 지켜도 된다»가 적혀 있는지 — 예외가 없으면 현실에 부딪히는 날 규칙 전체가 무시된다',
+        inventedExample: '예외 없음 (현실에 부딪히는 날 규칙 전체가 무시된다)',
+      },
+      {
+        key: 'notdoing',
+        label: '안 하는 것',
+        hint: '«이번엔 하지 않기로 정한 것»이 명시됐는지 — 침묵은 금지가 아니라 승낙으로 읽힌다',
+        inventedExample: '따로 정하지 않음 (침묵은 금지가 아니라 승낙으로 읽힌다)',
+      },
+    ],
+  },
   ch13_q01: {
     qaId: 'ch13_q01',
     topic: '우리 반 도서 대출 앱',
@@ -307,7 +552,7 @@ export class MyTurnUnavailableError extends Error {}
 const anthropic = env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: env.ANTHROPIC_API_KEY }) : null;
 
 const actorLastCall = new Map<string, number>();
-const sharedMinuteBuckets = new Map<string, { count: number; resetAt: number }>();
+const minuteBuckets = new Map<string, { count: number; resetAt: number }>();
 const actorDayBuckets = new Map<string, { count: number; resetAt: number }>();
 let globalMinute = { count: 0, resetAt: 0 };
 let globalDay = { count: 0, resetAt: 0 };
@@ -328,7 +573,7 @@ export function takeMyTurnToken(actorId: string): void {
  *    (실제로 변이 시험에서 그랬다).
  */
 export function __expireMyTurnMinuteBucketsForTest(): void {
-  for (const bucket of sharedMinuteBuckets.values()) bucket.resetAt = 0;
+  for (const bucket of minuteBuckets.values()) bucket.resetAt = 0;
   globalMinute = { count: 0, resetAt: 0 };
 }
 
@@ -336,7 +581,7 @@ export function __expireMyTurnMinuteBucketsForTest(): void {
 export function __resetMyTurnBucketsForTest(): void {
   actorLastCall.clear();
   actorDayBuckets.clear();
-  sharedMinuteBuckets.clear();
+  minuteBuckets.clear();
   globalMinute = { count: 0, resetAt: 0 };
   globalDay = { count: 0, resetAt: 0 };
 }
@@ -350,15 +595,19 @@ function takeToken(actorId: string): void {
   //    (2026-08-11: 통제를 켜면서 이 갈래가 없다는 것이 드러났다 — 챗봇은 이미 갈라 쓰고 있었다.)
   const isOne = isParticipantKey(actorId);
 
-  if (isOne) {
+  // 🔑 분당 한도는 **양쪽 다** 건다. 예전에는 학생 쪽이 쿨타임만 보고 분당을 안 봤는데,
+  //    쿨타임이 0 이 되면 학생 쪽에 연타를 막을 것이 아무것도 안 남는다.
+  const minuteLimit = isOne ? ACTOR_MINUTE_LIMIT : SHARED_MINUTE_LIMIT;
+  const minuteBucket = minuteBuckets.get(actorId);
+  if (minuteBucket && minuteBucket.resetAt > now && minuteBucket.count >= minuteLimit) {
+    throw new MyTurnRateLimitError(Math.ceil((minuteBucket.resetAt - now) / 1000));
+  }
+
+  // 쿨타임은 «학생 한 명»에게만, 그리고 켜져 있을 때만(기본 0 = 안 건다).
+  if (isOne && COOLDOWN_MS > 0) {
     const last = actorLastCall.get(actorId);
     if (last && now - last < COOLDOWN_MS) {
       throw new MyTurnRateLimitError(Math.ceil((COOLDOWN_MS - (now - last)) / 1000));
-    }
-  } else {
-    const minute = sharedMinuteBuckets.get(actorId);
-    if (minute && minute.resetAt > now && minute.count >= SHARED_MINUTE_LIMIT) {
-      throw new MyTurnRateLimitError(Math.ceil((minute.resetAt - now) / 1000));
     }
   }
 
@@ -377,13 +626,11 @@ function takeToken(actorId: string): void {
 
   if (isOne) {
     actorLastCall.set(actorId, now);
+  }
+  if (!minuteBucket || minuteBucket.resetAt <= now) {
+    minuteBuckets.set(actorId, { count: 1, resetAt: now + 60_000 });
   } else {
-    const minute = sharedMinuteBuckets.get(actorId);
-    if (!minute || minute.resetAt <= now) {
-      sharedMinuteBuckets.set(actorId, { count: 1, resetAt: now + 60_000 });
-    } else {
-      minute.count += 1;
-    }
+    minuteBucket.count += 1;
   }
   if (!day || day.resetAt <= now) {
     actorDayBuckets.set(actorId, { count: 1, resetAt: now + 86_400_000 });

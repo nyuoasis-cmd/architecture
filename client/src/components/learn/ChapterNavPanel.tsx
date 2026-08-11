@@ -1,17 +1,17 @@
 import { Link } from 'react-router-dom';
-import type { ChapterStub, QaStub } from '../../data/qa-stubs';
+import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getCategoryMeaning } from '../../data/category-meanings';
 import { useProgressMap } from '../../lib/progress';
 
 type ChapterNavPanelProps = {
-  chapter: ChapterStub;
+  chapter: Chapter;
   currentQa: QaStub;
-  /** 이 장의 문항만. 🚨 세션에 담긴 전체 문항을 여기 세우지 않는다 — §아래 주석 참조. */
+  /** 이 강의 문항만. 🚨 세션에 담긴 전체 문항을 여기 세우지 않는다 — §아래 주석 참조. */
   chapterQas: QaStub[];
-  /** 학생이 이동할 수 있는 장 목록(자습=전체, 세션=그 수업에 담긴 장). */
-  availableChapters: ChapterStub[];
+  /** 학생이 이동할 수 있는 강 목록(자습=전체, 세션=그 수업에 담긴 강). 진열 순서 그대로. */
+  availableChapters: Chapter[];
   progressMapOverride?: Record<string, { read: boolean; quizScore?: number }>;
-  /** 「전체 장 목록」으로 돌아가는 곳. */
+  /** 「전체 강 목록」으로 돌아가는 곳. */
   libraryHref: string;
   onSelectQa: (qaId: string) => void;
   onSelectChapter: (chapterId: number) => void;
@@ -20,9 +20,9 @@ type ChapterNavPanelProps = {
 /**
  * 좌측 컬럼 — «지금 어느 장의 몇 번째인가»와 «어디로 갈 수 있는가».
  *
- * 🚨 여기에는 **이 장의 문항만** 세운다. 전체 장을 다 늘어놓으면 «지금 뭘 하고 있는지»가
+ * 🚨 여기에는 **이 강의 문항만** 세운다. 전체 강을 다 늘어놓으면 «지금 뭘 하고 있는지»가
  *    묻힌다(승인 목업 learn-3col-restore-v1.html S0). 고르는 일은 색인(LibraryPage)에서,
- *    배우는 일은 이 화면에서 — 대신 위의 「← 전체 장 목록」과 아래의 「← 이전 장 / 다음 장 →」로
+ *    배우는 일은 이 화면에서 — 대신 위의 「← 전체 강 목록」과 아래의 「← 이전 강 / 다음 강 →」로
  *    이동은 두 번의 클릭 안에 끝난다.
  */
 export default function ChapterNavPanel({
@@ -58,13 +58,13 @@ export default function ChapterNavPanel({
           className="mb-3 inline-flex items-center gap-1 text-[11px] text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)]"
           to={libraryHref}
         >
-          ← 전체 장 목록
+          ← 전체 강 목록
         </Link>
 
         <div className="flex items-start gap-2">
           <span className="text-[15px] leading-none">{chapter.emoji}</span>
           <div className="min-w-0 flex-1">
-            <p className="text-[11px] font-medium text-[var(--color-text-muted)]">{chapter.id}장</p>
+            <p className="text-[11px] font-medium text-[var(--color-text-muted)]">{chapter.lessonNo}강</p>
             <h2
               className="mt-0.5 text-[14px] font-semibold leading-[1.4] text-[var(--color-text-primary)]"
               style={{ fontFamily: 'var(--font-heading)' }}
@@ -89,7 +89,7 @@ export default function ChapterNavPanel({
       <div className="scrollbar-hide flex-1 overflow-y-auto px-3 py-3">
         <div className="mb-2 flex items-baseline justify-between">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--color-text-faint)]">
-            이 장의 문항
+            이 강의 문항
           </p>
           <span className="font-mono text-[11px] text-[var(--color-text-faint)]">
             {currentQa.order}/{chapterQas.length}
@@ -141,13 +141,13 @@ export default function ChapterNavPanel({
 
         {nextChapter ? (
           <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-2.5">
-            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--color-text-faint)]">다음 장</p>
+            <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--color-text-faint)]">다음 강</p>
             <button
               className="mt-1 text-left text-[12px] font-medium leading-[1.5] text-[var(--color-text-primary)] hover:underline"
               onClick={() => onSelectChapter(nextChapter.id)}
               type="button"
             >
-              {nextChapter.emoji} {nextChapter.id}장 · {nextChapter.title}
+              {nextChapter.emoji} {nextChapter.lessonNo}강 · {nextChapter.title}
             </button>
           </div>
         ) : null}
@@ -164,11 +164,11 @@ export default function ChapterNavPanel({
             onClick={() => onSelectChapter(previousChapter.id)}
             type="button"
           >
-            ← {previousChapter.id}장
+            ← {previousChapter.lessonNo}강
           </button>
         ) : (
           <button className="btn-ghost-sm flex-1" disabled type="button">
-            ← 이전 장
+            ← 이전 강
           </button>
         )}
 
@@ -178,11 +178,11 @@ export default function ChapterNavPanel({
             onClick={() => onSelectChapter(nextChapter.id)}
             type="button"
           >
-            {nextChapter.id}장 →
+            {nextChapter.lessonNo}강 →
           </button>
         ) : (
           <button className="btn-primary-sm flex-1" disabled type="button">
-            다음 장 →
+            다음 강 →
           </button>
         )}
       </div>

@@ -15,6 +15,12 @@ import { CH14_LESSON_PLAN } from './lesson-plan-ch14';
 import { CH15_LESSON_PLAN } from './lesson-plan-ch15';
 import { CH16_LESSON_PLAN } from './lesson-plan-ch16';
 import { CH17_LESSON_PLAN } from './lesson-plan-ch17';
+import { CH18_LESSON_PLAN } from './lesson-plan-ch18';
+import { CH19_LESSON_PLAN } from './lesson-plan-ch19';
+import { CH20_LESSON_PLAN } from './lesson-plan-ch20';
+import { CH21_LESSON_PLAN } from './lesson-plan-ch21';
+import { CH22_LESSON_PLAN } from './lesson-plan-ch22';
+import { CH23_LESSON_PLAN } from './lesson-plan-ch23';
 
 /**
  * 교안(1장 = 1차시) 등록부.
@@ -83,6 +89,12 @@ export const LESSON_PLANS: Record<number, LessonPlan> = {
   [CH15_LESSON_PLAN.chapterId]: CH15_LESSON_PLAN,
   [CH16_LESSON_PLAN.chapterId]: CH16_LESSON_PLAN,
   [CH17_LESSON_PLAN.chapterId]: CH17_LESSON_PLAN,
+  [CH18_LESSON_PLAN.chapterId]: CH18_LESSON_PLAN,
+  [CH19_LESSON_PLAN.chapterId]: CH19_LESSON_PLAN,
+  [CH20_LESSON_PLAN.chapterId]: CH20_LESSON_PLAN,
+  [CH21_LESSON_PLAN.chapterId]: CH21_LESSON_PLAN,
+  [CH22_LESSON_PLAN.chapterId]: CH22_LESSON_PLAN,
+  [CH23_LESSON_PLAN.chapterId]: CH23_LESSON_PLAN,
 };
 
 /** 교안이 있는 장 번호들 — 등록부에서 파생한다(따로 선언하지 않는다). */

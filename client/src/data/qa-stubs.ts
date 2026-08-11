@@ -1,3 +1,4 @@
+import { orderChapters } from './chapter-order';
 import { VIBE_CHAPTERS, VIBE_QAS } from './vibe-stubs';
 
 export type QaStatus = 'done' | 'current' | 'todo';
@@ -16,6 +17,7 @@ export type QaStub = {
 };
 
 export type ChapterStub = {
+  /** 속 이름표. 🚨 화면에 「N장」으로 찍지 말 것 — 학생이 보는 번호는 lessonNo 다. */
   id: number;
   category: string;
   emoji: string;
@@ -37,8 +39,12 @@ const BASE_CHAPTERS: ChapterStub[] = [
   { id: 10, category: 'AI', emoji: '🤖', title: '거대한 컴퓨터를 빌리는 시대', qaCount: 7, firstQaId: 'ch10_q01' },
 ];
 
+/** 학생이 보는 「N강」 번호가 붙은 장. 번호는 진열 순서에서 «센» 값이다(chapter-order.ts). */
+export type Chapter = ChapterStub & { lessonNo: number };
+
 // 카테고리 «바이브코딩»(11~17장)은 vibe-stubs.ts에서 산다 — 기존 10장 생성 로직과 분리.
-export const CHAPTERS: ChapterStub[] = [...BASE_CHAPTERS, ...VIBE_CHAPTERS];
+// 🚨 등록 순서가 아니라 **진열 순서**로 내보낸다. 화면은 이 배열의 순서를 그대로 믿는다.
+export const CHAPTERS: Chapter[] = orderChapters([...BASE_CHAPTERS, ...VIBE_CHAPTERS]);
 
 const QA_COUNTS = BASE_CHAPTERS.map((chapter) => chapter.qaCount);
 

@@ -12,29 +12,14 @@ type MyTurnVerdict = {
   coach: string;
 };
 
-const COOLDOWN_SECONDS = 300;
-
-function cooldownStorageKey(qaId: string): string {
-  return `vibe:myturn:last:${qaId}`;
-}
-
-function readCooldownRemaining(qaId: string): number {
-  try {
-    const raw = window.localStorage.getItem(cooldownStorageKey(qaId));
-    if (!raw) {
-      return 0;
-    }
-    const elapsed = Math.floor((Date.now() - Number(raw)) / 1000);
-    return Math.max(0, COOLDOWN_SECONDS - elapsed);
-  } catch {
-    return 0;
-  }
-}
-
 /**
- * «내 차례» — 학생이 직접 쓴 부탁문을 실제 AI가 실행해 «네가 정한 칸 / AI가 대신 정한 칸»을
- * 판정한다. 호출 통제: 쿨타임 5분(클라 localStorage + 서버 이중), 재생성 버튼 없음.
- * 서버(`POST /api/vibe/my-turn`)가 아직 없으면 준비 중 안내로 강등된다.
+ * «내 차례» — 학생이 직접 쓴 부탁문을 실제 AI가 실행해 «네가 정한 칸 / AI가 대신 정한 칸»을 판정한다.
+ *
+ * 🚨 대기 시간을 **클라이언트가 스스로 정하지 않는다.** 예전에는 여기에 «5분»이 손으로 박혀 있어서
+ *    localStorage 로 버튼을 잠갔다. 그러면 서버가 쿨타임을 0 으로 내려도(2026-08-11 확정) 화면은
+ *    그대로 5분을 잠근다 — 무배포로 조정한다는 약속이 화면에서 깨진다.
+ *    지금은 **서버가 429 와 함께 알려 준 초만큼만** 기다린다. 안 막히면 안 기다린다.
+ * 🔑 실습 강은 «쓰고 → 판정받고 → 고쳐서 다시»가 수업의 본체다. 바로 다시 낼 수 있어야 한다.
  */
 export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
   const [prompt, setPrompt] = useState('');
@@ -46,7 +31,7 @@ export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
     setPrompt('');
     setStatus('idle');
     setVerdict(null);
-    setCooldown(readCooldownRemaining(qaId));
+    setCooldown(0);
   }, [qaId]);
 
   useEffect(() => {
@@ -75,8 +60,9 @@ export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
         return;
       }
       if (response.status === 429) {
+        // 🔑 기다릴 초는 서버만 안다(학생별·공유 통·전역 층이 다 다르다). 화면은 받아 적기만 한다.
         const payload = (await response.json().catch(() => null)) as { retryAfterSeconds?: number } | null;
-        setCooldown(payload?.retryAfterSeconds ?? COOLDOWN_SECONDS);
+        setCooldown(Math.max(1, payload?.retryAfterSeconds ?? 60));
         setStatus('idle');
         return;
       }
@@ -87,12 +73,6 @@ export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
       const payload = (await response.json()) as MyTurnVerdict;
       setVerdict(payload);
       setStatus('done');
-      try {
-        window.localStorage.setItem(cooldownStorageKey(qaId), String(Date.now()));
-      } catch {
-        // localStorage 실패는 무시 — 서버 쿨타임이 이중 방어
-      }
-      setCooldown(COOLDOWN_SECONDS);
     } catch {
       setStatus('error');
     }
@@ -100,8 +80,8 @@ export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
 
   const cooldownLabel =
     cooldown > 0
-      ? `다시 쓰기 ${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(2, '0')}`
-      : '오늘의 시도 준비됨';
+      ? `다시 보내기 ${Math.floor(cooldown / 60)}:${String(cooldown % 60).padStart(2, '0')}`
+      : '보낼 수 있어요';
 
   return (
     <div className="mx-auto flex w-full max-w-[720px] flex-col gap-4 px-5 py-7">
@@ -137,12 +117,12 @@ export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
            2026-08-11 prod QA(새내기 f2): 판정이 «네가 정한 규칙 0개»를 보여 준 바로 그 순간 버튼이
            잠기고 '다시 쓰기 4:55'만 떴다. 학생은 무엇이 빠졌는지 방금 깨달았는데 고쳐 볼 수 없었고,
            왜 기다려야 하는지가 화면에 없어 **고장으로 읽었다.**
-        🔑 입력칸은 대기 중에도 잠그지 않는다 — 기다리는 5분이 «종이에 고쳐 쓰는 시간»이 되게 한다.
-           (쿨타임 길이 자체는 AI 호출 통제라 Render env 로만 조정한다. 화면에서 건드리지 않는다.)
+        🔑 이제 이 안내는 **정말 막혔을 때만** 뜬다(서버가 429 로 알려 준 경우). 평소에는 판정을 받고
+           바로 고쳐서 다시 낼 수 있다. 입력칸은 대기 중에도 잠그지 않는다.
       */}
       {cooldown > 0 ? (
         <p className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-4 py-3 text-[13px] leading-[1.8] text-[var(--color-text-body)]">
-          ⏳ AI에게 보내는 건 한 사람당 정해진 간격으로 한 번이에요 — 고장이 아니에요.
+          ⏳ 지금은 잠깐 기다려야 해요 — 여럿이 한꺼번에 보내면 차례를 두는 거예요. 고장이 아니에요.
           <br />
           기다리는 동안 <b className="font-semibold text-[var(--color-text-primary)]">위 칸의 글을 고쳐 두면</b>, 시간이
           되자마자 그대로 보낼 수 있어요.

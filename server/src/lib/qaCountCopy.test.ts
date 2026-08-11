@@ -49,9 +49,11 @@ test('교사에게 보여 주는 챕터 범위 = 서버가 실제로 통과시�
     )
   }
 
-  // 교사 화면이 말하는 상한이 그 실제 범위와 같은가.
-  const declared = read(MODAL).match(/const SESSION_MAX_CHAPTER_ID = Math\.max/)
-  assert.ok(declared, `${MODAL} 의 상한이 손으로 적힌 숫자로 돌아갔다 — 데이터에서 계산해야 한다`)
+  // 교사 화면이 말하는 범위가 그 실제 범위와 같은가.
+  // 🚨 교사에게 말하는 것은 «강 수»(진열 번호의 끝)다. 속 이름표(chapter.id)의 최댓값과 우연히
+  //    같을 수 있지만 같다고 믿으면 안 된다 — 실습 강이 섞여 들어오면 갈라진다.
+  const declared = read(MODAL).match(/const SESSION_LESSON_COUNT = CHAPTERS\.length/)
+  assert.ok(declared, `${MODAL} 의 강 수가 손으로 적힌 숫자로 돌아갔다 — 등록부에서 세야 한다`)
   assert.equal(
     Math.max(...clientQa.CHAPTERS.map((chapter) => chapter.id)),
     MAX_CHAPTER_ID,

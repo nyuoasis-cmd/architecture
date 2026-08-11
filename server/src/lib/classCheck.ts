@@ -59,6 +59,9 @@ export function classCheckBlock() {
       MYTURN_DAILY_CAP: MY_TURN_LIMITS.globalDaily,
       MYTURN_PER_MIN: MY_TURN_LIMITS.globalPerMin,
       MYTURN_ACTOR_DAILY_CAP: MY_TURN_LIMITS.actorDaily,
+      // 🚨 쿨타임을 0 으로 내린 뒤 학생 한 명의 연타를 막는 유일한 한도다. 선언에서 빠지면
+      //    읽는 쪽은 학생 쪽에 분당 제한이 없는 줄 알고 동시 수용력을 과대평가한다.
+      MYTURN_ACTOR_PER_MIN: MY_TURN_LIMITS.actorPerMin,
       // 🔑 참여자 토큰이 없는 «라이브러리 자습» 은 여럿이 한 통에 뭉칠 수 있어 별도 한도를 쓴다.
       //    이 두 줄이 빠지면, 읽는 쪽은 자습 학생도 학생당 한도를 쓰는 줄 알고 여유를 잘못 계산한다.
       MYTURN_SHARED_PER_MIN: MY_TURN_LIMITS.sharedPerMin,

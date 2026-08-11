@@ -3,7 +3,7 @@ import { QrCode } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import QrFullscreen from '../common/QrFullscreen';
 import type { DemoMeta } from '../../data/demos';
-import type { ChapterStub, QaStub } from '../../data/qa-stubs';
+import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getExtras } from '../../data/learn-extras';
 import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
@@ -16,7 +16,7 @@ import TeacherExplainPanel from './TeacherExplainPanel';
 import TourTab from './TourTab';
 
 type ContentPanelProps = {
-  chapter: ChapterStub;
+  chapter: Chapter;
   qa: QaStub;
   demo?: DemoMeta;
   scenarioId: string;
@@ -209,7 +209,7 @@ export default function ContentPanel({
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-[11px] font-medium text-[var(--color-text-muted)]">
-              {chapter.id}장 · {qa.order}번
+              {chapter.lessonNo}강 · {qa.order}번
             </p>
             <h1
               className="mt-0.5 truncate text-[17px] font-semibold leading-[1.35] text-[var(--color-text-primary)]"
