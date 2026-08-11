@@ -21,13 +21,10 @@ export default function SessionCard({ session }: SessionCardProps) {
   const removeTeacherSession = useSessionStore((state) => state.removeTeacherSession);
   const updateTeacherSession = useSessionStore((state) => state.updateTeacherSession);
 
-  const chapterLabels =
-    session.mode === 'harness'
-      ? '🧪 하네스 심화 트랙'
-      : session.chapter_ids
-          .map((chapterId) => CHAPTERS.find((chapter) => chapter.id === chapterId)?.title)
-          .filter(Boolean)
-          .join(' · ');
+  const chapterLabels = session.chapter_ids
+    .map((chapterId) => CHAPTERS.find((chapter) => chapter.id === chapterId)?.title)
+    .filter(Boolean)
+    .join(' · ');
 
   const handleEnd = async () => {
     setIsEnding(true);

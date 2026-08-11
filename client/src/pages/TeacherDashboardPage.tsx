@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import NewHarnessSessionModal from '../components/teacher/NewHarnessSessionModal';
 import NewSessionModal from '../components/teacher/NewSessionModal';
 import SessionCard from '../components/teacher/SessionCard';
 import { listTeacherSessions } from '../lib/session-client';
@@ -7,7 +6,6 @@ import { useSessionStore } from '../store/session-store';
 
 export default function TeacherDashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isHarnessModalOpen, setIsHarnessModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const teacherSessions = useSessionStore((state) => state.teacherSessions);
@@ -55,13 +53,6 @@ export default function TeacherDashboardPage() {
           </p>
         </div>
         <div className="flex items-end gap-2">
-          <button
-            className="inline-flex min-h-11 items-center rounded-2xl border border-[var(--color-border)] bg-white px-5 text-sm font-medium text-stone-900"
-            onClick={() => setIsHarnessModalOpen(true)}
-            type="button"
-          >
-            + 하네스 세션 만들기
-          </button>
           <button
             className="inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white"
             onClick={() => setIsModalOpen(true)}
@@ -113,15 +104,6 @@ export default function TeacherDashboardPage() {
       {isModalOpen ? (
         <NewSessionModal
           onClose={() => setIsModalOpen(false)}
-          onCreated={(session) => {
-            prependTeacherSession(session);
-          }}
-        />
-      ) : null}
-
-      {isHarnessModalOpen ? (
-        <NewHarnessSessionModal
-          onClose={() => setIsHarnessModalOpen(false)}
           onCreated={(session) => {
             prependTeacherSession(session);
           }}
