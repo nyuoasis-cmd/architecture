@@ -156,6 +156,42 @@ export const MY_TURN_TASKS: Record<string, MyTurnTask> = {
       },
     ],
   },
+  ch15_q02: {
+    qaId: 'ch15_q02',
+    topic: '만들기 «전»에 쓰는 검사표 (성공 장면·막혀야 하는 장면·숫자·확인 방법·실패 조건)',
+    slots: [
+      {
+        key: 'success',
+        label: '성공한 장면',
+        hint: '누가 읽어도 됐다/안 됐다를 똑같이 판정할 수 있는 장면인지',
+        inventedExample: '앱이 잘 동작하면 성공 (누가 봐도 같은 판정이 안 되는 문장)',
+      },
+      {
+        key: 'blocked',
+        label: '막혀야 하는 장면',
+        hint: '규칙을 어겼을 때 «막혀야 한다»가 짝으로 적혀 있는지 — 성공 장면만 있으면 반쪽이다',
+        inventedExample: '특별히 막을 것 없음 (성공 장면만 있는 반쪽 검사표)',
+      },
+      {
+        key: 'number',
+        label: '기준이 되는 숫자',
+        hint: '몇 명·몇 분·몇 건 같은 숫자가 들어갔는지(«편하게·빠르게»는 숫자가 아니다)',
+        inventedExample: '많이·빠르게·편하게 (숫자가 없어 판정이 사람마다 다름)',
+      },
+      {
+        key: 'how',
+        label: '확인 방법',
+        hint: '누가 무엇을 눌러 보는지가 적혀 있는지',
+        inventedExample: '보면 안다 (누가·무엇을 눌러 보는지 없음)',
+      },
+      {
+        key: 'fail',
+        label: '실패로 인정하는 조건',
+        hint: '이 기준이 «실패할 수도 있는» 기준인지 — 어떤 결과든 성공이라 말할 수 있으면 기준이 아니다',
+        inventedExample: '어떤 결과가 나와도 «그래도 됐다»고 말할 수 있음',
+      },
+    ],
+  },
 };
 
 const verdictSchema = z.object({

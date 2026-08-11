@@ -154,6 +154,19 @@ export const CH15_EXTRAS: Record<string, VibeExtras> = {
           '성공 기준을 먼저 쓰는 건 다짐이 아니라 순서야. 먼저 쓰면 «검사표»가 되고, 나중에 쓰면 만든 것에 맞춰 깎은 «변명»이 돼.',
       },
     ],
+    myTurn: {
+      intro:
+        '이번엔 네 차례야. 만들기 «전»에 검사표를 써 보자. 성공한 장면 · 반드시 막혀야 하는 장면 · 숫자 · 확인 방법 · 언제 실패라고 할 것인지 — 안 정한 칸은 AI 가 대신 정해 버려. 특히 «막혀야 하는 장면»은 대부분이 빠뜨리는 칸이야.',
+      placeholder:
+        '이 앱은 ___ 가 되면 성공이야. 반대로 ___ 는 반드시 막혀야 해. 기준 숫자는 ___ 이고, ___ 로 확인할게. ___ 면 실패라고 인정할게.',
+      slots: [
+        { key: 'success', label: '성공한 장면', inventedExample: '앱이 잘 동작하면 성공 (누가 봐도 같은 판정이 안 되는 문장)' },
+        { key: 'blocked', label: '막혀야 하는 장면', inventedExample: '특별히 막을 것 없음 (성공 장면만 있는 반쪽 검사표)' },
+        { key: 'number', label: '기준이 되는 숫자', inventedExample: '많이·빠르게·편하게 (숫자가 없어 판정이 사람마다 다름)' },
+        { key: 'how', label: '확인 방법', inventedExample: '보면 안다 (누가·무엇을 눌러 보는지 없음)' },
+        { key: 'fail', label: '실패로 인정하는 조건', inventedExample: '어떤 결과가 나와도 «그래도 됐다»고 말할 수 있음' },
+      ],
+    },
   },
   ch15_q03: {
     qaId: 'ch15_q03',
