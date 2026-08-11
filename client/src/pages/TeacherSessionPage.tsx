@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams } from 'react-router-dom';
 import QrFullscreenModal from '../components/common/QrFullscreenModal';
 import QrInline from '../components/common/QrInline';
+import LessonPlanPanel from '../components/teacher/LessonPlanPanel';
 import ParticipantList from '../components/teacher/ParticipantList';
 import { CHAPTERS, getQasByChapterId } from '../data/qa-stubs';
 import { endSession, getSession, getSessionParticipants, SessionClientError } from '../lib/session-client';
@@ -168,6 +169,8 @@ export default function TeacherSessionPage() {
       </section>
 
       {error ? <div className="mt-6 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
+
+      <LessonPlanPanel chapterIds={currentSession.chapter_ids} />
 
       <section className="mt-8">
         <div className="mb-4 flex items-center justify-between">
