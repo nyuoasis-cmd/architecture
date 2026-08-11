@@ -12,6 +12,7 @@ import { CH11_LESSON_PLAN } from './lesson-plan-ch11';
 import { CH12_LESSON_PLAN } from './lesson-plan-ch12';
 import { CH13_LESSON_PLAN } from './lesson-plan-ch13';
 import { CH14_LESSON_PLAN } from './lesson-plan-ch14';
+import { CH15_LESSON_PLAN } from './lesson-plan-ch15';
 
 /**
  * 교안(1장 = 1차시) 등록부.
@@ -73,6 +74,7 @@ export const LESSON_PLANS: Record<number, LessonPlan> = {
   [CH12_LESSON_PLAN.chapterId]: CH12_LESSON_PLAN,
   [CH13_LESSON_PLAN.chapterId]: CH13_LESSON_PLAN,
   [CH14_LESSON_PLAN.chapterId]: CH14_LESSON_PLAN,
+  [CH15_LESSON_PLAN.chapterId]: CH15_LESSON_PLAN,
 };
 
 /** 교안이 있는 장 번호들 — 등록부에서 파생한다(따로 선언하지 않는다). */
