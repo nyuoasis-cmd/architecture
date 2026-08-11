@@ -5,6 +5,7 @@
 ## 0. 지금 상태 한 줄
 
 **에픽 6개 중 5개 머지 완료(전부 prod 배포됨). 남은 것 = PR6 하나.**
+사람이 할 일도 ①이 «조치 불필요»로 닫혀 **prod QA(②) 하나만 남았다.**
 학생 화면은 3컬럼으로 돌아왔고, 강은 17 → **23강 131문항**이 됐다.
 
 | PR | | 머지 후 달라진 것 |
@@ -20,22 +21,31 @@
 
 ---
 
-## 1. 🔴 사람이 해야 하는 일 (에이전트가 못 함)
+## 1. 🔴 사람이 해야 하는 일
 
-### ① Render 환경변수 확인 — **이거 안 하면 MYTURN 상향이 적용 안 된다**
+### ~~① Render 환경변수 확인~~ → **확인 완료, 조치 불필요** (2026-08-12)
 
-PR #194 는 한도의 **코드 기본값**을 올렸다. 그런데 Render 에 `MYTURN_*` 를 **손으로 넣어 둔 게 있으면 그 값이 이긴다.**
-예전 값(하루 12·쿨타임 300)이 env 에 박혀 있으면 배포해도 학생은 그대로 5분을 기다린다.
+Render API 로 실측했다. architecture 서비스(`srv-d7o3nh9f9bms738s9vug`)의 env 14개 중
+**`MYTURN_*` 는 하나도 없다.** 그래서 PR #194 의 코드 기본값이 그대로 적용된다 — 지울 것도 없었다.
 
-Render → architecture 서비스 → Environment 에서 아래 이름이 있으면 **지우면 된다**(지우면 새 기본값이 적용된다):
+prod 실측(2026-08-12, 배포 `fa4bc41` live):
 
 ```
-MYTURN_COOLDOWN_SEC   MYTURN_ACTOR_DAILY_CAP   MYTURN_ACTOR_PER_MIN
-MYTURN_SHARED_PER_MIN MYTURN_SHARED_DAILY_CAP  MYTURN_PER_MIN  MYTURN_DAILY_CAP
+$ curl -s https://architecture.teachermate.co.kr/api/health
+capPolicy: app-daily
+  MYTURN_ACTOR_PER_MIN     = 10      학생 분당
+  MYTURN_ACTOR_DAILY_CAP   = 300     학생 하루
+  MYTURN_SHARED_PER_MIN    = 10      공유 통(자습) 분당
+  MYTURN_SHARED_DAILY_CAP  = 1000    공유 통 하루
+  MYTURN_PER_MIN           = 120     전역 분당
+  MYTURN_DAILY_CAP         = 4000    전역 하루
 ```
 
-새 기본값 = 학생 분당 10 · 하루 300 · 쿨타임 **0** / 공유 분당 10 · 하루 1,000 / 전역 분당 120 · 하루 4,000.
-확인 방법: 배포 후 `https://architecture.teachermate.co.kr/health` 의 `classCheck.caps` 를 보면 **실제 적용값**이 그대로 나온다.
+의도한 값 그대로다. 🔑 **확인 경로는 `/api/health` 다**(`/health` 는 SPA 의 index.html 이 잡는다).
+🚨 쿨타임(0)은 이 선언에 안 나온다 — `caps` 는 «한도»만 말한다. 쿨타임 확인은 실제로 두 번 제출해 보는 것뿐(아래 ②-3).
+
+앞으로 한도를 손댈 일이 생기면 여기에 `MYTURN_*` 를 **넣으면** 코드 기본값을 덮어쓴다(무배포·즉시).
+넣어 둔 뒤에는 지우는 것을 잊기 쉬우니, 넣었다면 이 문서에 한 줄 남길 것.
 
 ### ② prod QA — 23강 실물 보기 (사람 눈)
 
