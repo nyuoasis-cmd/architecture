@@ -16,21 +16,19 @@ const router = Router();
 export const createSessionSchema = z
   .object({
     name: z.string().trim().min(1).max(60),
-    mode: z.enum(['learn', 'harness']).default('learn'),
-    // harness 모드는 챕터가 없음(서버가 무조건 []로 강제, 아래 참조) — learn 모드만 1개 이상 필수.
     // 🔑 범위·개수를 손으로 적지 않는다. 등록부에서 파생시켜야 장이 늘 때 저절로 따라온다.
     //    (2026-08-11 이전에는 max(10) 이 박혀 있어 바이브코딩 11~17장이 수업에 못 담겼다.)
+    // 🚨 세션은 한 종류뿐이다. 예전엔 mode('learn'|'harness')로 갈려 harness 는 챕터가 0개였고,
+    //    그래서 «챕터 1개 이상»이 조건부 규칙이었다. 하네스를 철거하면서 조건이 사라졌다 —
+    //    이제 **모든 세션은 장을 1개 이상 담는다**. 장 없는 세션은 학생이 열어도 볼 것이 없다.
     chapter_ids: z
       .array(z.number().int().refine((id) => ALL_CHAPTER_IDS.includes(id), { message: '없는 장입니다.' }))
+      .min(1, { message: '수업에 담을 장을 1개 이상 선택해야 합니다.' })
       .max(ALL_CHAPTER_IDS.length),
     max_participants: z.union([z.literal(50), z.literal(100), z.literal(200)]).default(100),
-  })
-  .refine((value) => value.mode !== 'learn' || value.chapter_ids.length >= 1, {
-    message: 'learn 모드는 챕터를 1개 이상 선택해야 합니다.',
-    path: ['chapter_ids'],
   });
 
-const SESSION_SELECT = 'id, code, name, teacher_id, chapter_ids, status, max_participants, created_at, ended_at, mode';
+const SESSION_SELECT = 'id, code, name, teacher_id, chapter_ids, status, max_participants, created_at, ended_at';
 
 type SessionRow = {
   id: string;
@@ -42,7 +40,6 @@ type SessionRow = {
   max_participants: number;
   created_at: string;
   ended_at: string | null;
-  mode: 'learn' | 'harness';
 };
 
 type ParticipantRow = {
@@ -152,9 +149,7 @@ router.post('/', async (req, res) => {
     return;
   }
 
-  // harness 모드는 챕터 개념이 없음 — 클라이언트가 뭘 보내든 서버가 무조건 []로 강제.
-  const chapterIds =
-    parsed.data.mode === 'harness' ? [] : [...new Set(parsed.data.chapter_ids)].sort((a, b) => a - b);
+  const chapterIds = [...new Set(parsed.data.chapter_ids)].sort((a, b) => a - b);
   let session: SessionRow | null = null;
 
   for (let attempt = 0; attempt < 5; attempt += 1) {
@@ -166,7 +161,6 @@ router.post('/', async (req, res) => {
         name: parsed.data.name,
         teacher_id: teacherId,
         chapter_ids: chapterIds,
-        mode: parsed.data.mode,
         max_participants: parsed.data.max_participants,
         ...qaTagFields(),
       })

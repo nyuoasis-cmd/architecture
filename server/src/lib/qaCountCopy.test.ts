@@ -27,7 +27,6 @@ const MODAL = 'client/src/components/teacher/NewSessionModal.tsx'
 
 const sampleSession = (chapterIds: number[]) => ({
   name: '테스트 수업',
-  mode: 'learn' as const,
   chapter_ids: chapterIds,
   max_participants: 100 as const,
 })

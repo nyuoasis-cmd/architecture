@@ -14,8 +14,6 @@ export type SessionProgressEntry = {
   quizScore?: number;
 };
 
-export type SessionMode = 'learn' | 'harness';
-
 export type SessionRecord = {
   id: string;
   code: string;
@@ -26,7 +24,6 @@ export type SessionRecord = {
   created_at: string;
   ended_at: string | null;
   participant_count?: number;
-  mode: SessionMode;
 };
 
 export type SessionDetail = SessionRecord & {
@@ -74,7 +71,6 @@ export async function createSession(input: {
   name: string;
   chapterIds: number[];
   maxParticipants: 50 | 100 | 200;
-  mode?: SessionMode;
 }): Promise<SessionRecord> {
   const headers = await getTeacherAuthHeaders();
   const response = await fetch('/api/sessions', {
@@ -87,7 +83,6 @@ export async function createSession(input: {
       name: input.name,
       chapter_ids: input.chapterIds,
       max_participants: input.maxParticipants,
-      mode: input.mode ?? 'learn',
     }),
   });
   return readJson<SessionRecord>(response);
@@ -151,7 +146,7 @@ export async function joinSession(input: { code: string; nickname: string }) {
       nickname: input.nickname.trim(),
     }),
   });
-  return readJson<{ session_id: string; participant_id: string; nickname: string; mode: SessionMode }>(response);
+  return readJson<{ session_id: string; participant_id: string; nickname: string }>(response);
 }
 
 export async function patchProgress(input: {
