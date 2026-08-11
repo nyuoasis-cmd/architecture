@@ -1,12 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Navigate, useParams, useSearchParams } from 'react-router-dom';
+import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { StudentExitGuard } from '../components/StudentExitGuard';
+import ChapterNavPanel from '../components/learn/ChapterNavPanel';
 import ChatPanel from '../components/learn/ChatPanel';
-import GuidePanel from '../components/learn/GuidePanel';
-import PreviewPanel from '../components/learn/PreviewPanel';
+import ContentPanel from '../components/learn/ContentPanel';
 import { CHAPTERS, getChapterById, getQaById, getQasByChapterId, type QaStub } from '../data/qa-stubs';
-import { chapterUsesExtrasLayout } from '../data/learn-extras';
-import VibeLearnLayout from '../components/learn/vibe/VibeLearnLayout';
 import { getDemoByQaId } from '../data/demos';
 import { markRead } from '../lib/progress';
 import { getSession, patchProgress, SessionClientError } from '../lib/session-client';
@@ -14,17 +12,25 @@ import { clearSessionTokenHint } from '../lib/session-token';
 import { useLearnStore } from '../store/learn-store';
 import { useSessionStore } from '../store/session-store';
 
-const LABELS = {
-  guide: '📖 학습',
-  chat: '💬 채팅',
-  preview: '📱 시연',
-  quiz: '✅ 퀴즈',
+const MOBILE_LABELS = {
+  nav: '문항',
+  chat: '챗봇',
+  content: '콘텐츠',
 } as const;
 
 type LearnPageProps = {
   mode: 'self' | 'session';
 };
 
+/**
+ * 학습 화면 — **3컬럼 하나뿐이다**(문항 목록 280 · AI 챗봇 320 · 콘텐츠).
+ *
+ * 🚨 형판을 둘로 가르지 않는다. 2026-08-11 까지는 «이 장에 extras 가 있는가»로 3컬럼과
+ *    5탭 단일 컬럼을 갈랐는데, 견학이 107/107 문항에 붙자 조건이 17/17 장을 참으로 만들어
+ *    **3컬럼이 도달 불가 죽은 코드**가 됐다 — 좌측 문항 목록과 챗봇 컬럼이 통째로 안 그려졌고,
+ *    «문제가 생기면 그 장 데이터만 되돌리면 된다»던 롤백 장치도 같이 무력화됐다.
+ *    데이터의 많고 적음은 **탭의 개수**로만 나타난다(ContentPanel). 화면 종류는 안 바꾼다.
+ */
 function LearnLayout(props: {
   mode: 'self' | 'session';
   chapter: NonNullable<ReturnType<typeof getChapterById>>;
@@ -32,67 +38,68 @@ function LearnLayout(props: {
   qa: QaStub;
   demo: ReturnType<typeof getDemoByQaId>;
   allSessionQas?: QaStub[];
-  availableChapters?: typeof CHAPTERS;
+  availableChapters: typeof CHAPTERS;
   progressMapOverride?: Record<string, { read: boolean; quizScore?: number }>;
   sessionId?: string;
   sessionCode?: string;
   isTeacherPreview?: boolean;
   onScore?: (score: number) => void;
+  libraryHref: string;
   makeQaHref: (qaId: string) => string;
 }) {
+  const navigate = useNavigate();
   const mobileTab = useLearnStore((state) => state.mobileTab);
   const scenarioId = useLearnStore((state) => state.scenarioId);
   const setMobileTab = useLearnStore((state) => state.setMobileTab);
   const setScenarioId = useLearnStore((state) => state.setScenarioId);
 
-  // 🔑 형판은 카테고리가 아니라 «이 장에 견학·사례 데이터가 있는가»로 고른다.
-  //    그래야 1~10장을 **한 장씩** 옮겨 갈 수 있고, 문제가 생기면 그 장 데이터만 되돌리면
-  //    원래 3컬럼 화면으로 돌아온다. (분류 체계를 건드리지 않고 콘텐츠로만 움직인다.)
-  if (chapterUsesExtrasLayout(props.chapter.id)) {
-    return (
-      <VibeLearnLayout
-        chapter={props.chapter}
-        chapterQas={props.chapterQas}
-        makeQaHref={props.makeQaHref}
-        onScore={props.onScore}
-        qa={props.qa}
-      />
-    );
-  }
+  const goToQa = (qaId: string) => {
+    navigate(props.makeQaHref(qaId));
+    // 🔑 모바일에서 목록으로 골랐으면 바로 읽을 것을 보여 준다 — 고른 뒤 한 번 더 누르게 하지 않는다.
+    setMobileTab('content');
+  };
 
   return (
-    <div className="flex h-[calc(100dvh-56px)] min-h-0 flex-col">
-      <nav className="flex flex-shrink-0 border-b border-[var(--color-border)] lg:hidden">
-        {(Object.keys(LABELS) as Array<keyof typeof LABELS>).map((tab) => (
+    /*
+      🚨 화면 높이를 «100dvh − 헤더»로 손수 빼지 않는다. 공용 네비(<teachermate-nav>)는 CDN 에서
+         오는 웹 컴포넌트라 높이가 고정이 아니다 — 실측 103px 인데 코드는 56 을 빼고 있었고,
+         그만큼 아래가 잘려 **좌측의 「이전 장 / 다음 장」 버튼과 챗봇 입력칸이 화면 밖으로 나갔다.**
+         (3컬럼이 죽어 있던 동안 아무도 못 봤다. 되살리는 김에 같이 고친다.)
+      🔑 대신 app-shell 의 세로 flex 에서 **남은 높이를 그대로 받는다**(flex-1 + min-h-0).
+         헤더가 커지든 작아지든, 네비가 아예 안 뜨든(학생 세션 라우트) 알아서 맞는다.
+    */
+    <div className="flex min-h-0 flex-1 flex-col">
+      <nav className="flex flex-shrink-0 border-b border-[var(--color-border)] bg-white lg:hidden">
+        {(Object.keys(MOBILE_LABELS) as Array<keyof typeof MOBILE_LABELS>).map((tab) => (
           <button
             key={tab}
             className={`mtab flex-1 py-2.5 text-sm font-medium ${mobileTab === tab ? 'is-active' : ''}`}
             onClick={() => setMobileTab(tab)}
             type="button"
           >
-            {LABELS[tab]}
+            {MOBILE_LABELS[tab]}
           </button>
         ))}
       </nav>
 
       <div className="mx-auto flex min-h-0 w-full max-w-[1440px] flex-1 overflow-hidden">
         <aside
-          className={`${mobileTab === 'guide' ? 'flex' : 'hidden'} w-full flex-col border-r border-[var(--color-border)] lg:flex lg:w-[280px] lg:min-w-[260px] lg:flex-shrink-0`}
+          className={`${mobileTab === 'nav' ? 'flex' : 'hidden'} w-full flex-col border-r border-[var(--color-border)] lg:flex lg:w-[280px] lg:min-w-[260px] lg:flex-shrink-0`}
         >
-          <GuidePanel
-            activeScenarioId={scenarioId}
-            allSessionQas={props.allSessionQas}
+          <ChapterNavPanel
+            availableChapters={props.availableChapters}
             chapter={props.chapter}
             chapterQas={props.chapterQas}
             currentQa={props.qa}
-            isTeacherPreview={props.isTeacherPreview}
-            mode={props.mode}
-            onScenarioChange={(nextScenarioId) => {
-              setScenarioId(nextScenarioId);
-              setMobileTab('preview');
+            libraryHref={props.libraryHref}
+            onSelectChapter={(chapterId) => {
+              const target = props.availableChapters.find((item) => item.id === chapterId);
+              if (target) {
+                goToQa(target.firstQaId);
+              }
             }}
+            onSelectQa={goToQa}
             progressMapOverride={props.progressMapOverride}
-            sessionId={props.sessionId}
           />
         </aside>
 
@@ -102,15 +109,13 @@ function LearnLayout(props: {
           <ChatPanel qaId={props.qa.id} qaTitle={props.qa.title} />
         </section>
 
-        <section
-          className={`${mobileTab === 'preview' || mobileTab === 'quiz' ? 'flex' : 'hidden'} flex-1 flex-col lg:flex`}
-        >
-          <PreviewPanel
+        <section className={`${mobileTab === 'content' ? 'flex' : 'hidden'} w-full min-w-0 flex-1 flex-col lg:flex`}>
+          <ContentPanel
             availableQaIds={props.allSessionQas?.map((item) => item.id) ?? [props.qa.id]}
+            chapter={props.chapter}
             demo={props.demo}
-            initialTab={mobileTab === 'quiz' ? 'quiz' : 'demo'}
             onScenarioChange={setScenarioId}
-            qaId={props.qa.id}
+            qa={props.qa}
             quizProps={props.onScore ? { onScore: props.onScore } : undefined}
             scenarioId={scenarioId}
             sessionCode={props.sessionCode}
@@ -288,6 +293,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
             });
           });
         }}
+        libraryHref={`/library?sessionId=${params.sessionId}`}
         makeQaHref={(targetQaId) =>
           `/learn/${params.sessionId}?qa=${targetQaId}${isTeacherPreview ? '&role=teacher' : ''}`
         }
@@ -310,7 +316,10 @@ export default function LearnPage({ mode }: LearnPageProps) {
       chapter={chapter}
       chapterQas={chapterQas}
       demo={demo}
-      makeQaHref={(targetQaId) => `/library/${chapter.id}/${targetQaId}`}
+      libraryHref="/library"
+      // 🔑 장을 건너뛰는 이동도 이 한 줄로 처리된다 — 목적지 문항이 자기 장을 알고 있으므로
+      //    현재 장 번호를 URL 에 박지 않는다(박으면 «12장 주소에 13장 문항»이 되어 튕긴다).
+      makeQaHref={(targetQaId) => `/library/${getQaById(targetQaId)?.chapterId ?? chapter.id}/${targetQaId}`}
       mode={mode}
       qa={qa}
     />

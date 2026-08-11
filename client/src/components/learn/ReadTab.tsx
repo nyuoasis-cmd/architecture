@@ -1,7 +1,7 @@
-import type { QaStub } from '../../../data/qa-stubs';
-import type { VibeIncident } from '../../../data/vibe-stubs';
+import type { QaStub } from '../../data/qa-stubs';
+import type { VibeIncident } from '../../data/vibe-stubs';
 
-type VibeReadTabProps = {
+type ReadTabProps = {
   qa: QaStub;
   incident?: VibeIncident;
   onDone?: () => void;
@@ -9,7 +9,7 @@ type VibeReadTabProps = {
 };
 
 /** 본문 탭 — 이론 5문단 + ⚡실제로 있었던 일 + 체크포인트. PC 기본, 읽기 폭 660px. */
-export default function VibeReadTab({ qa, incident, onDone, doneLabel }: VibeReadTabProps) {
+export default function ReadTab({ qa, incident, onDone, doneLabel }: ReadTabProps) {
   return (
     <div className="mx-auto w-full max-w-[660px] px-5 py-7">
       <div className="mb-5 flex flex-wrap gap-1.5">

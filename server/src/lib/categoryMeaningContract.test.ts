@@ -20,14 +20,10 @@ const load = (rel: string) => require(path.resolve(ROOT, 'client', 'src', 'data'
 const { CATEGORY_MEANINGS } = load('category-meanings') as { CATEGORY_MEANINGS: Record<string, string> }
 const { CHAPTERS } = load('qa-stubs') as { CHAPTERS: Array<{ id: number; category: string }> }
 
-/** 배지는 탭형 형판(VibeLearnLayout)에서 그려진다 — 그 형판을 쓰는 장의 묶음이 노출 대상이다. */
-const { chapterUsesExtrasLayout } = load('learn-extras') as {
-  chapterUsesExtrasLayout: (chapterId: number) => boolean
-}
-
-const shownCategories = (): string[] => [
-  ...new Set(CHAPTERS.filter((chapter) => chapterUsesExtrasLayout(chapter.id)).map((chapter) => chapter.category)),
-]
+// 🔑 배지는 이제 **모든 장**에 뜬다 — 학습 화면이 하나뿐이라(2026-08-11, 에픽 2/6) «어떤 장은 배지가
+//    안 보인다»는 상태가 존재하지 않는다. 예전에는 형판 판정(chapterUsesExtrasLayout)으로 대상을
+//    골랐는데, 그 판정이 사라졌으므로 노출 대상 = 등록부의 모든 묶음이다.
+const shownCategories = (): string[] => [...new Set(CHAPTERS.map((chapter) => chapter.category))]
 
 test('① 학생 화면에 배지로 나가는 모든 묶음에 뜻 한 줄이 있다', () => {
   const missing = shownCategories()
@@ -77,7 +73,7 @@ test('④ 이 계측이 실패할 수 있는가 — 대조 대상이 비어 있�
   assert.ok(CHAPTERS.length > 0, '장 목록이 비었다 — ①·③ 이 아무것도 안 보고 통과하는 상태다.')
   assert.ok(
     shownCategories().length > 0,
-    '배지로 나가는 묶음이 0개다 — 형판 판정이 죽었거나 장 데이터가 안 실렸다. ① 은 이 상태에서도 초록이다.',
+    '배지로 나가는 묶음이 0개다 — 장 데이터가 안 실렸다. ① 은 이 상태에서도 초록이다.',
   )
   assert.ok(
     Object.keys(CATEGORY_MEANINGS).length > 0,
@@ -86,7 +82,9 @@ test('④ 이 계측이 실패할 수 있는가 — 대조 대상이 비어 있�
 })
 
 test('⑤ 화면이 실제로 이 사전을 쓴다 — 사전만 살고 화면에서 사라지는 걸 막는다', () => {
-  const rel = 'client/src/components/learn/vibe/VibeLearnLayout.tsx'
+  // 🚨 그리는 자리가 옮겨 가면 여기 경로도 같이 옮겨야 한다. 안 옮기면 «파일이 없다»로 죽는데,
+  //    그건 조용히 초록이 되는 것보다 낫다 — 사전만 살고 화면에서 사라지는 게 이 검사가 막는 결함이다.
+  const rel = 'client/src/components/learn/ChapterNavPanel.tsx'
   const source = readFileSync(path.join(ROOT, rel), 'utf8')
 
   assert.ok(

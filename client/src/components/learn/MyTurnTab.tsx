@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import type { VibeMyTurnConfig } from '../../../data/vibe-stubs';
+import type { VibeMyTurnConfig } from '../../data/vibe-stubs';
 
-type VibeMyTurnTabProps = {
+type MyTurnTabProps = {
   qaId: string;
   config: VibeMyTurnConfig;
 };
@@ -36,7 +36,7 @@ function readCooldownRemaining(qaId: string): number {
  * 판정한다. 호출 통제: 쿨타임 5분(클라 localStorage + 서버 이중), 재생성 버튼 없음.
  * 서버(`POST /api/vibe/my-turn`)가 아직 없으면 준비 중 안내로 강등된다.
  */
-export default function VibeMyTurnTab({ qaId, config }: VibeMyTurnTabProps) {
+export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
   const [prompt, setPrompt] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'unavailable' | 'error'>('idle');
   const [verdict, setVerdict] = useState<MyTurnVerdict | null>(null);
