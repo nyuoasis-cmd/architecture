@@ -110,3 +110,97 @@ test('호출 통제: 기본은 켜져 있고, env 한 줄로 끌 수 있다', as
     else process.env.MYTURN_GUARD_ENABLED = saved;
   }
 });
+
+// 🚨 2026-08-11: 통제를 켜면서 드러난 결함 — 「내 차례」가 «학생 한 명»과 «여럿이 뭉친 통»을
+//    구분하지 않고 둘 다 쿨타임 5분으로 재고 있었다. 학교는 교실 전체가 공인 IP 하나로 나가므로,
+//    라이브러리 자습에서 첫 학생이 제출하면 반 전체가 5분 잠기는 상태였다.
+//    (챗봇은 이미 갈라 쓰고 있었다 — 같은 실수를 두 라우트가 서로 다르게 하고 있었던 것.)
+test('공유 통(참여자 토큰 없음)은 쿨타임에 안 걸린다 — 한 명 몫을 적용하면 교실 전체가 잠긴다', async () => {
+  const { takeMyTurnToken, __resetMyTurnBucketsForTest, MY_TURN_LIMITS, MyTurnRateLimitError } = await import(
+    './vibe-my-turn'
+  );
+  const saved = process.env.MYTURN_GUARD_ENABLED;
+  process.env.MYTURN_GUARD_ENABLED = '1';
+  __resetMyTurnBucketsForTest();
+  try {
+    // 같은 교실(같은 IP)에서 연달아 두 번 — 쿨타임이 걸리면 두 번째가 막힌다.
+    takeMyTurnToken('ip:1.2.3.4');
+    takeMyTurnToken('ip:1.2.3.4');
+
+    // 분당 한도까지는 통과해야 한다(공유 통은 여럿이 함께 쓰는 곳이다).
+    for (let i = 2; i < MY_TURN_LIMITS.sharedPerMin; i += 1) takeMyTurnToken('ip:1.2.3.4');
+
+    // 그다음 한 번은 막힌다 — 상한이 아예 없는 것도 아니어야 한다.
+    assert.throws(
+      () => takeMyTurnToken('ip:1.2.3.4'),
+      (error: unknown) => error instanceof MyTurnRateLimitError,
+      '공유 통에 상한이 없으면 자습 한 반이 전역 하루 한도를 통째로 써 버린다',
+    );
+  } finally {
+    __resetMyTurnBucketsForTest();
+    if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;
+    else process.env.MYTURN_GUARD_ENABLED = saved;
+  }
+});
+
+test('참여자 한 명은 쿨타임에 걸린다 — 공유 통 한도를 학생에게 적용하면 한 명이 몰아 쓴다', async () => {
+  const { takeMyTurnToken, __resetMyTurnBucketsForTest, MyTurnRateLimitError } = await import('./vibe-my-turn');
+  const saved = process.env.MYTURN_GUARD_ENABLED;
+  process.env.MYTURN_GUARD_ENABLED = '1';
+  __resetMyTurnBucketsForTest();
+  try {
+    takeMyTurnToken('pt:학생1');
+    assert.throws(
+      () => takeMyTurnToken('pt:학생1'),
+      (error: unknown) => error instanceof MyTurnRateLimitError,
+      '학생 한 명에게 쿨타임이 없으면 AI 호출을 연타할 수 있다',
+    );
+    // 🔑 다른 학생은 영향을 받지 않는다 — 이게 «학생별»의 뜻이다.
+    takeMyTurnToken('pt:학생2');
+  } finally {
+    __resetMyTurnBucketsForTest();
+    if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;
+    else process.env.MYTURN_GUARD_ENABLED = saved;
+  }
+});
+
+test('/health 가 공유 통 한도까지 선언한다 — 안 말하면 읽는 쪽이 자습도 학생당 한도로 계산한다', async () => {
+  const { classCheckBlock } = await import('./classCheck');
+  const { MY_TURN_LIMITS } = await import('./vibe-my-turn');
+  const saved = process.env.MYTURN_GUARD_ENABLED;
+  process.env.MYTURN_GUARD_ENABLED = '1';
+  try {
+    const block = classCheckBlock() as { caps: Record<string, number> };
+    assert.equal(block.caps.MYTURN_SHARED_PER_MIN, MY_TURN_LIMITS.sharedPerMin);
+    assert.equal(block.caps.MYTURN_SHARED_DAILY_CAP, MY_TURN_LIMITS.sharedDaily);
+  } finally {
+    if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;
+    else process.env.MYTURN_GUARD_ENABLED = saved;
+  }
+});
+
+test('공유 통의 «하루» 한도도 학생 몫이 아니다 — 12번째에서 막히면 자습 한 반이 반나절 만에 끝난다', async () => {
+  const { takeMyTurnToken, __resetMyTurnBucketsForTest, __expireMyTurnMinuteBucketsForTest, MY_TURN_LIMITS } =
+    await import('./vibe-my-turn');
+  const saved = process.env.MYTURN_GUARD_ENABLED;
+  process.env.MYTURN_GUARD_ENABLED = '1';
+  __resetMyTurnBucketsForTest();
+  try {
+    assert.ok(
+      MY_TURN_LIMITS.sharedDaily > MY_TURN_LIMITS.actorDaily,
+      '공유 통이 학생 한 명보다 적게 쓸 수 있으면 «여럿이 뭉친 통»이라는 뜻이 없다',
+    );
+    // 학생 한 명의 하루 한도를 넘겨서도 공유 통은 계속 통과해야 한다.
+    // (분당 한도가 먼저 막지 않도록 «분»만 넘겨 가며 센다 — 시계는 못 돌리므로 버킷을 만료시킨다.)
+    const target = MY_TURN_LIMITS.actorDaily + 3;
+    for (let i = 0; i < target; i += 1) {
+      takeMyTurnToken('ip:5.6.7.8');
+      __expireMyTurnMinuteBucketsForTest();
+    }
+    // 여기까지 예외 없이 왔으면 통과. 학생 몫(12)을 적용하면 13번째에서 던진다.
+  } finally {
+    __resetMyTurnBucketsForTest();
+    if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;
+    else process.env.MYTURN_GUARD_ENABLED = saved;
+  }
+});
