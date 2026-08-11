@@ -1,5 +1,10 @@
 import { useState } from 'react';
-import { getLessonPlan, type LessonPhase, type LessonPlan } from '../../data/lesson-plans';
+import {
+  getLessonPlan,
+  shouldExpandLessonPlanByDefault,
+  type LessonPhase,
+  type LessonPlan,
+} from '../../data/lesson-plans';
 import { getChapterById } from '../../data/qa-stubs';
 
 /**
@@ -83,8 +88,8 @@ function PlanBody({ plan }: { plan: LessonPlan }) {
   );
 }
 
-function ChapterPlan({ chapterId }: { chapterId: number }) {
-  const [isOpen, setIsOpen] = useState(true);
+function ChapterPlan({ chapterId, defaultOpen }: { chapterId: number; defaultOpen: boolean }) {
+  const [isOpen, setIsOpen] = useState(defaultOpen);
   const plan = getLessonPlan(chapterId);
   const chapter = getChapterById(chapterId);
 
@@ -123,10 +128,19 @@ export default function LessonPlanPanel({ chapterIds }: { chapterIds: number[] }
     return null;
   }
 
+  // 🚨 한 장일 때만 펼친다. 세션이 17장을 담고 있으면(교사 화면 기본값) 전부 펼칠 경우
+  //    페이지가 24,000px 가 된다 — prod 실측. 규칙은 데이터 층의 순수 함수에 두고 계약이 지킨다.
+  const defaultOpen = shouldExpandLessonPlanByDefault(withPlan.length);
+
   return (
     <section className="mt-8 space-y-4">
+      {withPlan.length > 1 ? (
+        <p className="text-sm text-stone-500">
+          이 수업에 담긴 장이 {withPlan.length}개입니다. 오늘 할 장을 펼쳐 보세요.
+        </p>
+      ) : null}
       {withPlan.map((chapterId) => (
-        <ChapterPlan chapterId={chapterId} key={chapterId} />
+        <ChapterPlan chapterId={chapterId} defaultOpen={defaultOpen} key={chapterId} />
       ))}
     </section>
   );

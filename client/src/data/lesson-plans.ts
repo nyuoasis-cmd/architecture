@@ -93,3 +93,18 @@ export function getLessonPlan(chapterId: number): LessonPlan | undefined {
 export function hasLessonPlan(chapterId: number): boolean {
   return LESSON_PLAN_CHAPTER_IDS.has(chapterId);
 }
+
+/**
+ * 교안 패널을 처음부터 펼쳐 둘 것인가.
+ *
+ * 🚨 «1장 = 1차시»가 기준이라 교안은 한 장짜리 세션을 전제로 만들었는데, **교사 화면의
+ *    «새 세션 만들기»는 장을 고르는 칸이 없어 항상 17장을 담는다**(NewSessionModal 의
+ *    `chapterIds: allChapterIds`). 그래서 전부 펼치면 45분짜리 교안 17개가 한 화면에 쌓여
+ *    페이지가 24,000px(≈27 화면)이 된다 — 실측(2026-08-11 prod). 수업 중에 쓸 수 없는 화면이다.
+ *
+ * 🔑 그래서 «한 장일 때만» 펼친다. 여러 장이면 접어 두고 교사가 오늘 할 장만 펼친다.
+ *    (근본 해결 = 세션 만들 때 장을 고르게 하는 것. 그건 교사 흐름을 바꾸는 결정이라 별건.)
+ */
+export function shouldExpandLessonPlanByDefault(chaptersWithPlanInSession: number): boolean {
+  return chaptersWithPlanInSession === 1;
+}
