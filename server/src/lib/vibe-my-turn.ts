@@ -228,6 +228,42 @@ export const MY_TURN_TASKS: Record<string, MyTurnTask> = {
       },
     ],
   },
+  ch17_q05: {
+    qaId: 'ch17_q05',
+    topic: 'AI 답이 학생에게 닿기 전 «출구 검사»를 설계하는 부탁문',
+    slots: [
+      {
+        key: 'what',
+        label: '검사할 것',
+        hint: '무엇을 거를 것인지가 구체적으로 지목됐는지(«부적절한 것»은 지목이 아니다)',
+        inventedExample: '부적절한 내용 전반 (무엇이 부적절한지 정해지지 않음)',
+      },
+      {
+        key: 'action',
+        label: '걸렸을 때 할 일',
+        hint: '막고 끝인지, 다시 시키는지, 사람이 보는지가 정해졌는지',
+        inventedExample: '차단 후 기본 문구로 대체 (막힌 걸 아무도 모름)',
+      },
+      {
+        key: 'count',
+        label: '몇 건 걸렸는지 세는 법',
+        hint: '걸린 건수를 세는 방법이 있는지 — 안 세면 거부율 0% 가 «안전»인지 «검사 없음»인지 구분되지 않는다',
+        inventedExample: '따로 세지 않음 — 거부율 0%가 «안전»인지 «검사가 없음»인지 구분 불가',
+      },
+      {
+        key: 'falsePositive',
+        label: '막히면 안 되는 것',
+        hint: '통과해야 할 답까지 막히는 경우를 어떻게 알아챌지 적혀 있는지',
+        inventedExample: '고려하지 않음 — 통과해야 할 답부터 막혀도 알 수 없음',
+      },
+      {
+        key: 'exit',
+        label: '검사를 걷어낼 조건',
+        hint: '원인을 고친 뒤 이 문을 언제 치울지 정해졌는지(마지막 문은 첫 대책이 아니다)',
+        inventedExample: '계속 켜 둠 (원인을 고친 뒤에도 문만 남음)',
+      },
+    ],
+  },
 };
 
 const verdictSchema = z.object({
