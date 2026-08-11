@@ -245,6 +245,19 @@ test('⑭ 파생 집합·조회 함수가 등록부와 일치한다 — 화면�
   }
 })
 
+// 🔑 이 계약은 17장 전부에 교안이 들어온 **뒤에** 켰다(에픽 18/18).
+//    쌓는 도중에 켜면 «아직 안 쓴 장» 예외 목록이 필요해지고, 그 목록은 반드시 면제권이 된다.
+//    그래서 «완전해진 다음에 문을 잠그는» 순서를 택했다.
+// 🚨 이제부터 장을 새로 만들면 교안 없이는 배포가 안 된다. 그게 이 계약의 목적이다.
+test('⑯ 모든 장에 교안이 있다 — 장을 늘리면 교안도 따라와야 한다', () => {
+  const missing = CHAPTERS.filter((chapter) => !LESSON_PLAN_CHAPTER_IDS.has(chapter.id))
+  assert.deepEqual(
+    missing.map((chapter) => chapter.id),
+    [],
+    `교안 없는 장: ${missing.map((chapter) => `${chapter.id}장 «${chapter.title}»`).join(', ')} — 이 장을 담은 수업에서 교사는 진행 안내를 못 본다`,
+  )
+})
+
 test('⑮ 계약이 검사한 교안 수를 찍는다 — 0개를 검사하고 초록인 계측 금지', () => {
   const covered = plans.length
   const total = CHAPTERS.length

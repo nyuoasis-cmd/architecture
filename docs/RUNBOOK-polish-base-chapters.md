@@ -64,7 +64,17 @@ console.log('문항',QA_STUBS.length,'| 견학없음',QA_STUBS.filter(q=>!ALL_EX
 | ⚡ 사례 | 본문 아래 «실제로 있었던 일» (teachermate 운영 실화만) | **없음** | 70/107 (선택 요소) |
 | ✋ 내 차례 | 학생이 쓴 부탁문을 Haiku 4.5 가 판정 | **있음** | 6/107 — 바이브코딩 장(12~17) 한 자리씩 |
 
-**🔑 남은 본체는 교안이다.** 견학·사례(AI 파급 0)와 「내 차례」(캡 켜고 6문항)는 끝났다.
+**🔑 교안도 17/17장 끝났다(2026-08-11).** 견학·사례(AI 파급 0)·「내 차례」(캡 켜고 6문항)·교안까지
+전부 완결. 남은 것은 선택 요소(사례 37문항)와 수업점검(class-check) 등록 재검토뿐이다.
+
+```bash
+# 교안 커버리지 즉시 확인 (손으로 세지 않는다)
+cd /home/claude/architecture/server && node --import tsx -e "
+const path=require('path');const R=path.resolve('..','client','src','data');
+const {LESSON_PLANS}=require(path.join(R,'lesson-plans'));const {CHAPTERS}=require(path.join(R,'qa-stubs'));
+const p=Object.values(LESSON_PLANS);
+console.log('교안',p.length,'/ 장',CHAPTERS.length,'| 총 분',p.map(x=>x.totalMinutes).join(','));"
+```
 
 ## 2. 결정 게이트
 
@@ -119,10 +129,26 @@ console.log('문항',QA_STUBS.length,'| 견학없음',QA_STUBS.filter(q=>!ALL_EX
 
 ### ✅ PR-K : 「내 차례」 — 바이브코딩 장(12~17) 한 자리씩 끝남
 
+### ✅ PR-L : 교안(1장=1차시) — 17/17장 끝남 (에픽 18 PR, 2026-08-11)
+
+jery 결정 = **앱 안 교사 화면 · 17장 전부**. 교사 세션 화면에 «이 차시 진행» 패널이 붙는다.
+
+- 데이터 `client/src/data/lesson-plan-chNN.ts` · 등록부 `lesson-plans.ts`(**파생** — 어느 장이 교안을
+  갖는지 따로 선언하지 않는다. 선언과 내용이 어긋날 자리를 없앤 것)
+- 화면 `client/src/components/teacher/LessonPlanPanel.tsx`
+- 계약 16건 `server/src/lib/lessonPlanContract.test.ts`
+
+🔑 **교안은 앱을 설명하는 문서가 아니라 가리키는 문서다.** 그래서 계약이 잡는 건 문장 품질이 아니라
+«가리킨 게 실제로 있는가»다 — 🚌 견학 칸은 tour 가 있는 문항만(⑫), ✋「내 차례」 칸은 myTurn 이
+있는 문항만(⑬), 그 장 문항 전부가 최소 한 칸에(⑪), 칸 합 === totalMinutes(④).
+
+🚨 **⑯(모든 장에 교안이 있다)은 17장이 다 들어온 뒤에 켰다.** 쌓는 도중에 켜면 «아직 안 쓴 장»
+예외 목록이 필요해지고 그 목록은 반드시 면제권이 된다(⑤-b 사고와 같은 형태). 완전해진 다음에
+문을 잠그는 순서를 택했다. 이제부터 장을 새로 만들면 교안 없이는 배포가 안 된다.
+
 ### 병렬 가능 (결정 불필요)
 
 - ⚡ 사례가 없는 37문항 — **실화가 있을 때만** 채운다. 없으면 비워 두는 게 맞다(날조 금지).
-- 교안·모듈(1장=1차시) — jery 가 «1~10장 다음»으로 지목한 것
 
 ## 4. 이 레포에서 굳은 검증 절차
 
