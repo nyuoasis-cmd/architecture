@@ -264,3 +264,20 @@ test('⑮ 계약이 검사한 교안 수를 찍는다 — 0개를 검사하고 �
   console.log(`[교안 계약] 검사한 교안 ${covered}개 / 전체 ${total}장`)
   assert.ok(covered > 0 && covered <= total, `검사한 교안 ${covered}개, 전체 ${total}장 — 셈이 어긋났다`)
 })
+
+// ── 교사 화면 기본 펼침 규칙 ────────────────────────────────────────────
+// 🚨 이 규칙이 없으면 45분짜리 교안 17개가 한 화면에 쌓인다(prod 실측 23,983px ≈ 27 화면).
+//    교사 화면의 «새 세션 만들기»가 장을 고르는 칸 없이 항상 전 장을 담기 때문이다.
+test('⑰ 교안 패널은 한 장일 때만 펼친다 — 여러 장이면 접는다', () => {
+  const { shouldExpandLessonPlanByDefault } = load('lesson-plans') as {
+    shouldExpandLessonPlanByDefault: (n: number) => boolean
+  }
+  assert.equal(shouldExpandLessonPlanByDefault(1), true, '한 장짜리 차시는 펼쳐야 바로 읽는다')
+  assert.equal(shouldExpandLessonPlanByDefault(2), false, '두 장부터는 접어야 한다')
+  assert.equal(
+    shouldExpandLessonPlanByDefault(CHAPTERS.length),
+    false,
+    `전 장(${CHAPTERS.length}장)을 담은 세션에서 전부 펼치면 수업 중에 못 쓰는 화면이 된다`,
+  )
+  assert.equal(shouldExpandLessonPlanByDefault(0), false, '교안이 없으면 펼칠 것도 없다')
+})
