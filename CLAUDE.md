@@ -29,7 +29,7 @@ architecture/
 │   ├── pages/          # Landing, Teacher, TeacherNew, TeacherSession, Join, Learn, Library, About
 │   ├── components/
 │   │   ├── layout/     # ServiceHeader
-│   │   ├── learn/      # ContentPanel, ChatTab, QuizTab
+│   │   ├── learn/      # ChapterNavPanel · ChatPanel · ContentPanel(읽기·시연·견학·내차례·퀴즈)
 │   │   └── teacher/    # SessionCard, ParticipantList
 │   ├── data/           # 장별 문항·퀴즈·부가데이터(견학/사례/내 차례)
 │   └── store/          # session-store, learn-store (Zustand)

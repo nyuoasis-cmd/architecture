@@ -49,7 +49,7 @@ export default function TeacherDashboardPage() {
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Teacher Dashboard</p>
           <h1 className="mt-3 text-4xl font-medium text-stone-950">내 세션 관리</h1>
           <p className="mt-3 text-sm leading-7 text-stone-600">
-            진행 중인 수업과 종료된 수업을 한곳에서 확인하고, 새 수업을 만들 수 있어요.
+            진행 중인 수업을 한곳에서 확인하고, 새 수업을 만들 수 있어요. 종료한 수업은 아래에 따로 모입니다.
           </p>
         </div>
         <div className="flex items-end gap-2">
@@ -85,21 +85,26 @@ export default function TeacherDashboardPage() {
         </div>
       </section>
 
-      <section className="mt-10">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-stone-900">종료된 세션</h2>
-          <span className="text-sm text-stone-500">{endedSessions.length}개</span>
-        </div>
-        <div className="space-y-4">
-          {endedSessions.length > 0 ? (
-            endedSessions.map((session) => <SessionCard key={session.id} session={session} />)
-          ) : (
-            <div className="rounded-[24px] border border-dashed border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
-              종료된 세션이 아직 없습니다.
-            </div>
-          )}
-        </div>
-      </section>
+      {/*
+        🔑 「종료된 세션」은 **있을 때만** 자리를 차지한다(결정 16, 2026-08-11).
+           0개인데도 «종료된 세션이 아직 없습니다» 카드가 늘 떠 있어, 교사가 처음 들어온 화면에서
+           빈 상자 두 개를 먼저 읽었다. 종료한 수업이 실제로 생기기 전까지는 안 보인다.
+        🚨 통째로 지우지는 않았다 — 지난 수업을 다시 열어 볼 다른 통로가 아직 없기 때문이다.
+           별도 「지난 수업」 화면이 생기는 날 이 섹션을 그리로 옮긴다(에픽 6/6).
+      */}
+      {endedSessions.length > 0 ? (
+        <section className="mt-10">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-medium text-stone-900">종료된 세션</h2>
+            <span className="text-sm text-stone-500">{endedSessions.length}개</span>
+          </div>
+          <div className="space-y-4">
+            {endedSessions.map((session) => (
+              <SessionCard key={session.id} session={session} />
+            ))}
+          </div>
+        </section>
+      ) : null}
 
       {isModalOpen ? (
         <NewSessionModal

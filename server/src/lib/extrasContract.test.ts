@@ -1,11 +1,11 @@
 // 견학(🚌)·사례(⚡) 데이터의 계약.
 //
-// 🔑 이 앱은 «extras 가 있는 장»만 탭형 형판으로 넘긴다(client/src/data/learn-extras.ts).
-//    그래서 데이터가 틀어지면 **화면 구조 자체가 틀어진다** — 탭은 떴는데 안이 비거나,
-//    형판은 바뀌었는데 보여 줄 게 없거나. 그 둘을 여기서 막는다.
+// 🔑 extras 는 우측 콘텐츠 컬럼의 **탭이 몇 개 켜지는가**를 정한다(client/src/data/learn-extras.ts).
+//    데이터가 틀어지면 학생이 보는 탭이 틀어진다 — 탭은 떴는데 안이 비거나, 만든 콘텐츠에 탭이 안 켜지거나.
 //
-// 🚨 이 파일이 지키는 가장 중요한 것: «형판을 쓰는 장에 실제로 내용이 있는가».
-//    선언(어느 장이 형판을 쓴다)과 내용(그 장에 무엇이 있다)이 어긋나면 학생은 빈 탭을 본다.
+// 🚨 2026-08-11(에픽 2/6)까지 이 데이터는 **화면 종류**까지 갈랐다. 견학이 107/107 문항에 붙자
+//    그 조건이 전 장을 참으로 만들어 3컬럼이 통째로 죽었다. 지금 화면은 하나뿐이고, 여기서 지키는 것은
+//    «내용이 있다고 선언한 장에 정말 내용이 있는가» 하나다.
 import assert from 'node:assert/strict'
 import path from 'node:path'
 import { test } from 'node:test'
@@ -15,11 +15,11 @@ import { QA_CONTEXTS } from '../data/chapter-content'
 const ROOT = path.resolve(__dirname, '..', '..', '..')
 const load = (rel: string) => require(path.resolve(ROOT, 'client', 'src', 'data', rel))
 
-const { ALL_EXTRAS, EXTRAS_CHAPTER_IDS, chapterIdOfQaId, chapterUsesExtrasLayout } = load('learn-extras') as {
+const { ALL_EXTRAS, EXTRAS_CHAPTER_IDS, chapterIdOfQaId, chapterHasExtras } = load('learn-extras') as {
   ALL_EXTRAS: Record<string, Extras>
   EXTRAS_CHAPTER_IDS: ReadonlySet<number>
   chapterIdOfQaId: (qaId: string) => number
-  chapterUsesExtrasLayout: (chapterId: number) => boolean
+  chapterHasExtras: (chapterId: number) => boolean
 }
 const { BASE_EXTRAS } = load('base-extras') as { BASE_EXTRAS: Record<string, Extras> }
 const { QA_STUBS, CHAPTERS } = load('qa-stubs') as {
@@ -47,14 +47,14 @@ type Extras = {
 
 const entries = Object.entries(ALL_EXTRAS)
 
-test('① 형판을 쓰는 장은 실제로 보여 줄 내용이 있다 — 빈 탭 금지', () => {
+test('① extras 가 있다고 선언된 장에 실제로 보여 줄 내용이 있다 — 빈 탭 금지', () => {
   for (const chapterId of EXTRAS_CHAPTER_IDS) {
     const owned = entries.filter(([qaId]) => chapterIdOfQaId(qaId) === chapterId)
-    assert.ok(owned.length > 0, `${chapterId}장이 형판을 쓴다고 선언됐는데 extras 가 하나도 없다`)
+    assert.ok(owned.length > 0, `${chapterId}장이 extras 묶음에 들었는데 정작 extras 가 하나도 없다`)
     const withContent = owned.filter(([, extras]) => extras.incident || extras.tour?.length || extras.myTurn)
     assert.ok(
       withContent.length > 0,
-      `${chapterId}장의 extras 가 전부 껍데기다 — 형판만 바뀌고 학생에게 보여 줄 게 없다`,
+      `${chapterId}장의 extras 가 전부 껍데기다 — 탭 이름만 있고 학생에게 보여 줄 게 없다`,
     )
   }
 })
@@ -149,25 +149,24 @@ test('⑦ 사례(⚡)의 세 칸이 모두 채워져 있다', () => {
 test('⑧ 가드가 실패할 수 있는 계측인지 — 대조 대상이 0건이 아니다 (반공백)', () => {
   // 🚨 이게 없으면 위 검사 전부가 «순회할 것이 없어서» 공짜로 통과한다.
   assert.ok(entries.length > 0, 'extras 가 0건이면 ①~⑦ 이 전부 무의미하다')
-  assert.ok(EXTRAS_CHAPTER_IDS.size > 0, '형판을 쓰는 장이 0개면 형판 전환 자체가 안 일어난 것이다')
+  assert.ok(EXTRAS_CHAPTER_IDS.size > 0, 'extras 가 있는 장이 0개면 ①·⑨ 가 아무 장도 안 돈다')
   const tourCount = entries.reduce((sum, [, extras]) => sum + (extras.tour?.length ?? 0), 0)
   assert.ok(tourCount > 0, '견학이 0건이면 ④⑤⑥ 이 공짜로 통과한다')
   const incidentCount = entries.filter(([, extras]) => extras.incident).length
   assert.ok(incidentCount > 0, '사례가 0건이면 ⑦ 이 공짜로 통과한다')
 
-  // 🚨 양성 대조군 — 이게 없으면 chapterUsesExtrasLayout 이 **항상 false** 를 줘도 초록이다.
+  // 🚨 양성 대조군 — 이게 없으면 chapterHasExtras 가 **항상 false** 를 줘도 초록이다.
   //    (실제로 그 변이가 이 파일을 통과했다. «없는 장은 false» 만 보면 «있는 장은 true» 를 아무도 안 본다.)
-  //    그러면 형판 전환이 통째로 죽고 1장은 옛 3컬럼 화면에 남는데, 검사는 아무 말도 안 한다.
   for (const chapterId of EXTRAS_CHAPTER_IDS) {
     assert.equal(
-      chapterUsesExtrasLayout(chapterId),
+      chapterHasExtras(chapterId),
       true,
-      `${chapterId}장에 extras 가 있는데 형판을 안 쓴다고 하면, 만든 콘텐츠가 화면에 안 나온다`,
+      `${chapterId}장에 extras 가 있는데 없다고 하면, ⑨ 가 그 장을 안 보고 지나간다`,
     )
   }
 
-  // 음성 대조군 — 없는 장·이상한 qaId 가 «형판을 쓴다»고 나오면 판정이 헛돈다.
-  assert.equal(chapterUsesExtrasLayout(99), false, '없는 장이 형판을 쓴다고 하면 선언이 의미를 잃는다')
+  // 음성 대조군 — 없는 장·이상한 qaId 가 «extras 가 있다»고 나오면 판정이 헛돈다.
+  assert.equal(chapterHasExtras(99), false, '없는 장에 extras 가 있다고 하면 선언이 의미를 잃는다')
   assert.ok(Number.isNaN(chapterIdOfQaId('엉터리')), 'qaId 모양이 아닌 것이 어느 장에 붙으면 안 된다')
 })
 
@@ -177,9 +176,9 @@ test('⑧ 가드가 실패할 수 있는 계측인지 — 대조 대상이 0건�
 //     모든 장이 문항 전부를 덮는다. 여기에 번호를 새로 넣는 것은 «반쪽 장을 만들겠다»는 선언이다.)
 const CHAPTERS_NOT_YET_FULLY_COVERED = new Set<number>([])
 
-test('⑨ 형판을 쓰는 장은 그 장의 문항 «전부»를 덮는다 — 반만 옮기면 문항마다 화면이 달라진다', () => {
-  // 🚨 형판은 장 단위로 걸린다. 그 장의 문항 중 일부만 extras 가 있으면, 나머지 문항은
-  //    본문·퀴즈·챗봇 탭만 있는 «옅은» 화면이 된다. 화면이 깨지지는 않지만,
+test('⑨ extras 가 있는 장은 그 장의 문항 «전부»를 덮는다 — 반만 채우면 문항마다 탭이 달라진다', () => {
+  // 🚨 탭은 문항 단위로 켜진다. 그 장의 문항 중 일부만 extras 가 있으면, 나머지 문항은
+  //    읽기·퀴즈만 있는 «옅은» 화면이 된다. 화면이 깨지지는 않지만,
   //    학생 입장에서는 문항을 넘길 때마다 있던 탭이 사라진다.
   //
   // 🔑 예전에는 이 검사가 **기초 장(base-extras.ts 등재분)에만** 걸렸다. 그래서 바이브코딩 장의
@@ -197,7 +196,7 @@ test('⑨ 형판을 쓰는 장은 그 장의 문항 «전부»를 덮는다 — 
   assert.deepEqual(
     partial,
     [],
-    `형판을 쓰는 장인데 견학이 없는 문항이 있다 — 그 문항만 탭이 사라진다: ${partial.join(' / ')}`,
+    `extras 가 있는 장인데 견학이 없는 문항이 있다 — 그 문항만 탭이 사라진다: ${partial.join(' / ')}`,
   )
 })
 
@@ -220,7 +219,7 @@ test('⑨-b 예외 목록이 «이미 채워진 장»을 붙들고 있지 않다
   const baseChapterIds = [...new Set(Object.keys(BASE_EXTRAS).map(chapterIdOfQaId))]
   assert.ok(baseChapterIds.length > 0, 'BASE_EXTRAS 가 비면 ⑨ 의 대상이 통째로 사라진다')
   for (const chapterId of baseChapterIds) {
-    assert.ok(EXTRAS_CHAPTER_IDS.has(chapterId), `${chapterId}장이 형판 대상에서 빠졌다 — ⑨ 가 그 장을 안 본다`)
+    assert.ok(EXTRAS_CHAPTER_IDS.has(chapterId), `${chapterId}장이 extras 묶음에서 빠졌다 — ⑨ 가 그 장을 안 본다`)
     assert.ok(!CHAPTERS_NOT_YET_FULLY_COVERED.has(chapterId), `기초 ${chapterId}장은 예외 대상이 아니다`)
   }
 })
@@ -236,7 +235,7 @@ test('⑩ 장 문항 수 선언이 실제 문항 수와 같다 — 손으로 적
 
 test('⑪ 각 장의 문항 순번이 1..N 으로 빈틈·중복 없이 이어진다', () => {
   // 🚨 order 는 표시용 숫자가 아니라 **이동에 쓰인다** — 이전/다음 버튼이 `chapterQas[order - 2]`,
-  //    `chapterQas[order]` 로 이웃을 집는다(GuidePanel). 그래서 순번이 겹치거나 비면
+  //    `chapterQas[order]` 로 이웃을 집는다(ChapterNavPanel). 그래서 순번이 겹치거나 비면
   //    «다음»이 자기 자신으로 가거나 문항 하나를 건너뛴다. 화면은 멀쩡해 보이고 아무도 안 알려 준다.
   // 🔑 2026-08-11 ch06_q03 을 채우며 q04~q10 순번을 한 칸씩 밀었다. 그때 밀다 만 상태를
   //    잡아 줄 것이 아무것도 없었다(변이 시험에서 초록으로 통과했다).
