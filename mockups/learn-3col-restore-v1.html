@@ -1,0 +1,683 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>3컬럼 골격 복원 + 탭 통합 — Architecture Academy 목업 v1</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css" rel="stylesheet" />
+<style>
+  :root{
+    --color-text-primary:#1c1917; --color-text-body:#57534e; --color-text-muted:#78716c; --color-text-faint:#a8a29e;
+    --color-border:#e7e5e4; --color-border-hover:#d6d3d1;
+    --color-bg-card:#fff; --color-bg-subtle:#fafaf9; --color-bg-input:#f5f5f4;
+    --color-btn-primary:#1c1917; --color-accent:#6366f1; --color-success:#10b981;
+    --font-heading:'Outfit','Pretendard Variable',sans-serif;
+    --font-body:'Pretendard Variable',-apple-system,'Noto Sans KR',sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  html,body{background:#f5f5f4;color:var(--color-text-primary);font-family:var(--font-body);letter-spacing:-.005em;line-height:1.7;font-weight:400}
+  h1,h2,h3,.font-head{font-family:var(--font-heading)}
+  .mono{font-family:var(--font-mono)}
+  .frame{background:var(--color-bg-card);border:1px solid var(--color-border);border-radius:20px;overflow:hidden;box-shadow:0 1px 2px rgba(28,25,23,.04),0 12px 32px -18px rgba(28,25,23,.18)}
+  .tabbtn{border-bottom:2px solid transparent;color:var(--color-text-muted)}
+  .tabbtn.is-active{border-bottom-color:var(--color-text-primary);color:var(--color-text-primary);font-weight:600}
+  .chip{border:1px solid var(--color-border);border-radius:999px;padding:2px 10px;font-size:11px;color:var(--color-text-muted)}
+  .h-chip{background:#eef2ff;border-color:#c7d2fe;color:#4338ca}
+  .scroller{overflow-x:auto;padding-bottom:8px}
+  .note{background:#fffbeb;border:1px solid #fde68a;border-radius:12px}
+  .danger{background:#fef2f2;border:1px solid #fecaca;border-radius:12px}
+  .ok{background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px}
+  .sec-label{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--color-text-faint);font-weight:600}
+</style>
+</head>
+<body class="pb-24">
+
+<!-- ══════════ 표지 ══════════ -->
+<header class="mx-auto max-w-[1180px] px-6 pt-12 pb-8">
+  <p class="sec-label">Architecture Academy · 목업 v1 · 2026-08-11</p>
+  <h1 class="mt-2 text-[32px] font-semibold leading-tight">3컬럼 골격 복원 + 탭 통합</h1>
+  <p class="mt-3 max-w-[760px] text-[15px]" style="color:var(--color-text-body)">
+    승인 목업 <span class="mono text-[13px]">student-learn.html</span> 의 3컬럼 골격을 되돌리고, 새로 만든 5탭 형판의 <strong>콘텐츠만</strong>(견학·사례·내 차례·퀴즈) 우측 탭으로 옮깁니다.
+    IT 17장과 하네스 6모듈은 <strong>하나의 연속된 챕터 목록</strong>이 되고, 학생은 교사 지정 없이 자유롭게 이동합니다.
+  </p>
+  <div class="mt-5 flex flex-wrap gap-2">
+    <span class="chip">지시 1 · 3컬럼 + 탭</span>
+    <span class="chip">지시 2 · 세션 통합 · 자유 이동</span>
+    <span class="chip">색인 → 학습 2단 진입</span>
+    <span class="chip">지시 3 · AI = 중앙 전용 컬럼</span>
+    <span class="chip h-chip">하네스 = 섞인 연속 챕터</span>
+    <span class="chip">교사 = 학생의 상위집합</span>
+    <span class="chip">B형 시연작 신설</span>
+    <span class="chip" style="background:#ecfdf5;border-color:#a7f3d0;color:#047857">확정 · 23강 · 이름표 유지</span>
+  </div>
+  <div class="note mt-6 px-4 py-3 text-[13px]" style="color:var(--color-text-body)">
+    <strong>이 목업은 구현이 아닙니다.</strong> 승인 뒤에 코드로 옮깁니다. 화면 안의 탭·목록은 눌러볼 수 있게 해두었습니다(더미 데이터).
+  </div>
+</header>
+
+<!-- ══════════ S0. 라이브러리 색인 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-10" id="s0">
+  <p class="sec-label">S0 · 진입 화면 (기존 구조 유지)</p>
+  <h2 class="mt-1 text-[22px] font-semibold">먼저 강 목록에서 고른다 — 카드 색인</h2>
+  <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">
+    학습 화면에 23강을 다 늘어놓지 않습니다. 지금 <span class="mono text-[12px]">LibraryPage</span> 가 하던 카드 그리드를 그대로 두고,
+    ai-app-builder 튜토리얼 색인처럼 <strong>검색 · 필터 · 진도</strong>를 붙입니다. 자유 이동은 여기서 일어납니다.
+  </p>
+
+  <div class="frame mt-5 p-6">
+    <div class="flex flex-wrap items-center gap-2">
+      <div class="flex min-w-[240px] flex-1 items-center gap-2 rounded-xl px-3 py-2" style="background:var(--color-bg-input)">
+        <span class="text-[13px]" style="color:var(--color-text-faint)">🔍</span>
+        <input class="w-full bg-transparent text-[13px] outline-none" placeholder="배우고 싶은 것을 검색 (예: 데이터베이스, 규칙, 테스트)" />
+      </div>
+      <div class="flex gap-1 rounded-xl p-1" style="background:var(--color-bg-input)">
+        <button class="rounded-lg bg-white px-3 py-1.5 text-[12px] font-medium shadow-sm">전체 23</button>
+        <button class="rounded-lg px-3 py-1.5 text-[12px]" style="color:var(--color-text-muted)">📘 지식 17</button>
+        <button class="rounded-lg px-3 py-1.5 text-[12px]" style="color:var(--color-text-muted)">🛠 실습 6</button>
+        <button class="rounded-lg px-3 py-1.5 text-[12px]" style="color:var(--color-text-muted)">이어하기</button>
+      </div>
+    </div>
+
+    <div class="mt-4 rounded-2xl border-2 px-4 py-3" style="border-color:var(--color-btn-primary)">
+      <p class="text-[11px] font-semibold" style="color:var(--color-text-faint)">이어서 하기</p>
+      <div class="mt-1 flex items-center gap-3">
+        <p class="flex-1 text-[14px] font-semibold">11강 · AI에게 일을 시킨다는 것 <span class="text-[12px] font-normal" style="color:var(--color-text-faint)">2/4 문항</span></p>
+        <button class="rounded-xl px-4 py-2 text-[12px] font-medium text-white" style="background:var(--color-btn-primary)">이어서 하기 →</button>
+      </div>
+    </div>
+
+    <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div class="rounded-xl border p-5" style="border-color:var(--color-border)">
+        <p class="mono text-[11px]" style="color:var(--color-text-faint)">1강</p>
+        <p class="mt-1 text-[14px] font-medium">🖥 컴퓨터의 큰 그림</p>
+        <p class="mt-2 text-[11px]" style="color:var(--color-text-faint)">문항 4개 · 진도 4/4</p>
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full" style="background:var(--color-bg-input)"><div class="h-full rounded-full" style="width:100%;background:var(--color-success)"></div></div>
+      </div>
+      <div class="rounded-xl border p-5" style="border-color:var(--color-border)">
+        <p class="mono text-[11px]" style="color:var(--color-text-faint)">10강</p>
+        <p class="mt-1 text-[14px] font-medium">☁️ 클라우드와 AI</p>
+        <p class="mt-2 text-[11px]" style="color:var(--color-text-faint)">문항 7개 · 진도 0/7</p>
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full" style="background:var(--color-bg-input)"><div class="h-full rounded-full" style="width:0%;background:var(--color-success)"></div></div>
+      </div>
+      <div class="rounded-xl border-2 p-5" style="border-color:var(--color-btn-primary)">
+        <p class="mono text-[11px]" style="color:var(--color-text-faint)">11강 · 보는 중</p>
+        <p class="mt-1 text-[14px] font-medium">🤖 AI에게 일을 시킨다는 것</p>
+        <p class="mt-2 text-[11px]" style="color:var(--color-text-faint)">문항 4개 · 진도 2/4</p>
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full" style="background:var(--color-bg-input)"><div class="h-full rounded-full" style="width:50%;background:var(--color-success)"></div></div>
+      </div>
+      <div class="rounded-xl border p-5" style="border-color:#c7d2fe;background:#eef2ff">
+        <div class="flex items-center gap-2"><p class="mono text-[11px]" style="color:#4338ca">12강</p><span class="chip h-chip">🛠 실습</span></div>
+        <p class="mt-1 text-[14px] font-medium">왜 하네스인가 · CLAUDE.md</p>
+        <p class="mt-2 text-[11px]" style="color:var(--color-text-body)">11강에서 배운 «규칙»을 직접 써봅니다</p>
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full" style="background:#e0e7ff"><div class="h-full rounded-full" style="width:0%;background:var(--color-accent)"></div></div>
+      </div>
+      <div class="rounded-xl border p-5" style="border-color:#c7d2fe;background:#eef2ff">
+        <div class="flex items-center gap-2"><p class="mono text-[11px]" style="color:#4338ca">13강</p><span class="chip h-chip">🛠 실습</span></div>
+        <p class="mt-1 text-[14px] font-medium">나만의 스킬 · /init</p>
+        <p class="mt-2 text-[11px]" style="color:var(--color-text-body)">반복 작업을 스킬로 박제합니다</p>
+        <div class="mt-3 h-1.5 overflow-hidden rounded-full" style="background:#e0e7ff"><div class="h-full rounded-full" style="width:0%;background:var(--color-accent)"></div></div>
+      </div>
+      <div class="grid place-items-center rounded-xl border border-dashed p-5 text-[12px]" style="border-color:var(--color-border);color:var(--color-text-faint)">… 14강 – 23강</div>
+    </div>
+  </div>
+
+  <div class="ok mt-4 px-4 py-3 text-[13px]" style="color:var(--color-text-body)">
+    <strong>왜 이렇게 갈리나</strong> — <strong>고르는 일</strong>은 색인에서(넓게 훑기), <strong>배우는 일</strong>은 학습 화면에서(한 강에 집중).
+    학습 화면 좌측에 23강을 다 세우면 «지금 뭘 하고 있는지»가 묻힙니다. 대신 좌측 상단에 «← 전체 강 목록»과 «← 10강 / 12강 →»을 둬서 이동은 두 번의 클릭 안에 끝납니다.
+  </div>
+</section>
+
+<!-- ══════════ S1. 학생 PC 3컬럼 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-10">
+  <p class="sec-label">S1 · 학생 화면 (PC 1440px)</p>
+  <h2 class="mt-1 text-[22px] font-semibold">3컬럼 — 이 강의 문항 280 · AI 챗봇 320 · 콘텐츠 탭</h2>
+  <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">색인(S0)에서 강을 고르면 이 화면으로 들어옵니다. 좌측은 <strong>그 강의 문항만</strong> 보여줍니다. 우측 탭은 눌러볼 수 있습니다.</p>
+
+  <div class="scroller mt-5">
+  <div class="frame" style="width:1440px">
+    <!-- 서비스 헤더 -->
+    <div class="flex h-14 items-center gap-3 border-b px-5" style="border-color:var(--color-border)">
+      <span class="font-head text-[15px] font-semibold">Architecture Academy</span>
+      <span class="chip">수업 참여 중 · <span class="mono">4TSCZ2</span></span>
+      <div class="ml-auto flex items-center gap-2 text-[13px]" style="color:var(--color-text-muted)">
+        <span>진도 7 / 107</span><span class="h-4 w-px" style="background:var(--color-border)"></span><span>이서준</span>
+      </div>
+    </div>
+
+    <div class="flex" style="height:760px">
+      <!-- 좌: 현재 강의 문항 목록 280 (전체 나열 아님) -->
+      <aside class="flex w-[280px] min-w-[260px] flex-col border-r" style="border-color:var(--color-border)">
+        <div class="border-b px-4 py-3" style="border-color:var(--color-border)">
+          <a class="inline-flex items-center gap-1 text-[12px] font-medium" style="color:var(--color-accent)" href="#s0">← 전체 강 목록</a>
+          <div class="mt-2 flex items-baseline gap-2">
+            <span class="mono text-[11px]" style="color:var(--color-text-faint)">11강</span>
+            <p class="text-[14px] font-semibold">AI에게 일을 시킨다는 것</p>
+          </div>
+          <div class="mt-2 flex items-center gap-2">
+            <div class="h-1.5 flex-1 overflow-hidden rounded-full" style="background:var(--color-bg-input)">
+              <div class="h-full rounded-full" style="width:50%;background:var(--color-success)"></div>
+            </div>
+            <span class="text-[11px]" style="color:var(--color-text-faint)">2/4</span>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto px-2 py-2 text-[13px]">
+          <p class="px-2 pb-1 pt-1 text-[11px] font-semibold" style="color:var(--color-text-faint)">이 강의 문항</p>
+          <button class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left hover:bg-stone-50"><span class="mono text-[11px]" style="color:var(--color-text-faint)">1</span><span class="flex-1">AI는 무엇을 못 하나</span><span style="color:var(--color-success)">●</span></button>
+          <button class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left font-semibold text-white" style="background:var(--color-btn-primary)"><span class="mono text-[11px] opacity-70">2</span><span class="flex-1">규칙을 주면 달라진다</span></button>
+          <button class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left hover:bg-stone-50"><span class="mono text-[11px]" style="color:var(--color-text-faint)">3</span><span class="flex-1">맥락이라는 준비물</span></button>
+          <button class="flex w-full items-center gap-2 rounded-lg px-2 py-2 text-left hover:bg-stone-50"><span class="mono text-[11px]" style="color:var(--color-text-faint)">4</span><span class="flex-1">시켜본 뒤에 남는 것</span></button>
+
+          <div class="mt-4 rounded-xl px-3 py-3" style="background:var(--color-bg-subtle)">
+            <p class="text-[11px] font-semibold" style="color:var(--color-text-faint)">다음 강</p>
+            <p class="mt-1 text-[13px] font-medium">12강 · 왜 하네스인가 <span class="chip h-chip">실습</span></p>
+            <p class="mt-1 text-[11px]" style="color:var(--color-text-body)">방금 배운 «규칙»을 직접 써봅니다.</p>
+          </div>
+        </div>
+
+        <div class="flex gap-2 border-t px-3 py-3 text-[12px]" style="border-color:var(--color-border)">
+          <button class="flex-1 rounded-xl border py-2 font-medium" style="border-color:var(--color-border)">← 10강</button>
+          <button class="flex-1 rounded-xl border py-2 font-medium" style="border-color:var(--color-border)">12강 →</button>
+        </div>
+      </aside>
+
+      <!-- 중: AI 챗봇 320 -->
+      <section class="flex w-[320px] min-w-[280px] flex-col border-r" style="border-color:var(--color-border)">
+        <div class="border-b px-4 py-3" style="border-color:var(--color-border)">
+          <p class="text-[13px] font-semibold">AI에게 물어보기</p>
+          <p class="mt-0.5 text-[11px]" style="color:var(--color-text-faint)">지금 보는 문항을 알고 답합니다</p>
+        </div>
+        <div class="flex-1 space-y-3 overflow-y-auto px-4 py-4 text-[13px]">
+          <div class="rounded-2xl px-3 py-2" style="background:var(--color-bg-subtle);color:var(--color-text-body)">
+            «규칙을 주면 달라진다»에 대해 최대 4문장으로 풀어 설명해드릴게요. 시연을 먼저 보고 헷갈린 부분을 짧게 질문해보세요.
+          </div>
+          <div class="ml-8 rounded-2xl px-3 py-2 text-white" style="background:var(--color-btn-primary)">규칙이랑 명령이랑 뭐가 달라요?</div>
+          <div class="rounded-2xl px-3 py-2" style="background:var(--color-bg-subtle);color:var(--color-text-body)">
+            명령은 «이번 한 번»이고 규칙은 «앞으로 계속»입니다. 같은 말을 매번 반복하지 않으려고 규칙을 문서에 적어두는 거예요.
+          </div>
+        </div>
+        <div class="border-t px-4 py-3" style="border-color:var(--color-border)">
+          <div class="flex items-center gap-2 rounded-2xl px-3 py-2" style="background:var(--color-bg-input)">
+            <input class="w-full bg-transparent text-[13px] outline-none" placeholder="궁금한 걸 물어보세요" />
+            <button class="rounded-xl px-3 py-1 text-[12px] font-medium text-white" style="background:var(--color-btn-primary)">보내기</button>
+          </div>
+          <p class="mt-2 text-[11px]" style="color:var(--color-text-faint)">오늘 남은 질문 8회</p>
+        </div>
+      </section>
+
+      <!-- 우: 콘텐츠 탭 -->
+      <section class="flex flex-1 flex-col">
+        <div class="border-b px-6 pt-4" style="border-color:var(--color-border)">
+          <div class="flex items-baseline gap-2">
+            <span class="mono text-[12px]" style="color:var(--color-text-faint)">11강 · 2번</span>
+            <h3 class="text-[18px] font-semibold">규칙을 주면 달라진다</h3>
+          </div>
+          <nav class="mt-3 flex gap-5 text-[13px]">
+            <button class="tabbtn is-active pb-2" data-tab="read">📖 읽기</button>
+            <button class="tabbtn pb-2" data-tab="demo">🎮 시연</button>
+            <button class="tabbtn pb-2" data-tab="tour">🚌 견학</button>
+            <button class="tabbtn pb-2" data-tab="myturn">✋ 내 차례</button>
+            <button class="tabbtn pb-2" data-tab="quiz">📝 퀴즈</button>
+          </nav>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-6">
+          <div data-panel="read" class="mx-auto max-w-[720px] space-y-4 text-[15px]" style="color:var(--color-text-body)">
+            <p>같은 부탁을 두 사람에게 하면 결과가 다릅니다. 한 사람은 우리 팀이 어떻게 일하는지 알고, 다른 사람은 모르기 때문입니다. AI도 같습니다.</p>
+            <p>그래서 «이번에만 이렇게 해줘»라고 매번 말하는 대신, 팀이 늘 지키는 것을 문서 한 장에 적어 둡니다. 그 문서가 있으면 AI는 매번 같은 기준으로 일합니다.</p>
+            <div class="rounded-2xl px-4 py-3" style="background:var(--color-bg-subtle)">
+              <p class="text-[12px] font-semibold" style="color:var(--color-text-primary)">한 줄로</p>
+              <p class="mt-1 text-[14px]">명령은 이번 한 번, 규칙은 앞으로 계속.</p>
+            </div>
+            <p class="text-[13px]" style="color:var(--color-text-faint)">다음 → 🎮 시연에서 규칙 있는 쪽과 없는 쪽을 나란히 돌려봅니다.</p>
+          </div>
+          <div data-panel="demo" class="hidden">
+            <div class="mx-auto max-w-[860px] rounded-2xl border p-5" style="border-color:var(--color-border);background:var(--color-bg-subtle)">
+              <p class="text-[12px] font-semibold" style="color:var(--color-text-faint)">인터랙티브 시연 · 규칙 없음 vs 규칙 있음</p>
+              <div class="mt-4 grid grid-cols-2 gap-4">
+                <div class="rounded-xl border bg-white p-4" style="border-color:var(--color-border)">
+                  <p class="text-[12px] font-semibold">규칙 없음</p>
+                  <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">매번 다른 모양으로 결과가 나옵니다.</p>
+                </div>
+                <div class="rounded-xl border bg-white p-4" style="border-color:#c7d2fe">
+                  <p class="text-[12px] font-semibold" style="color:#4338ca">규칙 있음</p>
+                  <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">세 번을 돌려도 같은 모양입니다.</p>
+                </div>
+              </div>
+              <button class="mt-4 rounded-xl px-4 py-2 text-[13px] font-medium text-white" style="background:var(--color-btn-primary)">3번 돌려보기</button>
+              <p class="mt-3 text-[11px]" style="color:var(--color-text-faint)">기존 데모 103개가 이 자리에 그대로 들어옵니다 (demos/registry.ts).</p>
+            </div>
+          </div>
+          <div data-panel="tour" class="hidden mx-auto max-w-[720px] space-y-3">
+            <p class="text-[15px]" style="color:var(--color-text-body)">🚌 규칙은 이미 네 주변에 가득하다 — 교실 밖에서 같은 구조를 찾아옵니다.</p>
+            <div class="rounded-2xl border p-4" style="border-color:var(--color-border)"><p class="text-[13px] font-semibold">미션 1</p><p class="mt-1 text-[13px]" style="color:var(--color-text-body)">우리 반에서 «말 안 해도 다들 지키는 것» 세 가지를 적어보세요.</p></div>
+            <div class="rounded-2xl border p-4" style="border-color:var(--color-border)"><p class="text-[13px] font-semibold">미션 2</p><p class="mt-1 text-[13px]" style="color:var(--color-text-body)">그중 하나가 사라지면 무엇이 어그러질지 한 문장으로.</p></div>
+          </div>
+          <div data-panel="myturn" class="hidden mx-auto max-w-[720px]">
+            <div class="rounded-2xl border p-5" style="border-color:var(--color-border)">
+              <p class="text-[13px] font-semibold">✋ 내 차례 — 우리 반 규칙 한 줄 쓰기</p>
+              <textarea class="mt-3 h-28 w-full rounded-xl p-3 text-[13px] outline-none" style="background:var(--color-bg-input)" placeholder="예: 발표할 때는 이름을 먼저 말한다"></textarea>
+              <div class="mt-3 flex items-center gap-2">
+                <button class="rounded-xl px-4 py-2 text-[13px] font-medium text-white" style="background:var(--color-btn-primary)">제출하고 판정받기</button>
+                <span class="text-[11px]" style="color:var(--color-text-faint)">오늘 남은 판정 11회 · 쿨타임 5분</span>
+              </div>
+            </div>
+          </div>
+          <div data-panel="quiz" class="hidden mx-auto max-w-[660px] space-y-3">
+            <p class="text-[15px] font-semibold">Q. 명령과 규칙의 차이로 가장 알맞은 것은?</p>
+            <button class="block w-full rounded-xl border p-3 text-left text-[14px]" style="border-color:var(--color-border)">① 규칙은 짧고 명령은 길다</button>
+            <button class="block w-full rounded-xl border p-3 text-left text-[14px]" style="border-color:var(--color-border)">② 명령은 이번 한 번, 규칙은 앞으로 계속</button>
+            <button class="block w-full rounded-xl border p-3 text-left text-[14px]" style="border-color:var(--color-border)">③ 규칙은 사람에게만 쓴다</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  </div>
+
+  <div class="ok mt-4 px-4 py-3 text-[13px]" style="color:var(--color-text-body)">
+    <strong>되살아나는 것</strong> — 좌측 패널(GuidePanel)이 돌아오면서 문항 목록·진도·이전/다음 이동이 복구됩니다.
+    지금 5탭 형판은 이 패널 자체를 렌더하지 않아 상단의 작은 «문항 이동» 화살표만 남아 있습니다.
+  </div>
+</section>
+
+<!-- ══════════ S2. 하네스 모듈 내부 구조 A안 / B안 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-16">
+  <p class="sec-label">S2 · 확정</p>
+  <h2 class="mt-1 text-[22px] font-semibold">하네스 모듈 하나가 «강»이 될 때 — <span style="color:var(--color-accent)">A안 확정</span></h2>
+
+  <div class="mt-5 grid gap-5 lg:grid-cols-2">
+    <!-- A안 -->
+    <div class="frame p-0">
+      <div class="border-b px-5 py-4" style="border-color:var(--color-border)">
+        <p class="text-[12px] font-semibold" style="color:#047857">✅ A안 채택 · 모듈 1개 = 강 1개, 안에 문항 여러 개</p>
+        <p class="mt-1 text-[13px]" style="color:var(--color-text-body)">다른 장과 구조가 같아짐. 좌측 목록·진도·퀴즈가 동일하게 동작.</p>
+      </div>
+      <div class="flex" style="height:300px">
+        <div class="w-[190px] border-r px-2 py-2 text-[12px]" style="border-color:var(--color-border)">
+          <div class="rounded-lg px-2 py-1.5" style="background:var(--color-bg-subtle)"><span class="mono text-[10px]">12강</span> 왜 하네스인가</div>
+          <div class="pl-4 pt-1">
+            <p class="rounded px-2 py-1 text-white" style="background:var(--color-btn-primary)">q01 규칙 없는 AI</p>
+            <p class="px-2 py-1" style="color:var(--color-text-body)">q02 CLAUDE.md 한 장</p>
+            <p class="px-2 py-1" style="color:var(--color-text-body)">q03 넣고 다시 시키기</p>
+            <p class="px-2 py-1" style="color:var(--color-text-body)">q04 우리 반 규칙 쓰기</p>
+          </div>
+        </div>
+        <div class="flex-1 px-4 py-3">
+          <div class="flex gap-4 border-b pb-2 text-[12px]" style="border-color:var(--color-border)">
+            <span class="font-semibold">📖 읽기</span><span style="color:var(--color-text-muted)">🛠 작업대</span><span style="color:var(--color-text-muted)">📝 퀴즈</span>
+          </div>
+          <p class="mt-3 text-[13px]" style="color:var(--color-text-body)">문항 하나가 «한 단계». 작업대는 그 단계 몫만 담습니다.</p>
+          <div class="mt-3 rounded-xl px-3 py-6 text-center text-[12px]" style="background:var(--color-bg-subtle);color:var(--color-text-faint)">작업대 (단계 1/4)</div>
+        </div>
+      </div>
+      <div class="border-t px-5 py-3 text-[12px]" style="border-color:var(--color-border);color:var(--color-text-body)">
+        <strong>비용</strong> — 지금 작업대 1개를 4단계로 쪼개는 설계 작업이 모듈마다 필요(6모듈).
+      </div>
+    </div>
+
+    <!-- B안 -->
+    <div class="frame p-0" style="opacity:.5">
+      <div class="border-b px-5 py-4" style="border-color:var(--color-border)">
+        <p class="text-[12px] font-semibold" style="color:var(--color-text-faint)"><s>B안 · 모듈 1개 = 문항 1개 (작업대 통짜)</s> — 미채택</p>
+        <p class="mt-1 text-[13px]" style="color:var(--color-text-body)">지금 구현 그대로 얹음. 리스크 작음.</p>
+      </div>
+      <div class="flex" style="height:300px">
+        <div class="w-[190px] border-r px-2 py-2 text-[12px]" style="border-color:var(--color-border)">
+          <div class="rounded-lg px-2 py-1.5 text-white" style="background:var(--color-btn-primary)"><span class="mono text-[10px]">12강</span> 왜 하네스인가</div>
+          <div class="pl-4 pt-1"><p class="px-2 py-1" style="color:var(--color-text-faint)">q01 (하나뿐)</p></div>
+          <div class="rounded-lg px-2 py-1.5"><span class="mono text-[10px]">13강</span> 나만의 스킬</div>
+          <div class="pl-4 pt-1"><p class="px-2 py-1" style="color:var(--color-text-faint)">q01 (하나뿐)</p></div>
+        </div>
+        <div class="flex-1 px-4 py-3">
+          <div class="flex gap-4 border-b pb-2 text-[12px]" style="border-color:var(--color-border)">
+            <span class="font-semibold">🛠 작업대</span><span style="color:var(--color-text-muted)">📝 퀴즈</span>
+          </div>
+          <div class="mt-3 rounded-xl px-3 py-14 text-center text-[12px]" style="background:var(--color-bg-subtle);color:var(--color-text-faint)">작업대 통짜 (시키기 → 실행 → 결과 → 이해)</div>
+        </div>
+      </div>
+      <div class="danger border-0 px-5 py-3 text-[12px]" style="color:var(--color-text-body)">
+        <strong>마찰</strong> — 좌측 목록에서 하네스 장만 문항이 1개라 진도 눈금이 다른 장과 불균질해 보입니다(1/1 vs 1/7).
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ S3. 챕터 배치안 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-16">
+  <p class="sec-label">S3 · 승인 필요</p>
+  <h2 class="mt-1 text-[22px] font-semibold">«순서를 섞는다» — 배치 확정 23강</h2>
+  <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">하네스 실습을 그 주제를 배운 직후에 배치했습니다. 회색 = 기존 IT 지식, 남색 = 하네스 실습. 표시는 «N강», 속 이름표(ch12 등)는 그대로 둡니다.</p>
+
+  <div class="mt-5 grid gap-2 md:grid-cols-2">
+    <div class="space-y-1.5">
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:var(--color-border)"><span class="mono text-[11px]" style="color:var(--color-text-faint)">1–10강</span> &nbsp;컴퓨터의 큰 그림 → 클라우드와 AI &nbsp;<span class="chip">기존 1–10 그대로</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:var(--color-border)"><span class="mono text-[11px]" style="color:var(--color-text-faint)">11강</span> &nbsp;AI에게 일을 시킨다는 것 <span class="chip mono">속 ch11</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:#c7d2fe;background:#eef2ff"><span class="mono text-[11px]" style="color:#4338ca">12강</span> &nbsp;왜 하네스인가 · CLAUDE.md <span class="chip h-chip">하네스 M1</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:#c7d2fe;background:#eef2ff"><span class="mono text-[11px]" style="color:#4338ca">13강</span> &nbsp;나만의 스킬 · /init <span class="chip h-chip">하네스 M2</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:var(--color-border)"><span class="mono text-[11px]" style="color:var(--color-text-faint)">14강</span> &nbsp;만들 것을 정하는 법 <span class="chip mono">속 ch12</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:var(--color-border)"><span class="mono text-[11px]" style="color:var(--color-text-faint)">15강</span> &nbsp;아무도 안 적는 세 칸 <span class="chip mono">속 ch13</span></div>
+    </div>
+    <div class="space-y-1.5">
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:#c7d2fe;background:#eef2ff"><span class="mono text-[11px]" style="color:#4338ca">16강</span> &nbsp;기획 · 요구사항·이슈·AC <span class="chip h-chip">하네스 M3</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:var(--color-border)"><span class="mono text-[11px]" style="color:var(--color-text-faint)">17강</span> &nbsp;일 시키는 순서 <span class="chip mono">속 ch14</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:var(--color-border)"><span class="mono text-[11px]" style="color:var(--color-text-faint)">18강</span> &nbsp;믿지 않고 확인하는 법 <span class="chip mono">속 ch15</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:#c7d2fe;background:#eef2ff"><span class="mono text-[11px]" style="color:#4338ca">19강</span> &nbsp;TDD 한 바퀴 <span class="chip h-chip">하네스 M4</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:var(--color-border)"><span class="mono text-[11px]" style="color:var(--color-text-faint)">20강</span> &nbsp;합격, 불합격, 그리고 거짓말 <span class="chip mono">속 ch16</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:var(--color-border)"><span class="mono text-[11px]" style="color:var(--color-text-faint)">21강</span> &nbsp;재고, 지키고, 운영하기 <span class="chip mono">속 ch17</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:#c7d2fe;background:#eef2ff"><span class="mono text-[11px]" style="color:#4338ca">22강</span> &nbsp;커밋·PR·보안 <span class="chip h-chip">하네스 M5</span></div>
+      <div class="rounded-xl border px-4 py-2 text-[13px]" style="border-color:#c7d2fe;background:#eef2ff"><span class="mono text-[11px]" style="color:#4338ca">23강</span> &nbsp;종합 = 졸업 <span class="chip h-chip">하네스 M6</span></div>
+    </div>
+  </div>
+
+  <div class="ok mt-5 px-4 py-3 text-[13px]" style="color:var(--color-text-body)">
+    <strong>✅ 확정 — 이름표는 그대로, 번호 체계만 «N강»으로 (2026-08-11)</strong><br />
+    속 이름표(<span class="mono text-[12px]">ch12_q01</span>)는 <strong>손대지 않습니다.</strong> 견학 107 · 사례 70 · 내 차례 6 · 퀴즈 · 데모 103개가 전부 이 이름표에 매달려 있고,
+    학생 진도 기록과 링크도 이걸 씁니다. 바꾸는 것은 <strong>화면에 보이는 번호와 순서뿐</strong>입니다.
+    <br /><br />
+    «장»을 버리고 «강»으로 간 이유 — 옛 번호(12장)와 새 번호(14)가 같은 단위로 겹치면 교사도 작업자도 헷갈립니다.
+    단위를 바꾸면 <strong>«12강»은 새 체계에만 있는 말</strong>이라 오인할 수가 없습니다.
+  </div>
+  <div class="note mt-3 px-4 py-3 text-[13px]" style="color:var(--color-text-body)">
+    <strong>교안 6개 신규 필요</strong> — 하네스 강(12·13·16·19·22·23강)에는 교안이 없습니다. CLAUDE.md 계약 ⑯: 강을 만들면 교안도 같이 만들어야 배포됩니다. 현재 17/17 → 목표 23/23.
+  </div>
+</section>
+
+<!-- ══════════ S4. 학생 모바일 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-16">
+  <p class="sec-label">S4 · 학생 화면 (모바일 375px)</p>
+  <h2 class="mt-1 text-[22px] font-semibold">3컬럼이 상단 탭으로 접힘</h2>
+  <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">PC의 세 컬럼이 모바일에서는 «목록 · 챗봇 · 콘텐츠» 상단 탭이 됩니다. 콘텐츠 안의 5탭은 가로 스크롤.</p>
+  <div class="mt-5 flex gap-6">
+    <div class="frame" style="width:375px">
+      <div class="flex h-12 items-center gap-2 border-b px-4 text-[13px]" style="border-color:var(--color-border)"><span class="font-head font-semibold">Architecture</span><span class="chip ml-auto mono">4TSCZ2</span></div>
+      <nav class="flex border-b text-[13px]" style="border-color:var(--color-border)">
+        <button class="tabbtn flex-1 py-2.5">문항</button>
+        <button class="tabbtn flex-1 py-2.5">챗봇</button>
+        <button class="tabbtn is-active flex-1 py-2.5">콘텐츠</button>
+      </nav>
+      <div class="px-4 pt-3">
+        <p class="mono text-[11px]" style="color:var(--color-text-faint)">11강 · 2번</p>
+        <h3 class="text-[16px] font-semibold">규칙을 주면 달라진다</h3>
+        <div class="scroller mt-2 flex gap-4 border-b text-[13px]" style="border-color:var(--color-border)">
+          <button class="tabbtn is-active whitespace-nowrap pb-2">📖 읽기</button>
+          <button class="tabbtn whitespace-nowrap pb-2">🎮 시연</button>
+          <button class="tabbtn whitespace-nowrap pb-2">🚌 견학</button>
+          <button class="tabbtn whitespace-nowrap pb-2">✋ 내 차례</button>
+          <button class="tabbtn whitespace-nowrap pb-2">📝 퀴즈</button>
+        </div>
+      </div>
+      <div class="px-4 py-4 text-[14px]" style="color:var(--color-text-body);height:420px">
+        <p>같은 부탁을 두 사람에게 하면 결과가 다릅니다. 한 사람은 우리 팀이 어떻게 일하는지 알고, 다른 사람은 모르기 때문입니다.</p>
+        <div class="mt-3 rounded-2xl px-4 py-3" style="background:var(--color-bg-subtle)"><p class="text-[12px] font-semibold" style="color:var(--color-text-primary)">한 줄로</p><p class="mt-1">명령은 이번 한 번, 규칙은 앞으로 계속.</p></div>
+      </div>
+    </div>
+    <div class="flex-1 self-start rounded-2xl border p-5 text-[13px]" style="border-color:var(--color-border);background:#fff;color:var(--color-text-body)">
+      <p class="font-semibold" style="color:var(--color-text-primary)">모바일 규칙</p>
+      <ul class="mt-2 space-y-1.5 list-disc pl-5">
+        <li>기본 탭은 <strong>콘텐츠</strong>. 학생이 들어오면 바로 읽을 것이 보입니다.</li>
+        <li>챗봇은 탭으로 내려가되, 콘텐츠 우하단에 <strong>말풍선 버튼</strong>을 띄워 한 번에 이동.</li>
+        <li>탭 상태는 문항을 바꿔도 유지(읽기 → 읽기).</li>
+      </ul>
+      <p class="mt-3 text-[12px]" style="color:var(--color-text-faint)">현행 구현에도 있던 동작입니다 (LearnPage 모바일 4탭 → 3탭으로 축소).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ S5. 교사 = 상위집합 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-16">
+  <p class="sec-label">S5 · 교사 화면 (DESIGN-POLICY §9.H-14)</p>
+  <h2 class="mt-1 text-[22px] font-semibold">학생 화면 ⊂ 교사 화면 — 같은 화면 위에 컨트롤만 얹힘</h2>
+  <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">교사는 학생이 보는 것을 <strong>그대로</strong> 보면서 <strong>탭 하나(📋 교안)</strong>만 더 갖습니다. 별도 사이드바를 두지 않아 폭이 늘지 않습니다(§9.D-5).</p>
+
+  <div class="scroller mt-5">
+  <div class="frame" style="width:1440px">
+    <!-- 교사 전용 바 -->
+    <div class="flex h-14 items-center gap-3 border-b-2 px-5" style="border-color:#c7d2fe;background:#eef2ff">
+      <span class="chip h-chip">교사 전용</span>
+      <span class="text-[13px] font-semibold">3학년 2반 · 진행 중</span>
+      <span class="text-[13px]" style="color:var(--color-text-body)">참여 <strong>24</strong>명 · 현재 문항 도달 18명</span>
+      <div class="ml-auto flex items-center gap-2">
+        <button class="rounded-xl border bg-white px-3 py-1.5 text-[12px] font-medium" style="border-color:#c7d2fe">📋 이 차시 진행</button>
+        <button class="rounded-xl border bg-white px-3 py-1.5 text-[12px] font-medium" style="border-color:#c7d2fe">QR 보기</button>
+        <button class="rounded-xl border bg-white px-3 py-1.5 text-[12px] font-medium" style="border-color:#c7d2fe">🎬 시연작 만들기</button>
+        <button class="rounded-xl px-3 py-1.5 text-[12px] font-medium text-white" style="background:var(--color-btn-primary)">수업 종료</button>
+      </div>
+    </div>
+
+    <div class="flex" style="height:560px">
+      <aside class="w-[280px] border-r px-2 py-2 text-[13px]" style="border-color:var(--color-border)">
+        <p class="px-2 pb-1 pt-1 text-[11px] font-semibold" style="color:var(--color-text-faint)">학생과 동일한 목록</p>
+        <div class="rounded-lg px-2 py-1.5" style="background:var(--color-bg-subtle)"><span class="mono text-[11px]">11</span> AI에게 일을 시킨다는 것</div>
+        <div class="pl-4 pt-1 text-[12px]">
+          <p class="rounded px-2 py-1 text-white" style="background:var(--color-btn-primary)">q02 규칙을 주면 달라진다 <span class="opacity-70">· 18/24</span></p>
+          <p class="px-2 py-1" style="color:var(--color-text-body)">q03 맥락이라는 준비물 <span style="color:var(--color-text-faint)">· 3/24</span></p>
+        </div>
+        <div class="mt-2 rounded-xl border-2 px-3 py-2 text-[12px]" style="border-color:#c7d2fe;background:#eef2ff">
+          <p class="font-semibold" style="color:#4338ca">교사에게만</p>
+          <p class="mt-1" style="color:var(--color-text-body)">문항마다 <strong>도달 인원</strong>이 함께 표시됩니다.</p>
+        </div>
+      </aside>
+
+      <section class="w-[320px] border-r" style="border-color:var(--color-border)">
+        <div class="border-b px-4 py-3" style="border-color:var(--color-border)"><p class="text-[13px] font-semibold">AI에게 물어보기</p></div>
+        <div class="px-4 py-3 text-[13px]" style="color:var(--color-text-body)">학생과 동일한 챗봇.</div>
+        <div class="mx-4 rounded-xl border-2 px-3 py-2 text-[12px]" style="border-color:#c7d2fe;background:#eef2ff">
+          <p class="font-semibold" style="color:#4338ca">교사에게만</p>
+          <p class="mt-1" style="color:var(--color-text-body)">«학생들이 많이 물은 것» 상위 3개 · 남은 호출량</p>
+        </div>
+      </section>
+
+      <section class="flex-1">
+        <div class="border-b px-6 pt-4" style="border-color:var(--color-border)">
+          <div class="flex items-baseline gap-2"><span class="mono text-[12px]" style="color:var(--color-text-faint)">11강 · 2번</span><h3 class="text-[18px] font-semibold">규칙을 주면 달라진다</h3></div>
+          <nav class="mt-3 flex gap-5 text-[13px]">
+            <span class="tabbtn is-active pb-2">📖 읽기</span><span class="tabbtn pb-2">🎮 시연</span><span class="tabbtn pb-2">🚌 견학</span><span class="tabbtn pb-2">✋ 내 차례</span><span class="tabbtn pb-2">📝 퀴즈</span>
+            <span class="tabbtn is-active pb-2" style="color:#4338ca;border-bottom-color:#4338ca">📋 교안 <span class="chip h-chip">교사 전용</span></span>
+          </nav>
+        </div>
+        <div style="height:465px">
+          <div class="overflow-y-auto px-6 py-5 text-[15px]" style="color:var(--color-text-body)">
+            <div class="rounded-2xl px-4 py-2 text-[12px] font-semibold" style="background:#eef2ff;color:#4338ca">
+              🔒 «📋 교안» 탭은 교사에게만 보입니다 — 학생 탭은 앞의 다섯 개뿐
+            </div>
+            <div class="mt-3 space-y-1.5 text-[13px]">
+              <div class="rounded-xl border px-3 py-2" style="border-color:var(--color-border)"><b>🔔 열기</b> · 전학생에게 알려줄 우리 반 규칙</div>
+              <div class="rounded-xl border-2 px-3 py-2" style="border-color:#1c1917;background:#fafaf9"><b>📖 학습</b> · 같은 부탁, 세 번 다른 답 <span class="chip">여기 하는 중</span><br /><span style="color:var(--color-accent)">교사 — "다 똑같은데요"가 나오면 부탁이 이미 구체적이었던 겁니다.</span></div>
+              <div class="rounded-xl border px-3 py-2" style="border-color:var(--color-border)"><b>🚌 견학</b> · 규칙은 이미 네 주변에 가득하다</div>
+              <div class="rounded-xl border px-3 py-2" style="border-color:var(--color-border)"><b>✋ 내 차례</b> · 규칙 한 장 써서 판정받기</div>
+              <div class="rounded-xl border px-3 py-2" style="border-color:var(--color-border)"><b>🧪 퀴즈</b> · <b>🧵 정리</b></div>
+            </div>
+            <p class="mt-3 text-[12px]" style="color:var(--color-text-faint)">칸은 순서만 — 분은 없습니다. 시간 배분은 교사가 그 반을 보고 정합니다.</p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  </div>
+</section>
+
+<!-- ══════════ S6. B형 시연작 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-16">
+  <p class="sec-label">S6 · 신설 (감사 인벤토리 부채 해소)</p>
+  <h2 class="mt-1 text-[22px] font-semibold">B형 시연작 — 교사가 학생 경험을 직접 시연하고, 학생이 QR로 참여</h2>
+  <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">
+    현재 architecture 는 <strong>C형</strong>입니다 — «수업 시연 시작»이 그냥 <span class="mono text-[12px]">/library</span> 목록으로 이동할 뿐이라 시연 세션도 QR도 없습니다
+    (<span class="mono text-[12px]">shared/demo-screen-qr-inventory.md</span> 에 «B형 신설 필요»로 등재됨).
+  </p>
+
+  <div class="mt-5 grid gap-5 lg:grid-cols-[420px_1fr]">
+    <div class="frame p-5">
+      <p class="text-[12px] font-semibold" style="color:var(--color-accent)">진입 = 매번 목록부터 (§9.H-14, 2026-07-31)</p>
+      <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">시연작에 들어갈 때마다 «무엇을 고를지»부터 다시 보여줍니다. 직전 선택으로 직행하지 않습니다.</p>
+      <div class="mt-3 space-y-1.5 text-[13px]">
+        <div class="rounded-xl border px-3 py-2" style="border-color:var(--color-border)">1강 컴퓨터의 큰 그림</div>
+        <div class="rounded-xl border-2 px-3 py-2 font-semibold" style="border-color:var(--color-btn-primary)">11강 AI에게 일을 시킨다는 것 ✓</div>
+        <div class="rounded-xl border px-3 py-2" style="border-color:#c7d2fe;background:#eef2ff">12강 왜 하네스인가 · CLAUDE.md</div>
+      </div>
+      <button class="mt-4 w-full rounded-2xl py-2.5 text-[13px] font-medium text-white" style="background:var(--color-btn-primary)">이 강으로 시연 시작</button>
+      <p class="mt-2 text-[11px]" style="color:var(--color-text-faint)">신원 유지 · 진행만 초기화 · 학생 진행 불가침</p>
+    </div>
+
+    <div class="frame">
+      <div class="flex h-12 items-center gap-3 border-b-2 px-5 text-[13px]" style="border-color:#c7d2fe;background:#eef2ff">
+        <span class="chip h-chip">시연 모드</span><span class="font-semibold">11강 · 규칙을 주면 달라진다</span>
+        <div class="ml-auto flex items-center gap-2">
+          <button class="rounded-xl bg-white px-3 py-1.5 text-[12px] font-medium border" style="border-color:#c7d2fe">QR코드</button>
+          <button class="rounded-xl bg-white px-3 py-1.5 text-[12px] font-medium border" style="border-color:#c7d2fe">시연 끝내기</button>
+        </div>
+      </div>
+      <div class="grid grid-cols-[1fr_260px]" style="height:340px">
+        <div class="px-6 py-5 text-[14px]" style="color:var(--color-text-body)">
+          <p class="text-[12px] font-semibold" style="color:var(--color-text-faint)">학생이 보는 것과 똑같은 화면</p>
+          <h3 class="mt-1 text-[17px] font-semibold" style="color:var(--color-text-primary)">규칙을 주면 달라진다</h3>
+          <p class="mt-3">교사가 이 화면을 그대로 밟아 보이면, 학생은 QR로 같은 세션에 들어와 옆에서 따라옵니다.</p>
+          <div class="mt-4 flex gap-4 border-b pb-2 text-[13px]" style="border-color:var(--color-border)">
+            <span class="tabbtn is-active pb-1">📖 읽기</span><span class="tabbtn pb-1">🎮 시연</span><span class="tabbtn pb-1">🚌 견학</span><span class="tabbtn pb-1">✋ 내 차례</span><span class="tabbtn pb-1">📝 퀴즈</span>
+          </div>
+        </div>
+        <aside class="flex flex-col items-center justify-center border-l px-4" style="border-color:var(--color-border);background:var(--color-bg-subtle)">
+          <div class="grid h-[120px] w-[120px] place-items-center rounded-2xl bg-white text-[11px]" style="border:1px solid var(--color-border);color:var(--color-text-faint)">QR</div>
+          <p class="mono mt-3 text-[22px] font-semibold tracking-widest">4TSCZ2</p>
+          <p class="mt-1 text-[11px]" style="color:var(--color-text-faint)">참여 0명 · 대기 중</p>
+          <p class="mt-3 text-center text-[11px]" style="color:var(--color-text-faint)">QR은 <strong>조건부로 숨기지 않습니다</strong>. 미준비면 disabled 로 렌더.</p>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ S7. 교사 대시보드 = 버튼 1개 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-16">
+  <p class="sec-label">S7 · 세션 통합</p>
+  <h2 class="mt-1 text-[22px] font-semibold">«하네스 세션»이 사라짐 — 만들기 버튼 1개, 종료된 세션 섹션 제거</h2>
+
+  <div class="mt-5 grid gap-5 lg:grid-cols-2">
+    <div class="frame p-5">
+      <p class="text-[12px] font-semibold" style="color:#b91c1c">현재 (문제)</p>
+      <div class="mt-3 flex justify-end gap-2">
+        <button class="rounded-2xl border bg-white px-4 py-2 text-[13px]" style="border-color:var(--color-border)">+ 하네스 세션 만들기</button>
+        <button class="rounded-2xl px-4 py-2 text-[13px] text-white" style="background:var(--color-btn-primary)">+ 새 세션 만들기</button>
+      </div>
+      <ul class="mt-4 space-y-1.5 text-[13px] list-disc pl-5" style="color:var(--color-text-body)">
+        <li>버튼이 2개라 교사가 무엇을 눌러야 할지 모름</li>
+        <li>하네스로 만들면 학생이 17장 콘텐츠에 <strong>닿지 못함</strong></li>
+        <li>«종료된 세션» 섹션이 0개여도 자리를 차지</li>
+      </ul>
+    </div>
+    <div class="frame p-5">
+      <p class="text-[12px] font-semibold" style="color:var(--color-accent)">제안</p>
+      <div class="mt-3 flex justify-end">
+        <button class="rounded-2xl px-4 py-2 text-[13px] text-white" style="background:var(--color-btn-primary)">+ 새 수업 만들기</button>
+      </div>
+      <div class="mt-4 rounded-2xl border p-4" style="border-color:var(--color-border)">
+        <p class="text-[13px] font-semibold">새 수업 만들기</p>
+        <input class="mt-2 w-full rounded-xl px-3 py-2 text-[13px] outline-none" style="background:var(--color-bg-input)" placeholder="예: 3학년 2반 4교시" />
+        <p class="mt-3 text-[12px] font-semibold">학생에게 열어줄 범위</p>
+        <div class="mt-2 space-y-1.5 text-[13px]">
+          <label class="flex items-center gap-2 rounded-xl border px-3 py-2" style="border-color:var(--color-btn-primary)"><input type="radio" name="scope" checked /> 전체 23강장 — 학생이 자유롭게 이동 <span class="chip">권장</span></label>
+          <label class="flex items-center gap-2 rounded-xl border px-3 py-2" style="border-color:var(--color-border)"><input type="radio" name="scope" /> 특정 강만 고르기</label>
+        </div>
+      </div>
+      <p class="mt-3 text-[12px]" style="color:var(--color-text-faint)">종료된 세션 섹션은 제거. 종료 시 목록에서 사라지고 «지난 수업»에서 조회.</p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ══════════ S9. 실습 강 AI 계약 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-16">
+  <p class="sec-label">S9 · 확정 (2026-08-11)</p>
+  <h2 class="mt-1 text-[22px] font-semibold">실습 강에 실제 AI를 붙인다 — 세 번째 호출 경로</h2>
+  <p class="mt-2 text-[13px]" style="color:var(--color-text-body)">
+    각본을 걷어내면 지금 <strong>2개</strong>인 AI 경로(챗봇 · ✋내 차례)가 <strong>3개</strong>가 됩니다. <strong>전면 AI 확정</strong> — 비용은 제약 아님(jery: 3개월 뒤 소멸 예산). 한도는 <strong>돈이 아니라 동시 수용력</strong> 때문에 남깁니다.
+  </p>
+
+  <div class="mt-5 grid gap-4 lg:grid-cols-3">
+    <div class="frame p-5">
+      <p class="text-[12px] font-semibold" style="color:var(--color-text-faint)">모델</p>
+      <p class="mt-1 text-[15px] font-semibold">Claude Haiku 4.5</p>
+      <p class="mono mt-1 text-[11px]" style="color:var(--color-text-faint)">claude-haiku-4-5-20251001</p>
+      <p class="mt-3 text-[12px]" style="color:var(--color-text-body)">
+        기존 챗봇·내 차례와 <strong>같은 모델</strong>. 새 모델을 들이지 않으므로 별도 승인 사안이 아닙니다.
+        <br /><br />단가 = 입력 $1 / 출력 $5 (100만 토큰당)
+      </p>
+    </div>
+    <div class="frame p-5">
+      <p class="text-[12px] font-semibold" style="color:var(--color-text-faint)">예상 호출량</p>
+      <p class="mt-1 text-[15px] font-semibold">1차시 · 24명 ≈ 96~192회</p>
+      <p class="mt-3 text-[12px]" style="color:var(--color-text-body)">
+        실습 강 1개 = 문항 4개(A안). 학생 24명이 문항마다 1~2회 호출.
+        <br />6강 전체 이수 = 학생 1명당 24~48회.
+      </p>
+    </div>
+    <div class="frame p-5">
+      <p class="text-[12px] font-semibold" style="color:var(--color-text-faint)">비용</p>
+      <p class="mt-1 text-[15px] font-semibold" style="color:#047857">제약 아님</p>
+      <p class="mt-3 text-[12px]" style="color:var(--color-text-body)">
+        참고 수치만: 1차시 ≈ $0.4~0.9 · 월 20학급 ≈ $52~104.
+        <br /><br />🚨 <strong>월 예산 가드는 올려야 합니다</strong> — 지금 <span class="mono text-[11px]">CHAT_MONTHLY_BUDGET_USD=173</span> 에 걸리면 <strong>챗봇까지 같이 멈춥니다.</strong>
+      </p>
+    </div>
+
+  <div class="danger mt-5 px-4 py-3 text-[13px]" style="color:var(--color-text-body)">
+    <strong>🚨 통을 나누지 않으면 «수업이 수업을 죽입니다»</strong> — 챗봇 전역 한도는 <span class="mono text-[12px]">하루 1,000회</span> 하나뿐입니다.
+    실습이 1차시당 96~192회를 같은 통에서 빼가면, <strong>실습하는 반 때문에 다른 반 학생이 챗봇을 못 씁니다.</strong>
+    돈을 더 써도 이 충돌은 안 없어집니다 — 한도가 <strong>공유</strong>라서 생기는 문제라 <strong>분리</strong>로만 풀립니다.
+  </div>
+
+  <div class="mt-4 frame p-5">
+    <p class="text-[13px] font-semibold">✅ 확정 — 실습용 한도를 <span class="mono text-[12px]">HARNESS_*</span> 로 <strong>따로</strong> 판다</p>
+    <p class="mt-2 text-[12px]" style="color:var(--color-text-body)">기존 <span class="mono">CHAT_*</span>·<span class="mono">MYTURN_*</span> 과 같은 방식 — Render 환경변수라 <strong>무배포 조정·즉시 롤백</strong>.</p>
+    <div class="mt-3 overflow-x-auto">
+      <table class="w-full text-[12px]" style="color:var(--color-text-body)">
+        <thead><tr style="color:var(--color-text-faint)"><th class="pb-2 text-left">층</th><th class="pb-2 text-left">한도(제안)</th><th class="pb-2 text-left">이유</th></tr></thead>
+        <tbody>
+          <tr class="border-t" style="border-color:var(--color-border)"><td class="py-2 mono">HARNESS_ACTOR_DAILY_CAP</td><td>학생 1명 하루 200</td><td>6강 전체를 하루에 몰아쳐도 안 걸림</td></tr>
+          <tr class="border-t" style="border-color:var(--color-border)"><td class="py-2 mono">HARNESS_ACTOR_PER_MIN</td><td>학생 1명 분당 10</td><td>연타 방지</td></tr>
+          <tr class="border-t" style="border-color:var(--color-border)"><td class="py-2 mono">HARNESS_SHARED_DAILY_CAP</td><td>«여럿이 뭉친 통» 하루 1,000</td><td>참여자 토큰 없는 접속</td></tr>
+          <tr class="border-t" style="border-color:var(--color-border)"><td class="py-2 mono">HARNESS_GLOBAL_PER_MIN</td><td>전역 분당 120</td><td>40명 학급 동시 클릭도 흡수</td></tr>
+          <tr class="border-t" style="border-color:var(--color-border)"><td class="py-2 mono">HARNESS_GLOBAL_DAILY_CAP</td><td>전역 하루 4,000</td><td>≈ 20~40차시/일. 챗봇 1,000 과 <strong>별도 통</strong></td></tr>
+          <tr class="border-t" style="border-color:var(--color-border)"><td class="py-2 mono">HARNESS_GUARD_ENABLED</td><td>0 = 전면 차단</td><td>사고 시 원클릭 롤백</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="mt-3 text-[12px]" style="color:var(--color-text-faint)">신원 판정은 기존 <span class="mono">resolveActorId</span> 하나만 재사용 — IP 로 학생을 세면 교실 전체가 한 명이 됩니다.</p>
+  </div>
+
+  <div class="ok mt-4 px-4 py-3 text-[13px]" style="color:var(--color-text-body)">
+    <strong>기각한 대안</strong> — «문항 4개 중 1개만 실제 AI, 나머지는 각본»(월 $13~26)은 <strong>쓰지 않습니다.</strong>
+    비용이 제약이 아닌데 학생이 «어디는 진짜, 어디는 가짜»를 알아챌 위험만 남기 때문입니다.
+  </div>
+</section>
+
+<!-- ══════════ S8. 결정 기록 ══════════ -->
+<section class="mx-auto max-w-[1180px] px-6 pt-16">
+  <p class="sec-label">S8 · 승인 전 결정할 것</p>
+  <h2 class="mt-1 text-[22px] font-semibold">결정 기록 — 전부 확정</h2>
+  <div class="mt-4 space-y-2 text-[13px]">
+    <div class="frame px-4 py-3" style="opacity:.55"><s><strong>① 하네스 모듈 내부</strong></s> — <strong>확정</strong>: A안(강 1개 = 문항 4개)</div>
+    <div class="frame px-4 py-3" style="opacity:.55"><s><strong>② 재번호 방식</strong></s> — <strong>확정</strong>: 이름표 유지 · 표시만 «N강» 1–23</div>
+    <div class="frame px-4 py-3" style="opacity:.55"><s><strong>③ 하네스 교안 6개</strong></s> — <strong>확정</strong>: 별도 PR로 분리</div>
+    <div class="frame px-4 py-3"><strong>④ 격리 프리뷰 배너</strong> — 학생 노출 문구 제거 확정 (리스트 #3)</div>
+    <div class="frame px-4 py-3" style="opacity:.55"><s><strong>⑤ 각본형 유지 여부</strong></s> — <strong>확정</strong>: 각본 폐기, 전면 실제 AI + <span class="mono">HARNESS_*</span> 별도 한도(S9)</div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('.tabbtn[data-tab]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var root = btn.closest('section');
+      root.querySelectorAll('.tabbtn[data-tab]').forEach(function (b) { b.classList.remove('is-active'); });
+      btn.classList.add('is-active');
+      root.querySelectorAll('[data-panel]').forEach(function (p) { p.classList.add('hidden'); });
+      var target = root.querySelector('[data-panel="' + btn.dataset.tab + '"]');
+      if (target) target.classList.remove('hidden');
+    });
+  });
+</script>
+</body>
+</html>
