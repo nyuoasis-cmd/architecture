@@ -42,15 +42,31 @@ const NICK = `qa-${RUN_ID.slice(0, 8)}`;   // max 20자 계약
 
 const steps = [];
 let createdSessionId = '';
+let tearingDown = false;   // teardown 재진입 방지 — done() 이 두 번 지우지 않게
 
 function log(name, detail = '') {
   steps.push(name);
   console.log(`PASS ${name}${detail ? ` — ${detail}` : ''}`);
 }
 
+/**
+ * 판정 출력 + 종료. 🚨 **실패로 끝날 때도 반드시 지우고 나간다.**
+ * 예전 판은 흐름 중간의 `done(false, …)` 가 teardown 없이 process.exit 해서, 검사가 제 일을
+ * 한 날(=FAIL 한 날)마다 prod 에 세션이 한 줄씩 쌓였다 — 실패는 드물어서 오래 안 보인다.
+ * (2026-08-11 변이시험에서 실측: 참여자 노출 검사를 변이시키자 세션 1건이 그대로 남았다.)
+ * teardown 이 이미 돈 뒤(S4 경로)면 tearingDown 이 막아 두 번 지우지 않는다.
+ */
 async function done(pass, detail) {
-  // 🚨 마지막 관문에서도 한 번 더 지운다 — 이 한 줄이 밤샘 리포트에 그대로 실린다.
-  console.log(`PRECLASS_FLOW=architecture RESULT=${pass ? 'PASS' : 'FAIL'} detail=${redact(detail)}`);
+  let extra = '';
+  if (!pass && createdSessionId && !tearingDown) {
+    try {
+      const purge = await teardown();
+      extra = purge.leftover.length ? ` · 🚨잔존 ${purge.leftover.join(',')}` : ' · 잔존 0';
+    } catch (err) {
+      extra = ` · teardown 실패:${redact(err?.message || err)}`;
+    }
+  }
+  console.log(`PRECLASS_FLOW=architecture RESULT=${pass ? 'PASS' : 'FAIL'} detail=${redact(detail)}${extra}`);
   process.exit(pass ? 0 : 1);
 }
 
@@ -117,6 +133,7 @@ async function api(path, { method = 'GET', body, bearer } = {}) {
 const AI_ROUTES = ['/api/chat', '/api/vibe/my-turn'];
 
 async function teardown() {
+  tearingDown = true;
   if (!createdSessionId) return { removed: [], leftover: [] };
   // S2 — PK **그리고** 마커가 동시에 맞을 때만. 마커 없는 행은 우리 것이 아니다.
   const mine = await q(
