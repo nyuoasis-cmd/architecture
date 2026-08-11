@@ -68,6 +68,11 @@ npm run build
 
 - **라이브** — `architecture.teachermate.co.kr`. 기본 브랜치 **`main`**(master 아님) — `main` 머지 = prod 자동배포.
 - 콘텐츠: 17장 107문항 · 🚌 견학 **107/107** · ⚡ 사례 70 · ✋ 내 차례 6(12·13·14·15·16·17장)
-- 서버 테스트 88개(`cd server && npm test`). CI = `l1-fast.yml`, `main` 보호(required check `fast`).
-- **다음 본체 = 교안(1장=1차시).** 실행 런북 = `docs/RUNBOOK-polish-base-chapters.md`
+- 📋 **교안 17/17장 완료**(1장=1차시, 45분). 교사 세션 화면의 «이 차시 진행» 패널.
+  데이터 = `client/src/data/lesson-plan-chNN.ts` · 등록부 = `lesson-plans.ts`(파생, 별도 선언 없음)
+  🚨 **장을 새로 만들면 교안도 같이 만들어야 배포된다**(계약 ⑯). 그리고 교안의 🚌 견학 칸은 tour 가
+  있는 문항만, ✋「내 차례」 칸은 myTurn 이 있는 문항만 가리킬 수 있다(⑫·⑬) — 교안이 없는 것을
+  있다고 적으면 교사가 수업 중에 헛짚는다.
+- 서버 테스트 104개(`cd server && npm test`). CI = `l1-fast.yml`, `main` 보호(required check `fast`).
+- 실행 런북 = `docs/RUNBOOK-polish-base-chapters.md`
   (§0 «상태 재확인»을 착수 전에 직접 돌릴 것 — 이 문서의 숫자도 적힌 순간의 관측이다.)
