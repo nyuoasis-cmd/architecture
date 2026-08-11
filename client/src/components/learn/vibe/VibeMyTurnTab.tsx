@@ -132,6 +132,23 @@ export default function VibeMyTurnTab({ qaId, config }: VibeMyTurnTabProps) {
         </span>
       </div>
 
+      {/*
+        🚨 기다리는 이유를 **숫자 옆에 반드시 같이 적는다.**
+           2026-08-11 prod QA(새내기 f2): 판정이 «네가 정한 규칙 0개»를 보여 준 바로 그 순간 버튼이
+           잠기고 '다시 쓰기 4:55'만 떴다. 학생은 무엇이 빠졌는지 방금 깨달았는데 고쳐 볼 수 없었고,
+           왜 기다려야 하는지가 화면에 없어 **고장으로 읽었다.**
+        🔑 입력칸은 대기 중에도 잠그지 않는다 — 기다리는 5분이 «종이에 고쳐 쓰는 시간»이 되게 한다.
+           (쿨타임 길이 자체는 AI 호출 통제라 Render env 로만 조정한다. 화면에서 건드리지 않는다.)
+      */}
+      {cooldown > 0 ? (
+        <p className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-4 py-3 text-[13px] leading-[1.8] text-[var(--color-text-body)]">
+          ⏳ AI에게 보내는 건 한 사람당 정해진 간격으로 한 번이에요 — 고장이 아니에요.
+          <br />
+          기다리는 동안 <b className="font-semibold text-[var(--color-text-primary)]">위 칸의 글을 고쳐 두면</b>, 시간이
+          되자마자 그대로 보낼 수 있어요.
+        </p>
+      ) : null}
+
       {status === 'unavailable' ? (
         <p className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-4 py-3 text-[13px] text-[var(--color-text-muted)]">
           이 기능은 선생님이 열어주면 사용할 수 있어요. 지금은 🎮 시연 탭에서 미리 실행해 둔 결과를 볼 수 있습니다.
