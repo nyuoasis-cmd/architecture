@@ -84,6 +84,42 @@ export const MY_TURN_TASKS: Record<string, MyTurnTask> = {
       { key: 'retention', label: '기록 처리', hint: '대출 기록을 언제까지 보관하고 언제 지우는지', inventedExample: '대출 기록 무기한 보관' },
     ],
   },
+  ch12_q06: {
+    qaId: 'ch12_q06',
+    topic: '만들고 싶은 앱의 «한 장 문서» (문제·사용자·기능·우선순위·성공 기준)',
+    slots: [
+      {
+        key: 'problem',
+        label: '문제 한 문장',
+        hint: '앱 이름이 아니라 «누가 + 어떤 상황에서 + 무엇이 불편한지»가 적혀 있는지',
+        inventedExample: '학급 관리가 불편하다 (누가·언제·무엇이 빠진 막연한 문장)',
+      },
+      {
+        key: 'user',
+        label: '주 사용자',
+        hint: '누가 주로 쓰는지(학년·역할)가 정해져 있는지. 여럿이면 주인공이 정해졌는지',
+        inventedExample: '일반 사용자 대상 (어른 사무용 앱의 평균)',
+      },
+      {
+        key: 'features',
+        label: '기능 목록',
+        hint: '«사용자가 ~할 수 있다» 크기의 기능이 몇 개 적혀 있는지',
+        inventedExample: '검색·등록·수정·삭제 (어느 앱에나 붙는 네 가지)',
+      },
+      {
+        key: 'priority',
+        label: '우선순위(안 함 포함)',
+        hint: '무엇이 필수인지, 그리고 «이번엔 안 함»이 명시됐는지 — 침묵은 승낙으로 읽힌다',
+        inventedExample: '적은 기능 전부 필수 — «이번엔 안 함» 칸 없음',
+      },
+      {
+        key: 'success',
+        label: '성공 기준',
+        hint: '누가 읽어도 됐다/안 됐다를 똑같이 판정할 수 있는 문장인지(숫자가 들어갔는지)',
+        inventedExample: '잘 동작하면 성공 (검사할 수 없는 문장)',
+      },
+    ],
+  },
 };
 
 const verdictSchema = z.object({

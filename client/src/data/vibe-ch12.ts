@@ -273,6 +273,19 @@ export const CH12_EXTRAS: Record<string, VibeExtras> = {
           '거창하지 않지? 진짜 서비스의 기획 문서도 결국 «정한 것을 잊지 않으려고» 쓰는 한 장이야. 다른 점은 딱 하나 — 이 사람들은 그걸 꼭 쓴다는 것.',
       },
     ],
+    myTurn: {
+      intro:
+        '이번엔 네 차례야. 만들고 싶은 앱을 «한 장 문서»가 담긴 부탁문으로 써 봐. 문제 한 문장·주 사용자·기능 목록·우선순위·성공 기준 — 다섯 칸 중 네가 안 정한 칸은 AI 가 대신 정해 버려. 어느 칸이 남는지 확인해 보자.',
+      placeholder:
+        '우리 반 ___ 앱을 만들어줘. 문제는 ___ 이고, 주 사용자는 ___ 야. 기능은 ___ 이고, 이번엔 ___ 는 안 해. 성공은 ___ 로 판정할게.',
+      slots: [
+        { key: 'problem', label: '문제 한 문장', inventedExample: '학급 관리가 불편하다 (누가·언제·무엇이 빠진 막연한 문장)' },
+        { key: 'user', label: '주 사용자', inventedExample: '일반 사용자 대상 (어른 사무용 앱의 평균)' },
+        { key: 'features', label: '기능 목록', inventedExample: '검색·등록·수정·삭제 (어느 앱에나 붙는 네 가지)' },
+        { key: 'priority', label: '우선순위(안 함 포함)', inventedExample: '적은 기능 전부 필수 — «이번엔 안 함» 칸 없음' },
+        { key: 'success', label: '성공 기준', inventedExample: '잘 동작하면 성공 (검사할 수 없는 문장)' },
+      ],
+    },
   },
   ch12_q07: {
     qaId: 'ch12_q07',
