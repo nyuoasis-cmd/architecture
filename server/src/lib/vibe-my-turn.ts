@@ -31,10 +31,15 @@ export const MY_TURN_LIMITS = {
 /**
  * 호출 통제 스위치 — 0 이면 통제를 끈다.
  *
- * 🚨 2026-08-11 jery 결정: **기본값을 «끔» 으로 둔다.** 바이브코딩을 수업 세션으로 열면서
- *    「한도가 필요하면 나중에 만든다」는 방침. 그래서 통제 «로직» 은 그대로 남기고 값만 껐다 —
- *    나중에 필요해지는 날 Render env 에 `MYTURN_GUARD_ENABLED=1` 한 줄이면 **배포 없이** 켜지고,
- *    한도 숫자도 MYTURN_* env 로 그 자리에서 조정된다. 코드 작업이 다시 필요하지 않다.
+ * 🚨 2026-08-11 jery 결정(2차): **기본값을 «켬» 으로 되돌린다.** 「내 차례」를 한 문항 시범에서
+ *    여러 문항으로 넓히기로 하면서, 상한 없이 넓히면 지출이 열려 버리기 때문이다. 숫자는 그대로
+ *    두고(전역 하루 500 = 30명×2문 기준 8차시) 스위치만 켠다.
+ *    🔑 되돌리는 길은 그대로다 — Render env 에 `MYTURN_GUARD_ENABLED=0` 한 줄이면 **배포 없이**
+ *    꺼지고, 한도 숫자도 MYTURN_* env 로 그 자리에서 올린다(대규모 수업 전 상향 → 수업 후 원복).
+ *
+ * 🚨 1차 결정(2026-08-11 오전)은 «기본 끔» 이었다. 그때는 「내 차례」가 한 문항뿐이라 상한이
+ *    사실상 의미가 없었다. 문항이 늘면 같은 스위치의 뜻이 달라진다 — 결정이 바뀐 게 아니라
+ *    전제가 바뀐 것이다.
  *
  * 🔑 끈 상태에서 /health 는 capPolicy 를 'none' 으로 정직하게 말한다(classCheck.ts).
  *    켜 놓고 «없다» 고 말하거나 꺼 놓고 «있다» 고 말하면, 캡을 보고 여유를 계산하는 쪽이 속는다.
@@ -43,7 +48,7 @@ export const MY_TURN_LIMITS = {
  *    상태가 생기고, 그건 캡을 보고 판정하는 쪽을 조용히 속인다.
  */
 export function myTurnGuardEnabled(): boolean {
-  return (process.env.MYTURN_GUARD_ENABLED ?? '0') !== '0';
+  return (process.env.MYTURN_GUARD_ENABLED ?? '1') !== '0';
 }
 
 const COOLDOWN_MS = MY_TURN_LIMITS.cooldownSeconds * 1000;
