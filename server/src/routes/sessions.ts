@@ -4,6 +4,7 @@ import { z } from 'zod';
 import { getRequestUser } from '../lib/auth';
 import { getParticipantTokenFromRequest, verifyParticipantToken } from '../lib/participant-token';
 import { generateSessionCode } from '../lib/session-code';
+import { tallyProgressRows } from '../lib/session-progress';
 import { getSupabaseAdminClient } from '../lib/supabase';
 import { qaTagFields } from '../lib/qa-context';
 import { ALL_CHAPTER_IDS } from '../data/chapter-content';
@@ -80,7 +81,7 @@ async function listParticipantsWithProgress(sessionId: string) {
   const typedParticipants = (participants ?? []) as ParticipantRow[];
   const participantIds = typedParticipants.map((participant) => participant.id);
   if (participantIds.length === 0) {
-    return [];
+    return { participants: [], qaCompletion: {} };
   }
 
   const { data: progressRows, error: progressError } = await supabase
@@ -92,22 +93,18 @@ async function listParticipantsWithProgress(sessionId: string) {
     throw new Error('progress_lookup_failed');
   }
 
-  const counts = new Map<string, number>();
-  for (const row of progressRows ?? []) {
-    const participantId = row.participant_id as string | null;
-    if (!participantId) {
-      continue;
-    }
+  // 같은 행을 참여자별·문항별 두 축으로 센다(session-progress.ts) — 쿼리는 늘지 않는다.
+  const { countsByParticipant: counts, qaCompletion } = tallyProgressRows(progressRows ?? []);
 
-    counts.set(participantId, (counts.get(participantId) ?? 0) + 1);
-  }
-
-  return typedParticipants.map((participant) => ({
-    id: participant.id,
-    nickname: participant.nickname,
-    joined_at: participant.joined_at,
-    progress_count: counts.get(participant.id) ?? 0,
-  }));
+  return {
+    participants: typedParticipants.map((participant) => ({
+      id: participant.id,
+      nickname: participant.nickname,
+      joined_at: participant.joined_at,
+      progress_count: counts.get(participant.id) ?? 0,
+    })),
+    qaCompletion,
+  };
 }
 
 async function loadViewerProgress(participantId: string) {
@@ -226,7 +223,7 @@ router.get('/', async (req, res) => {
 
   const participantCounts = new Map<string, number>();
   for (const session of sessions) {
-    participantCounts.set(session.id, (await listParticipantsWithProgress(session.id)).length);
+    participantCounts.set(session.id, (await listParticipantsWithProgress(session.id)).participants.length);
   }
 
   res.setHeader('Cache-Control', 'no-store');
@@ -307,7 +304,8 @@ router.get('/:id', async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.json({
     ...(session as SessionRow),
-    participants: await listParticipantsWithProgress(session.id),
+    // 🚨 이 경로는 학생도 부른다 — 문항별 집계(qaCompletion)는 교사 화면 전용이라 여기서 안 내보낸다.
+    participants: (await listParticipantsWithProgress(session.id)).participants,
     viewer,
   });
 });
@@ -343,11 +341,15 @@ router.get('/:id/participants', async (req, res) => {
     return;
   }
 
+  const progress = await listParticipantsWithProgress(session.id);
+
   res.setHeader('Cache-Control', 'no-store');
   res.json({
     id: session.id,
     status: session.status,
-    participants: await listParticipantsWithProgress(session.id),
+    participants: progress.participants,
+    // 교사 전용 — 교안의 칸이 가리키는 문항에 학생이 몇 명 도달했는지 잇는 데 쓴다.
+    qa_completion: progress.qaCompletion,
   });
 });
 

@@ -1,11 +1,26 @@
 import { useState } from 'react';
 import {
+  findActiveSegmentIndex,
   getLessonPlan,
   shouldExpandLessonPlanByDefault,
   type LessonPhase,
   type LessonPlan,
 } from '../../data/lesson-plans';
 import { getChapterById } from '../../data/qa-stubs';
+
+/**
+ * 교안 칸 ↔ 학생 진도를 잇는 데 필요한 것. 둘 다 «없을 수 있음»이 기본값이다 —
+ * 학생이 아직 없으면 시각도 도달 수도 없고, 그때는 아무것도 그리지 않는다.
+ */
+type ClassProgress = {
+  /** 문항 id → 그 문항을 연 학생 수 */
+  qaCompletion: Record<string, number>;
+  participantCount: number;
+  /** 수업 시작 근사값 = 첫 학생이 들어온 시각(ISO). 없으면 «몇 분째»를 말하지 않는다. */
+  startedAt?: string;
+  /** 지금까지 흐른 분. startedAt 이 있을 때만 값이 있다. */
+  elapsedMinutes?: number;
+};
 
 /**
  * 교사 세션 화면의 «이 차시 진행» 패널.
@@ -30,7 +45,13 @@ function elapsedLabel(segments: LessonPlan['segments'], index: number): string {
   return `${start}–${start + segments[index].minutes}분`;
 }
 
-function PlanBody({ plan }: { plan: LessonPlan }) {
+function PlanBody({ plan, progress }: { plan: LessonPlan; progress?: ClassProgress }) {
+  // 🚨 «지금 이 칸»은 시각을 알 때만 말한다. 모르면 아무 칸도 «지금»이라고 하지 않는다 —
+  //    틀린 «몇 분째»는 없는 것보다 나쁘다(교사가 그걸 믿고 진도를 당기거나 늦춘다).
+  const activeIndex =
+    progress?.elapsedMinutes === undefined ? null : findActiveSegmentIndex(plan, progress.elapsedMinutes);
+  const isOvertime = progress?.elapsedMinutes !== undefined && activeIndex === null;
+
   return (
     <div className="mt-4">
       <p className="rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-700">
@@ -38,12 +59,25 @@ function PlanBody({ plan }: { plan: LessonPlan }) {
         {plan.goal}
       </p>
 
+      {progress?.elapsedMinutes !== undefined ? (
+        <p className="mt-3 rounded-2xl bg-stone-900 px-4 py-3 text-sm text-white">
+          첫 학생이 들어온 뒤 <b className="font-semibold">{progress.elapsedMinutes}분째</b>
+          {isOvertime ? ` · 계획한 ${plan.totalMinutes}분을 지났어요` : ' · 아래에서 「지금 이 칸」을 보세요'}
+          <span className="mt-1 block text-xs text-stone-400">
+            이 앱에는 「수업 시작」 기록이 없어서 첫 참여 시각으로 셉니다 — 미리 만들어 둔 세션이면 어긋날 수 있어요.
+          </span>
+        </p>
+      ) : null}
+
       <ol className="mt-4 space-y-3">
         {plan.segments.map((segment, index) => {
           const style = PHASE_STYLE[segment.phase];
+          const isActive = index === activeIndex;
           return (
             <li
-              className="rounded-2xl border border-[var(--color-border)] p-4"
+              className={`rounded-2xl border p-4 ${
+                isActive ? 'border-stone-900 bg-stone-50 ring-1 ring-stone-900' : 'border-[var(--color-border)]'
+              }`}
               key={`${plan.chapterId}-${index}-${segment.title}`}
             >
               <div className="flex flex-wrap items-center gap-2">
@@ -52,6 +86,9 @@ function PlanBody({ plan }: { plan: LessonPlan }) {
                   {style.icon} {segment.phase}
                 </span>
                 <span className="text-sm font-medium text-stone-900">{segment.title}</span>
+                {isActive ? (
+                  <span className="rounded-full bg-stone-900 px-2 py-0.5 text-xs font-medium text-white">지금 이 칸</span>
+                ) : null}
               </div>
               <p className="mt-2 text-sm text-stone-700">
                 <span className="text-stone-500">학생 </span>
@@ -62,7 +99,28 @@ function PlanBody({ plan }: { plan: LessonPlan }) {
                 {segment.teacherSays}
               </p>
               {segment.qaIds?.length ? (
-                <p className="mt-2 font-mono text-xs text-stone-400">{segment.qaIds.join(' · ')}</p>
+                progress && progress.participantCount > 0 ? (
+                  // 🔑 «연 학생»이라고 적는다 — 진도 행은 학생이 그 문항 화면을 열 때 생긴다.
+                  //    «끝낸»이라고 쓰면 교사가 이해도까지 봤다고 오해한다(퀴즈 점수는 별개다).
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    <span className="text-xs text-stone-500">이 칸 문항을 연 학생</span>
+                    {segment.qaIds.map((qaId) => {
+                      const opened = progress.qaCompletion[qaId] ?? 0;
+                      return (
+                        <span
+                          className={`rounded-full px-2 py-0.5 font-mono text-xs ${
+                            opened === 0 ? 'bg-stone-100 text-stone-400' : 'bg-emerald-50 text-emerald-800'
+                          }`}
+                          key={qaId}
+                        >
+                          {qaId} {opened}/{progress.participantCount}
+                        </span>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="mt-2 font-mono text-xs text-stone-400">{segment.qaIds.join(' · ')}</p>
+                )
               ) : null}
             </li>
           );
@@ -88,7 +146,15 @@ function PlanBody({ plan }: { plan: LessonPlan }) {
   );
 }
 
-function ChapterPlan({ chapterId, defaultOpen }: { chapterId: number; defaultOpen: boolean }) {
+function ChapterPlan({
+  chapterId,
+  defaultOpen,
+  progress,
+}: {
+  chapterId: number;
+  defaultOpen: boolean;
+  progress?: ClassProgress;
+}) {
   const [isOpen, setIsOpen] = useState(defaultOpen);
   const plan = getLessonPlan(chapterId);
   const chapter = getChapterById(chapterId);
@@ -116,12 +182,18 @@ function ChapterPlan({ chapterId, defaultOpen }: { chapterId: number; defaultOpe
           <span className="text-sm text-stone-500">{isOpen ? '접기' : '펼치기'}</span>
         </span>
       </button>
-      {isOpen ? <PlanBody plan={plan} /> : null}
+      {isOpen ? <PlanBody plan={plan} progress={progress} /> : null}
     </div>
   );
 }
 
-export default function LessonPlanPanel({ chapterIds }: { chapterIds: number[] }) {
+export default function LessonPlanPanel({
+  chapterIds,
+  progress,
+}: {
+  chapterIds: number[];
+  progress?: ClassProgress;
+}) {
   const withPlan = chapterIds.filter((chapterId) => getLessonPlan(chapterId) !== undefined);
 
   if (withPlan.length === 0) {
@@ -140,7 +212,7 @@ export default function LessonPlanPanel({ chapterIds }: { chapterIds: number[] }
         </p>
       ) : null}
       {withPlan.map((chapterId) => (
-        <ChapterPlan chapterId={chapterId} defaultOpen={defaultOpen} key={chapterId} />
+        <ChapterPlan chapterId={chapterId} defaultOpen={defaultOpen} key={chapterId} progress={progress} />
       ))}
     </section>
   );
