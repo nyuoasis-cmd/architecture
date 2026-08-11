@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { ChapterStub, QaStub } from '../../../data/qa-stubs';
 import { getDemoByQaId } from '../../../data/demos';
 import { getDemoComponent } from '../../../demos/registry';
+import { getCategoryMeaning } from '../../../data/category-meanings';
 import { getExtras } from '../../../data/learn-extras';
 import ChatPanel from '../ChatPanel';
 import QuizTab from '../QuizTab';
@@ -38,6 +39,7 @@ export default function VibeLearnLayout({ chapter, chapterQas, qa, makeQaHref, o
   const extras = getExtras(qa.id);
   const demoMeta = getDemoByQaId(qa.id);
   const demoComponent = getDemoComponent(qa.id);
+  const categoryMeaning = getCategoryMeaning(chapter.category);
 
   const tabs = useMemo(() => {
     const list: VibeTabId[] = ['read'];
@@ -96,9 +98,21 @@ export default function VibeLearnLayout({ chapter, chapterQas, qa, makeQaHref, o
         <p className="mt-0.5 text-[12.5px] text-[var(--color-text-muted)]">
           {qa.order}/{chapter.qaCount} · {qa.summary}
         </p>
+        {categoryMeaning ? (
+          <p className="mt-1.5 text-[12px] leading-[1.6] text-[var(--color-text-faint)]">{categoryMeaning}</p>
+        ) : null}
       </header>
 
-      <nav className="mt-4 flex gap-0.5 overflow-x-auto border-b border-[var(--color-border)]">
+      {/*
+        🚨 탭은 **줄바꿈**으로 접는다 — 가로 스크롤로 두지 않는다.
+           「내 차례」가 붙은 문항은 탭이 6개가 되는데, 390px 학생 화면에서는 scrollWidth 476 > 358 이라
+           ✅퀴즈 라벨이 잘리고 💬챗봇은 화면 밖으로 나갔다(2026-08-11 prod QA 실측, 새내기 f1).
+           스크롤은 됐지만 **스크롤된다는 표시가 없어** 학생은 탭이 4개인 줄 알았고, 막혔을 때
+           물어볼 유일한 통로인 챗봇이 바로 그 안 보이는 자리에 있었다.
+           줄바꿈이면 탭이 몇 개로 늘어도 «화면 밖»이 생기지 않는다 — 표시를 덧붙여 고치는 대신
+           넘칠 수 있는 구조 자체를 없앤다.
+      */}
+      <nav className="mt-4 flex flex-wrap gap-0.5 border-b border-[var(--color-border)]">
         {tabs.map((tab) => (
           <button
             key={tab}
