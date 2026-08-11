@@ -54,12 +54,14 @@ export default function LibraryPage() {
   const headerTitle = isPreviewMode
     ? isStudentMode
       ? '챕터 라이브러리'
-      : '수업 시연 — 챕터 선택'
+      : // 🔑 교사 세션 화면의 버튼과 같은 말을 쓴다 — 「시연」은 «학생에게 보여 주기»로도
+        //    «내가 미리 보기»로도 읽혀 신입 교사가 순서에서 멈춘 낱말이다(2026-08-11 QA t2).
+        '학생 화면 미리 보기 — 챕터 선택'
     : '라이브러리';
   const headerDescription = isPreviewMode
     ? isStudentMode
       ? '오늘 수업에서 열린 챕터예요. 들어가고 싶은 챕터를 골라주세요.'
-      : '시연을 시작할 챕터를 선택하세요. 세션에 포함된 챕터만 보입니다.'
+      : '학생이 보게 될 화면을 미리 열어 봅니다. 이 수업에 담긴 챕터만 보입니다.'
     : `${CHAPTERS.length}개 챕터, ${CHAPTERS.reduce((sum, chapter) => sum + chapter.qaCount, 0)}개 Q&A.`;
 
   return (
@@ -82,7 +84,7 @@ export default function LibraryPage() {
           ) : null}
           {previewSession ? (
             <span className="text-xs text-stone-500">
-              시연 세션 · {previewSession.name} · 코드 {previewSession.code}
+              미리 보기 · {previewSession.name} · 코드 {previewSession.code}
             </span>
           ) : null}
         </div>

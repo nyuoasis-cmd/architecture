@@ -108,3 +108,33 @@ export function hasLessonPlan(chapterId: number): boolean {
 export function shouldExpandLessonPlanByDefault(chaptersWithPlanInSession: number): boolean {
   return chaptersWithPlanInSession === 1;
 }
+
+/**
+ * 지금이 교안의 몇 번째 칸인가. 범위 밖이면 null.
+ *
+ * 왜 있는가(2026-08-11 prod QA, 신입샘 t3): 교안은 «0–4분 열기 / 4–13분 학습…»으로 시간을
+ * 말하는데 교사 화면 어디에도 «지금 몇 분째»가 없었다. 교사가 45분 계획을 손에 들고도
+ * 자기가 어디쯤인지 화면에서 못 읽었다.
+ *
+ * 🚨 이 함수는 «수업이 몇 분째인가»를 **모른다** — 받은 값으로만 고른다. 시각의 출처를
+ *    화면 쪽에 두는 이유는, 이 앱에 «수업 시작» 이라는 기록이 없어서다(세션은 수업 전날
+ *    만들어질 수도 있다). 지금 쓰는 근사값은 «첫 학생이 들어온 시각»이고, 근사라는 사실을
+ *    화면에 그대로 적는다. 여기서 시각을 지어내면 교사가 틀린 «몇 분째»를 믿게 된다.
+ */
+export function findActiveSegmentIndex(plan: LessonPlan, elapsedMinutes: number): number | null {
+  if (!Number.isFinite(elapsedMinutes) || elapsedMinutes < 0) {
+    return null;
+  }
+
+  let start = 0;
+  for (let index = 0; index < plan.segments.length; index += 1) {
+    const end = start + plan.segments[index].minutes;
+    if (elapsedMinutes < end) {
+      return index;
+    }
+    start = end;
+  }
+
+  // 계획한 시간을 지났다 — 마지막 칸을 «지금»이라고 말하지 않는다(지난 건 지난 것이다).
+  return null;
+}
