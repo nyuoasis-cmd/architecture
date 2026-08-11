@@ -192,6 +192,42 @@ export const MY_TURN_TASKS: Record<string, MyTurnTask> = {
       },
     ],
   },
+  ch16_q06: {
+    qaId: 'ch16_q06',
+    topic: '규칙 하나를 «말로 막기»가 아니라 «구조로 막기»로 시키는 부탁문',
+    slots: [
+      {
+        key: 'rule',
+        label: '막을 규칙',
+        hint: '무엇을 못 하게 할 것인지가 한 문장으로 지목됐는지',
+        inventedExample: '적절히 검증한다 (무엇을 막는지 정해지지 않음)',
+      },
+      {
+        key: 'harm',
+        label: '어기면 생기는 일',
+        hint: '어겼을 때의 피해가 «되돌릴 수 있는가·알아챌 수 있는가» 두 축으로 적혔는지',
+        inventedExample: '문제가 될 수 있음 (되돌릴 수 있는지·알아챌 수 있는지 없음)',
+      },
+      {
+        key: 'structure',
+        label: '구조로 막는 방법',
+        hint: '안내문·경고문이 아니라 «어길 방법이 없게» 만드는 방식(입력 형태·선택지 제한 등)이 적혔는지',
+        inventedExample: '«하지 마세요» 안내문 추가 (지킬지 말지가 쓰는 쪽에 달림)',
+      },
+      {
+        key: 'message',
+        label: '막혔을 때 알려 줄 말',
+        hint: '왜 막혔는지 사람이 읽고 알 수 있는 문구가 있는지(막는 일과 알려 주는 일은 다른 역할이다)',
+        inventedExample: '오류가 발생했습니다 (왜 막혔는지 알 수 없음)',
+      },
+      {
+        key: 'backdoor',
+        label: '뒷길 차단',
+        hint: '정문을 좁히면 몰릴 수 있는 다른 경로까지 함께 막았는지',
+        inventedExample: '정문만 막음 — 다른 경로로 들어오면 검사 없이 통과',
+      },
+    ],
+  },
 };
 
 const verdictSchema = z.object({

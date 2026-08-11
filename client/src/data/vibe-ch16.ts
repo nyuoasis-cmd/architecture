@@ -272,6 +272,19 @@ export const CH16_EXTRAS: Record<string, VibeExtras> = {
           '규칙을 지키게 하는 가장 센 방법은 부탁이 아니라 구조야. 사람에게든 AI에게든 똑같아 — «하지 마라»는 어길 수 있고, «할 수 없다»는 어길 방법이 없어.',
       },
     ],
+    myTurn: {
+      intro:
+        '이번엔 네 차례야. 네 앱의 규칙 하나를 골라 «어길 수 없게» 부탁해 봐. 무슨 규칙인지 · 어기면 무슨 일이 생기는지 · 안내문 말고 구조로 어떻게 막을지 · 막혔을 때 뭐라고 알려 줄지 · 뒷길은 없는지 — 안 정한 칸은 AI 가 대신 정해 버려.',
+      placeholder:
+        '___ 규칙을 어길 수 없게 만들어줘. 어기면 ___ 가 생기니까. 안내문 말고 ___ 로 막아 줘. 막히면 ___ 라고 알려 주고, ___ 로 우회하는 길도 막아 줘.',
+      slots: [
+        { key: 'rule', label: '막을 규칙', inventedExample: '적절히 검증한다 (무엇을 막는지 정해지지 않음)' },
+        { key: 'harm', label: '어기면 생기는 일', inventedExample: '문제가 될 수 있음 (되돌릴 수 있는지·알아챌 수 있는지 없음)' },
+        { key: 'structure', label: '구조로 막는 방법', inventedExample: '«하지 마세요» 안내문 추가 (지킬지 말지가 쓰는 쪽에 달림)' },
+        { key: 'message', label: '막혔을 때 알려 줄 말', inventedExample: '오류가 발생했습니다 (왜 막혔는지 알 수 없음)' },
+        { key: 'backdoor', label: '뒷길 차단', inventedExample: '정문만 막음 — 다른 경로로 들어오면 검사 없이 통과' },
+      ],
+    },
   },
 };
 
