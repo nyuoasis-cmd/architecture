@@ -174,7 +174,7 @@ function ChapterPlan({
         <span>
           <span className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">이 차시 진행</span>
           <span className="mt-1 block text-lg font-medium text-stone-900">
-            {chapter ? `${chapter.emoji} ${chapter.id}장 ${chapter.title}` : `${chapterId}장`}
+            {chapter ? `${chapter.emoji} ${chapter.lessonNo}강 ${chapter.title}` : `${chapterId}번 장`}
           </span>
         </span>
         <span className="flex shrink-0 items-center gap-2">

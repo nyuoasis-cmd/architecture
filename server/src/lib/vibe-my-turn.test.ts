@@ -143,17 +143,20 @@ test('공유 통(참여자 토큰 없음)은 쿨타임에 안 걸린다 — 한 
   }
 });
 
-test('참여자 한 명은 쿨타임에 걸린다 — 공유 통 한도를 학생에게 적용하면 한 명이 몰아 쓴다', async () => {
-  const { takeMyTurnToken, __resetMyTurnBucketsForTest, MyTurnRateLimitError } = await import('./vibe-my-turn');
+test('한 학생은 분당 한도에 걸린다 — 쿨타임을 없앤 자리에 이게 없으면 연타가 그대로 호출이 된다', async () => {
+  const { takeMyTurnToken, __resetMyTurnBucketsForTest, MyTurnRateLimitError, MY_TURN_LIMITS } =
+    await import('./vibe-my-turn');
   const saved = process.env.MYTURN_GUARD_ENABLED;
   process.env.MYTURN_GUARD_ENABLED = '1';
   __resetMyTurnBucketsForTest();
   try {
-    takeMyTurnToken('pt:학생1');
+    for (let i = 0; i < MY_TURN_LIMITS.actorPerMin; i += 1) {
+      takeMyTurnToken('pt:학생1');
+    }
     assert.throws(
       () => takeMyTurnToken('pt:학생1'),
       (error: unknown) => error instanceof MyTurnRateLimitError,
-      '학생 한 명에게 쿨타임이 없으면 AI 호출을 연타할 수 있다',
+      '학생 한 명에게 분당 한도가 없으면 버튼 연타가 그대로 AI 호출이 되고, 전역 분당을 한 명이 다 먹는다',
     );
     // 🔑 다른 학생은 영향을 받지 않는다 — 이게 «학생별»의 뜻이다.
     takeMyTurnToken('pt:학생2');
@@ -161,6 +164,46 @@ test('참여자 한 명은 쿨타임에 걸린다 — 공유 통 한도를 학�
     __resetMyTurnBucketsForTest();
     if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;
     else process.env.MYTURN_GUARD_ENABLED = saved;
+  }
+});
+
+// 🚨 2026-08-11 상향의 핵심이 이것이다. 실습 강은 «쓰고 → 판정받고 → 고쳐서 다시»가 수업의 본체라,
+//    바로 다시 낼 수 없으면 한 차시 안에 학생이 두세 번밖에 못 고친다. 쿨타임이 되살아나면 여기서 잡는다.
+test('학생은 판정을 받고 바로 다시 낼 수 있다 — 쿨타임 기본값은 0 이다', async () => {
+  const { takeMyTurnToken, __resetMyTurnBucketsForTest, MY_TURN_LIMITS } = await import('./vibe-my-turn');
+  const saved = process.env.MYTURN_GUARD_ENABLED;
+  process.env.MYTURN_GUARD_ENABLED = '1';
+  __resetMyTurnBucketsForTest();
+  try {
+    assert.equal(MY_TURN_LIMITS.cooldownSeconds, 0, '쿨타임이 되살아나면 학생이 고쳐서 다시 내는 흐름이 막힌다');
+    takeMyTurnToken('pt:학생1');
+    takeMyTurnToken('pt:학생1'); // 던지면 실패 — 바로 다시 낼 수 있어야 한다
+  } finally {
+    __resetMyTurnBucketsForTest();
+    if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;
+    else process.env.MYTURN_GUARD_ENABLED = saved;
+  }
+});
+
+// 🚨 «0 을 넣어 끈다»가 실제로 먹히는지. env 정수 읽기가 0 을 «양수 아님»으로 버리면
+//    Render 에 MYTURN_COOLDOWN_SEC=0 을 넣고도 5분이 그대로 걸린다 — 무배포 롤백이 조용히 죽는 형태다.
+test('env 로 0 을 넣으면 0 이 된다 — 0 이 기본값으로 되돌아가면 «꺼짐»을 설정할 수 없다', async () => {
+  const { envInt } = await import('./vibe-my-turn');
+  const KEY = '__MYTURN_TEST_ONLY__';
+  const saved = process.env[KEY];
+  try {
+    process.env[KEY] = '0';
+    assert.equal(envInt(KEY, 300, true), 0, '0 을 허용한 자리에서 0 이 안 되면 «쿨타임 없음»을 설정할 수 없다');
+    // 음성 대조군 — 0 을 허용하지 않은 자리(한도)는 0 이 들어와도 기본값을 지켜야 한다.
+    //    한도가 0 이 되면 «아무도 못 쓴다»는 뜻이라, 오타 한 번이 수업을 통째로 막는다.
+    assert.equal(envInt(KEY, 300), 300, '한도 자리에 0 이 그대로 먹히면 오타 하나로 전원이 막힌다');
+    process.env[KEY] = '-5';
+    assert.equal(envInt(KEY, 300, true), 300, '음수는 어느 자리에서도 설정값이 아니다');
+    process.env[KEY] = '아홉';
+    assert.equal(envInt(KEY, 300, true), 300, '숫자가 아니면 기본값을 지킨다');
+  } finally {
+    if (saved === undefined) delete process.env[KEY];
+    else process.env[KEY] = saved;
   }
 });
 
@@ -179,7 +222,7 @@ test('/health 가 공유 통 한도까지 선언한다 — 안 말하면 읽는 
   }
 });
 
-test('공유 통의 «하루» 한도도 학생 몫이 아니다 — 12번째에서 막히면 자습 한 반이 반나절 만에 끝난다', async () => {
+test('공유 통의 «하루» 한도도 학생 몫이 아니다 — 학생 몫을 적용하면 자습 한 반이 반나절 만에 끝난다', async () => {
   const { takeMyTurnToken, __resetMyTurnBucketsForTest, __expireMyTurnMinuteBucketsForTest, MY_TURN_LIMITS } =
     await import('./vibe-my-turn');
   const saved = process.env.MYTURN_GUARD_ENABLED;
@@ -197,7 +240,7 @@ test('공유 통의 «하루» 한도도 학생 몫이 아니다 — 12번째에
       takeMyTurnToken('ip:5.6.7.8');
       __expireMyTurnMinuteBucketsForTest();
     }
-    // 여기까지 예외 없이 왔으면 통과. 학생 몫(12)을 적용하면 13번째에서 던진다.
+    // 여기까지 예외 없이 왔으면 통과. 학생 몫(하루 300)을 적용하면 301번째에서 던진다.
   } finally {
     __resetMyTurnBucketsForTest();
     if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { CHAPTERS, getQasByChapterId, type ChapterStub } from '../data/qa-stubs';
+import { CHAPTERS, getQasByChapterId, type Chapter } from '../data/qa-stubs';
 import { getChapterProgress, useProgressMap } from '../lib/progress';
 import { getSession, SessionClientError, type SessionDetail } from '../lib/session-client';
 
@@ -76,7 +76,7 @@ export default function LibraryPage() {
     }
     return openChapters.filter((chapter) => {
       const haystack = [
-        `${chapter.id}장`,
+        `${chapter.lessonNo}강`,
         chapter.title,
         chapter.category,
         ...getQasByChapterId(chapter.id).map((qa) => `${qa.title} ${qa.keywords.join(' ')}`),
@@ -87,7 +87,7 @@ export default function LibraryPage() {
     });
   }, [openChapters, query]);
 
-  const progressOf = (chapter: ChapterStub) => getChapterProgress(chapter.id);
+  const progressOf = (chapter: Chapter) => getChapterProgress(chapter.id);
   const inProgressChapters = useMemo(
     () =>
       openChapters.filter((chapter) => {
@@ -112,7 +112,7 @@ export default function LibraryPage() {
       })
     : undefined;
 
-  const hrefFor = (chapter: ChapterStub, qaId: string) =>
+  const hrefFor = (chapter: Chapter, qaId: string) =>
     isPreviewMode && sessionId
       ? `/learn/${sessionId}?qa=${qaId}${isStudentMode ? '' : '&role=teacher'}`
       : `/library/${chapter.id}/${qaId}`;
@@ -208,7 +208,7 @@ export default function LibraryPage() {
           <div className="min-w-0">
             <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[var(--color-accent)]">이어서 하기</p>
             <p className="mt-1 text-sm font-medium text-stone-900">
-              {resumeChapter.emoji} {resumeChapter.id}장 · {resumeChapter.title}
+              {resumeChapter.emoji} {resumeChapter.lessonNo}강 · {resumeChapter.title}
             </p>
             <p className="mt-0.5 truncate text-xs text-stone-600">
               {resumeQa.order}번 · {resumeQa.title}
@@ -238,7 +238,7 @@ export default function LibraryPage() {
                 to={hrefFor(chapter, chapter.firstQaId)}
               >
                 <div className="mb-1 flex items-center gap-1.5 text-xs text-stone-500">
-                  <span>{chapter.id}장</span>
+                  <span>{chapter.lessonNo}강</span>
                   {isCurrent ? (
                     <span className="rounded-full bg-[var(--color-accent-soft)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--color-accent)]">
                       보는 중

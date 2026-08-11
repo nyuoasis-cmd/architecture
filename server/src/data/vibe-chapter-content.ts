@@ -7,6 +7,12 @@ import { CH14_QA_CONTEXTS } from './vibe-chapter-content-ch14';
 import { CH15_QA_CONTEXTS } from './vibe-chapter-content-ch15';
 import { CH16_QA_CONTEXTS } from './vibe-chapter-content-ch16';
 import { CH17_QA_CONTEXTS } from './vibe-chapter-content-ch17';
+import { CH18_QA_CONTEXTS } from './vibe-chapter-content-ch18';
+import { CH19_QA_CONTEXTS } from './vibe-chapter-content-ch19';
+import { CH20_QA_CONTEXTS } from './vibe-chapter-content-ch20';
+import { CH21_QA_CONTEXTS } from './vibe-chapter-content-ch21';
+import { CH22_QA_CONTEXTS } from './vibe-chapter-content-ch22';
+import { CH23_QA_CONTEXTS } from './vibe-chapter-content-ch23';
 
 export const VIBE_CHAPTER_META = [
   { id: 11, title: 'AI에게 일을 시킨다는 것', count: 5, category: '바이브코딩' },
@@ -16,6 +22,12 @@ export const VIBE_CHAPTER_META = [
   { id: 15, title: '믿지 않고 확인하는 법', count: 6, category: '바이브코딩' },
   { id: 16, title: '합격, 불합격, 그리고 거짓말', count: 6, category: '바이브코딩' },
   { id: 17, title: '재고, 지키고, 운영하기', count: 7, category: '바이브코딩' },
+  { id: 18, title: '왜 하네스인가 · CLAUDE.md', count: 4, category: '바이브코딩' },
+  { id: 19, title: '나만의 스킬 · /init', count: 4, category: '바이브코딩' },
+  { id: 20, title: '기획 · 요구사항·이슈·AC', count: 4, category: '바이브코딩' },
+  { id: 21, title: 'TDD 한 바퀴', count: 4, category: '바이브코딩' },
+  { id: 22, title: '커밋·PR·보안', count: 4, category: '바이브코딩' },
+  { id: 23, title: '종합 = 졸업', count: 4, category: '바이브코딩' },
 ] as const;
 
 export const VIBE_QA_CONTEXTS: QaContext[] = [
@@ -91,4 +103,10 @@ export const VIBE_QA_CONTEXTS: QaContext[] = [
   ...CH15_QA_CONTEXTS,
   ...CH16_QA_CONTEXTS,
   ...CH17_QA_CONTEXTS,
+  ...CH18_QA_CONTEXTS,
+  ...CH19_QA_CONTEXTS,
+  ...CH20_QA_CONTEXTS,
+  ...CH21_QA_CONTEXTS,
+  ...CH22_QA_CONTEXTS,
+  ...CH23_QA_CONTEXTS,
 ];
