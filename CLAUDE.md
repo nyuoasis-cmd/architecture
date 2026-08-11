@@ -14,7 +14,9 @@
 
 - **Client**: React 19 + Vite 8 + TypeScript + Tailwind v4
 - **Server**: Express 5 + TypeScript
-- **AI**: **Claude Haiku 4.5** (`@anthropic-ai/sdk`) — 학생 챗봇 + Anthropic prompt caching (4500 tok prefix, 5분 TTL 기본 / 1h 옵션) + DB 답변 캐시 + JSON 단발 응답 (streaming X). SDD §5.4 참조
+- **AI**: **Claude Haiku 4.5** (`@anthropic-ai/sdk`) — ① 학생 챗봇 ② ✋「내 차례」 판정(`/api/vibe/my-turn`). prompt caching + DB 답변 캐시 + JSON 단발 응답(streaming X).
+  🚨 **호출 통제 켜짐**(2026-08-11). 신원은 `resolveActorId` 하나만 쓴다 — 참여자 토큰=학생 한 명, 없으면 «여럿이 뭉친 통»으로 갈라 다른 한도를 준다(IP 로 학생을 세면 교실 전체가 한 명이 된다).
+  한도는 전부 Render env 로 **무배포** 조정: 「내 차례」 `MYTURN_*`(학생 하루 12·쿨타임 5분 / 공유 분당 10·하루 200 / 전역 분당 60·하루 500, 롤백 `MYTURN_GUARD_ENABLED=0`) · 챗봇 `CHAT_*` 4층.
 - **DB**: Supabase PostgreSQL (테이블 prefix `architecture_*`)
 - **Auth**: 카카오 OAuth + DEV 로그인
 - **Design**: Restrained Trust (stone palette)
@@ -29,7 +31,7 @@ architecture/
 │   │   ├── layout/     # ServiceHeader
 │   │   ├── learn/      # ContentPanel, ChatTab, QuizTab
 │   │   └── teacher/    # SessionCard, ParticipantList
-│   ├── content/        # 64 Q&A Markdown (정적)
+│   ├── data/           # 장별 문항·퀴즈·부가데이터(견학/사례/내 차례)
 │   └── store/          # session-store, learn-store (Zustand)
 ├── server/src/
 │   ├── index.ts        # Express
@@ -44,7 +46,7 @@ architecture/
 ## 콘텐츠 정책
 
 - **책 TOC·소제목·본문 모두 차용 0%** — 모든 학생 노출 콘텐츠(챕터 title / Q&A title / summary / body / 챗봇 답변)는 fresh 자가 생성. PR-0 (2026-05-04) 정책 강화. 책 『기술노트』는 영감 출처로만 footer/about 표기
-- Claude가 64 Q&A 본문 작성 → repo 정적 저장 → 챗봇 컨텍스트로 사용
+- Claude가 Q&A 본문 작성 → repo 정적 저장 → 챗봇 컨텍스트로 사용 (🔑 문항 수는 **손으로 적지 않는다** — 데이터에서 센다. 2026-08-11 기준 17장 107문항)
 - 출처: 푸터/about에 알렉 『기술노트』(2026) 영감 표기
 
 ## 개발
@@ -62,8 +64,10 @@ npm run build
 - 1 마일스톤 = 1 커밋 = 1 PR
 - 4-Phase 워크플로우는 UI 핵심 STEP에서 채택 (Visual + Interaction 분리 검증)
 
-## 현재 단계
+## 현재 단계 (2026-08-11)
 
-- SDD-v1 작성 완료 (`SDD-v1.md`)
-- 학생 학습 화면 목업 (`mockups/student-learn.html`)
-- 사용자 확인 대기
+- **라이브** — `architecture.teachermate.co.kr`. 기본 브랜치 **`main`**(master 아님) — `main` 머지 = prod 자동배포.
+- 콘텐츠: 17장 107문항 · 🚌 견학 **107/107** · ⚡ 사례 70 · ✋ 내 차례 6(12·13·14·15·16·17장)
+- 서버 테스트 88개(`cd server && npm test`). CI = `l1-fast.yml`, `main` 보호(required check `fast`).
+- **다음 본체 = 교안(1장=1차시).** 실행 런북 = `docs/RUNBOOK-polish-base-chapters.md`
+  (§0 «상태 재확인»을 착수 전에 직접 돌릴 것 — 이 문서의 숫자도 적힌 순간의 관측이다.)
