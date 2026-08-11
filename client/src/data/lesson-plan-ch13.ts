@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 13장 «아무도 안 적는 세 칸» — 1차시(45분).
+ * 13장 «아무도 안 적는 세 칸» — 1차시.
  *
  * 🔑 ✋「내 차례」가 **첫 문항**(`ch13_q01`)에 붙어 있다. 그래서 이 교안은 예외적으로
  *    «부탁문을 먼저 써 보고, 거기서 빈 칸을 발견한 다음 배우는» 순서다. 설명을 먼저 하면
@@ -10,11 +10,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH13_LESSON_PLAN: LessonPlan = {
   chapterId: 13,
-  totalMinutes: 45,
   goal: '요구에서 비워 둔 규칙·예외·데이터 칸은 사라지지 않고 AI가 대신 채운다는 것을 알고, 자기 기획에서 그 세 칸을 직접 메운다.',
   segments: [
     {
-      minutes: 3,
       phase: '열기',
       title: '카톡의 «5분»은 누가 정했나',
       studentDoes: '메시지를 지울 수 있는 시간이 왜 하필 5분인지 추측해 한 줄 적는다.',
@@ -22,7 +20,6 @@ export const CH13_LESSON_PLAN: LessonPlan = {
         '답은 없습니다. "누군가 정했다"는 데까지만 가면 됩니다 — 오늘 학생이 그 «누군가»가 됩니다.',
     },
     {
-      minutes: 10,
       phase: '내 차례',
       title: '먼저 써 본다 — 도서 대출 앱 부탁문',
       studentDoes:
@@ -32,7 +29,6 @@ export const CH13_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch13_q01'],
     },
     {
-      minutes: 7,
       phase: '학습',
       title: '기능과 정책은 다르다',
       studentDoes: '1번 문항을 읽고, 방금 자기 부탁문에서 AI가 대신 정하게 될 규칙을 하나 찾아 표시한다.',
@@ -41,7 +37,6 @@ export const CH13_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch13_q01'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '잘못 눌렀을 때의 각본 · 최악의 사용자',
       studentDoes:
@@ -51,7 +46,6 @@ export const CH13_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch13_q02', 'ch13_q03'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '이 앱은 나에 대해 뭘 저장하나',
       studentDoes: '4번 견학으로 이 앱이 자기에 대해 저장하는 것을 찾아 적는다.',
@@ -60,7 +54,6 @@ export const CH13_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch13_q04'],
     },
     {
-      minutes: 6,
       phase: '학습',
       title: '저장하지 않을 목록이 먼저 · 표를 종이에 그리기',
       studentDoes:
@@ -70,7 +63,6 @@ export const CH13_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch13_q04', 'ch13_q05'],
     },
     {
-      minutes: 5,
       phase: '학습',
       title: 'AI가 쓴 기획서의 빈칸 찾기',
       studentDoes: '6번 문항을 읽고, AI가 써 준 기획서에서 정책·예외·데이터 빈칸을 직접 표시한다.',

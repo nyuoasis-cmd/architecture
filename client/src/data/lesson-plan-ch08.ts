@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 8장 «인터넷 너머의 보이지 않는 길» — 1차시(45분).
+ * 8장 «인터넷 너머의 보이지 않는 길» — 1차시.
  *
  * 🔑 네트워크는 학생이 «안 보이는 것»이라 가장 빨리 지루해지는 장이다. 그래서 이 교안은
  *    설명보다 견학 비중을 높였다(자물쇠 눌러 보기·학교 와이파이에서 막히던 것·새로고침 없이
@@ -11,11 +11,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH08_LESSON_PLAN: LessonPlan = {
   chapterId: 8,
-  totalMinutes: 45,
   goal: '주소를 찾고(DNS) 길을 정하고(IP/TCP) 안전하게 감싸고(HTTPS) 가깝게 두는(CDN) 네 가지가 각각 무슨 일을 하는지 갈라서 말한다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '학교 와이파이에서 안 되던 것',
       studentDoes: '학교나 집 와이파이에서 유독 안 되던 것을 하나 적는다.',
@@ -23,7 +21,6 @@ export const CH08_LESSON_PLAN: LessonPlan = {
         '"왜 안 될까"를 지금 설명하지 마세요. 5번(차단과 보호 통로)에서 학생이 직접 답을 찾습니다.',
     },
     {
-      minutes: 10,
       phase: '학습',
       title: '주소와 등기 · 자물쇠 한 글자 · 이름을 번호로',
       studentDoes: '1·2·3번 문항을 읽고, 택배 비유로 «주소»와 «등기»가 각각 무엇에 해당하는지 적는다.',
@@ -32,7 +29,6 @@ export const CH08_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch08_q01', 'ch08_q02', 'ch08_q03'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '지금 주소창의 자물쇠 눌러 보기',
       studentDoes: '2번 견학으로 주소창 자물쇠를 눌러, 안에 무슨 말이 적혀 있는지 그대로 옮겨 적는다.',
@@ -41,7 +37,6 @@ export const CH08_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch08_q02'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '유튜브가 한국에서 빠른 이유 · 막는 것과 감싸는 것',
       studentDoes: '4·5번 문항을 읽고, 열기에서 적은 «안 되던 것»에 이제 이유를 붙인다.',
@@ -50,7 +45,6 @@ export const CH08_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch08_q04', 'ch08_q05'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '새로고침 없이 오는 것 세기',
       studentDoes: '6번 견학으로 자기 폰에서 새로고침 없이 저절로 오는 것을 세어 적는다.',
@@ -59,7 +53,6 @@ export const CH08_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch08_q06'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '왜 «최소 권한»이 첫 원칙인가',
       studentDoes: '7번 문항을 읽고, «이 앱이 사진에 접근하도록 허용할까요?»에 매번 무엇을 눌러 왔는지 적는다.',
@@ -68,7 +61,6 @@ export const CH08_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch08_q07'],
     },
     {
-      minutes: 3,
       phase: '정리',
       title: '주소창에 유튜브를 치면 무슨 일이',
       studentDoes: '주소를 치고 화면이 뜨기까지를 아는 단어로 순서대로 적는다.',

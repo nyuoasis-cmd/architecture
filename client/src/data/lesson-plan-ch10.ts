@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 10장 «거대한 컴퓨터를 빌리는 시대» — 1차시(45분).
+ * 10장 «거대한 컴퓨터를 빌리는 시대» — 1차시.
  *
  * 🔑 기초 10장의 마지막이자, 11장 바이브코딩으로 넘어가는 다리다. 그래서 뒤쪽(4~6번 AI·토큰·비용)에
  *    무게를 실었다 — 여기서 토큰과 비용 감각이 안 서면 11장부터 학생이 «공짜로 무한히 되는 것»으로 안다.
@@ -10,11 +10,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH10_LESSON_PLAN: LessonPlan = {
   chapterId: 10,
-  totalMinutes: 45,
   goal: '클라우드가 «남의 컴퓨터를 빌리는 일»이라는 것과, AI를 쓸 때마다 요금이 글자 수로 매겨진다는 것을 자기 말로 설명한다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '피자를 어디까지 남이 해 주나',
       studentDoes: '재료만 사기 / 밀키트 / 배달 세 가지 중 자기가 자주 쓰는 방식을 고르고 이유를 적는다.',
@@ -22,7 +20,6 @@ export const CH10_LESSON_PLAN: LessonPlan = {
         'IaaS·PaaS·SaaS라는 말을 아직 꺼내지 마세요. 이 비유가 곧 1번 문항의 답입니다.',
     },
     {
-      minutes: 9,
       phase: '학습',
       title: '책임 범위 셋 · 왜 «컨테이너»인가 · 수백 개를 누가 정리하나',
       studentDoes: '1~3번 문항을 읽고, 열기의 피자 셋을 클라우드 셋과 짝지어 적는다.',
@@ -31,7 +28,6 @@ export const CH10_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch10_q01', 'ch10_q02', 'ch10_q03'],
     },
     {
-      minutes: 5,
       phase: '견학',
       title: '이건 AI인가 아닌가 판정하기',
       studentDoes: '4번 견학으로 자기가 쓰는 기능 다섯 개를 «AI다/아니다»로 판정해 적는다.',
@@ -40,7 +36,6 @@ export const CH10_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch10_q04'],
     },
     {
-      minutes: 9,
       phase: '학습',
       title: 'AI·머신러닝·딥러닝의 포함 관계 · 다음 글자를 고르는 원리',
       studentDoes: '4·5번 문항을 읽고, AI가 답을 «미리 알고 있는지»에 대해 자기 생각을 한 줄 적는다.',
@@ -49,7 +44,6 @@ export const CH10_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch10_q04', 'ch10_q05'],
     },
     {
-      minutes: 5,
       phase: '견학',
       title: '답이 앞에서부터 나오는 걸 직접 보기',
       studentDoes: '5번 견학으로 이 앱 챗봇에 물어보고, 답이 어떻게 나타나는지 관찰해 적는다.',
@@ -57,7 +51,6 @@ export const CH10_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch10_q05'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '요금이 토큰으로 매겨지는 이유 · 가장 먼저 잠글 것',
       studentDoes: '6·7번 문항을 읽고, 같은 질문을 두 번 하면 요금이 두 번 나가는지 생각해 적는다.',
@@ -66,7 +59,6 @@ export const CH10_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch10_q06', 'ch10_q07'],
     },
     {
-      minutes: 5,
       phase: '정리',
       title: '기초 10장 되짚기',
       studentDoes: '1장부터 10장까지 중 «가장 오래 남은 장면» 하나를 골라 적는다.',

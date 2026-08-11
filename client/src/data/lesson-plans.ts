@@ -20,7 +20,15 @@ import { CH17_LESSON_PLAN } from './lesson-plan-ch17';
  * 교안(1장 = 1차시) 등록부.
  *
  * 🔑 «1장 = 1차시»가 기준이다(2026-08-11 jery 확정). 한 장의 문항을 한 차시 안에서
- *    어떤 순서로 몇 분씩 다루는지, 학생은 무엇을 하고 교사는 무엇을 말하는지를 한 벌로 적는다.
+ *    어떤 순서로 다루는지, 학생은 무엇을 하고 교사는 무엇을 말하는지를 한 벌로 적는다.
+ *
+ * 🚨 **교안은 시간을 말하지 않는다**(2026-08-11 jery 확정). 칸마다 «몇 분»을 적고 화면이
+ *    «지금 몇 분째»를 세던 방식을 통째로 걷어냈다. 이유는 그 숫자가 지켜지지 않아서가 아니라
+ *    **지킬 수 없는 약속이라서**다 — 이 앱에는 「수업 시작」 기록이 없어 첫 참여 시각을
+ *    근사값으로 썼고, 미리 만들어 둔 세션에서는 그 근사가 통째로 틀렸다. 틀린 «몇 분째»는
+ *    없는 것보다 나쁘다(교사가 그걸 믿고 진도를 당기거나 늦춘다).
+ *    지금 이 칸이 어디인지는 **교사가 눌러서** 정한다 — 시계가 아니라 사람이 진도의 주인이다.
+ *    🚨 시간 필드를 되살리지 말 것. 계약 ④ 가 되살아난 순간을 빨강으로 잡는다.
  *
  * 🚨 교안은 **앱을 설명하는 문서가 아니라 앱을 가리키는 문서**다. 그래서 칸마다 실제 문항 id 를
  *    달고, 계약 테스트(server/src/lib/lessonPlanContract.test.ts)가 그 id 가 진짜 있는지,
@@ -35,8 +43,6 @@ import { CH17_LESSON_PLAN } from './lesson-plan-ch17';
 export type LessonPhase = '열기' | '학습' | '견학' | '내 차례' | '퀴즈' | '정리';
 
 export type LessonSegment = {
-  /** 이 칸에 쓰는 분 */
-  minutes: number;
   phase: LessonPhase;
   /** 이 칸에서 하는 일 한 줄 */
   title: string;
@@ -50,8 +56,6 @@ export type LessonSegment = {
 
 export type LessonPlan = {
   chapterId: number;
-  /** segments 의 분 합과 같아야 한다 — 손으로 적은 값이 어긋나면 계약이 잡는다 */
-  totalMinutes: number;
   /** 이 차시가 끝나면 학생이 할 수 있게 되는 것 */
   goal: string;
   segments: LessonSegment[];
@@ -99,7 +103,7 @@ export function hasLessonPlan(chapterId: number): boolean {
  *
  * 🚨 «1장 = 1차시»가 기준이라 교안은 한 장짜리 세션을 전제로 만들었는데, **교사 화면의
  *    «새 세션 만들기»는 장을 고르는 칸이 없어 항상 17장을 담는다**(NewSessionModal 의
- *    `chapterIds: allChapterIds`). 그래서 전부 펼치면 45분짜리 교안 17개가 한 화면에 쌓여
+ *    `chapterIds: allChapterIds`). 그래서 전부 펼치면 교안 17개가 한 화면에 쌓여
  *    페이지가 24,000px(≈27 화면)이 된다 — 실측(2026-08-11 prod). 수업 중에 쓸 수 없는 화면이다.
  *
  * 🔑 그래서 «한 장일 때만» 펼친다. 여러 장이면 접어 두고 교사가 오늘 할 장만 펼친다.
@@ -107,34 +111,4 @@ export function hasLessonPlan(chapterId: number): boolean {
  */
 export function shouldExpandLessonPlanByDefault(chaptersWithPlanInSession: number): boolean {
   return chaptersWithPlanInSession === 1;
-}
-
-/**
- * 지금이 교안의 몇 번째 칸인가. 범위 밖이면 null.
- *
- * 왜 있는가(2026-08-11 prod QA, 신입샘 t3): 교안은 «0–4분 열기 / 4–13분 학습…»으로 시간을
- * 말하는데 교사 화면 어디에도 «지금 몇 분째»가 없었다. 교사가 45분 계획을 손에 들고도
- * 자기가 어디쯤인지 화면에서 못 읽었다.
- *
- * 🚨 이 함수는 «수업이 몇 분째인가»를 **모른다** — 받은 값으로만 고른다. 시각의 출처를
- *    화면 쪽에 두는 이유는, 이 앱에 «수업 시작» 이라는 기록이 없어서다(세션은 수업 전날
- *    만들어질 수도 있다). 지금 쓰는 근사값은 «첫 학생이 들어온 시각»이고, 근사라는 사실을
- *    화면에 그대로 적는다. 여기서 시각을 지어내면 교사가 틀린 «몇 분째»를 믿게 된다.
- */
-export function findActiveSegmentIndex(plan: LessonPlan, elapsedMinutes: number): number | null {
-  if (!Number.isFinite(elapsedMinutes) || elapsedMinutes < 0) {
-    return null;
-  }
-
-  let start = 0;
-  for (let index = 0; index < plan.segments.length; index += 1) {
-    const end = start + plan.segments[index].minutes;
-    if (elapsedMinutes < end) {
-      return index;
-    }
-    start = end;
-  }
-
-  // 계획한 시간을 지났다 — 마지막 칸을 «지금»이라고 말하지 않는다(지난 건 지난 것이다).
-  return null;
 }

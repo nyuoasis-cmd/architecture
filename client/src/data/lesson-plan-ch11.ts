@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 11장 «AI에게 일을 시킨다는 것» — 1차시(45분).
+ * 11장 «AI에게 일을 시킨다는 것» — 1차시.
  *
  * 🔑 바이브코딩 첫 차시다. 여기서 «AI는 답을 아는 존재»라는 그림이 안 깨지면 12~17장이
  *    전부 «AI가 알아서 해 주는 이야기»가 된다. 그래서 3번(매번 다른 답)에 가장 큰 칸을 줬다.
@@ -9,11 +9,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH11_LESSON_PLAN: LessonPlan = {
   chapterId: 11,
-  totalMinutes: 45,
   goal: 'AI가 «답을 아는 존재»가 아니라 «다음 말을 고르는 도구»라는 것을 알고, 그래서 사람이 무엇을 맡아야 하는지 말한다.',
   segments: [
     {
-      minutes: 5,
       phase: '열기',
       title: '오늘 AI를 몇 번 썼나',
       studentDoes: '오늘 하루 AI를 쓴 횟수를 세어 적는다. 0이라고 생각하면 0이라고 적는다.',
@@ -21,7 +19,6 @@ export const CH11_LESSON_PLAN: LessonPlan = {
         '대부분 «0~1번»이라고 적습니다. 견학에서 실제로 세면 훨씬 많이 나옵니다 — 그 격차가 이 차시의 출발점입니다.',
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '이미 쓰고 있던 AI 세어 보기',
       studentDoes: '1번 견학으로 자동완성·추천·번역·필터를 짚어 가며 다시 세어 적는다.',
@@ -29,7 +26,6 @@ export const CH11_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch11_q01'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '말만 잘하면 앱이 나오는 이유 · AI가 내 말을 자르는 방식',
       studentDoes: '1·2번 문항을 읽고, «AI가 하는 일»과 «내가 하는 일»을 한 줄씩 적는다.',
@@ -38,7 +34,6 @@ export const CH11_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch11_q01', 'ch11_q02'],
     },
     {
-      minutes: 11,
       phase: '학습',
       title: '같은 부탁에 매번 다른 답이 나오는 이유',
       studentDoes: '3번 문항을 읽고, «한 번 잘 나왔다»가 왜 증거가 못 되는지 한 줄로 적는다.',
@@ -47,7 +42,6 @@ export const CH11_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch11_q03'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '같은 질문을 두 번 하면 · 책상에서 서류 떨어뜨리기',
       studentDoes:
@@ -57,7 +51,6 @@ export const CH11_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch11_q03', 'ch11_q04'],
     },
     {
-      minutes: 6,
       phase: '학습',
       title: 'AI는 어디까지 기억하나 · 시키는 사람에게 남는 것',
       studentDoes: '4·5번 문항을 읽고, "AI가 만들고 내가 ___한다"의 빈칸을 세 가지로 채운다.',
@@ -66,7 +59,6 @@ export const CH11_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch11_q04', 'ch11_q05'],
     },
     {
-      minutes: 3,
       phase: '정리',
       title: '정하기·확인하기·책임지기',
       studentDoes: '세 가지 중 자기가 가장 자신 없는 것 하나에 표시한다.',

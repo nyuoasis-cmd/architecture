@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 16장 «합격, 불합격, 그리고 거짓말» — 1차시(45분).
+ * 16장 «합격, 불합격, 그리고 거짓말» — 1차시.
  *
  * 🔑 ✋「내 차례」가 마지막 문항(`ch16_q06`)에 있고 «규칙을 어길 수 없게 부탁하기»다.
  *    앞의 다섯 문항이 전부 그 결론으로 모이는 구조라 순서를 바꾸지 않는다.
@@ -9,18 +9,15 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH16_LESSON_PLAN: LessonPlan = {
   chapterId: 16,
-  totalMinutes: 45,
   goal: '수업에 쓸 물건은 점수가 아니라 합/불로 판정한다는 것을 알고, 중요한 규칙을 «말로 막기»가 아니라 «구조로 막기»로 설계한다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '와이파이 비밀번호에는 부분 점수가 없다',
       studentDoes: '"90점이면 되는 일"과 "100이 아니면 안 되는 일"을 각각 하나씩 적는다.',
       teacherSays: '비밀번호·시험 시간·버스 번호가 나옵니다. 이 감각이 이 차시의 축입니다.',
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '90점짜리 AI 앱은 쓸 수 있나 · 점검 질문은 왜 "~했는가"인가',
       studentDoes: '1·2번 문항을 읽고, 자기 앱의 애매한 점검 항목을 "~했는가?" 형태로 고쳐 쓴다.',
@@ -29,7 +26,6 @@ export const CH16_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch16_q01', 'ch16_q02'],
     },
     {
-      minutes: 7,
       phase: '학습',
       title: '거부율 0%가 안전이 아닌 이유',
       studentDoes: '3번 문항을 읽고, "문제가 한 건도 없었다"를 들었을 때 던질 질문을 적는다.',
@@ -38,7 +34,6 @@ export const CH16_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch16_q03'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '두 번 물어보기를 여기서 바로',
       studentDoes: '4번 견학으로 이 앱 챗봇에 같은 것을 두 번 물어, 답이 흔들리는지 확인해 적는다.',
@@ -47,7 +42,6 @@ export const CH16_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch16_q04'],
     },
     {
-      minutes: 7,
       phase: '학습',
       title: 'AI는 언제 지어내나 · 분야마다 다른 위험',
       studentDoes: '4·5번 문항을 읽고, 자기 앱에서 AI가 답하는 자리의 위험을 되돌리기·알아채기 두 축으로 적는다.',
@@ -56,7 +50,6 @@ export const CH16_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch16_q04', 'ch16_q05'],
     },
     {
-      minutes: 11,
       phase: '내 차례',
       title: '규칙을 «어길 수 없게» 부탁해 보기',
       studentDoes:
@@ -66,7 +59,6 @@ export const CH16_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch16_q06'],
     },
     {
-      minutes: 2,
       phase: '정리',
       title: '말로 막기와 구조로 막기',
       studentDoes: '자기 앱의 규칙 중 «반드시 구조로 막아야 하는 것» 하나에 표시한다.',
