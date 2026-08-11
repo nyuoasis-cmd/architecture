@@ -1,5 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
+import { isParticipantKey } from './actor-id';
 import { env } from '../env';
 
 // «내 차례» — 학생이 쓴 부탁문을 Haiku 4.5로 실제 실행해, 다섯 칸 중
@@ -24,6 +25,12 @@ function envInt(key: string, fallback: number): number {
 export const MY_TURN_LIMITS = {
   cooldownSeconds: envInt('MYTURN_COOLDOWN_SEC', 300),
   actorDaily: envInt('MYTURN_ACTOR_DAILY_CAP', 12),
+  // 🚨 공유 통(참여자 토큰이 없는 «라이브러리 자습») 전용 한도.
+  //    학교는 교실 전체가 공인 IP 하나로 나가서, 한 명 몫(쿨타임 5분)을 여기 적용하면
+  //    첫 학생이 제출하는 순간 반 전체가 5분 잠긴다. 그래서 **쿨타임을 걸지 않고**
+  //    분당·일일 한도로만 잰다(챗봇 chat-service 가 이미 쓰는 방식과 같다).
+  sharedPerMin: envInt('MYTURN_SHARED_PER_MIN', 10),
+  sharedDaily: envInt('MYTURN_SHARED_DAILY_CAP', 200),
   globalPerMin: envInt('MYTURN_PER_MIN', 60),
   globalDaily: envInt('MYTURN_DAILY_CAP', 500),
 };
@@ -52,6 +59,8 @@ export function myTurnGuardEnabled(): boolean {
 }
 
 const COOLDOWN_MS = MY_TURN_LIMITS.cooldownSeconds * 1000;
+const SHARED_MINUTE_LIMIT = MY_TURN_LIMITS.sharedPerMin;
+const SHARED_DAILY_LIMIT = MY_TURN_LIMITS.sharedDaily;
 const ACTOR_DAILY_LIMIT = MY_TURN_LIMITS.actorDaily;
 const GLOBAL_MINUTE_LIMIT = MY_TURN_LIMITS.globalPerMin;
 const GLOBAL_DAILY_LIMIT = MY_TURN_LIMITS.globalDaily;
@@ -298,21 +307,64 @@ export class MyTurnUnavailableError extends Error {}
 const anthropic = env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: env.ANTHROPIC_API_KEY }) : null;
 
 const actorLastCall = new Map<string, number>();
+const sharedMinuteBuckets = new Map<string, { count: number; resetAt: number }>();
 const actorDayBuckets = new Map<string, { count: number; resetAt: number }>();
 let globalMinute = { count: 0, resetAt: 0 };
 let globalDay = { count: 0, resetAt: 0 };
+
+/**
+ * 🚨 테스트에서 이 함수를 직접 부를 수 있게 export 한다. 통제 로직은 judgeMyTurn 안쪽에 있어서
+ *    밖에서 부르려면 Anthropic 키가 필요한데, 그러면 «교실 전체가 한 명으로 묶이는» 회귀를
+ *    CI 에서 아무도 못 잡는다(키가 없다). 계약을 검사할 수 없게 만드는 캡슐화는 캡슐화가 아니다.
+ */
+export function takeMyTurnToken(actorId: string): void {
+  takeToken(actorId);
+}
+
+/**
+ * 테스트 전용 — 공유 통의 «분» 버킷만 만료시킨다(시계를 돌리는 대신).
+ * 🚨 이게 없으면 공유 통의 **일일** 한도를 검사할 수 없다. 분당 한도가 먼저 막아서
+ *    하루치까지 못 가고, 그러면 «일일 한도를 학생 몫으로 되돌리는» 회귀가 초록으로 지나간다
+ *    (실제로 변이 시험에서 그랬다).
+ */
+export function __expireMyTurnMinuteBucketsForTest(): void {
+  for (const bucket of sharedMinuteBuckets.values()) bucket.resetAt = 0;
+  globalMinute = { count: 0, resetAt: 0 };
+}
+
+/** 테스트 전용 — 버킷을 비운다. 안 비우면 앞 테스트의 호출이 뒤 테스트를 막는다. */
+export function __resetMyTurnBucketsForTest(): void {
+  actorLastCall.clear();
+  actorDayBuckets.clear();
+  sharedMinuteBuckets.clear();
+  globalMinute = { count: 0, resetAt: 0 };
+  globalDay = { count: 0, resetAt: 0 };
+}
 
 function takeToken(actorId: string): void {
   if (!myTurnGuardEnabled()) return;
   const now = Date.now();
 
-  const last = actorLastCall.get(actorId);
-  if (last && now - last < COOLDOWN_MS) {
-    throw new MyTurnRateLimitError(Math.ceil((COOLDOWN_MS - (now - last)) / 1000));
+  // 🔑 «학생 한 명»인가 «여럿이 뭉쳐 있을 수 있는 통»인가에 따라 다른 한도를 쓴다.
+  //    공유 통에 한 명 몫(쿨타임 5분)을 적용하면, 자습하던 다른 학생이 남의 제출 때문에 막힌다.
+  //    (2026-08-11: 통제를 켜면서 이 갈래가 없다는 것이 드러났다 — 챗봇은 이미 갈라 쓰고 있었다.)
+  const isOne = isParticipantKey(actorId);
+
+  if (isOne) {
+    const last = actorLastCall.get(actorId);
+    if (last && now - last < COOLDOWN_MS) {
+      throw new MyTurnRateLimitError(Math.ceil((COOLDOWN_MS - (now - last)) / 1000));
+    }
+  } else {
+    const minute = sharedMinuteBuckets.get(actorId);
+    if (minute && minute.resetAt > now && minute.count >= SHARED_MINUTE_LIMIT) {
+      throw new MyTurnRateLimitError(Math.ceil((minute.resetAt - now) / 1000));
+    }
   }
 
   const day = actorDayBuckets.get(actorId);
-  if (day && day.resetAt > now && day.count >= ACTOR_DAILY_LIMIT) {
+  const dailyLimit = isOne ? ACTOR_DAILY_LIMIT : SHARED_DAILY_LIMIT;
+  if (day && day.resetAt > now && day.count >= dailyLimit) {
     throw new MyTurnRateLimitError(Math.ceil((day.resetAt - now) / 1000));
   }
 
@@ -323,7 +375,16 @@ function takeToken(actorId: string): void {
     throw new MyTurnRateLimitError(Math.ceil((globalDay.resetAt - now) / 1000));
   }
 
-  actorLastCall.set(actorId, now);
+  if (isOne) {
+    actorLastCall.set(actorId, now);
+  } else {
+    const minute = sharedMinuteBuckets.get(actorId);
+    if (!minute || minute.resetAt <= now) {
+      sharedMinuteBuckets.set(actorId, { count: 1, resetAt: now + 60_000 });
+    } else {
+      minute.count += 1;
+    }
+  }
   if (!day || day.resetAt <= now) {
     actorDayBuckets.set(actorId, { count: 1, resetAt: now + 86_400_000 });
   } else {
