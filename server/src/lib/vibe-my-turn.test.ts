@@ -71,7 +71,8 @@ test('/health 의 캡 선언이 실제 통제값과 같다 — 선언만 바뀌�
   const { classCheckBlock } = await import('./classCheck');
   const { MY_TURN_LIMITS } = await import('./vibe-my-turn');
   const saved = process.env.MYTURN_GUARD_ENABLED;
-  // 🚨 통제 기본값이 «끔»(2026-08-11 jery 결정)이라, 켠 상태를 보려면 명시적으로 켜야 한다.
+  // 🚨 기본값이 «켬»(2026-08-11 jery 2차 결정)이지만, 이 검사는 «켠 상태의 선언»을 보는 것이므로
+  //    기본값에 기대지 않고 명시적으로 켠다 — 기본값이 또 바뀌어도 이 검사의 뜻은 그대로여야 한다.
   process.env.MYTURN_GUARD_ENABLED = '1';
   try {
     const block = classCheckBlock() as { capPolicy: string; caps: Record<string, number> };
@@ -85,21 +86,25 @@ test('/health 의 캡 선언이 실제 통제값과 같다 — 선언만 바뀌�
   }
 });
 
-// 🚨 이 앱은 「내 차례」가 AI(Haiku 4.5)를 부른다. 통제를 끈 것은 **결정**이지 사고가 아니지만,
-//    끈 사실이 코드 어딘가에서 조용히 뒤집히거나, 반대로 끈 채로 «있다»고 말하게 되면 그때는 사고다.
-//    그래서 «기본은 꺼져 있다»와 «켜면 실제로 막는다»를 둘 다 계약으로 박아 둔다.
-test('호출 통제: 기본은 꺼져 있고, 켜면 실제로 막는다', async () => {
+// 🚨 이 앱은 「내 차례」가 AI(Haiku 4.5)를 부른다. 통제를 켜고 끄는 것은 **결정**이고, 그 결정이
+//    코드 어딘가에서 조용히 뒤집히면 그때는 사고다(끈 채로 «있다»고 말하는 것도 같은 사고).
+//    그래서 «기본은 켜져 있다»와 «env 한 줄로 끌 수 있다»를 둘 다 계약으로 박아 둔다.
+test('호출 통제: 기본은 켜져 있고, env 한 줄로 끌 수 있다', async () => {
   const { myTurnGuardEnabled } = await import('./vibe-my-turn');
   const saved = process.env.MYTURN_GUARD_ENABLED;
   try {
     delete process.env.MYTURN_GUARD_ENABLED;
-    assert.equal(myTurnGuardEnabled(), false, 'jery 결정 = 기본 무제한. 이게 true 로 뒤집히면 수업 중 학생이 막힌다');
-
-    process.env.MYTURN_GUARD_ENABLED = '1';
-    assert.equal(myTurnGuardEnabled(), true, 'env 한 줄로 «배포 없이» 다시 켜지지 않으면 나중에 손쓸 수가 없다');
+    assert.equal(
+      myTurnGuardEnabled(),
+      true,
+      'jery 2차 결정 = 넓히는 대신 상한을 건다. 이게 false 로 뒤집히면 지출 상한이 통째로 사라진다',
+    );
 
     process.env.MYTURN_GUARD_ENABLED = '0';
-    assert.equal(myTurnGuardEnabled(), false);
+    assert.equal(myTurnGuardEnabled(), false, 'env 한 줄로 «배포 없이» 꺼지지 않으면 수업 중 막혔을 때 손쓸 수가 없다');
+
+    process.env.MYTURN_GUARD_ENABLED = '1';
+    assert.equal(myTurnGuardEnabled(), true);
   } finally {
     if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;
     else process.env.MYTURN_GUARD_ENABLED = saved;

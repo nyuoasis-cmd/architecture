@@ -18,10 +18,16 @@ import { classCheckBlock, providerFingerprints } from './classCheck'
 test('classCheckBlock: 캡이 있으면 있다고, 없으면 없다고 «명시»한다', () => {
   const saved = process.env.MYTURN_GUARD_ENABLED
 
+  // 🚨 2026-08-11 jery 2차 결정으로 기본값이 «켬» 이 됐다(「내 차례」를 넓히는 대신 상한을 건다).
+  //    그래서 «아무것도 설정하지 않은 서버»는 캡이 있다고 말해야 한다 — 없다고 말하면 상한이
+  //    걸려 있는데도 읽는 쪽이 무제한으로 계산한다.
   delete process.env.MYTURN_GUARD_ENABLED
   const byDefault = classCheckBlock()
-  assert.equal(byDefault.capPolicy, 'none', '기본이 «통제 끔»인데 캡이 있는 척하면, 읽는 쪽이 없는 상한을 믿는다')
-  assert.deepEqual(byDefault.caps, {}, '캡이 없다고 말해 놓고 값을 흘리면 둘 중 하나는 거짓말이다')
+  assert.equal(byDefault.capPolicy, 'app-daily', '기본이 «통제 켬»인데 none 이라 말하면, 읽는 쪽이 없는 여유를 믿는다')
+  assert.ok(
+    Object.keys(byDefault.caps).length > 0,
+    '캡이 있다고 말해 놓고 값을 안 주면 읽는 쪽이 숫자를 지어내야 한다',
+  )
 
   process.env.MYTURN_GUARD_ENABLED = '1'
   const on = classCheckBlock()
