@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 3장 «코드를 세상에 내보내는 길» — 1차시(45분).
+ * 3장 «코드를 세상에 내보내는 길» — 1차시.
  *
  * 🔑 7문항이라 전부 같은 깊이로 다루면 45분이 모자란다. 검사(1~3번)에 무게를 두고,
  *    배포·되돌리기·감시·리뷰(4~7번)는 «왜 필요한가»만 잡고 넘어간다.
@@ -10,11 +10,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH03_LESSON_PLAN: LessonPlan = {
   chapterId: 3,
-  totalMinutes: 45,
   goal: '코드가 세상에 나가기 전에 무엇이 그것을 막아 서는지 — 검사·환경 분리·되돌리기·감시·리뷰 — 를 한 줄로 이어서 말한다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '"내 컴퓨터에서는 됐는데"',
       studentDoes: '자기가 만든 것이 남에게서는 안 됐던 경험을 하나 떠올려 적는다(과제·발표자료 무엇이든).',
@@ -22,7 +20,6 @@ export const CH03_LESSON_PLAN: LessonPlan = {
         '컴퓨터 이야기로 좁히지 마세요. 폰트가 깨진 발표자료도 같은 일입니다. 이 경험이 «환경 분리»의 씨앗입니다.',
     },
     {
-      minutes: 12,
       phase: '학습',
       title: '검사는 작을수록 좋은가, 먼저 쓰면 무엇이 달라지나',
       studentDoes: '1·2번 문항을 읽고, 작은 검사와 큰 검사를 각각 언제 쓰는지 한 줄씩 적는다.',
@@ -31,7 +28,6 @@ export const CH03_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch03_q01', 'ch03_q02'],
     },
     {
-      minutes: 8,
       phase: '견학',
       title: '이 앱의 가장 작은 검사를 직접 통과·실패시키기',
       studentDoes: '1번 견학을 따라 검사를 한 번 통과시키고, 한 번 일부러 실패시켜 본다. 두 화면의 차이를 적는다.',
@@ -40,7 +36,6 @@ export const CH03_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch03_q01'],
     },
     {
-      minutes: 9,
       phase: '학습',
       title: '자동 검사·환경 셋·되돌리기',
       studentDoes: '3·4·5번 문항을 읽고, 연습실·리허설·본공연 비유로 dev·staging·prod를 자기 말로 적는다.',
@@ -49,7 +44,6 @@ export const CH03_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch03_q03', 'ch03_q04', 'ch03_q05'],
     },
     {
-      minutes: 5,
       phase: '견학',
       title: '무시하게 된 알림 하나',
       studentDoes: '6번 견학으로 자기가 «끄거나 무시하게 된 알림»을 하나 적고, 왜 무시하게 됐는지 쓴다.',
@@ -58,7 +52,6 @@ export const CH03_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch03_q06'],
     },
     {
-      minutes: 5,
       phase: '학습',
       title: '남의 눈이 내 코드를 보는 이유',
       studentDoes: '7번 문항을 읽고, 남이 봐 줘서 내가 못 본 걸 찾은 경험을 하나 적는다.',
@@ -67,7 +60,6 @@ export const CH03_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch03_q07'],
     },
     {
-      minutes: 2,
       phase: '정리',
       title: '막아 서는 것들을 순서대로',
       studentDoes: '코드가 나가기까지 거치는 관문을 아는 대로 순서대로 적는다.',

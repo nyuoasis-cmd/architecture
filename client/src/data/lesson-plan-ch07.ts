@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 7장 «데이터를 보관하는 창고» — 1차시(45분).
+ * 7장 «데이터를 보관하는 창고» — 1차시.
  *
  * 🔑 4장과 겹쳐 보이지만 자리가 다르다. 4장은 «데이터를 어떻게 다룰까», 7장은 «그걸 담는 창고가
  *    어떻게 생겼나»다. 학생이 "이거 아까 했는데요"라고 하면 그 말을 그대로 받아서 4장의 문제
@@ -9,11 +9,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH07_LESSON_PLAN: LessonPlan = {
   chapterId: 7,
-  totalMinutes: 45,
   goal: '데이터베이스를 «저장하는 곳»이 아니라 «여러 사람이 동시에 만져도 어긋나지 않게 지켜 주는 곳»으로 설명한다.',
   segments: [
     {
-      minutes: 5,
       phase: '열기',
       title: '마지막 한 자리를 두 사람이 동시에 눌렀다',
       studentDoes: '예매·선착순 신청에서 겪은 «동시에 눌렀을 때» 경험을 하나 적는다.',
@@ -21,7 +19,6 @@ export const CH07_LESSON_PLAN: LessonPlan = {
         '이 장의 마지막 문항(6번)을 열기로 당겨 쓰는 구성입니다. 답을 주지 말고 장면만 세워 두세요.',
     },
     {
-      minutes: 10,
       phase: '학습',
       title: '칸이 정해진 창고와 아무거나 넣는 창고 · DB에 묻는 네 가지',
       studentDoes: '1·2번 문항을 읽고, 넣기·읽기·바꾸기·지우기를 자기 생활의 예로 하나씩 적는다.',
@@ -30,7 +27,6 @@ export const CH07_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch07_q01', 'ch07_q02'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '칸이 정해진 것과 아무거나 넣는 것',
       studentDoes: '1번 견학으로 자기가 쓰는 앱 중 «칸이 정해진 것»과 «아무거나 넣는 것»을 각각 든다.',
@@ -38,7 +34,6 @@ export const CH07_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch07_q01'],
     },
     {
-      minutes: 9,
       phase: '학습',
       title: '정전이 나도 돈이 안 사라지는 이유 · 1행을 1초에 찾기',
       studentDoes: '3·4번 문항을 읽고, «저장 안 함»과 «저장됨»의 경계가 어디인지 한 줄로 적는다.',
@@ -47,7 +42,6 @@ export const CH07_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch07_q03', 'ch07_q04'],
     },
     {
-      minutes: 5,
       phase: '견학',
       title: '연락처가 가나다순인 이유를 뒤집어 보기',
       studentDoes: '4번 견학으로 연락처가 순서 없이 섞여 있다면 어떻게 찾아야 할지 적는다.',
@@ -55,7 +49,6 @@ export const CH07_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch07_q04'],
     },
     {
-      minutes: 7,
       phase: '학습',
       title: '일부러 여러 표로 쪼개기 · 동시에 만질 때',
       studentDoes: '5·6번 문항을 읽고, 열기에서 적은 «동시에 눌렀을 때» 경험에 이제 이름을 붙인다.',
@@ -64,7 +57,6 @@ export const CH07_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch07_q05', 'ch07_q06'],
     },
     {
-      minutes: 3,
       phase: '견학',
       title: '«저장 안 함»과 «저장됨»의 경계',
       studentDoes: '3번 견학으로 작업하던 문서를 강제로 닫아 보고, 어디까지 남았는지 확인해 적는다.',

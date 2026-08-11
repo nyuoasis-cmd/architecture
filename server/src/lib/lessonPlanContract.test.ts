@@ -18,7 +18,6 @@ const ROOT = path.resolve(__dirname, '..', '..', '..')
 const load = (rel: string) => require(path.resolve(ROOT, 'client', 'src', 'data', rel))
 
 type LessonSegment = {
-  minutes: number
   phase: string
   title: string
   studentDoes: string
@@ -27,7 +26,6 @@ type LessonSegment = {
 }
 type LessonPlan = {
   chapterId: number
-  totalMinutes: number
   goal: string
   segments: LessonSegment[]
   pitfalls: string[]
@@ -52,10 +50,6 @@ const { QA_STUBS, CHAPTERS } = load('qa-stubs') as {
 const plans = Object.values(LESSON_PLANS)
 const qaIdsOfChapter = (chapterId: number) => QA_STUBS.filter((qa) => qa.chapterId === chapterId).map((qa) => qa.id)
 const ALLOWED_PHASES = new Set(['열기', '학습', '견학', '내 차례', '퀴즈', '정리'])
-
-// 한 차시의 길이. 이 범위를 벗어난 교안은 «1장 = 1차시»라는 기준을 스스로 깬 것이다.
-const MIN_PERIOD_MINUTES = 40
-const MAX_PERIOD_MINUTES = 50
 
 test('① 등록부가 비어 있지 않다 — 형판만 있고 교안이 없는 상태 금지', () => {
   assert.ok(plans.length > 0, '교안 등록부가 비었다. 형판만 들어오고 내용이 안 들어온 것이다')
@@ -82,36 +76,53 @@ test('③ 교안이 걸린 장은 실제로 있는 장이다', () => {
   }
 })
 
-test('④ 칸의 분 합이 totalMinutes 와 같다 — 손으로 적은 총합이 어긋나면 시간표가 거짓말이 된다', () => {
-  for (const plan of plans) {
-    const sum = plan.segments.reduce((acc, segment) => acc + segment.minutes, 0)
-    assert.equal(
-      sum,
-      plan.totalMinutes,
-      `${plan.chapterId}장: 칸 합 ${sum}분인데 totalMinutes 는 ${plan.totalMinutes}분이라고 적혀 있다`,
-    )
-  }
-})
+// 🚨 ④ 는 원래 «칸의 분 합이 totalMinutes 와 같은가»였고 ⑤⑥ 은 차시 길이·양수 분을 봤다.
+//    2026-08-11 교안에서 시간을 전면 폐기하면서 셋 다 볼 것이 없어졌다. 지울 자리에
+//    **되살아남을 잡는 계약**을 대신 넣는다 — 시간을 뺀 진짜 이유는 그 숫자를 지킬 수 없어서였고
+//    (이 앱엔 「수업 시작」 기록이 없다), 누군가 편의로 minutes 를 다시 넣으면 화면이 다시
+//    틀린 진도를 말하기 시작한다. 사람의 기억이 아니라 계약이 막는다.
+const TIME_FIELDS = ['minutes', 'totalMinutes', 'durationMinutes', 'elapsedMinutes', 'startMinute']
 
-test('⑤ 1차시 길이 범위 안에 있다', () => {
-  for (const plan of plans) {
-    assert.equal(
-      plan.totalMinutes >= MIN_PERIOD_MINUTES && plan.totalMinutes <= MAX_PERIOD_MINUTES,
-      true,
-      `${plan.chapterId}장: ${plan.totalMinutes}분 — 1차시(${MIN_PERIOD_MINUTES}~${MAX_PERIOD_MINUTES}분)를 벗어났다`,
-    )
-  }
-})
+test('④ 교안 데이터에 시간 필드가 없다 — 지킬 수 없는 약속을 되살리지 않는다', () => {
+  const found: string[] = []
 
-test('⑥ 모든 칸의 분이 양수다 — 0분짜리 칸은 안 하는 일이다', () => {
   for (const plan of plans) {
-    for (const segment of plan.segments) {
-      assert.equal(
-        Number.isInteger(segment.minutes) && segment.minutes > 0,
-        true,
-        `${plan.chapterId}장 «${segment.title}» 칸이 ${segment.minutes}분이다`,
-      )
+    for (const field of TIME_FIELDS) {
+      if (field in (plan as unknown as Record<string, unknown>)) {
+        found.push(`${plan.chapterId}장 교안에 ${field}`)
+      }
     }
+    for (const segment of plan.segments) {
+      for (const field of TIME_FIELDS) {
+        if (field in (segment as unknown as Record<string, unknown>)) {
+          found.push(`${plan.chapterId}장 «${segment.title}» 칸에 ${field}`)
+        }
+      }
+    }
+  }
+
+  assert.deepEqual(
+    found,
+    [],
+    '교안에 시간 필드가 되살아났다 — 이 앱에는 「수업 시작」 기록이 없어서 «몇 분째»를 정직하게 셀 수 없다. ' +
+      `진도는 교사가 눌러서 정한다:\n  ${found.join('\n  ')}`,
+  )
+})
+
+test('⑤ 데이터 층이 시간으로 «지금 이 칸»을 고르는 함수를 다시 갖지 않는다', () => {
+  const registry = load('lesson-plans') as Record<string, unknown>
+  assert.equal(
+    registry.findActiveSegmentIndex,
+    undefined,
+    'findActiveSegmentIndex 가 되살아났다 — 시계가 진도를 고르면 미리 만들어 둔 세션에서 통째로 틀린다',
+  )
+})
+
+test('⑥ 칸의 순서가 곧 진행 순서다 — 순서 말고 진행을 말하는 다른 열쇠가 없다', () => {
+  // 시간을 뺀 뒤로 «몇 번째 칸인가»가 유일한 진행 표시다. 배열이 비면 화면에 순서가 사라진다.
+  for (const plan of plans) {
+    assert.ok(Array.isArray(plan.segments), `${plan.chapterId}장: segments 가 배열이 아니다`)
+    assert.ok(plan.segments.length > 0, `${plan.chapterId}장: 칸이 하나도 없다 — 진행할 순서가 없다`)
   }
 })
 

@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 17장 «재고, 지키고, 운영하기» — 1차시(45분).
+ * 17장 «재고, 지키고, 운영하기» — 1차시.
  *
  * 🔑 마지막 차시다. 6번(분당 한도)은 **교사 자신에게 가장 필요한 문항**이다 — 이 앱의
  *    「내 차례」 한도도 정확히 그 이야기이고, 수업이 멈추는 사고가 실제로 여기서 난다.
@@ -9,18 +9,15 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH17_LESSON_PLAN: LessonPlan = {
   chapterId: 17,
-  totalMinutes: 45,
   goal: '만든 것을 «좋아졌다»고 말하려면 무엇이 필요한지 알고, AI 기능의 한도와 출구 검사를 우리 반 30명 기준으로 환산해 말한다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '폰은 이미 «지난주 대비»로 말해 준다',
       studentDoes: '폰의 사용 시간 화면을 열어 «지난주 대비» 숫자를 확인해 적는다.',
       teacherSays: '"비교 대상이 있어야 좋아졌다고 말할 수 있다" — 그 한 줄이 이 차시의 시작입니다.',
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '«고쳤다»와 «좋아졌다» · 한 번의 측정',
       studentDoes: '1·2번 문항을 읽고, "한 번 재 보니 좋았다"에 던질 질문을 적는다.',
@@ -29,7 +26,6 @@ export const CH17_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch17_q01', 'ch17_q02'],
     },
     {
-      minutes: 5,
       phase: '견학',
       title: '인터넷 속도를 연달아 세 번 재기',
       studentDoes: '2번 견학으로 속도를 연달아 세 번 재고 세 숫자를 그대로 적는다.',
@@ -37,7 +33,6 @@ export const CH17_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch17_q02'],
     },
     {
-      minutes: 7,
       phase: '학습',
       title: '찾아주는 AI는 잘 찾고 있나 · AI 일꾼의 성적표',
       studentDoes: '3·4번 문항을 읽고, 검색형 AI의 실패를 «못 찾음»과 «잘못 말함»으로 갈라 적는다.',
@@ -46,7 +41,6 @@ export const CH17_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch17_q03', 'ch17_q04'],
     },
     {
-      minutes: 11,
       phase: '내 차례',
       title: '«나가는 말»을 검사하는 문 설계하기',
       studentDoes:
@@ -56,7 +50,6 @@ export const CH17_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch17_q05'],
     },
     {
-      minutes: 7,
       phase: '학습',
       title: '분당 한도가 수업을 멈추게 하는 이유 · 같은 질문을 두 번 계산하지 않기',
       studentDoes:
@@ -66,7 +59,6 @@ export const CH17_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch17_q06', 'ch17_q07'],
     },
     {
-      minutes: 3,
       phase: '견학',
       title: '이 앱의 챗봇에서 캐시 확인하기',
       studentDoes: '7번 견학으로 같은 질문을 두 번 해 두 번째가 빨랐는지 확인해 적는다.',

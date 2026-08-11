@@ -16,7 +16,6 @@ export default function TeacherSessionPage() {
   const [isForbidden, setIsForbidden] = useState(false);
   const [isQrFullscreen, setIsQrFullscreen] = useState(false);
   const [qaCompletion, setQaCompletion] = useState<Record<string, number>>({});
-  const [now, setNow] = useState(() => Date.now());
   const currentSession = useSessionStore((state) => state.currentSession);
   const participants = useSessionStore((state) => state.participants);
   const setCurrentSession = useSessionStore((state) => state.setCurrentSession);
@@ -93,12 +92,6 @@ export default function TeacherSessionPage() {
     };
   }, [id, setParticipants]);
 
-  // 「몇 분째」는 30초마다만 다시 센다 — 1초짜리 시계는 수업 중 교사 화면에서 시선을 끈다.
-  useEffect(() => {
-    const timer = window.setInterval(() => setNow(Date.now()), 30_000);
-    return () => window.clearInterval(timer);
-  }, []);
-
   if (isForbidden) {
     return <Navigate replace to="/forbidden" />;
   }
@@ -123,15 +116,6 @@ export default function TeacherSessionPage() {
   //    2026-08-11 prod QA(신입샘 t2): 참여자 0명인데도 「▶ 수업 시연 시작」이 1차 CTA 라
   //    신입 교사가 «QR 을 먼저 띄워야 하나, 시연을 먼저 눌러야 하나»에서 멈췄다.
   const hasParticipants = participants.length > 0;
-
-  // 이 앱에는 「수업 시작」 기록이 없다. 첫 학생이 들어온 시각을 근사값으로 쓰되,
-  // 근사라는 사실을 교안 패널이 화면에 그대로 적는다(지어낸 시각을 믿게 하지 않는다).
-  // 참여자는 서버가 joined_at 오름차순으로 준다 — 첫 항목이 가장 먼저 들어온 학생이다.
-  const startedAtIso = participants[0]?.joined_at;
-  const startedAtMs = startedAtIso ? Date.parse(startedAtIso) : Number.NaN;
-  const elapsedMinutes = Number.isFinite(startedAtMs)
-    ? Math.max(0, Math.floor((now - startedAtMs) / 60_000))
-    : undefined;
 
   const primaryCta =
     'inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white disabled:bg-stone-300';
@@ -215,8 +199,6 @@ export default function TeacherSessionPage() {
         progress={{
           participantCount: participants.length,
           qaCompletion,
-          startedAt: startedAtIso,
-          elapsedMinutes,
         }}
       />
 

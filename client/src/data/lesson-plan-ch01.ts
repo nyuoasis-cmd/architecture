@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 1장 «컴퓨터가 1초 안에 하는 일» — 1차시(45분).
+ * 1장 «컴퓨터가 1초 안에 하는 일» — 1차시.
  *
  * 🔑 이 장은 4문항이고 넷 다 🚌 견학이 붙어 있다. 그래서 «설명 → 견학»을 두 번 반복하는
  *    형태로 짰다. 앞에서 다 설명하고 뒤에 견학을 몰면 학생이 앞 내용을 잊은 채로 앱을 연다.
@@ -10,11 +10,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH01_LESSON_PLAN: LessonPlan = {
   chapterId: 1,
-  totalMinutes: 45,
   goal: '키보드를 한 번 누른 뒤 컴퓨터 안에서 무슨 일이 일어나는지를, 입력·처리·출력이라는 말로 자기 문장으로 설명한다.',
   segments: [
     {
-      minutes: 5,
       phase: '열기',
       title: '지금 누른 키가 화면에 뜨기까지',
       studentDoes: '아무 글자나 한 번 눌러 보고, 그 사이에 무슨 일이 있었을지 한 줄로 적는다.',
@@ -22,7 +20,6 @@ export const CH01_LESSON_PLAN: LessonPlan = {
         '"방금 A를 눌렀는데 화면에 A가 떴죠. 그 사이에 컴퓨터는 아무것도 안 했을까요?" — 정답을 받지 말고 추측만 두세 개 칠판에 받아 둡니다. 이 추측은 정리 시간에 다시 씁니다.',
     },
     {
-      minutes: 12,
       phase: '학습',
       title: '입력·처리·출력, 그리고 부품과 명령',
       studentDoes: '1·2번 문항을 읽고 각 문항 끝의 체크 문장을 자기 말로 바꿔 적는다.',
@@ -31,7 +28,6 @@ export const CH01_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch01_q01', 'ch01_q02'],
     },
     {
-      minutes: 8,
       phase: '견학',
       title: '지금 쓰는 앱과 폰에서 직접 찾기',
       studentDoes:
@@ -41,7 +37,6 @@ export const CH01_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch01_q01', 'ch01_q02'],
     },
     {
-      minutes: 10,
       phase: '학습',
       title: '앱 사이를 정리하는 쪽과, 클릭 한 번의 왕복',
       studentDoes: '3·4번 문항을 읽고, 운영체제가 하는 일 세 가지와 SSD→RAM→CPU 순서를 정리한다.',
@@ -50,7 +45,6 @@ export const CH01_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch01_q03', 'ch01_q04'],
     },
     {
-      minutes: 5,
       phase: '견학',
       title: '«두 번째가 더 빠른» 순간 만들어 보기',
       studentDoes: '4번 견학으로 같은 화면을 두 번 열어 보고, 두 번째가 빨랐는지 아닌지를 적는다.',
@@ -59,7 +53,6 @@ export const CH01_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch01_q04'],
     },
     {
-      minutes: 3,
       phase: '퀴즈',
       title: '4문항 확인',
       studentDoes: '장 퀴즈 4문항을 풀고, 헷갈린 번호를 하나 고른다.',
@@ -68,7 +61,6 @@ export const CH01_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch01_q01', 'ch01_q02', 'ch01_q03', 'ch01_q04'],
     },
     {
-      minutes: 2,
       phase: '정리',
       title: '열기에서 적은 추측과 맞대 보기',
       studentDoes: '첫 5분에 적었던 자기 추측을 다시 읽고, 바뀐 부분에 밑줄을 친다.',

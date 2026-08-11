@@ -1,18 +1,16 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 2장 «프로그램, 한 종류가 아닙니다» — 1차시(45분).
+ * 2장 «프로그램, 한 종류가 아닙니다» — 1차시.
  *
  * 🔑 이 장의 핵심 오해는 «소프트웨어 = 앱»이다. 그래서 열기에서 학생이 지울 수 있는 앱과
  *    지울 수 없는 앱을 먼저 갈라 보게 하고, 이름(시스템/응용)은 그 뒤에 붙인다.
  */
 export const CH02_LESSON_PLAN: LessonPlan = {
   chapterId: 2,
-  totalMinutes: 45,
   goal: '「프로그램」을 한 덩어리로 보지 않고, 층(시스템·응용)과 출처(오픈소스·상용)와 사는 곳(내 기기·클라우드)으로 갈라서 말한다.',
   segments: [
     {
-      minutes: 5,
       phase: '열기',
       title: '지울 수 있는 앱, 지울 수 없는 앱',
       studentDoes: '자기 폰 앱 목록을 열어 «지워지는 것»과 «지우기 버튼이 없는 것»을 각각 두 개씩 적는다.',
@@ -20,7 +18,6 @@ export const CH02_LESSON_PLAN: LessonPlan = {
         '"왜 어떤 건 못 지울까요?"만 던지고 답은 받지 않습니다. 이 질문이 이 차시 전체를 끌고 갑니다.',
     },
     {
-      minutes: 10,
       phase: '학습',
       title: '워드와 윈도우는 같은 소프트웨어인가',
       studentDoes: '1번 문항을 읽고, 열기에서 적은 앱들을 시스템/응용으로 다시 분류한다.',
@@ -29,7 +26,6 @@ export const CH02_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch02_q01'],
     },
     {
-      minutes: 8,
       phase: '견학',
       title: '내 앱 안에 숨어 있는 오픈소스 목록',
       studentDoes:
@@ -39,7 +35,6 @@ export const CH02_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch02_q02'],
     },
     {
-      minutes: 10,
       phase: '학습',
       title: '무료인 이유, 그리고 잘게 나뉘는 이유',
       studentDoes: '2·3번 문항을 읽고, 오픈소스가 «공짜»가 아니라 «규칙이 다른 것»임을 한 줄로 적는다.',
@@ -48,7 +43,6 @@ export const CH02_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch02_q02', 'ch02_q03'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '이 앱에서 같은 부품이 몇 번 쓰였나',
       studentDoes: '3번 견학으로 이 앱 화면을 돌아다니며 똑같이 생긴 부품(버튼·카드)을 세어 적는다.',
@@ -56,7 +50,6 @@ export const CH02_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch02_q03'],
     },
     {
-      minutes: 4,
       phase: '학습',
       title: '구글 드라이브는 어디서 도나',
       studentDoes: '4번 문항을 읽고, 자기가 쓰는 서비스 중 «내 기기에 없는데 쓰는 것»을 하나 든다.',
@@ -64,7 +57,6 @@ export const CH02_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch02_q04'],
     },
     {
-      minutes: 2,
       phase: '정리',
       title: '열기의 질문으로 돌아가기',
       studentDoes: '"왜 어떤 앱은 못 지울까"에 이제 답을 한 줄로 적는다.',

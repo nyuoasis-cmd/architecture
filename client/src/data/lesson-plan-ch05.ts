@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 5장 «보이는 쪽과 안 보이는 쪽» — 1차시(45분).
+ * 5장 «보이는 쪽과 안 보이는 쪽» — 1차시.
  *
  * 🔑 이 장의 견학은 대부분 «방금 이 앱»이다. 학생이 지금 쓰고 있는 화면이 그대로 교재라서,
  *    설명을 길게 하는 것보다 화면을 짚게 하는 쪽이 훨씬 빨리 남는다.
@@ -10,11 +10,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH05_LESSON_PLAN: LessonPlan = {
   chapterId: 5,
-  totalMinutes: 45,
   goal: '지금 보고 있는 화면 중 무엇이 «내 기기에서 끝나는 일»이고 무엇이 «서버까지 다녀오는 일»인지 갈라서 말한다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '퀴즈 정답은 어디 있을까',
       studentDoes: '"이 앱의 퀴즈 정답이 내 폰 안에 있을까, 없을까"에 손을 들어 답하고 이유를 한 줄 적는다.',
@@ -22,7 +20,6 @@ export const CH05_LESSON_PLAN: LessonPlan = {
         '정답을 알려 주지 마세요. 5분 뒤 견학에서 학생이 직접 확인합니다 — 이 차시에서 가장 강한 장면입니다.',
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '얼굴과 규칙, 그리고 한 화면에 세 언어',
       studentDoes: '1·2번 문항을 읽고, 화면을 그리는 일과 규칙을 처리하는 일을 각각 한 줄로 적는다.',
@@ -31,7 +28,6 @@ export const CH05_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch05_q01', 'ch05_q02'],
     },
     {
-      minutes: 8,
       phase: '견학',
       title: '화면만으로 되는 것과 서버까지 다녀오는 것',
       studentDoes: '1번 견학으로 이 앱에서 «즉시 되는 동작»과 «잠깐 기다리는 동작»을 각각 두 개씩 찾아 적는다.',
@@ -40,7 +36,6 @@ export const CH05_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch05_q01'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '창구(API)와 그리는 시점',
       studentDoes: '3·4번 문항을 읽고, 식당 주문 창구 비유로 요청과 응답을 자기 말로 옮긴다.',
@@ -49,7 +44,6 @@ export const CH05_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch05_q03', 'ch05_q04'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '페이지가 새로 열리는가, 화면만 바뀌는가',
       studentDoes: '4번 견학으로 이 앱에서 주소가 바뀌는 순간과 화면만 갈리는 순간을 구분해 적는다.',
@@ -57,7 +51,6 @@ export const CH05_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch05_q04'],
     },
     {
-      minutes: 7,
       phase: '학습',
       title: '여러 화면의 정보 맞추기 · 남의 코드 · 포장',
       studentDoes: '5·6·7번 문항을 읽고, «한 곳에서 바꿨는데 여러 곳이 같이 바뀌는» 경험을 하나 적는다.',
@@ -66,7 +59,6 @@ export const CH05_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch05_q05', 'ch05_q06', 'ch05_q07'],
     },
     {
-      minutes: 4,
       phase: '정리',
       title: '지금 이 화면을 두 쪽으로 갈라 말하기',
       studentDoes: '지금 보고 있는 화면 하나를 골라 «보이는 쪽이 한 일»과 «안 보이는 쪽이 한 일»로 나눠 적는다.',

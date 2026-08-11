@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 15장 «믿지 않고 확인하는 법» — 1차시(45분).
+ * 15장 «믿지 않고 확인하는 법» — 1차시.
  *
  * 🔑 ✋「내 차례」가 2번(`ch15_q02`)에 있고 «만들기 전에 검사표 쓰기»다. 그래서 1번(증거의 기준)만
  *    짧게 잡고 바로 「내 차례」로 들어가는 구성이다 — 검사표를 쓰기 전에 이론을 길게 하면
@@ -10,18 +10,15 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH15_LESSON_PLAN: LessonPlan = {
   chapterId: 15,
-  totalMinutes: 45,
   goal: '«내 눈에 한 번 됐다»를 증거로 인정하지 않고, 실패할 수 있는 검사를 스스로 설계해 «됐다»를 증명한다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '가입 화면은 «막힘»을 일부러 보여 준다',
       studentDoes: '가입할 때 빨간 글씨로 막혔던 경험을 하나 적는다.',
       teacherSays: '"짜증났다"가 나오면 그대로 받으세요. 그 짜증이 곧 검사가 일한 증거입니다.',
     },
     {
-      minutes: 6,
       phase: '학습',
       title: '"된다"의 증거로 인정할 수 있는 것',
       studentDoes: '1번 문항을 읽고, 증거가 되는 것과 안 되는 것을 각각 두 개씩 적는다.',
@@ -30,7 +27,6 @@ export const CH15_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch15_q01'],
     },
     {
-      minutes: 11,
       phase: '내 차례',
       title: '만들기 «전»에 검사표 쓰기',
       studentDoes:
@@ -40,7 +36,6 @@ export const CH15_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch15_q02'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '초록불이 거짓말하는 순간 · 일부러 망가뜨려 보기',
       studentDoes: '3·4번 문항을 읽고, 자기 검사 하나를 골라 «일부러 망가뜨리기» 시나리오를 적는다.',
@@ -49,7 +44,6 @@ export const CH15_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch15_q03', 'ch15_q04'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '비행기 모드로 앱을 일부러 망가뜨리기',
       studentDoes: '4번 견학으로 비행기 모드를 켜고 앱을 써 보며, 앱이 어떻게 반응하는지 적는다.',
@@ -58,7 +52,6 @@ export const CH15_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch15_q04'],
     },
     {
-      minutes: 6,
       phase: '학습',
       title: '만든 쪽과 검사하는 쪽을 나누기',
       studentDoes: '5번 문항을 읽고, 자기 검사보다 남의 검사가 잘 찾는 이유를 한 줄 적는다.',
@@ -67,7 +60,6 @@ export const CH15_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch15_q05'],
     },
     {
-      minutes: 4,
       phase: '학습',
       title: '막혔을 때 추측 대신 기록',
       studentDoes: '6번 문항을 읽고, 막혔을 때 부탁문에 담을 세 가지를 적는다.',

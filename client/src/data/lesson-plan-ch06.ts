@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 6장 «컴퓨터 안을 분해해 봅니다» — 1차시(45분).
+ * 6장 «컴퓨터 안을 분해해 봅니다» — 1차시.
  *
  * 🚨 이 장은 **10문항으로 앱에서 가장 두껍다.** 한 문항씩 설명하면 45분에 절대 안 들어간다.
  *    그래서 «CPU·메모리»(1~4) / «사건과 동시성»(5~7) / «저장과 켜지기»(8~10) 세 덩어리로 묶고,
@@ -11,11 +11,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH06_LESSON_PLAN: LessonPlan = {
   chapterId: 6,
-  totalMinutes: 45,
   goal: '컴퓨터 안을 «부품 이름 목록»이 아니라 «빠르고 비싼 것을 가까이, 느리고 싼 것을 멀리» 라는 하나의 원리로 꿴다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '"저장공간 부족"과 "메모리 부족"은 같은 말인가',
       studentDoes: '폰에서 본 두 경고 문구를 떠올려, 같은 말인지 다른 말인지 손을 들어 답한다.',
@@ -23,7 +21,6 @@ export const CH06_LESSON_PLAN: LessonPlan = {
         '거의 모든 학급이 «같다»로 갈립니다. 정답을 말하지 말고 2번 문항까지 끌고 가세요 — 이 장에서 가장 오래 남는 착각입니다.',
     },
     {
-      minutes: 11,
       phase: '학습',
       title: 'CPU 안 · 메모리가 여러 종류인 이유 · 프로그램/프로세스/프로세서 · 캐시',
       studentDoes:
@@ -33,7 +30,6 @@ export const CH06_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch06_q01', 'ch06_q02', 'ch06_q03', 'ch06_q04'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '"캐시 삭제"가 지운 것 확인하기',
       studentDoes: '4번 견학으로 캐시를 지워 보고, 다음에 같은 화면을 열 때 무엇이 달라지는지 적는다.',
@@ -42,7 +38,6 @@ export const CH06_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch06_q04'],
     },
     {
-      minutes: 9,
       phase: '학습',
       title: '키보드가 CPU를 부르는 법 · 동시는 진짜 동시인가 · 메모리가 부족해도 안 죽는 이유',
       studentDoes: '5~7번 문항을 읽고, «계속 확인하기»와 «오면 알려 주기»의 차이를 한 줄로 적는다.',
@@ -51,7 +46,6 @@ export const CH06_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch06_q05', 'ch06_q06', 'ch06_q07'],
     },
     {
-      minutes: 5,
       phase: '견학',
       title: '"동시"가 진짜 동시가 아니라는 증거 찾기',
       studentDoes: '6번 견학을 따라 앱 여러 개를 띄워 놓고 느려지는 순간을 찾아 적는다.',
@@ -59,7 +53,6 @@ export const CH06_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch06_q06'],
     },
     {
-      minutes: 7,
       phase: '학습',
       title: '파일을 안 잃어버리는 비결 · 새 부품 알아보기 · 전원부터 화면까지',
       studentDoes: '8~10번 문항을 읽고, 전원을 누른 뒤의 순서를 세 단계로 적는다.',
@@ -68,7 +61,6 @@ export const CH06_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch06_q08', 'ch06_q09', 'ch06_q10'],
     },
     {
-      minutes: 3,
       phase: '견학',
       title: '꽂자마자 되는 것과 뭘 깔아야 되는 것',
       studentDoes: '9번 견학으로 꽂아 본 기기 둘을 나눠 적는다.',

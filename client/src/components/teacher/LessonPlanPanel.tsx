@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import {
-  findActiveSegmentIndex,
   getLessonPlan,
   shouldExpandLessonPlanByDefault,
   type LessonPhase,
@@ -16,19 +15,20 @@ type ClassProgress = {
   /** 문항 id → 그 문항을 연 학생 수 */
   qaCompletion: Record<string, number>;
   participantCount: number;
-  /** 수업 시작 근사값 = 첫 학생이 들어온 시각(ISO). 없으면 «몇 분째»를 말하지 않는다. */
-  startedAt?: string;
-  /** 지금까지 흐른 분. startedAt 이 있을 때만 값이 있다. */
-  elapsedMinutes?: number;
 };
 
 /**
  * 교사 세션 화면의 «이 차시 진행» 패널.
  *
- * 🔑 교사는 수업 중에 이 화면을 띄워 둔 채로 진행한다. 그래서 기본은 **펼친 상태**고,
- *    한 칸이 몇 분인지·학생이 무엇을 하는지가 먼저 보이고, 교사 주석은 그 아래 붙는다.
+ * 🔑 교사는 수업 중에 이 화면을 띄워 둔 채로 진행한다. 학생이 무엇을 하는지가 먼저 보이고,
+ *    교사 주석은 그 아래 붙는다.
  * 🚨 교안이 없는 장은 아무것도 그리지 않는다 — «준비 중» 같은 빈 상자를 띄우면 교사가
  *    수업 중에 그걸 열어 보느라 시간을 쓴다.
+ *
+ * 🚨 **「지금 이 칸」은 시계가 아니라 교사가 정한다**(2026-08-11 jery 확정). 예전에는 첫 학생이
+ *    들어온 시각으로 «몇 분째»를 세어 칸을 자동으로 켰는데, 그 근사값은 미리 만들어 둔 세션에서
+ *    통째로 틀렸다. 이제 교사가 칸을 눌러 켜고, 아무것도 안 눌렀으면 **아무 칸도 «지금»이 아니다** —
+ *    화면이 진도를 지어내지 않는다.
  */
 
 const PHASE_STYLE: Record<LessonPhase, { icon: string; chip: string }> = {
@@ -40,17 +40,11 @@ const PHASE_STYLE: Record<LessonPhase, { icon: string; chip: string }> = {
   정리: { icon: '🧵', chip: 'bg-stone-100 text-stone-700' },
 };
 
-function elapsedLabel(segments: LessonPlan['segments'], index: number): string {
-  const start = segments.slice(0, index).reduce((sum, segment) => sum + segment.minutes, 0);
-  return `${start}–${start + segments[index].minutes}분`;
-}
-
 function PlanBody({ plan, progress }: { plan: LessonPlan; progress?: ClassProgress }) {
-  // 🚨 «지금 이 칸»은 시각을 알 때만 말한다. 모르면 아무 칸도 «지금»이라고 하지 않는다 —
-  //    틀린 «몇 분째»는 없는 것보다 나쁘다(교사가 그걸 믿고 진도를 당기거나 늦춘다).
-  const activeIndex =
-    progress?.elapsedMinutes === undefined ? null : findActiveSegmentIndex(plan, progress.elapsedMinutes);
-  const isOvertime = progress?.elapsedMinutes !== undefined && activeIndex === null;
+  // 🚨 «지금 이 칸»은 **교사가 눌러서** 정한다. 아무것도 안 눌렀으면 null — 화면이 진도를
+  //    지어내지 않는다. (예전엔 첫 참여 시각으로 «몇 분째»를 세어 자동으로 켰는데, 미리
+  //    만들어 둔 세션에서 그 근사가 통째로 틀렸다. 틀린 진도는 없는 것보다 나쁘다.)
+  const [activeIndex, setActiveIndex] = useState<number | null>(null);
 
   return (
     <div className="mt-4">
@@ -59,15 +53,11 @@ function PlanBody({ plan, progress }: { plan: LessonPlan; progress?: ClassProgre
         {plan.goal}
       </p>
 
-      {progress?.elapsedMinutes !== undefined ? (
-        <p className="mt-3 rounded-2xl bg-stone-900 px-4 py-3 text-sm text-white">
-          첫 학생이 들어온 뒤 <b className="font-semibold">{progress.elapsedMinutes}분째</b>
-          {isOvertime ? ` · 계획한 ${plan.totalMinutes}분을 지났어요` : ' · 아래에서 「지금 이 칸」을 보세요'}
-          <span className="mt-1 block text-xs text-stone-400">
-            이 앱에는 「수업 시작」 기록이 없어서 첫 참여 시각으로 셉니다 — 미리 만들어 둔 세션이면 어긋날 수 있어요.
-          </span>
-        </p>
-      ) : null}
+      <p className="mt-3 text-sm text-stone-500">
+        {activeIndex === null
+          ? '지금 하고 있는 칸을 눌러 두면 수업 중에 눈으로 찾기 쉬워집니다.'
+          : `지금 «${plan.segments[activeIndex].title}» 칸입니다. 다음 칸으로 넘어가면 그 칸을 눌러 주세요.`}
+      </p>
 
       <ol className="mt-4 space-y-3">
         {plan.segments.map((segment, index) => {
@@ -81,14 +71,24 @@ function PlanBody({ plan, progress }: { plan: LessonPlan; progress?: ClassProgre
               key={`${plan.chapterId}-${index}-${segment.title}`}
             >
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-mono text-xs text-stone-500">{elapsedLabel(plan.segments, index)}</span>
+                <span className="font-mono text-xs text-stone-500">{index + 1}번째 칸</span>
                 <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${style.chip}`}>
                   {style.icon} {segment.phase}
                 </span>
                 <span className="text-sm font-medium text-stone-900">{segment.title}</span>
-                {isActive ? (
-                  <span className="rounded-full bg-stone-900 px-2 py-0.5 text-xs font-medium text-white">지금 이 칸</span>
-                ) : null}
+                {/* 🚨 교사가 누르는 자리. 켜져 있을 때 다시 누르면 꺼진다 — 잘못 눌러도 되돌릴 수 있어야 한다. */}
+                <button
+                  aria-pressed={isActive}
+                  className={`ml-auto inline-flex min-h-11 items-center rounded-full px-3 text-xs font-medium ${
+                    isActive
+                      ? 'bg-stone-900 text-white'
+                      : 'border border-[var(--color-border)] bg-white text-stone-600 hover:bg-stone-50'
+                  }`}
+                  onClick={() => setActiveIndex((current) => (current === index ? null : index))}
+                  type="button"
+                >
+                  {isActive ? '지금 이 칸 · 끄기' : '여기부터'}
+                </button>
               </div>
               <p className="mt-2 text-sm text-stone-700">
                 <span className="text-stone-500">학생 </span>
@@ -178,7 +178,7 @@ function ChapterPlan({
           </span>
         </span>
         <span className="flex shrink-0 items-center gap-2">
-          <span className="rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-600">{plan.totalMinutes}분</span>
+          <span className="rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-600">{plan.segments.length}칸</span>
           <span className="text-sm text-stone-500">{isOpen ? '접기' : '펼치기'}</span>
         </span>
       </button>

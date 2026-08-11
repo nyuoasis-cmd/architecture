@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 12장 «만들 것을 정하는 법» — 1차시(45분).
+ * 12장 «만들 것을 정하는 법» — 1차시.
  *
  * 🔑 이 장부터 ✋「내 차례」가 나온다(`ch12_q06`). 학생이 쓴 부탁문을 AI 가 판정하는 칸이라
  *    **실제 AI 호출이 일어난다.** 그래서 교안에 한도를 적어 뒀다 — 교사가 모르면 수업 중에
@@ -10,11 +10,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH12_LESSON_PLAN: LessonPlan = {
   chapterId: 12,
-  totalMinutes: 45,
   goal: '"앱 만들어줘"가 왜 실패하는지 알고, 문제 한 문장·사용자·기능·우선순위·성공 기준을 자기 앱에 대해 직접 적는다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '배달앱의 «요청사항» 칸',
       studentDoes: '배달 주문할 때 요청사항 칸에 뭐라고 적는지 떠올려 적는다.',
@@ -22,7 +20,6 @@ export const CH12_LESSON_PLAN: LessonPlan = {
         '"안 적어요"도 좋은 답입니다. 그럼 가게가 알아서 정한다는 데까지 끌고 가세요 — 그게 이 장 전체입니다.',
     },
     {
-      minutes: 9,
       phase: '학습',
       title: '짧은 부탁이 실패하는 이유 · 문제를 한 문장으로',
       studentDoes: '1·2번 문항을 읽고, 자기가 만들고 싶은 것을 «~해서 ~가 불편하다» 문장으로 바꿔 적는다.',
@@ -31,7 +28,6 @@ export const CH12_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch12_q01', 'ch12_q02'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '누구를 위한 앱인가 · 기능은 어디까지',
       studentDoes: '3·4번 문항을 읽고, 자기 앱의 사용자를 한 줄로 정의하고 기능을 5개 내외로 적는다.',
@@ -40,7 +36,6 @@ export const CH12_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch12_q03', 'ch12_q04'],
     },
     {
-      minutes: 5,
       phase: '견학',
       title: '이 앱의 «이번엔 안 함» 칸 세어 보기',
       studentDoes: '5번 견학으로 이 앱의 탭을 세어 보고, 없는 기능을 두 개 적는다.',
@@ -49,7 +44,6 @@ export const CH12_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch12_q05'],
     },
     {
-      minutes: 5,
       phase: '학습',
       title: '하고 싶은 것과 해야 하는 것',
       studentDoes: '5번 문항을 읽고, 방금 적은 기능 목록을 필수·나중·안 함 세 칸으로 나눈다.',
@@ -57,7 +51,6 @@ export const CH12_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch12_q05'],
     },
     {
-      minutes: 9,
       phase: '내 차례',
       title: '한 장 문서를 담은 부탁문 직접 쓰기',
       studentDoes:
@@ -67,7 +60,6 @@ export const CH12_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch12_q06'],
     },
     {
-      minutes: 3,
       phase: '학습',
       title: '"다 되면 성공"은 성공 기준이 아니다',
       studentDoes: '7번 문항을 읽고, 자기 앱의 성공 기준을 검사 가능한 문장 두 개로 적는다.',
@@ -76,7 +68,6 @@ export const CH12_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch12_q07'],
     },
     {
-      minutes: 2,
       phase: '정리',
       title: '한 장 문서 챙기기',
       studentDoes: '오늘 적은 한 장 문서를 다음 시간까지 잃어버리지 않게 사진으로 남긴다.',

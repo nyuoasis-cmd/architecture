@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 14장 «일 시키는 순서» — 1차시(45분).
+ * 14장 «일 시키는 순서» — 1차시.
  *
  * 🔑 ✋「내 차례」는 3번(`ch14_q03`)에 있다. 앞의 1·2번에서 «한 번에 다 시키면 안 되는 이유»를
  *    잡은 다음에 «첫 작업 하나만» 부탁하는 연습으로 들어가는 순서다.
@@ -9,18 +9,15 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH14_LESSON_PLAN: LessonPlan = {
   chapterId: 14,
-  totalMinutes: 45,
   goal: '앱 전체를 한 번에 시키지 않고 기획→설계→작업 목록으로 쪼개, 확인할 수 있는 단위로 부탁한다.',
   segments: [
     {
-      minutes: 4,
       phase: '열기',
       title: '주문 버튼 앞에서 화면이 한 번 더 뜨는 이유',
       studentDoes: '결제 직전 확인 화면이 없다면 무슨 일이 생길지 한 줄 적는다.',
       teacherSays: '"되돌릴 수 없으니까"가 나오면 그대로 받으세요 — 그게 «확인 지점»입니다.',
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '왜 한 번에 다 시키면 안 되나 · 설계 문서는 누구를 위한 것인가',
       studentDoes: '1·2번 문항을 읽고, "만들지 말고 계획부터 보여줘"라고 시키는 이유를 한 줄 적는다.',
@@ -29,7 +26,6 @@ export const CH14_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch14_q01', 'ch14_q02'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '이 학습 화면에도 번호가 붙어 있다',
       studentDoes: '3번 견학으로 이 앱의 문항 번호·진도 표시를 찾아, 번호가 없다면 뭐가 불편할지 적는다.',
@@ -38,7 +34,6 @@ export const CH14_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch14_q03'],
     },
     {
-      minutes: 11,
       phase: '내 차례',
       title: '«첫 작업 하나»만 부탁해 보기',
       studentDoes:
@@ -48,7 +43,6 @@ export const CH14_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch14_q03'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '대화는 언제 끊고 새로 시작하나',
       studentDoes: '4번 문항을 읽고, 새 대화 첫 부탁문에 담을 세 가지를 적는다.',
@@ -57,7 +51,6 @@ export const CH14_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch14_q04'],
     },
     {
-      minutes: 5,
       phase: '학습',
       title: '같은 재료를 계속 쓰면 좋은 점',
       studentDoes: '5번 문항을 읽고, 재료를 바꿀 때 잃는 것과 유지할 때 쌓이는 것을 각각 적는다.',
@@ -66,7 +59,6 @@ export const CH14_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch14_q05'],
     },
     {
-      minutes: 3,
       phase: '정리',
       title: '내 작업 목록 첫 세 줄',
       studentDoes: '자기 앱의 작업 목록 첫 세 줄에 번호를 붙여 적는다.',

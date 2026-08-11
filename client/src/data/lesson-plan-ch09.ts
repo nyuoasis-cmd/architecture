@@ -1,7 +1,7 @@
 import type { LessonPlan } from './lesson-plans';
 
 /**
- * 9장 «큰 시스템의 뼈대 그리는 법» — 1차시(45분).
+ * 9장 «큰 시스템의 뼈대 그리는 법» — 1차시.
  *
  * 🔑 이 장은 «정답이 없다»가 핵심이다. 앞 장들은 원리를 배웠지만 여기는 전부 맞바꿈이다.
  *    그래서 각 칸의 발문을 «어느 쪽이 맞나»가 아니라 «어떤 상황에서 어느 쪽인가»로 세웠다.
@@ -10,11 +10,9 @@ import type { LessonPlan } from './lesson-plans';
  */
 export const CH09_LESSON_PLAN: LessonPlan = {
   chapterId: 9,
-  totalMinutes: 45,
   goal: '시스템 설계에는 정답 대신 맞바꿈이 있다는 것을 알고, 한 덩어리/여러 조각·수직/수평처럼 갈리는 선택을 상황과 함께 말한다.',
   segments: [
     {
-      minutes: 5,
       phase: '열기',
       title: '전부 한 가방 vs 칸칸이 나눈 가방',
       studentDoes: '자기 가방이 어느 쪽인지 정하고, 그 방식의 좋은 점과 불편한 점을 하나씩 적는다.',
@@ -22,7 +20,6 @@ export const CH09_LESSON_PLAN: LessonPlan = {
         '"어느 쪽이 더 좋아요?"라고 물으면 학생이 정답을 찾으려 합니다. "언제 그 방식이 편했어요?"로 물으세요.',
     },
     {
-      minutes: 9,
       phase: '학습',
       title: '한 덩어리와 여러 조각 · 층층이 쌓기',
       studentDoes: '1·2번 문항을 읽고, 열기에서 적은 가방의 장단점을 시스템 쪽 말로 옮긴다.',
@@ -31,7 +28,6 @@ export const CH09_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch09_q01', 'ch09_q02'],
     },
     {
-      minutes: 6,
       phase: '견학',
       title: '이 앱에서 «층»의 증거 찾기',
       studentDoes: '2번 견학으로 이 앱에서 층이 나뉘어 있다는 증거를 찾아 적는다.',
@@ -39,7 +35,6 @@ export const CH09_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch09_q02'],
     },
     {
-      minutes: 8,
       phase: '학습',
       title: '같은 이름의 패턴 · 캐시는 어디에 두고 언제 비우나',
       studentDoes: '3·4번 문항을 읽고, «분명 바뀌었다는데 나한테는 옛날 게 보이는» 경험을 하나 적는다.',
@@ -48,7 +43,6 @@ export const CH09_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch09_q03', 'ch09_q04'],
     },
     {
-      minutes: 5,
       phase: '견학',
       title: '«옛날 화면»이 보이던 순간',
       studentDoes: '4번 견학으로 새로고침해야 최신이 보였던 경험을 적고, 무엇을 눌렀더니 고쳐졌는지 쓴다.',
@@ -56,7 +50,6 @@ export const CH09_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch09_q04'],
     },
     {
-      minutes: 9,
       phase: '학습',
       title: '급한 일과 안 급한 일 · 서버를 키운다는 말',
       studentDoes: '5·6번 문항을 읽고, 주문 접수와 음식 완성이 다른 순간인 예를 하나 든다.',
@@ -65,7 +58,6 @@ export const CH09_LESSON_PLAN: LessonPlan = {
       qaIds: ['ch09_q05', 'ch09_q06'],
     },
     {
-      minutes: 3,
       phase: '정리',
       title: '맞바꿈으로 말하기',
       studentDoes: '오늘 배운 선택 중 하나를 골라 «무엇을 얻고 무엇을 내주는지» 한 줄로 적는다.',
