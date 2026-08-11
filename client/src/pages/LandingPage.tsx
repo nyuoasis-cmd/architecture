@@ -13,9 +13,12 @@ import { useNavigate } from 'react-router-dom';
 import { CHAPTERS } from '../data/qa-stubs';
 
 // 🚨 손으로 적은 문항 수는 콘텐츠가 늘고 줄어도 안 따라온다 — 실제와 어긋난 채 학생에게 보여졌다.
-//    수업 세션은 서버가 1~10장으로 막으므로(server/src/routes/sessions.ts), 랜딩도 그 범위를 말한다.
-const LANDING_MAX_CHAPTER_ID = 10;
-const LANDING_CHAPTERS = CHAPTERS.filter((chapter) => chapter.id <= LANDING_MAX_CHAPTER_ID);
+//
+// 🔑 2026-08-11: 여기 «1~10장» 상한이 있었고 근거는 «수업 세션은 서버가 1~10장으로 막으므로»였다.
+//    그 상한은 #142 로 풀렸는데(등록부 전체 허용) 이 줄만 남아, 랜딩은 «10개 챕터»라 말하고
+//    학생은 17장을 받는 상태였다 — 사문이 된 근거가 학생에게 앱을 작아 보이게 하고 있었다.
+//    jery 결정(2026-08-11) = **학생도 모든 챕터에 접근한다.** 그래서 상한 없이 등록부 전체를 센다.
+const LANDING_CHAPTERS = CHAPTERS;
 const LANDING_CHAPTER_COUNT = LANDING_CHAPTERS.length;
 const LANDING_QA_COUNT = LANDING_CHAPTERS.reduce((sum, chapter) => sum + chapter.qaCount, 0);
 

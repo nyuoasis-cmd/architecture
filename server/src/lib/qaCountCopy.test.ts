@@ -95,3 +95,45 @@ test('가드가 실패할 수 있는 계측인지 — 대조 대상 파일이 �
   }
   assert.ok(clientQa.CHAPTERS.length > 0, '챕터가 0개면 계산식 자체가 의미 없다')
 })
+
+// ── 학생이 닿는 범위 ────────────────────────────────────────────────
+// 🚨 jery 결정(2026-08-11): **학생도 모든 챕터에 접근한다.**
+//    예전에는 랜딩이 `LANDING_MAX_CHAPTER_ID = 10` 으로 잘라 «10개 챕터»라 말했는데, 그 근거였던
+//    서버 상한은 #142 로 이미 풀린 뒤였다 — 사문이 된 근거가 학생에게 앱을 작아 보이게 했다.
+//    🔑 이런 상한은 «지운다»고 끝나지 않는다. 다시 생기면 아무도 모른다. 그래서 계약으로 막는다.
+test('학생이 보는 화면에 챕터 범위를 자르는 상한이 없다 — 학생은 전 챕터에 닿는다', () => {
+  const STUDENT_SURFACES = ['client/src/pages/LandingPage.tsx', 'client/src/pages/LibraryPage.tsx']
+  const offenders: string[] = []
+  for (const rel of STUDENT_SURFACES) {
+    for (const m of read(rel).matchAll(/MAX_CHAPTER_ID\s*=\s*(\d+)/g)) {
+      offenders.push(`${rel}: «${m[0]}»`)
+    }
+    // `chapter.id <= 10` 처럼 숫자로 직접 자르는 것도 같은 일이다.
+    for (const m of read(rel).matchAll(/chapter\.id\s*[<>]=?\s*(\d+)/g)) {
+      offenders.push(`${rel}: «${m[0]}»`)
+    }
+  }
+  assert.deepEqual(
+    offenders,
+    [],
+    `학생 화면에 챕터 상한이 손으로 박혔다 — 등록부(CHAPTERS)에서 전체를 세야 한다: ${offenders.join(' / ')}`,
+  )
+
+  // 음성 대조군 — 이 검사가 «무엇이든 통과»가 아닌지. 상한이 박힌 문자열은 실제로 잡혀야 한다.
+  const probe = 'const LANDING_MAX_CHAPTER_ID = 10;'
+  assert.equal(
+    /MAX_CHAPTER_ID\s*=\s*(\d+)/.test(probe),
+    true,
+    '탐지 정규식이 상한 선언을 못 잡으면 이 검사는 실패할 수 없는 계측이다',
+  )
+})
+
+test('랜딩이 말하는 챕터·문항 수 = 등록부 전체', () => {
+  const totalQa = clientQa.CHAPTERS.reduce((sum, chapter) => sum + chapter.qaCount, 0)
+  const landing = read('client/src/pages/LandingPage.tsx')
+  assert.ok(
+    landing.includes('const LANDING_CHAPTERS = CHAPTERS;'),
+    '랜딩이 등록부 전체가 아닌 부분집합을 세고 있다 — 학생에게 앱이 실제보다 작아 보인다',
+  )
+  console.log(`[학생 접근] 랜딩·라이브러리 = ${clientQa.CHAPTERS.length}장 ${totalQa}문항 (전 챕터 개방)`)
+})
