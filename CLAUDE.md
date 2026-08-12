@@ -75,7 +75,7 @@ npm run build
   이름표에 매달려 있기 때문. 진열 정본 = `client/src/data/chapter-order.ts`(계약이 양방향으로 지킨다).
   실습 6강 = 12강(ch18)·13강(ch19)·16강(ch20)·19강(ch21)·22강(ch22)·23강(ch23).
 - 📋 **교사가 읽는 것 = 「📋 설명 노트」 하나**(문항 1개 = 노트 1개). 자리 = 학습 화면 우측 탭(교사 전용).
-  현재 **64/131**(ch01~ch10) — 나머지는 순차로 들어온다. 계약 = `teacherExplainContract.test.ts`.
+  현재 **131/131**(ch01~ch23) — 전체 문항에 노트가 있다. 계약 = `teacherExplainContract.test.ts`.
   🚨 교사 화면 = 학생 화면의 **상위집합**이다(§9.H-14) — 같은 화면에 탭 하나가 더 붙는 것뿐이라,
   교사 전용 탭을 미는 자리는 `ContentPanel` 의 `if (teacherPanel)` **한 곳뿐이다**(계약 learnLayoutContract ⑦).
   거기서 새면 학생이 교사 대본을 읽는다.

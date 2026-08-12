@@ -41,7 +41,7 @@ const TAB_LABELS: Record<ContentTab, string> = {
   explain: '📋 설명 노트',
 };
 
-const QA_ID_PATTERN = /^ch(0[1-9]|10)_q(0[1-9]|10)$/;
+const QA_ID_PATTERN = /^ch\d{2}_q\d{2}$/;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /**
