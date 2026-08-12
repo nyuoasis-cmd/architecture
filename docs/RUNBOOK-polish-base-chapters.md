@@ -64,16 +64,13 @@ console.log('문항',QA_STUBS.length,'| 견학없음',QA_STUBS.filter(q=>!ALL_EX
 | ⚡ 사례 | 본문 아래 «실제로 있었던 일» (teachermate 운영 실화만) | **없음** | 70/107 (선택 요소) |
 | ✋ 내 차례 | 학생이 쓴 부탁문을 Haiku 4.5 가 판정 | **있음** | 6/107 — 바이브코딩 장(12~17) 한 자리씩 |
 
-**🔑 교안도 17/17장 끝났다(2026-08-11).** 견학·사례(AI 파급 0)·「내 차례」(캡 켜고 6문항)·교안까지
-전부 완결. 남은 것은 선택 요소(사례 37문항)와 수업점검(class-check) 등록 재검토뿐이다.
+**🚨 교안(23강 164칸)은 2026-08-12 에 철거됐다.** 교사가 읽는 것은 **「📋 설명 노트」 하나**다.
+아래 «교안 커버리지» 명령은 더 이상 돌지 않는다(`lesson-plans.ts` 없음) — 노트 셈으로 갈음한다.
 
 ```bash
-# 교안 커버리지 즉시 확인 (손으로 세지 않는다)
-cd /home/claude/architecture/server && node --import tsx -e "
-const path=require('path');const R=path.resolve('..','client','src','data');
-const {LESSON_PLANS}=require(path.join(R,'lesson-plans'));const {CHAPTERS}=require(path.join(R,'qa-stubs'));
-const p=Object.values(LESSON_PLANS);
-console.log('교안',p.length,'/ 장',CHAPTERS.length,'| 총 분',p.map(x=>x.totalMinutes).join(','));"
+# 설명 노트 커버리지 즉시 확인 (손으로 세지 않는다)
+cd /home/claude/architecture/server && npm test 2>&1 | grep '설명 노트 계약'
+# → [설명 노트 계약] 파일 N개 / 실린 노트 N개 / 전체 문항 131개
 ```
 
 ## 2. 결정 게이트
@@ -129,7 +126,11 @@ console.log('교안',p.length,'/ 장',CHAPTERS.length,'| 총 분',p.map(x=>x.tot
 
 ### ✅ PR-K : 「내 차례」 — 바이브코딩 장(12~17) 한 자리씩 끝남
 
-### ✅ PR-L : 교안(1장=1차시) — 17/17장 끝남 (에픽 18 PR, 2026-08-11)
+### 🗑️ PR-L : 교안(1장=1차시) — **2026-08-12 철거됨**
+
+> 아래는 철거 전 기록이다. 교안은 앱이 수업 흐름을 지시하는 물건이었고 «수업 흐름은 교사가 정한다»와
+> 충돌해 걷어냈다(jery 결정). 건진 것 = 실제 사고 사례·장간 연결·🚌 견학 운영 요령 → 설명 노트.
+> 근거·판정표 = `docs/HANDOFF-lesson-plan-teardown-2026-08-12.md`
 
 jery 결정 = **앱 안 교사 화면 · 17장 전부**. 교사 세션 화면에 «이 차시 진행» 패널이 붙는다.
 

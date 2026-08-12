@@ -101,7 +101,7 @@ export async function getSessionParticipants(sessionId: string): Promise<{
   id: string;
   status: SessionStatus;
   participants: SessionParticipant[];
-  /** 문항 id → 그 문항을 연 학생 수. 교사 화면에서 교안의 칸과 진도를 잇는 데 쓴다. */
+  /** 문항 id → 그 문항을 연 학생 수. 🚨 지금 이걸 그리는 화면은 없다(2026-08-12 교안 철거). */
   qa_completion?: Record<string, number>;
 }> {
   const headers = await getTeacherAuthHeaders();

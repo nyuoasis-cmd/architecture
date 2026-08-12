@@ -1,5 +1,9 @@
 # 핸드오프 — architecture 폴리싱 (3컬럼 복원 + 하네스 흡수)
 
+> 🗑️ **철거됨 (2026-08-12).** 아래에서 「📋 교안」을 «현재»로 적은 부분은 더 이상 사실이 아니다 —
+> 교안 23강 164칸은 앱에서 걷어냈고, 계약 `lessonPlanContract`(①~⑱)도 함께 사라졌다.
+> 교사가 읽는 것은 문항별 「📋 설명 노트」 하나다. 근거 = `docs/HANDOFF-lesson-plan-teardown-2026-08-12.md`
+
 작성 2026-08-11 · 작업 위치 `/home/claude/architecture/.orca/worktrees/orca-architecture-20260811` (브랜치 `orca-architecture-20260811`)
 
 ## 0. 지금 상태 한 줄
