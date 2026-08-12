@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { QrCode } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import QrFullscreen from '../common/QrFullscreen';
 import type { DemoMeta } from '../../data/demos';
 import type { Chapter, QaStub } from '../../data/qa-stubs';
@@ -10,6 +10,8 @@ import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
 import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
 import MyTurnTab from './MyTurnTab';
+import NextQuestionDoor from './NextQuestionDoor';
+import { getNextQuestionDoorTarget } from './next-question-door';
 import QuizTab from './QuizTab';
 import ReadTab from './ReadTab';
 import TeacherExplainPanel from './TeacherExplainPanel';
@@ -65,6 +67,7 @@ export default function ContentPanel({
 }: ContentPanelProps) {
   const qaId = qa.id;
   const inlineHostRef = useRef<HTMLDivElement>(null);
+  const location = useLocation();
   const navigate = useNavigate();
   const contentTab = useLearnStore((state) => state.contentTab);
   const setContentTab = useLearnStore((state) => state.setContentTab);
@@ -206,6 +209,23 @@ export default function ContentPanel({
   const InlineComponent = inlineMeta?.Component;
   const inlineMaxWidth = inlineMeta ? DEMO_LAYOUT_MAX_WIDTH[inlineMeta.layout] : '';
   const nextTab = tabs[tabs.indexOf('read') + 1];
+  const isSessionRoute = location.pathname.startsWith('/learn/');
+  const nextQuestion = getNextQuestionDoorTarget(qaId, isSessionRoute ? availableQaIds : undefined);
+
+  const handleOpenNextQuestion = () => {
+    if (!nextQuestion) {
+      return;
+    }
+
+    if (isSessionRoute) {
+      const nextSearch = new URLSearchParams(location.search);
+      nextSearch.set('qa', nextQuestion.qa.id);
+      navigate(`${location.pathname}?${nextSearch.toString()}`);
+      return;
+    }
+
+    navigate(`/library/${nextQuestion.chapter.id}/${nextQuestion.qa.id}`);
+  };
 
   return (
     <section className="flex h-full flex-1 flex-col bg-[var(--color-surface-alt)]">
@@ -307,6 +327,13 @@ export default function ContentPanel({
         {activeTab === 'quiz' ? (
           <div className="mx-auto w-full max-w-[720px] p-6 lg:p-8">
             <QuizTab onScore={quizProps?.onScore} qaId={qaId} />
+            {nextQuestion ? (
+              <NextQuestionDoor
+                chapter={nextQuestion.chapter}
+                onOpen={handleOpenNextQuestion}
+                qa={nextQuestion.qa}
+              />
+            ) : null}
           </div>
         ) : null}
 

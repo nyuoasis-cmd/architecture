@@ -25,7 +25,7 @@ const root = path.resolve(__dirname, '..', '..', '..')
 
 // dist = 빌드 산출물(src 에서 지운 테스트의 잔해가 남는다), node_modules = 남의 코드.
 const SKIP_DIRS = new Set([
-  'node_modules', 'dist', 'build', '.git', '.worktrees',
+  'node_modules', 'dist', 'build', '.git', '.worktrees', '.ao',
   'playwright-report', 'test-results', 'coverage',
 ])
 const TEST_FILE = /\.(test|spec)\.(mts|mjs|cjs|js|ts|tsx)$/
