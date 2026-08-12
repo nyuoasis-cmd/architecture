@@ -1,24 +1,24 @@
 import { useState } from 'react';
-import {
-  getLessonPlan,
-  shouldExpandLessonPlanByDefault,
-  type LessonPhase,
-  type LessonPlan,
-} from '../../data/lesson-plans';
+import { getLessonPlan, type LessonPhase, type LessonPlan } from '../../data/lesson-plans';
 import { getChapterById } from '../../data/qa-stubs';
 
 /**
  * 교안 칸 ↔ 학생 진도를 잇는 데 필요한 것. 둘 다 «없을 수 있음»이 기본값이다 —
  * 학생이 아직 없으면 시각도 도달 수도 없고, 그때는 아무것도 그리지 않는다.
  */
-type ClassProgress = {
+export type ClassProgress = {
   /** 문항 id → 그 문항을 연 학생 수 */
   qaCompletion: Record<string, number>;
   participantCount: number;
 };
 
 /**
- * 교사 세션 화면의 «이 차시 진행» 패널.
+ * 「📋 교안」 — 학습 화면 우측 콘텐츠 컬럼의 **교사 전용 탭** 본문.
+ *
+ * 🚨 2026-08-12(에픽 6/6)에 교사 세션 화면에서 여기로 **옮겨 왔다**. 옮기면서 «세션에 담긴 장을
+ *    전부 세우는» 아코디언은 없앴다 — 전 장을 담은 세션에서 교안 23개가 한 화면에 쌓여
+ *    페이지가 24,000px 이 되던 그 화면이다(2026-08-11 prod 실측). 이제 **한 번에 한 장**,
+ *    교사가 지금 보고 있는 그 장만 그린다. 규칙으로 접는 대신 구조로 못 쌓이게 했다.
  *
  * 🔑 교사는 수업 중에 이 화면을 띄워 둔 채로 진행한다. 학생이 무엇을 하는지가 먼저 보이고,
  *    교사 주석은 그 아래 붙는다.
@@ -146,16 +146,15 @@ function PlanBody({ plan, progress }: { plan: LessonPlan; progress?: ClassProgre
   );
 }
 
-function ChapterPlan({
-  chapterId,
-  defaultOpen,
-  progress,
-}: {
-  chapterId: number;
-  defaultOpen: boolean;
-  progress?: ClassProgress;
-}) {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
+/**
+ * 학습 화면 우측 「📋 교안」 탭의 본문 — **지금 보고 있는 그 장 하나**만 그린다.
+ *
+ * 🔑 왜 아코디언이 아닌가: 여기서는 교사가 이미 장을 골라 들어와 있다. 세션에 담긴 장을
+ *    전부 세워 두면 «지금 이 장»을 다시 찾아야 한다 — 목록을 고르는 일은 좌측 컬럼이 한다.
+ * 🚨 교안이 없는 장은 «준비 중» 상자를 띄우지 않는다. 대신 탭 자체가 안 켜진다(ContentPanel).
+ *    이 컴포넌트는 만약을 대비해 null 을 돌려줄 뿐, 그 상태를 화면에 설명하지 않는다.
+ */
+export function LessonPlanTab({ chapterId, progress }: { chapterId: number; progress?: ClassProgress }) {
   const plan = getLessonPlan(chapterId);
   const chapter = getChapterById(chapterId);
 
@@ -164,56 +163,19 @@ function ChapterPlan({
   }
 
   return (
-    <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-6 shadow-sm">
-      <button
-        aria-expanded={isOpen}
-        className="flex w-full items-center justify-between gap-3 text-left"
-        onClick={() => setIsOpen((open) => !open)}
-        type="button"
-      >
-        <span>
-          <span className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">이 차시 진행</span>
-          <span className="mt-1 block text-lg font-medium text-stone-900">
-            {chapter ? `${chapter.emoji} ${chapter.lessonNo}강 ${chapter.title}` : `${chapterId}번 장`}
+    <div className="mx-auto w-full max-w-[760px]">
+      <div className="flex flex-wrap items-baseline gap-2">
+        <span className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">이 차시 진행</span>
+        {chapter ? (
+          <span className="text-sm font-medium text-stone-900">
+            {chapter.emoji} {chapter.lessonNo}강 {chapter.title}
           </span>
+        ) : null}
+        <span className="ml-auto rounded-full bg-stone-100 px-3 py-1 text-xs text-stone-600">
+          {plan.segments.length}칸
         </span>
-        <span className="flex shrink-0 items-center gap-2">
-          <span className="rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-600">{plan.segments.length}칸</span>
-          <span className="text-sm text-stone-500">{isOpen ? '접기' : '펼치기'}</span>
-        </span>
-      </button>
-      {isOpen ? <PlanBody plan={plan} progress={progress} /> : null}
+      </div>
+      <PlanBody plan={plan} progress={progress} />
     </div>
-  );
-}
-
-export default function LessonPlanPanel({
-  chapterIds,
-  progress,
-}: {
-  chapterIds: number[];
-  progress?: ClassProgress;
-}) {
-  const withPlan = chapterIds.filter((chapterId) => getLessonPlan(chapterId) !== undefined);
-
-  if (withPlan.length === 0) {
-    return null;
-  }
-
-  // 🚨 한 장일 때만 펼친다. 세션이 17장을 담고 있으면(교사 화면 기본값) 전부 펼칠 경우
-  //    페이지가 24,000px 가 된다 — prod 실측. 규칙은 데이터 층의 순수 함수에 두고 계약이 지킨다.
-  const defaultOpen = shouldExpandLessonPlanByDefault(withPlan.length);
-
-  return (
-    <section className="mt-8 space-y-4">
-      {withPlan.length > 1 ? (
-        <p className="text-sm text-stone-500">
-          이 수업에 담긴 장이 {withPlan.length}개입니다. 오늘 할 장을 펼쳐 보세요.
-        </p>
-      ) : null}
-      {withPlan.map((chapterId) => (
-        <ChapterPlan chapterId={chapterId} defaultOpen={defaultOpen} key={chapterId} progress={progress} />
-      ))}
-    </section>
   );
 }

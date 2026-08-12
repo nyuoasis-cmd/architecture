@@ -11,6 +11,7 @@
 // 🚨 예외 목록을 두지 않는다. «아직 교안이 없는 장»은 등록부에 없으면 그만이고, 등록부에 있으면
 //    완전해야 한다. 목록으로 면제해 주기 시작하면 그 목록이 면제권이 된다(⑤-b 사고).
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { test } from 'node:test'
 
@@ -276,19 +277,34 @@ test('⑮ 계약이 검사한 교안 수를 찍는다 — 0개를 검사하고 �
   assert.ok(covered > 0 && covered <= total, `검사한 교안 ${covered}개, 전체 ${total}장 — 셈이 어긋났다`)
 })
 
-// ── 교사 화면 기본 펼침 규칙 ────────────────────────────────────────────
-// 🚨 이 규칙이 없으면 45분짜리 교안 17개가 한 화면에 쌓인다(prod 실측 23,983px ≈ 27 화면).
-//    교사 화면의 «새 세션 만들기»가 장을 고르는 칸 없이 항상 전 장을 담기 때문이다.
-test('⑰ 교안 패널은 한 장일 때만 펼친다 — 여러 장이면 접는다', () => {
-  const { shouldExpandLessonPlanByDefault } = load('lesson-plans') as {
-    shouldExpandLessonPlanByDefault: (n: number) => boolean
-  }
-  assert.equal(shouldExpandLessonPlanByDefault(1), true, '한 장짜리 차시는 펼쳐야 바로 읽는다')
-  assert.equal(shouldExpandLessonPlanByDefault(2), false, '두 장부터는 접어야 한다')
-  assert.equal(
-    shouldExpandLessonPlanByDefault(CHAPTERS.length),
-    false,
-    `전 장(${CHAPTERS.length}장)을 담은 세션에서 전부 펼치면 수업 중에 못 쓰는 화면이 된다`,
+// ── 교안이 놓인 자리 ────────────────────────────────────────────────
+// 🚨 2026-08-12(에픽 6/6) 이전에는 교사 세션 화면이 «세션에 담긴 장 전부»를 아코디언으로 세웠고,
+//    전 장을 담은 세션에서 페이지가 23,983px(≈27 화면)이 됐다 — prod 실측. 그때는 «한 장일 때만
+//    펼친다»는 규칙으로 막았는데, 규칙은 다음 사람이 지우면 그만이다. 이제 교안은 학습 화면의
+//    교사 전용 탭이고 **한 번에 한 장**만 그린다 — 구조가 규칙을 대신한다.
+//    아래 둘은 그 구조가 되돌려지지 않았는지를 본다.
+test('⑰ 교안 화면은 한 번에 한 장만 받는다 — 장 목록을 통째로 받는 입구가 없다', () => {
+  const source = readFileSync(path.join(ROOT, 'client/src/components/teacher/LessonPlanPanel.tsx'), 'utf8')
+
+  assert.ok(
+    /export function LessonPlanTab\(\{ chapterId/.test(source),
+    'LessonPlanTab 이 chapterId 하나를 받지 않는다 — 교안이 다시 여러 장을 쌓을 수 있는 모양이 됐다',
   )
-  assert.equal(shouldExpandLessonPlanByDefault(0), false, '교안이 없으면 펼칠 것도 없다')
+  assert.equal(
+    /chapterIds\s*[:,)]/.test(source),
+    false,
+    '교안 컴포넌트가 다시 «장 목록»을 받고 있다 — 전 장 세션에서 24,000px 화면이 되던 그 모양이다',
+  )
+
+  // 음성 대조군 — 탐지식이 실제로 그 모양을 잡는지.
+  assert.equal(/chapterIds\s*[:,)]/.test('function P({ chapterIds }: { chapterIds: number[] })'), true, '탐지식이 못 잡으면 ⑰ 은 실패할 수 없다')
+})
+
+test('⑱ 「펼침 규칙」이 되살아나지 않았다 — 규칙이 필요했던 화면 자체가 없어졌다', () => {
+  const source = readFileSync(path.join(ROOT, 'client/src/data/lesson-plans.ts'), 'utf8')
+  assert.equal(
+    /shouldExpandLessonPlanByDefault/.test(source),
+    false,
+    '데이터 층에 펼침 규칙이 돌아왔다 — 교안을 여러 장 쌓는 화면이 다시 생겼다는 뜻이다',
+  )
 })

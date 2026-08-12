@@ -98,6 +98,50 @@ test('⑤ 좌측은 «이 장의 문항»만 세운다 — 전 장을 늘어놓�
   )
 })
 
+test('⑦ 교사 전용 탭은 교사에게만 켜진다 — 학생 화면에 교안이 새지 않게', () => {
+  // 🚨 왜 있는가(2026-08-12, 에픽 6/6): 「📋 교안」이 교사 세션 화면에서 학생과 **같은 화면**의
+  //    탭으로 들어왔다(§9.H-14 = 교사 화면은 학생 화면의 상위집합). 같은 화면을 쓴다는 것은
+  //    한 줄만 어긋나도 학생이 교사 대본을 읽게 된다는 뜻이다 — 그리고 그건 학생 계정으로
+  //    열어 보기 전까지 아무도 안 알려 준다.
+  // 🔑 그래서 검사하는 것은 «탭이 예쁜가»가 아니라 **«교사 전용 탭을 미는 자리가 한 곳인가»**이다.
+  const source = read(CONTENT_PANEL)
+
+  const guard = source.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
+  assert.ok(guard, `${CONTENT_PANEL} 에 «if (teacherPanel)» 블록이 없다 — 교사 전용 탭을 가르는 자리가 사라졌다`)
+
+  for (const [tab, label] of [
+    ['lesson', '📋 교안'],
+    ['explain', '📋 설명 노트'],
+  ]) {
+    const pushes = [...source.matchAll(new RegExp(`list\\.push\\('${tab}'\\)`, 'g'))].length
+    assert.equal(
+      pushes,
+      1,
+      `${CONTENT_PANEL} 이 ${label} 탭을 ${pushes} 곳에서 켜고 있다 — 켜는 자리는 «if (teacherPanel)» 한 곳뿐이어야 한다`,
+    )
+    assert.ok(
+      guard![1].includes(`list.push('${tab}')`),
+      `${label} 탭이 «if (teacherPanel)» 블록 밖에서 켜지고 있다 — 학생 화면에 샌다`,
+    )
+  }
+
+  // 🔑 교안은 **있는 장에만** 켠다. 계약 ⑯ 이 «모든 장에 교안»을 지키지만, 그 계약이 언젠가
+  //    느슨해져도 학생·교사가 빈 탭을 열지는 않게 한다.
+  assert.ok(
+    /hasLessonPlan\(/.test(source),
+    `${CONTENT_PANEL} 이 교안 유무를 안 보고 탭을 켠다 — 교안 없는 장에서 빈 화면이 열린다`,
+  )
+
+  // 음성 대조군 — 블록 추출식이 실제로 블록 안팎을 가르는지.
+  const probe = "    if (teacherPanel) {\n      list.push('explain');\n    }\n    list.push('lesson');"
+  const probeGuard = probe.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
+  assert.equal(
+    probeGuard![1].includes("list.push('lesson')"),
+    false,
+    '추출식이 블록 밖의 push 를 블록 안으로 세면 ⑦ 은 실패할 수 없는 계측이다',
+  )
+})
+
 test('⑥ 가드가 실패할 수 있는 계측인지 — 대조 대상 파일이 비어 있지 않다', () => {
   for (const rel of [LEARN_PAGE, CONTENT_PANEL, NAV_PANEL]) {
     assert.ok(read(rel).length > 500, `${rel} 이 비어 있으면 위 검사들이 공짜로 통과한다`)
