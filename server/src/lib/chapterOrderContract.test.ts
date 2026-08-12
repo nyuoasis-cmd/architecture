@@ -83,7 +83,6 @@ test('⑥ 화면이 속 이름표를 「N강」으로 찍지 않는다 — 교�
     'client/src/components/learn/ChapterNavPanel.tsx',
     'client/src/components/learn/ContentPanel.tsx',
     'client/src/pages/LibraryPage.tsx',
-    'client/src/components/teacher/LessonPlanPanel.tsx',
   ]
   const offenders: string[] = []
   for (const rel of SURFACES) {

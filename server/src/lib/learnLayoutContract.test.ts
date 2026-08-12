@@ -98,21 +98,20 @@ test('⑤ 좌측은 «이 장의 문항»만 세운다 — 전 장을 늘어놓�
   )
 })
 
-test('⑦ 교사 전용 탭은 교사에게만 켜진다 — 학생 화면에 교안이 새지 않게', () => {
-  // 🚨 왜 있는가(2026-08-12, 에픽 6/6): 「📋 교안」이 교사 세션 화면에서 학생과 **같은 화면**의
+test('⑦ 교사 전용 탭은 교사에게만 켜진다 — 학생 화면에 교사 대본이 새지 않게', () => {
+  // 🚨 왜 있는가(2026-08-12, 에픽 6/6): 교사 전용 탭이 교사 세션 화면에서 학생과 **같은 화면**의
   //    탭으로 들어왔다(§9.H-14 = 교사 화면은 학생 화면의 상위집합). 같은 화면을 쓴다는 것은
   //    한 줄만 어긋나도 학생이 교사 대본을 읽게 된다는 뜻이다 — 그리고 그건 학생 계정으로
   //    열어 보기 전까지 아무도 안 알려 준다.
+  // 🔑 2026-08-12 「📋 교안」이 철거되면서 교사 전용 탭은 「📋 설명 노트」 하나만 남았다.
+  //    **계약은 지운 게 아니라 대상이 준 것이다** — 노트가 이 게이트를 그대로 쓴다.
   // 🔑 그래서 검사하는 것은 «탭이 예쁜가»가 아니라 **«교사 전용 탭을 미는 자리가 한 곳인가»**이다.
   const source = read(CONTENT_PANEL)
 
   const guard = source.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
   assert.ok(guard, `${CONTENT_PANEL} 에 «if (teacherPanel)» 블록이 없다 — 교사 전용 탭을 가르는 자리가 사라졌다`)
 
-  for (const [tab, label] of [
-    ['lesson', '📋 교안'],
-    ['explain', '📋 설명 노트'],
-  ]) {
+  for (const [tab, label] of [['explain', '📋 설명 노트']]) {
     const pushes = [...source.matchAll(new RegExp(`list\\.push\\('${tab}'\\)`, 'g'))].length
     assert.equal(
       pushes,
@@ -125,18 +124,21 @@ test('⑦ 교사 전용 탭은 교사에게만 켜진다 — 학생 화면에 �
     )
   }
 
-  // 🔑 교안은 **있는 장에만** 켠다. 계약 ⑯ 이 «모든 장에 교안»을 지키지만, 그 계약이 언젠가
-  //    느슨해져도 학생·교사가 빈 탭을 열지는 않게 한다.
-  assert.ok(
-    /hasLessonPlan\(/.test(source),
-    `${CONTENT_PANEL} 이 교안 유무를 안 보고 탭을 켠다 — 교안 없는 장에서 빈 화면이 열린다`,
+  // 🚨 교안이 되살아나는 것도 여기서 잡는다. 「수업을 어떤 순서로 하라」를 앱이 다시 말하기
+  //    시작하면 P4(수업 흐름은 교사가 정한다)가 무너지고, 그건 화면을 열기 전까지 안 보인다.
+  //    🔑 `lessonNo`(진열 「N강」)까지 물지 않게 표적을 좁힌다 — 그건 chapterOrderContract ⑥ 이
+  //       **요구하는** 것이다. 넓은 정규식은 남의 계약을 깨뜨린다.
+  assert.equal(
+    /'lesson'|LessonPlan|교안/.test(source),
+    false,
+    `${CONTENT_PANEL} 에 교안이 되살아났다 — 2026-08-12 에 철거한 것이다(HANDOFF-lesson-plan-teardown)`,
   )
 
   // 음성 대조군 — 블록 추출식이 실제로 블록 안팎을 가르는지.
-  const probe = "    if (teacherPanel) {\n      list.push('explain');\n    }\n    list.push('lesson');"
+  const probe = "    if (teacherPanel) {\n      list.push('quiz');\n    }\n    list.push('explain');"
   const probeGuard = probe.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
   assert.equal(
-    probeGuard![1].includes("list.push('lesson')"),
+    probeGuard![1].includes("list.push('explain')"),
     false,
     '추출식이 블록 밖의 push 를 블록 안으로 세면 ⑦ 은 실패할 수 없는 계측이다',
   )

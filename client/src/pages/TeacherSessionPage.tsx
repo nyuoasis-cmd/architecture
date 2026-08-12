@@ -184,13 +184,14 @@ export default function TeacherSessionPage() {
           </div>
 
           {/*
-            🚨 교안은 이 화면을 떠났다(에픽 6/6). 사라진 게 아니라 **학생과 같은 화면 안**으로
-               들어갔다 — 교사 화면 = 학생 화면의 상위집합(DESIGN-POLICY §9.H-14). 어디로 갔는지
-               적어 두지 않으면 교사는 «없어졌다»로 읽고 수업 중에 찾아 헤맨다.
+            🚨 교사가 수업 중에 읽는 것은 **문항별 「📋 설명 노트」** 하나다(2026-08-12, 교안 철거).
+               노트는 학생과 **같은 화면 안**에 있다 — 교사 화면 = 학생 화면의 상위집합
+               (DESIGN-POLICY §9.H-14). 어디 있는지 적어 두지 않으면 교사는 수업 중에 찾아 헤맨다.
+            🚨 «차시 순서»를 여기에 다시 만들지 않는다 — 수업 흐름은 교사가 정한다.
           */}
           <p className="mt-4 text-sm text-stone-500">
-            📋 교안은 «학생 화면 미리 보기»로 들어가면 우측 콘텐츠의 <span className="font-medium text-stone-700">📋 교안</span> 탭에
-            있습니다. 그 장의 칸과 학생 도달 인원이 함께 보입니다.
+            📋 문항마다 <span className="font-medium text-stone-700">설명 노트</span>가 있습니다. «학생 화면 미리 보기»로
+            들어가 우측 콘텐츠의 <span className="font-medium text-stone-700">📋 설명 노트</span> 탭을 여세요.
           </p>
         </div>
 

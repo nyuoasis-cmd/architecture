@@ -7,14 +7,11 @@ import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getExtras } from '../../data/learn-extras';
 import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
-import { hasLessonPlan } from '../../data/lesson-plans';
-import { getSessionParticipants } from '../../lib/session-client';
 import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
 import MyTurnTab from './MyTurnTab';
 import QuizTab from './QuizTab';
 import ReadTab from './ReadTab';
-import { LessonPlanTab, type ClassProgress } from '../teacher/LessonPlanPanel';
 import TeacherExplainPanel from './TeacherExplainPanel';
 import TourTab from './TourTab';
 
@@ -39,7 +36,6 @@ const TAB_LABELS: Record<ContentTab, string> = {
   tour: '🚌 견학',
   myturn: '✋ 내 차례',
   quiz: '📝 퀴즈',
-  lesson: '📋 교안',
   explain: '📋 설명 노트',
 };
 
@@ -76,7 +72,6 @@ export default function ContentPanel({
   const [teacherExplain, setTeacherExplain] = useState<TeacherExplainBlock | null>(null);
   const [teacherExplainStatus, setTeacherExplainStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const [teacherExplainMessage, setTeacherExplainMessage] = useState<string | null>(null);
-  const [classProgress, setClassProgress] = useState<ClassProgress | undefined>(undefined);
 
   const extras = getExtras(qaId);
   const inlineMeta = qaId ? getDemoComponent(qaId) : undefined;
@@ -94,12 +89,9 @@ export default function ContentPanel({
     }
     list.push('quiz');
     // 🚨 여기가 «교사에게만»의 **유일한** 자리다. 교사 전용 탭을 이 블록 밖에서 밀어 넣으면
-    //    학생 화면에 교안이 새고, 그건 화면을 열어 보기 전까지 아무도 안 알려 준다.
-    //    (learnLayoutContract ⑤ 가 이 블록 밖의 lesson·explain 을 빨갛게 잡는다.)
+    //    학생 화면에 교사용 대본이 새고, 그건 화면을 열어 보기 전까지 아무도 안 알려 준다.
+    //    (learnLayoutContract ⑦ 이 이 블록 밖의 explain 을 빨갛게 잡는다.)
     if (teacherPanel) {
-      if (hasLessonPlan(chapter.id)) {
-        list.push('lesson');
-      }
       list.push('explain');
     }
     return list;
@@ -114,50 +106,6 @@ export default function ContentPanel({
     }
   }, [contentTab, setContentTab, tabs]);
 
-  /*
-    📋 교안 칸에 붙는 «이 칸 문항을 연 학생 N/M» 을 위한 것. 교사 세션 화면이 6초마다 돌리던
-    바로 그 조회다(같은 라우트).
-
-    🚨 **탭이 열려 있을 때만** 돈다. 학습 화면은 교사가 수업 내내 띄워 두는 화면이라, 안 보는
-       탭 때문에 6초마다 조회가 나가면 그건 교사가 못 보는 곳에서 계속 쌓이는 비용이다.
-    🚨 실패해도 화면에 아무 말도 하지 않는다 — 교안 본문은 이미 떠 있고, 진도 배지가 잠깐
-       안 뜨는 것은 교사가 수업을 멈출 이유가 아니다.
-  */
-  useEffect(() => {
-    if (activeTab !== 'lesson' || !teacherPanel || !sessionId || !UUID_PATTERN.test(sessionId)) {
-      return;
-    }
-
-    let cancelled = false;
-    let timer: number | undefined;
-
-    const tick = async () => {
-      try {
-        const payload = await getSessionParticipants(sessionId);
-        if (!cancelled) {
-          setClassProgress({
-            participantCount: payload.participants.length,
-            qaCompletion: payload.qa_completion ?? {},
-          });
-        }
-      } catch {
-        // 조용히 넘어간다 — 다음 주기에 다시 시도한다.
-      } finally {
-        if (!cancelled) {
-          timer = window.setTimeout(tick, 6_000);
-        }
-      }
-    };
-
-    void tick();
-
-    return () => {
-      cancelled = true;
-      if (timer) {
-        window.clearTimeout(timer);
-      }
-    };
-  }, [activeTab, sessionId, teacherPanel]);
 
   useEffect(() => {
     if (activeTab !== 'explain') {
@@ -314,7 +262,7 @@ export default function ContentPanel({
               type="button"
             >
               {TAB_LABELS[tab]}
-              {tab === 'explain' || tab === 'lesson' ? (
+              {tab === 'explain' ? (
                 <span className="ml-1 rounded bg-amber-100 px-1 py-0.5 text-[9px] font-bold text-amber-800">교사</span>
               ) : null}
             </button>
@@ -359,12 +307,6 @@ export default function ContentPanel({
         {activeTab === 'quiz' ? (
           <div className="mx-auto w-full max-w-[720px] p-6 lg:p-8">
             <QuizTab onScore={quizProps?.onScore} qaId={qaId} />
-          </div>
-        ) : null}
-
-        {activeTab === 'lesson' ? (
-          <div className="px-4 py-5 lg:px-8">
-            <LessonPlanTab chapterId={chapter.id} progress={classProgress} />
           </div>
         ) : null}
 

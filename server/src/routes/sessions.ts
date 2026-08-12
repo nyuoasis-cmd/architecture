@@ -342,7 +342,8 @@ router.get('/:id/participants', async (req, res) => {
     id: session.id,
     status: session.status,
     participants: progress.participants,
-    // 교사 전용 — 교안의 칸이 가리키는 문항에 학생이 몇 명 도달했는지 잇는 데 쓴다.
+    // 교사 전용 — 문항별로 학생이 몇 명 도달했는지. 🚨 지금 이걸 그리는 화면은 없다
+    //    (2026-08-12 교안 철거). 근거는 session-progress.ts 머리말.
     qa_completion: progress.qaCompletion,
   });
 });
