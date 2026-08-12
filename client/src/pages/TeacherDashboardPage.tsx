@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import NewSessionModal from '../components/teacher/NewSessionModal';
 import SessionCard from '../components/teacher/SessionCard';
 import { listTeacherSessions } from '../lib/session-client';
@@ -49,10 +50,20 @@ export default function TeacherDashboardPage() {
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Teacher Dashboard</p>
           <h1 className="mt-3 text-4xl font-medium text-stone-950">내 세션 관리</h1>
           <p className="mt-3 text-sm leading-7 text-stone-600">
-            진행 중인 수업을 한곳에서 확인하고, 새 수업을 만들 수 있어요. 종료한 수업은 아래에 따로 모입니다.
+            진행 중인 수업을 한곳에서 확인하고, 새 수업을 만들 수 있어요. 종료한 수업은 아래에 따로 모입니다. 수업 없이 화면만 보여 주고 싶을 때는 「🎬 시연작」을 쓰세요.
           </p>
         </div>
         <div className="flex items-end gap-2">
+          {/*
+            🔑 시연작은 수업 만들기와 **나란히** 둔다 — 교사가 «먼저 한번 보여 주고 싶다»고
+               생각하는 순간이 곧 이 화면이다. 메뉴 속에 넣으면 그 순간에 못 찾는다.
+          */}
+          <Link
+            className="inline-flex min-h-11 items-center rounded-2xl border border-[var(--color-border)] bg-white px-5 text-sm font-medium text-stone-800 hover:bg-stone-50"
+            to="/teacher/demo"
+          >
+            🎬 시연작
+          </Link>
           <button
             className="inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white"
             onClick={() => setIsModalOpen(true)}

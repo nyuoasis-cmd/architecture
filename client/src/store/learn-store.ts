@@ -13,8 +13,13 @@ import { create } from 'zustand';
 /** 모바일에서 세 컬럼이 접히는 자리. PC(lg 이상)에서는 셋 다 동시에 보인다. */
 export type MobileTab = 'nav' | 'chat' | 'content';
 
-/** 우측 콘텐츠 컬럼의 탭. 데이터가 있을 때만 켜진다(견학·내 차례·시연). */
-export type ContentTab = 'read' | 'demo' | 'tour' | 'myturn' | 'quiz' | 'explain';
+/**
+ * 우측 콘텐츠 컬럼의 탭. 데이터가 있을 때만 켜진다(견학·내 차례·시연).
+ * 🚨 `lesson`(📋 교안)·`explain`(📋 설명 노트)은 **교사 전용**이다 — 학생 화면에서는 배열에 들어가지
+ *    않는다(ContentPanel 의 `if (teacherPanel)` 한 곳). 여기 열거돼 있다는 것은 «그런 탭이 있다»는
+ *    뜻일 뿐, «누구에게 보인다»는 뜻이 아니다.
+ */
+export type ContentTab = 'read' | 'demo' | 'tour' | 'myturn' | 'quiz' | 'lesson' | 'explain';
 
 type LearnStoreState = {
   currentQaId: string;
