@@ -3,7 +3,8 @@
 > 대상 = `architecture` (`architecture.teachermate.co.kr`, **라이브**). `main` 머지 = prod 자동배포.
 > 앞 단계 = `docs/HANDOFF-audit-followup-2026-08-13.md`(낮) → 그 문서의 §2·§3·§4 를 이 세션에서 처리했다.
 > `main` = `c6da968`. **열린 PR 0건.**
-> 🔄 **2026-08-13 갱신 2**: §4-1(#213)·§4-3(#215) 완료. `main` = `ad99734`. **남은 것은 §4-4 예산과 §4-5 사람 눈뿐이다.**
+> 🔄 **2026-08-13 갱신 3**: §4-1(#213)·§4-3(#215)·순찰 `full` 승격(#217) 완료. `main` = `2b98eda`.
+> **남은 것은 §4-4 예산과 §4-5 사람 눈뿐이다 — 둘 다 사람이 줘야 시작된다.**
 
 ---
 
@@ -186,11 +187,11 @@ supabase-js 가 만료로 보고 `getSession()` 에 `null` 을 준다(쿠키로 
 
 **앱 AI 과금 0원.**
 
-#### 등록부는 `partial` 그대로 뒀다
+#### 등록부 — `partial` 로 뒀다가, 커버리지를 올린 뒤 `full` 로 승격했다
 
-`shared/qa/registry.yaml` 을 갱신했지만(master `57a1695`) **`covers.patrol` 은 `partial`** 이다.
-클릭 깊이가 경로당 1~4로 얕아 표준의 커버리지 정의(L1 − {L2+L3} = 미클릭 버튼 명단)로 보면
-아직 덮은 게 아니다. **산출물이 하나 나왔다는 것과 그 층을 덮었다는 것은 다르다.**
+첫 실행 직후에는 `partial` 로 뒀다(master `57a1695`). 클릭 깊이가 경로당 1~4로 얕아
+표준의 커버리지 정의(L1 − {L2+L3} = 미클릭 버튼 명단)로는 덮은 게 아니었기 때문이다.
+**그 이유를 없앤 뒤에 올렸다**(master `b08f7f3` · architecture [#217](https://github.com/nyuoasis-cmd/architecture/pull/217)) — §4-6 참조.
 
 #### 재현
 
@@ -206,6 +207,53 @@ cd qa/crawler && npm i && npx tsx crawl.ts
 
 `.gitignore` 가 `.env` 만 막아 `client/.env.local` 이 **추적 대상으로 잡혔다.**
 `.env.*` + `!.env.example` 추가(#215).
+
+### 4-6. ~~순찰 커버리지 승격~~ ✅ **완료** — [#217](https://github.com/nyuoasis-cmd/architecture/pull/217) (`2b98eda`) + master `b08f7f3`
+
+「`full` 로 승격해라」를 받고 **플래그부터 바꾸지 않았다.** 승격이 사실인지 먼저 쟀더니
+L1 분모 126 대비 실클릭 18(≈14%)·사각지대 71 이었다. 그래서 커버리지를 실제로 올렸다.
+
+#### 🚨 크롤러가 깨져 있던 세 번째 곳 — 클릭 루프가 첫 재렌더에서 죽는다
+
+```ts
+const handles = await page.$$('button, a, …');   // ← 루프 «밖»에서 한 번만
+for (const h of handles.slice(0, MAX_CLICKS_PER_ROUTE)) { … }
+```
+
+React 가 첫 클릭에 재렌더하면 남은 `ElementHandle` 이 전부 detached 가 되고,
+`h.evaluate()` 가 throw 해 `catch → continue` 로 **조용히** 넘어간다.
+상한이 12인데 경로당 1~4개만 눌린 이유다. 매 회차 다시 질의하도록 고쳤다.
+
+또 리포트가 `clickedSignatures` 를 안 내보내서 `coverage-diff.mjs` 가 **매칭 0**
+= 「사각지대 = 분모 전체」라는 무의미한 답을 내고 있었다. 시그니처를 싣도록 고쳤다.
+
+#### 실측
+
+| | 경로 | 클릭 | 매칭 | 🎯사각지대 |
+|---|---:|---:|---:|---:|
+| 승격 요청 시점 | 13 | 18 | 0 | **71** |
+| 루프 + 시그니처 | 13 | 125 | 19 | 53 |
+| **+ 사각지대가 지목한 시드 22개** | **35** | **505** | **44** | **28** |
+
+죽은 버튼 0 · 하드실패 0 · SKIPPED 0 · 앱 AI 과금 0원.
+
+#### 남은 28 — 0 이라고 적지 않았다
+
+| 수 | 무엇 | 판정 |
+|---:|---|---|
+| 10 | 데모 문항 | **매칭 실패지 미도달 아님** — 그 경로들은 실제로 12~40회 클릭됐다. L1 이 정적 추출한 라벨이 템플릿 리터럴 조각(`← 강`)이라 런타임 innerText 와 안 맞는다 |
+| 2 | `ChatPanel` 전송·다시 시도 | **일부러 안 누른다** — 비용 게이트 |
+| 16 | 조건부 상태 뒤 | 설명 노트 탭 · 세션 취소 확인 · 용어사전 닫기 · 퀴즈 다시 풀기 · QR 모달 |
+
+#### 승격 기준은 이 등록부 자신의 바를 썼다
+
+`full` 을 받은 다른 앱: `studio` = 21화면·64클릭 · `profile` = 크롤 6·18클릭.
+architecture 는 **35화면·505클릭**에 더해 `coverage-diff` 까지 동반한다
+(그걸 가진 셋째 앱 — 앞의 둘은 `sangkwon`·`youthschool`).
+
+🔑 **다음에 또 「승격해라」를 받으면**: 플래그를 만지기 전에
+`node shared/qa/inventory/extract.mjs` → `coverage-diff.mjs` 를 먼저 돌려 숫자를 볼 것.
+분모와 사각지대가 없으면 `full` 은 의견이지 사실이 아니다.
 
 ### 4-4. 🔴 class-check 등록 — **예산 결정이 먼저다**
 
@@ -249,7 +297,7 @@ cd qa/crawler && npm i && npx tsx crawl.ts
 ## 6. 상태 요약
 
 ```
-main            ad99734
+main            2b98eda
 열린 PR         0건
 문항            131        (qa-stubs 65 + vibe-ch11~23 66)
 📋 설명 노트     131/131    ← teacherExplainContract 가 지킨다
@@ -262,7 +310,8 @@ client tsc      통과
 qa/crawler tsc  통과
 정적 검사        ghost-columns PASS · ime-input-guard PASS · required-checks-path-filter PASS
                 render-workspace-refs = RENDER_API_KEY 부재로 미실행
-QA 등록부        gate/nightly/realflow/ux = full · patrol = partial(1회 실행 13/13) · class = none
+QA 등록부        gate/nightly/realflow/ux/patrol = full · class = none
+순찰 커버리지    L1 126 · 클릭 505 · 매칭 44 · 사각지대 28(내역 §4-6)
 앱 AI 과금       0원
 ```
 
@@ -272,7 +321,7 @@ QA 등록부        gate/nightly/realflow/ux = full · patrol = partial(1회 실
 
 ```bash
 cd /home/claude/architecture
-git fetch origin main && git log --oneline origin/main -1     # ad99734 인지 확인
+git fetch origin main && git log --oneline origin/main -1     # 2b98eda 인지 확인
 git branch --show-current                                      # 🚨 main 인지 확인 — 낡은 브랜치면 노트가 66개로 보인다
 cd server && npm test | grep -E "^ℹ (tests|pass|fail)"        # 133/133/0
 gh pr list --repo nyuoasis-cmd/architecture --state open       # 0건이어야 한다
@@ -284,7 +333,7 @@ gh pr list --repo nyuoasis-cmd/architecture --state open       # 0건이어야 �
 |---|---|---|
 | §4-4 class-check | 축2-b 실측에 태울 **예산** | jery |
 | §4-5 사람 눈 | 사람이 직접 눌러 보기 | jery |
-| (선택) 순찰 클릭 깊이 | 판단 — `partial` 을 `full` 로 올리려면 미클릭 버튼을 줄여야 한다 | — |
+| (선택) 사각지대 16 | 조건부 상태 뒤 버튼 — 다단계 상태 기계를 크롤러에 넣는 일이라 별건 | — |
 
 🚨 **코드로 더 밀 수 있는 일은 없다.** 새 창이 열리면 위 셋 중 무엇을 줄 수 있는지부터 물을 것 —
 아무것도 없으면 이 앱에서 지금 할 수 있는 일은 없고, 억지로 만들면 안 돌던 검사를 초록으로
