@@ -113,10 +113,19 @@ async function crawlRoute(
   // X-QA 헤더는 same-origin(client/api) 요청에만 부착한다. setExtraHTTPHeaders 는 cross-origin
   // 폰트(cdn.jsdelivr/fonts.gstatic)에도 헤더를 새게 해 CORS preflight 를 깨뜨리고(자기유발),
   // 그 console-error 를 결함으로 오탐한다. interception 으로 origin 을 가려 주입한다.
+  const blockedRequests: string[] = []; // 네트워크에서 끊은 금지 요청 — 리포트에 남긴다
   await page.setRequestInterception(true);
   page.on('request', (req: HTTPRequest) => {
     if (req.isInterceptResolutionHandled()) return;
     const url = req.url();
+    // 🚨 §3 이중 방어 — 네비게이션 가드(아래 217행)만으로는 버튼 클릭이 부른 XHR 을 못 막는다.
+    // 크롤러는 페이지의 모든 button/a 를 누르므로, 금지 라우트는 네트워크에서 한 번 더 끊는다.
+    // 이게 없으면 AI 라우트가 실제로 호출돼 돈이 나간다(「내 차례」는 돈 천장이 없다).
+    if (isForbidden(url)) {
+      blockedRequests.push(url);
+      req.abort('blockedbyclient').catch(() => { /* 이미 처리됨 */ });
+      return;
+    }
     if (url.startsWith(QA_CLIENT_URL) || url.startsWith(QA_BASE_URL)) {
       req.continue({ headers: { ...req.headers(), 'x-qa-run-id': RUN_ID, 'x-qa-browser-id': 'crawler' } });
     } else {
@@ -225,6 +234,12 @@ async function crawlRoute(
     }
   } finally {
     await page.close().catch(() => {});
+  }
+
+  // 네트워크에서 끊은 금지 요청은 «결함»이 아니라 «방어가 일했다»는 기록이다 — 눈에 보이게 남긴다.
+  if (blockedRequests.length > 0) {
+    const uniq = [...new Set(blockedRequests)];
+    console.log(`[crawl]   🛡️ 금지 라우트 ${blockedRequests.length}건 차단: ${uniq.slice(0, 3).join(', ')}${uniq.length > 3 ? ` 외 ${uniq.length - 3}` : ''}`);
   }
 
   // 판정
