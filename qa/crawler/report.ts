@@ -28,6 +28,10 @@ export interface RouteResult {
   clicked: number;       // 클릭한 인터랙티브 요소 수
   deadButtons: number;   // data-qa-action 인데 무반응
   durationMs: number;
+  /** 이 라우트에서 실제로 «누른» 요소들의 시그니처(`TAG|text|href`). */
+  clickedSignatures?: string[];
+  /** 이 라우트에서 «보인» 요소 전부의 시그니처. 누른 것보다 크다(disabled·불가시 포함). */
+  seenSignatures?: string[];
 }
 
 export interface CrawlReport {
@@ -38,6 +42,12 @@ export interface CrawlReport {
   finished_at: string;
   routes: RouteResult[];
   skipped_forbidden: string[]; // forbiddenRoutes 로 스킵된 후보(silent cap 금지)
+  /** 🔑 L1↔L2 커버리지 diff(shared/qa/inventory/coverage-diff.mjs)의 입력.
+   *  이게 없으면 diff 가 «매칭 0 · 사각지대 = 분모 전체» 라는 무의미한 답을 낸다.
+   *  형식은 그 도구의 parseSig 계약 그대로 `TAG|text|href`. */
+  clickedSignatures: string[];
+  seenSignatures: string[];
+  runId: string;
   effect_blocks: unknown[];    // EffectGate 차단 실증(부작용 버튼)
   summary: { total: number; pass: number; fail: number; skipped: number; hard_failures: number };
 }

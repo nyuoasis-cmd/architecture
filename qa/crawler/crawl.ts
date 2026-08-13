@@ -214,6 +214,8 @@ async function crawlRoute(
   const fullUrl = `${QA_CLIENT_URL}${resolvedPath}`;
   let clicked = 0;
   let deadButtons = 0;
+  const clickedSigs: string[] = [];
+  const seenSigs = new Set<string>();
 
   try {
     if (isForbidden(fullUrl) || isForbidden(resolvedPath)) {
@@ -241,36 +243,70 @@ async function crawlRoute(
     if (!ws.ok) findings.push({ kind: 'whitescreen', detail: ws.reasons.join('; ') });
 
     // 인터랙티브 요소 클릭(예산 제한). data-qa-action = 죽은버튼 검사 대상.
-    const handles = await page.$$('button, a, [role="button"], [data-qa-action]');
-    for (const h of handles.slice(0, MAX_CLICKS_PER_ROUTE)) {
-      const meta = await h.evaluate((el) => ({
-        href: (el as HTMLAnchorElement).getAttribute?.('href') || '',
-        qaAction: el.getAttribute('data-qa-action'),
-        disabled: (el as HTMLButtonElement).disabled === true,
-        visible: (el as HTMLElement).offsetParent !== null,
-      })).catch(() => null);
-      if (!meta || !meta.visible || meta.disabled) continue;
-      if (meta.href && isForbidden(meta.href)) { skippedForbidden.push(meta.href); continue; }
+    // 🚨 핸들을 루프 밖에서 한 번만 잡으면 안 된다 — React 가 첫 클릭에 재렌더하는 순간
+    //    남은 ElementHandle 이 전부 detached 가 되고, h.evaluate() 가 throw 해서 조용히 continue 된다.
+    //    (2026-08-13 실측: 그래서 상한이 12인데 경로당 1~4개만 눌리고 있었다.)
+    //    매 회차마다 다시 질의하고, 이미 누른 것은 시그니처로 기억해 건너뛴다.
+    const attempted = new Set<string>();
+
+    for (let round = 0; round < MAX_CLICKS_PER_ROUTE; round++) {
+      const handles = await page.$$('button, a, [role="button"], [data-qa-action]');
+      if (handles.length === 0) break;
+
+      // 이번 회차에 «보이는» 요소 전부의 시그니처를 걷는다(분모 기록 — 누른 것보다 크다).
+      let target: (typeof handles)[number] | null = null;
+      let targetMeta: { sig: string; href: string; qaAction: string | null } | null = null;
+
+      for (const h of handles) {
+        const meta = await h.evaluate((el) => {
+          const tag = el.tagName;
+          const text = ((el as HTMLElement).innerText || el.getAttribute('aria-label') || '').trim().slice(0, 60);
+          const href = (el as HTMLAnchorElement).getAttribute?.('href') || '';
+          return {
+            sig: `${tag}|${text}|${href}`,
+            href,
+            qaAction: el.getAttribute('data-qa-action'),
+            disabled: (el as HTMLButtonElement).disabled === true,
+            visible: (el as HTMLElement).offsetParent !== null,
+          };
+        }).catch(() => null);
+        if (!meta) continue;                       // detached — 다음 회차에 다시 잡힌다
+        seenSigs.add(meta.sig);
+        if (!meta.visible || meta.disabled) continue;
+        if (attempted.has(meta.sig)) continue;     // 이미 시도함
+        if (meta.href && isForbidden(meta.href)) { skippedForbidden.push(meta.href); attempted.add(meta.sig); continue; }
+        target = h;
+        targetMeta = { sig: meta.sig, href: meta.href, qaAction: meta.qaAction };
+        break;
+      }
+
+      if (!target || !targetMeta) break;           // 이 라우트에서 더 누를 것이 없다
+      attempted.add(targetMeta.sig);
 
       const before = page.url();
       try {
-        await h.click({ delay: 10 });
+        await target.click({ delay: 10 });
         clicked++;
+        clickedSigs.push(targetMeta.sig);
         await new Promise((r) => setTimeout(r, 250));
         const after = page.url();
         // 죽은버튼: data-qa-action 인데 URL·DOM 변화 0 (opt-in 만 FAIL)
-        if (meta.qaAction && after === before) {
+        if (targetMeta.qaAction && after === before) {
           const domChanged = await page.evaluate(() => true); // (간이) — 정밀 판정은 별 PR
           if (!domChanged) deadButtons++;
         }
-        // 네비게이션 시 forbidden 진입 방지 — 벗어났으면 복귀
+        // 네비게이션 시 forbidden 진입 방지 / 외부 이탈 — 벗어났으면 복귀.
+        // 🔑 같은 앱 안에서 다른 화면으로 갔어도 되돌아온다. 안 그러면 이 라우트의
+        //    남은 버튼을 영영 못 누르고, 커버리지가 첫 링크 하나에서 끊긴다.
         if (isForbidden(page.url())) {
           skippedForbidden.push(page.url());
           await page.goto(fullUrl, { waitUntil: 'domcontentloaded', timeout: 15_000 }).catch(() => {});
-        } else if (page.url() !== before && !page.url().startsWith(QA_CLIENT_URL)) {
+          await new Promise((r) => setTimeout(r, 400));
+        } else if (page.url() !== before) {
           await page.goto(fullUrl, { waitUntil: 'domcontentloaded', timeout: 15_000 }).catch(() => {});
+          await new Promise((r) => setTimeout(r, 400));
         }
-      } catch { /* 클릭 불가 요소 무시 */ }
+      } catch { /* 클릭 불가 요소 무시 — attempted 에 넣었으므로 무한루프는 없다 */ }
     }
   } finally {
     await page.close().catch(() => {});
@@ -287,7 +323,12 @@ async function crawlRoute(
   const soft = findings.some((f) => f.kind === 'console-error' || (f.kind === 'http-error' && [401, 403, 429].includes(f.httpStatus ?? 0)) || f.kind === 'dead-button');
   const status: RouteResult['status'] = hard || soft ? 'FAIL' : 'PASS';
 
-  return { path: seedPath, resolvedUrl: fullUrl, role, status, findings, clicked, deadButtons, durationMs: Date.now() - t0 };
+  return {
+    path: seedPath, resolvedUrl: fullUrl, role, status, findings, clicked, deadButtons,
+    durationMs: Date.now() - t0,
+    clickedSignatures: clickedSigs,
+    seenSignatures: [...seenSigs],
+  };
 }
 
 async function fetchEffectBlocks(): Promise<unknown[]> {
@@ -355,6 +396,10 @@ async function main() {
     routes,
     skipped_forbidden: skippedForbidden,
     effect_blocks: effectBlocks,
+    // 🔑 L1↔L2 커버리지 diff 의 입력. 라우트별 시그니처를 앱 전체로 합집합한다.
+    runId: RUN_ID,
+    clickedSignatures: [...new Set(routes.flatMap((r) => r.clickedSignatures ?? []))],
+    seenSignatures: [...new Set(routes.flatMap((r) => r.seenSignatures ?? []))],
     summary: summarize(routes),
   };
   const { jsonPath, mdPath } = writeReport(report, REPORTS_ROOT);
