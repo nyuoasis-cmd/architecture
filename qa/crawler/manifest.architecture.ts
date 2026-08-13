@@ -56,6 +56,31 @@ export const manifest: CrawlManifest = {
     { path: '/library', role: 'anon' },
     { path: '/library/1/ch01_q01', role: 'anon' }, // self-learn = LearnPage(mode=self) 정적 렌더(인증·세션 불요)
     { path: '/demos-preview/showcase', role: 'anon' },
+    // 🎯 L1↔L2 커버리지 diff 가 지목한 사각지대 — 데모(demos/chNN/*)는 그 문항 화면에서만 렌더된다.
+    //    이 22개가 없으면 L1 분모의 demos 38개가 «미도달»로 남는다(2026-08-13 실측).
+    //    목록의 근거 = shared/qa/inventory/reports/coverage-diff.architecture.json 의 unreached 버킷.
+    { path: '/library/11/ch11_q04', role: 'anon' },
+    { path: '/library/12/ch12_q01', role: 'anon' },
+    { path: '/library/12/ch12_q04', role: 'anon' },
+    { path: '/library/12/ch12_q06', role: 'anon' },
+    { path: '/library/12/ch12_q07', role: 'anon' },
+    { path: '/library/13/ch13_q06', role: 'anon' },
+    { path: '/library/14/ch14_q02', role: 'anon' },
+    { path: '/library/14/ch14_q03', role: 'anon' },
+    { path: '/library/14/ch14_q04', role: 'anon' },
+    { path: '/library/14/ch14_q05', role: 'anon' },
+    { path: '/library/15/ch15_q01', role: 'anon' },
+    { path: '/library/15/ch15_q03', role: 'anon' },
+    { path: '/library/15/ch15_q04', role: 'anon' },
+    { path: '/library/15/ch15_q06', role: 'anon' },
+    { path: '/library/16/ch16_q01', role: 'anon' },
+    { path: '/library/16/ch16_q02', role: 'anon' },
+    { path: '/library/16/ch16_q04', role: 'anon' },
+    { path: '/library/16/ch16_q06', role: 'anon' },
+    { path: '/library/17/ch17_q01', role: 'anon' },
+    { path: '/library/17/ch17_q02', role: 'anon' },
+    { path: '/library/17/ch17_q04', role: 'anon' },
+    { path: '/library/17/ch17_q05', role: 'anon' },
     // ── teacher (AuthGate) — best-effort(인증 주입 가능 시, 아니면 SKIPPED) ──
     { path: '/teacher', role: 'teacher' },
     { path: '/teacher/demo', role: 'teacher' }, // 🎬 시연작 B형(2026-08-12) — 강 목록부터 고르는 화면
