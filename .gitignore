@@ -1,6 +1,9 @@
 node_modules/
 dist/
 .env
+# .env 만으로는 client/.env.local 같은 변형이 안 걸린다(2026-08-13 실측 — 로컬 QA 중 발견).
+.env.*
+!.env.example
 *.log
 
 # Build artifacts

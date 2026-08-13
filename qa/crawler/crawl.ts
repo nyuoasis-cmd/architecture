@@ -54,14 +54,27 @@ function isForbidden(url: string): boolean {
   );
 }
 
-async function issueTeacherToken(): Promise<string> {
+interface QaTeacherSession {
+  access_token: string;
+  refresh_token: string;
+  expires_at: number;
+  account_id: string;
+}
+
+async function issueTeacherToken(): Promise<QaTeacherSession> {
   const res = await fetch(`${QA_BASE_URL}/api/qa/auth/token`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'X-QA-Secret': QA_SECRET },
     body: JSON.stringify({ role: 'teacher', run_id: RUN_ID }),
   });
   if (!res.ok) throw new Error(`issueTeacherToken ${res.status}: ${await res.text().catch(() => '')}`);
-  return (await res.json()).access_token as string;
+  const j = await res.json();
+  return {
+    access_token: j.access_token as string,
+    refresh_token: (j.refresh_token ?? '') as string,
+    expires_at: Number(j.expires_at ?? 0),
+    account_id: (j.account_id ?? '') as string,
+  };
 }
 
 /** 흰화면 4불변식 + 지속 스피너 검사(브라우저 컨텍스트). */
@@ -102,7 +115,7 @@ async function crawlRoute(
   seedPath: string,
   resolvedPath: string,
   role: CrawlRole,
-  teacherToken: string | null,
+  teacherToken: QaTeacherSession | null,
   participantCookie: string | null,
   skippedForbidden: string[],
 ): Promise<RouteResult> {
@@ -133,15 +146,42 @@ async function crawlRoute(
     }
   });
 
-  // teacher best-effort 인증 주입(Supabase 토큰 → localStorage). 실패해도 진행(SKIPPED 판정).
+  // teacher 인증 주입(Supabase 세션).
+  // 🚨 저장소는 localStorage 가 아니라 **쿠키**다 — client/src/lib/supabase-client.ts 가
+  //    `storage: cookieStorage`(js-cookie) 로 createClient 한다. localStorage 에 쓰면
+  //    앱이 절대 읽지 않아 AuthGate 가 로그인으로 보내고, teacher 경로가 전부 SKIPPED 로 샌다.
+  //    (2026-08-13 실측: 이 때문에 teacher 4경로가 «한 번도» 크롤된 적이 없었다. prod 에서도 같다.)
+  // 🚨 stub 도 안 된다 — expires_at·refresh_token 이 없으면 supabase-js 가 만료로 보고
+  //    getSession()에 null 을 준다. 그래서 JWT 클레임에서 user 를 복원해 온전한 Session 을 만든다.
+  // 🔑 값은 encodeURIComponent 로 감싼다. 쿠키는 콤마·따옴표를 그대로 못 담고,
+  //    js-cookie 의 read 변환기가 퍼센트 시퀀스를 되돌려 주므로 왕복이 맞는다.
   if (role === 'teacher' && teacherToken) {
-    await page.evaluateOnNewDocument((tok: string) => {
-      try {
-        const payload = JSON.stringify({ access_token: tok, token_type: 'bearer', user: { id: 'qa-teacher' } });
-        for (const k of Object.keys(localStorage)) if (/auth-token$/.test(k)) localStorage.setItem(k, payload);
-        localStorage.setItem('sb-auth-token', payload);
-      } catch { /* */ }
-    }, teacherToken);
+    let claims: Record<string, unknown> = {};
+    try {
+      const part = teacherToken.access_token.split('.')[1] ?? '';
+      claims = JSON.parse(Buffer.from(part, 'base64').toString('utf8'));
+    } catch { /* 클레임 해독 실패 시 최소 user 로 진행 */ }
+    const sessionPayload = JSON.stringify({
+      access_token: teacherToken.access_token,
+      refresh_token: teacherToken.refresh_token,
+      token_type: 'bearer',
+      expires_at: teacherToken.expires_at,
+      expires_in: Math.max(0, teacherToken.expires_at - Math.floor(Date.now() / 1000)),
+      user: {
+        id: (claims.sub as string) ?? teacherToken.account_id,
+        aud: (claims.aud as string) ?? 'authenticated',
+        role: (claims.role as string) ?? 'authenticated',
+        email: (claims.email as string) ?? '',
+        app_metadata: (claims.app_metadata as object) ?? {},
+        user_metadata: (claims.user_metadata as object) ?? {},
+      },
+    });
+    await page.setCookie({
+      name: 'sb-auth-token',
+      value: encodeURIComponent(sessionPayload),
+      url: QA_CLIENT_URL,
+      path: '/',
+    });
   }
 
   // participant 인증 주입 — setup()이 /api/join 으로 미리 발급받은 arch_pt 쿠키.
@@ -265,11 +305,18 @@ async function main() {
   const startedAt = new Date().toISOString();
   console.log(`[crawl] run=${RUN_ID} app=${manifest.app} client=${QA_CLIENT_URL} api=${QA_BASE_URL}`);
 
-  let teacherToken: string | null = null;
+  let teacherToken: QaTeacherSession | null = null;
   let dynCtx: DynamicContext | null = null;
   try {
     teacherToken = await issueTeacherToken();
-    dynCtx = await manifest.dynamicRouteFactories.setup({ issueTeacherToken, apiBase: QA_BASE_URL, runId: RUN_ID });
+    // manifest 계약은 Bearer 문자열 하나다(변경하지 않는다). 이미 발급한 것을 넘겨
+    // 같은 크롤에서 토큰을 두 번 발급하지 않는다 — 발급마다 감사 로그가 한 줄씩 쌓인다.
+    const issuedToken = teacherToken.access_token;
+    dynCtx = await manifest.dynamicRouteFactories.setup({
+      issueTeacherToken: async () => issuedToken,
+      apiBase: QA_BASE_URL,
+      runId: RUN_ID,
+    });
     console.log(`[crawl] QA 세션 코드 = ${dynCtx.sessionCode}`);
   } catch (e) {
     console.error(`[crawl] setup 실패(라이브 서버 필요): ${String(e).slice(0, 200)}`);
