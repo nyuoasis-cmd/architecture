@@ -3,7 +3,7 @@
 > 대상 = `architecture` (`architecture.teachermate.co.kr`, **라이브**). `main` 머지 = prod 자동배포.
 > 앞 단계 = `docs/HANDOFF-audit-followup-2026-08-13.md`(낮) → 그 문서의 §2·§3·§4 를 이 세션에서 처리했다.
 > `main` = `c6da968`. **열린 PR 0건.**
-> 🔄 **2026-08-13 갱신**: §4-1(학생 화면 2건)은 jery 승인을 받아 [#213](https://github.com/nyuoasis-cmd/architecture/pull/213) 으로 끝났다. 다음은 §4-3 이다.
+> 🔄 **2026-08-13 갱신 2**: §4-1(#213)·§4-3(#215) 완료. `main` = `ad99734`. **남은 것은 §4-4 예산과 §4-5 사람 눈뿐이다.**
 
 ---
 
@@ -131,27 +131,81 @@ jery 승인(2026-08-13)을 받고 둘 다 적용했다. 아래는 무엇을 왜 
 앞 세션들은 매번 `docs/HANDOFF-*.md` 를 남겼는데, 오늘 산출물(#204 검증표 29줄·#211 발견 2건)은
 PR 본문과 코멘트에만 있었다. 이 문서가 그 자리다.
 
-### 4-3. 🔴 순찰(patrol) 크롤 실행 — **`QA_SECRET` 이 있어야 시작된다**
+### 4-3. ~~순찰(patrol) 크롤 실행~~ ✅ **완료** — [#215](https://github.com/nyuoasis-cmd/architecture/pull/215) (`ad99734`)
 
-#211 로 「돌려도 안전한 상태」까지는 만들었다. 막힌 곳은 하나다:
-크롤러 setup 이 `POST /api/qa/auth/token` 에 `X-QA-Secret` 을 보내 교사 토큰을 받는데,
-**로컬 `.env` 에 `QA_SECRET` 이 없다**(실측: `NODE_ENV PORT ANTHROPIC_API_KEY SUPABASE_URL
-SUPABASE_SERVICE_ROLE_KEY VITE_SUPABASE_URL VITE_SUPABASE_ANON_KEY KAKAO_OAUTH_REDIRECT_URI
-HMAC_SECRET` 9개뿐).
+#### 🚨 정정 — 이 문서의 앞 판이 틀렸다
 
-```bash
-cd $WT && npm run dev            # client :5176 + server :3003
-cd $WT/qa/crawler && npm i
-QA_SECRET=... QA_CLIENT_URL=http://localhost:5176 QA_BASE_URL=http://localhost:3003 npx tsx crawl.ts
+앞 판은 「`QA_SECRET` 이 로컬에 없다」고 적었다. **틀렸다.** 변수명은 `QA_AUTH_SECRET` 이고,
+값은 **`~/.claude/.secrets/architecture-real-flow-qa.env`** 에 처음부터 있었다.
+밤샘 스모크(`FLOW_SMOKES`)가 매일 쓰는 파일인데 앱 `.env` 만 보고 없다고 단정했다.
+🔑 교훈 = 「시크릿이 없다」고 말하기 전에 **`~/.claude/.secrets/` 를 먼저 볼 것.**
+
+#### 어디에 대고 돌렸나 — prod 아님
+
+시크릿 파일의 `QA_BASE_URL`·`QA_CLIENT_URL` 은 `https://architecture.teachermate.co.kr`(라이브)이고
+계정은 `nyuoasis@gmail.com`(jery 실계정)이다. 그건 **밤샘 스모크용**이다 — 정해진 11단계만 밟고
+teardown 하는 좁은 각본이라 라이브에 대도 된다.
+
+**L2 크롤러는 다르다. 모든 버튼을 누른다**(경로당 최대 12회). 라이브에 대면
+QA-LAYERS-STANDARD 가 금지하는 「prod 블라인드 크롤」이다. 표준의 선례도 전부
+local+실DB(`sprint-v2`=yrxk · `vibe`=ltbkd)라 **로컬 dev 서버**에 대고 돌렸다.
+시크릿과 계정만 재사용하고 주소만 `localhost` 로 덮었다.
+
+#### 🚨 돌려 보니 크롤러가 깨져 있었다 — teacher 롤은 «한 번도» 통한 적이 없다
+
+첫 실행: **PASS 9 / SKIPPED 4** — teacher 4경로가 전부 로그인으로 샜다.
+가설 2회가 연달아 틀려 진단 로그로 전환했고(디버깅 정책), 그때 원인이 나왔다.
+
+```ts
+// client/src/lib/supabase-client.ts
+createClient(url, key, { auth: { storage: cookieStorage, storageKey: 'sb-auth-token' } })
+//                                       ^^^^^^^^^^^^^ js-cookie
 ```
 
-**돌린 뒤에 할 것**: `qa/crawler/reports/` 산출물을 근거로 `shared/qa/registry.yaml` 의
-architecture `covers.patrol` 을 `partial` → `full` 로 올리고 `disposition.patrol` 을 갱신한다.
-🚨 **산출물 없이 등록부를 먼저 고치면 날조다.** 지금 등록부가 「한 번도 안 돌았다」로 적힌 것은
-**정확한 기록**이라 이번 세션에서 손대지 않았다.
+크롤러는 **localStorage** 에 세션을 넣고 있었다 — 앱이 절대 읽지 않는 곳이다.
+**prod 빌드도 같은 쿠키 저장소를 쓴다. 즉 이 크롤러의 teacher 롤은 어느 환경에서도 통한 적이 없다.**
+두 번째로 주입 payload 가 stub 이라 `expires_at`·`refresh_token` 이 없었다 —
+supabase-js 가 만료로 보고 `getSession()` 에 `null` 을 준다(쿠키로 고쳐도 따로 걸린다).
 
-**돌릴 때 눈으로 확인할 것 하나**: 학습 화면 크롤에서 `🛡️ 금지 라우트 N건 차단` 로그가 찍히는지.
-찍히면 3-A 의 수리가 실제로 일한 것이고, 안 찍히면 크롤러가 AI 버튼까지 못 갔다는 뜻이다.
+| | PASS | FAIL | SKIPPED |
+|---|---|---|---|
+| 수리 전 | 9 | 0 | **4** |
+| 수리 후 | **13** | 0 | **0** |
+
+죽은 버튼 0 · 총 클릭 18 · 하드실패 0.
+
+#### 🦷 이빨 확인 (음성 대조)
+
+#211 의 비용 게이트가 실제로 무는지 따로 때렸다:
+
+```
+/api/vibe/my-turn → 차단 (네트워크 abort)
+/api/chat         → 차단 (네트워크 abort)
+/api/sessions     → 통과 (크롤 자체는 계속 돈다)
+```
+
+**앱 AI 과금 0원.**
+
+#### 등록부는 `partial` 그대로 뒀다
+
+`shared/qa/registry.yaml` 을 갱신했지만(master `57a1695`) **`covers.patrol` 은 `partial`** 이다.
+클릭 깊이가 경로당 1~4로 얕아 표준의 커버리지 정의(L1 − {L2+L3} = 미클릭 버튼 명단)로 보면
+아직 덮은 게 아니다. **산출물이 하나 나왔다는 것과 그 층을 덮었다는 것은 다르다.**
+
+#### 재현
+
+```bash
+cd $WT && set -a && . ./.env && . ~/.claude/.secrets/architecture-real-flow-qa.env && set +a
+export QA_BASE_URL=http://localhost:3003 QA_CLIENT_URL=http://localhost:5176   # 🚨 prod 주소를 덮어쓴다
+cp <(grep -E "^VITE_SUPABASE_(URL|ANON_KEY)=" .env) client/.env.local           # vite 는 client/ 에서 env 를 읽는다
+npm run dev
+cd qa/crawler && npm i && npx tsx crawl.ts
+```
+
+#### 📌 곁다리로 막은 것
+
+`.gitignore` 가 `.env` 만 막아 `client/.env.local` 이 **추적 대상으로 잡혔다.**
+`.env.*` + `!.env.example` 추가(#215).
 
 ### 4-4. 🔴 class-check 등록 — **예산 결정이 먼저다**
 
@@ -195,7 +249,7 @@ architecture `covers.patrol` 을 `partial` → `full` 로 올리고 `disposition
 ## 6. 상태 요약
 
 ```
-main            c6da968
+main            ad99734
 열린 PR         0건
 문항            131        (qa-stubs 65 + vibe-ch11~23 66)
 📋 설명 노트     131/131    ← teacherExplainContract 가 지킨다
@@ -208,7 +262,7 @@ client tsc      통과
 qa/crawler tsc  통과
 정적 검사        ghost-columns PASS · ime-input-guard PASS · required-checks-path-filter PASS
                 render-workspace-refs = RENDER_API_KEY 부재로 미실행
-QA 등록부        gate/nightly/realflow/ux = full · patrol = partial(미실행) · class = none
+QA 등록부        gate/nightly/realflow/ux = full · patrol = partial(1회 실행 13/13) · class = none
 앱 AI 과금       0원
 ```
 
@@ -218,7 +272,7 @@ QA 등록부        gate/nightly/realflow/ux = full · patrol = partial(미실�
 
 ```bash
 cd /home/claude/architecture
-git fetch origin main && git log --oneline origin/main -1     # c6da968 인지 확인
+git fetch origin main && git log --oneline origin/main -1     # ad99734 인지 확인
 git branch --show-current                                      # 🚨 main 인지 확인 — 낡은 브랜치면 노트가 66개로 보인다
 cd server && npm test | grep -E "^ℹ (tests|pass|fail)"        # 133/133/0
 gh pr list --repo nyuoasis-cmd/architecture --state open       # 0건이어야 한다
@@ -228,9 +282,9 @@ gh pr list --repo nyuoasis-cmd/architecture --state open       # 0건이어야 �
 
 | 남은 것 | 필요한 것 | 누가 |
 |---|---|---|
-| §4-3 순찰 크롤 | `QA_SECRET` | jery |
 | §4-4 class-check | 축2-b 실측에 태울 **예산** | jery |
 | §4-5 사람 눈 | 사람이 직접 눌러 보기 | jery |
+| (선택) 순찰 클릭 깊이 | 판단 — `partial` 을 `full` 로 올리려면 미클릭 버튼을 줄여야 한다 | — |
 
 🚨 **코드로 더 밀 수 있는 일은 없다.** 새 창이 열리면 위 셋 중 무엇을 줄 수 있는지부터 물을 것 —
 아무것도 없으면 이 앱에서 지금 할 수 있는 일은 없고, 억지로 만들면 안 돌던 검사를 초록으로
