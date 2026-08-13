@@ -31,7 +31,7 @@ export default {
   beforeDemo:
     '교사가 예외와 안 하는 것을 먼저 알려 주지 말고 학생의 첫 판을 그대로 AI 판정에 넣으세요. 빠진 칸 표시가 나온 뒤 실제 반에서 맞는지 하나씩 승인하게 합니다.',
   note:
-    '열기에서 "규칙 없어요"라는 학생에게 정답을 주지 말고 급식·청소·발표 중 하나를 고르게 하세요. 몸이 아는 순서를 말로 꺼내면 숨은 규칙이 빠르게 보입니다.',
+    '"규칙 없어요"라는 학생에게 정답을 주지 말고 급식·청소·발표 중 하나를 고르게 하세요. 몸이 아는 순서를 말로 꺼내면 숨은 규칙이 빠르게 보입니다.',
   advanced: {
     technicalSpec:
       'AI critique는 coverage heuristic으로 활용하되 policy authority와 분리해야 합니다. suggested rule은 local context, stakeholder impact, enforceability 검토 후에만 canonical document로 승격합니다.',
