@@ -38,7 +38,7 @@ const SCREENS = [
   'client/src/components/learn/TeacherExplainPanel.tsx',
 ]
 
-test('① 교사·학생 화면에 한글 「세션」이 없다 — 그들이 하는 것은 수업이다', () => {
+test('1) 교사·학생 화면에 한글 「세션」이 없다 — 그들이 하는 것은 수업이다', () => {
   const offenders: string[] = []
 
   for (const file of SCREENS) {
@@ -57,15 +57,15 @@ test('① 교사·학생 화면에 한글 「세션」이 없다 — 그들이 �
   )
 })
 
-test('② 주석 제거기가 문자열 안의 // 를 삼키지 않는다 — 삼키면 ① 은 실패할 수 없는 계측이다', () => {
-  // 음성 대조군 셋. 하나라도 어긋나면 ① 의 «0건»은 탐지가 죽어서 나온 0건이다.
+test('2) 주석 제거기가 문자열 안의 // 를 삼키지 않는다 — 삼키면 1) 은 실패할 수 없는 계측이다', () => {
+  // 음성 대조군 셋. 하나라도 어긋나면 1) 의 «0건»은 탐지가 죽어서 나온 0건이다.
   assert.equal(stripComments("const url = 'https://x/세션'").includes('세션'), true)
   assert.equal(stripComments('// 세션 라우트 주석').includes('세션'), false)
   assert.equal(stripComments('{/* 세션 블록 주석 */}').includes('세션'), false)
   assert.equal(stripComments('<p>세션</p> // 꼬리 주석').includes('세션'), true)
 })
 
-test('③ 대상 파일이 전부 실재한다 — 이름이 바뀌면 계약이 빈 목록을 보고 초록이 된다', () => {
+test('3) 대상 파일이 전부 실재한다 — 이름이 바뀌면 계약이 빈 목록을 보고 초록이 된다', () => {
   assert.ok(SCREENS.length >= 10, '화면 목록이 줄었다 — 지운 것이 아니라 이름이 바뀐 것은 아닌지')
   for (const file of SCREENS) {
     assert.doesNotThrow(() => read(file), `${file} 이 없다 — 목록을 고치지 않으면 그 화면은 검사 밖이다`)

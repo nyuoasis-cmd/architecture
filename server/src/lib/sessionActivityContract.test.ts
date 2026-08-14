@@ -20,7 +20,7 @@ const PARTICIPANTS = [
   { id: 'p6', nickname: '한지호' },
 ]
 
-test('① 들어오기만 한 학생은 활동으로 세지 않는다 — 세면 피드가 거짓말을 한다', () => {
+test('1) 들어오기만 한 학생은 활동으로 세지 않는다 — 세면 피드가 거짓말을 한다', () => {
   const activity = summarizeSessionActivity({
     participants: PARTICIPANTS,
     progressRows: [{ participant_id: 'p1', qa_id: 'ch01_q01', read_at: '2026-08-14T01:00:00Z' }],
@@ -31,7 +31,7 @@ test('① 들어오기만 한 학생은 활동으로 세지 않는다 — 세면
   assert.equal(activity.activity_count, 1, '활동 학생은 진도 행이 있는 사람만이다')
 })
 
-test('② 최근 활동 순 상위 4명만 나온다 — 아바타 자리가 4칸이고 +N 은 activity_count 에서 뺀다', () => {
+test('2) 최근 활동 순 상위 4명만 나온다 — 아바타 자리가 4칸이고 +N 은 activity_count 에서 뺀다', () => {
   const rows = PARTICIPANTS.map((participant, index) => ({
     participant_id: participant.id,
     qa_id: 'ch01_q01',
@@ -45,7 +45,7 @@ test('② 최근 활동 순 상위 4명만 나온다 — 아바타 자리가 4�
   assert.equal(activity.activity_count, 6, '+N 뱃지는 6 - 4 = 2 가 되어야 한다')
 })
 
-test('③ 마지막 활동은 가장 최근 행이고, 퀴즈 점수가 있으면 「퀴즈 완료」다', () => {
+test('3) 마지막 활동은 가장 최근 행이고, 퀴즈 점수가 있으면 「퀴즈 완료」다', () => {
   const activity = summarizeSessionActivity({
     participants: PARTICIPANTS,
     progressRows: [
@@ -65,7 +65,7 @@ test('③ 마지막 활동은 가장 최근 행이고, 퀴즈 점수가 있으�
   })
 })
 
-test('④ 제목을 못 찾으면 qa_id 라도 내보낸다 — 빈 따옴표("")를 교사에게 보이지 않게', () => {
+test('4) 제목을 못 찾으면 qa_id 라도 내보낸다 — 빈 따옴표("")를 교사에게 보이지 않게', () => {
   const activity = summarizeSessionActivity({
     participants: PARTICIPANTS,
     progressRows: [{ participant_id: 'p1', qa_id: 'ch99_q99', read_at: '2026-08-14T01:00:00Z' }],
@@ -76,7 +76,7 @@ test('④ 제목을 못 찾으면 qa_id 라도 내보낸다 — 빈 따옴표(""
   assert.equal(activity.last_activity?.action, '읽음', '퀴즈 점수가 없으면 「읽음」이다')
 })
 
-test('⑤ 「진행 중」은 하나라도 열었지만 전부는 아닌 학생이다 — 0명도 다 끝낸 사람도 빼고', () => {
+test('5) 「진행 중」은 하나라도 열었지만 전부는 아닌 학생이다 — 0명도 다 끝낸 사람도 빼고', () => {
   const activity = summarizeSessionActivity({
     participants: PARTICIPANTS.slice(0, 3),
     progressRows: [
@@ -95,7 +95,7 @@ test('⑤ 「진행 중」은 하나라도 열었지만 전부는 아닌 학생�
   assert.equal(activity.opened_qa_count, 4, '열어 본 문항은 행의 총합이다')
 })
 
-test('⑥ 남의 수업 행·주인 없는 행은 어느 숫자에도 안 들어간다', () => {
+test('6) 남의 수업 행·주인 없는 행은 어느 숫자에도 안 들어간다', () => {
   const activity = summarizeSessionActivity({
     participants: PARTICIPANTS.slice(0, 2),
     progressRows: [
@@ -111,7 +111,7 @@ test('⑥ 남의 수업 행·주인 없는 행은 어느 숫자에도 안 들어
   assert.equal(activity.last_activity?.student_name, '김민수', '남의 행이 최신이라고 피드에 올라오면 안 된다')
 })
 
-test('⑦ 목록 라우트가 수업 수만큼 쿼리를 날리지 않는다 — 교사가 가장 자주 새로고침하는 화면이다', () => {
+test('7) 목록 라우트가 수업 수만큼 쿼리를 날리지 않는다 — 교사가 가장 자주 새로고침하는 화면이다', () => {
   const source = read('server/src/routes/sessions.ts')
   const listRoute = source.slice(source.indexOf("router.get('/',"), source.indexOf("router.get('/:id'"))
 
@@ -124,7 +124,7 @@ test('⑦ 목록 라우트가 수업 수만큼 쿼리를 날리지 않는다 —
   assert.ok(/summarizeSessionActivity\(/.test(listRoute), '목록이 활동 집계를 내보내지 않는다')
 })
 
-test('⑧ 구 이름 participant_count 를 계속 내보낸다 — 배포 시차 동안 카드가 0명으로 보이지 않게', () => {
+test('8) 구 이름 participant_count 를 계속 내보낸다 — 배포 시차 동안 카드가 0명으로 보이지 않게', () => {
   const source = read('server/src/routes/sessions.ts')
   assert.ok(/participant_count: activity\.student_count/.test(source), 'participant_count 가 사라졌다')
 })
