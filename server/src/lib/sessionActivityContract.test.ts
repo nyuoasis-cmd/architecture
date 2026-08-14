@@ -120,11 +120,28 @@ test('7) 목록 라우트가 수업 수만큼 쿼리를 날리지 않는다 — 
     false,
     '수업마다 참여자 조회를 부르고 있다 — N+1 이 돌아왔다',
   )
-  assert.ok(/\.in\('session_id', sessionIds\)/.test(listRoute), '참여자를 한 번에 가져오지 않는다')
+  assert.ok(/selectAllPaged<[\s\S]{0,200}sessionIds,/.test(listRoute), '참여자를 수업 목록 전체에 대해 한 번에 가져오지 않는다')
   assert.ok(/summarizeSessionActivity\(/.test(listRoute), '목록이 활동 집계를 내보내지 않는다')
 })
 
 test('8) 구 이름 participant_count 를 계속 내보낸다 — 배포 시차 동안 카드가 0명으로 보이지 않게', () => {
   const source = read('server/src/routes/sessions.ts')
   assert.ok(/participant_count: activity\.student_count/.test(source), 'participant_count 가 사라졌다')
+})
+
+test('9) 목록 조회가 조용히 잘리지 않는다 — id 는 쪼개고 페이지는 끝까지 넘긴다', () => {
+  const source = read('server/src/routes/sessions.ts')
+
+  // 🚨 잘림은 에러가 아니라 «더 작은 숫자»로 나온다. 200명짜리 수업 몇 개면 참여자만으로
+  //    PostgREST 기본 행 상한(1,000)을 넘고, 교사 화면이 조용히 덜 센다.
+  assert.ok(/const ROW_PAGE = 1000/.test(source), '행 상한을 넘길 페이지 개념이 없다')
+  assert.ok(/\.range\(from, to\)/.test(source), '페이지를 넘기지 않는다 — 첫 1,000행만 세게 된다')
+  assert.ok(/ids\.slice\(index, index \+ ID_CHUNK\)/.test(source), 'IN 목록을 쪼개지 않는다 — 요청 길이가 터진다')
+
+  const listRoute = source.slice(source.indexOf("router.get('/',"), source.indexOf("router.get('/:id'"))
+  assert.equal(
+    [...listRoute.matchAll(/selectAllPaged</g)].length,
+    2,
+    '참여자·진도 두 조회가 모두 페이지 처리를 거쳐야 한다',
+  )
 })
