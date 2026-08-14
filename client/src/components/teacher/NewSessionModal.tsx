@@ -53,10 +53,10 @@ export default function NewSessionModal({ onClose, onCreated }: NewSessionModalP
       <div className="w-full max-w-lg rounded-[28px] bg-white p-6 shadow-[0_30px_80px_rgba(28,25,23,0.24)]">
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">New Session</p>
-            <h2 className="mt-2 text-2xl font-medium text-stone-900">수업 만들기</h2>
+            <h2 className="text-2xl font-medium text-stone-900">수업 만들기</h2>
+            <p className="mt-2 text-sm text-stone-500">수업 이름을 입력하면 참여 코드가 자동 발급돼요</p>
           </div>
-          <button className="btn-ghost-sm" onClick={onClose} type="button">
+          <button aria-label="닫기" className="btn-ghost-sm" onClick={onClose} type="button">
             닫기
           </button>
         </div>

@@ -4,6 +4,15 @@ import SessionCard from '../components/teacher/SessionCard';
 import { listTeacherSessions } from '../lib/session-client';
 import { useSessionStore } from '../store/session-store';
 
+/**
+ * 교사 「내 수업」 목록. BUILDER-UX-POLICY §4 D안.
+ *
+ * 🔑 헤더는 산문이 아니라 **숫자 한 줄**이다 — 「5개 수업 · 진행 중 2개」.
+ *    3줄짜리 설명은 처음 한 번만 유용하고, 그다음부터는 매번 읽어야 할 벽이 된다.
+ * 🚨 시연작 입구를 여기 두지 않는다(2026-08-14 철거). 시연은 «수업을 하고 있는 자리»에서
+ *    켜는 것이라 입구는 수업 현황 상세에 있다(DESIGN-POLICY §9.H-14 v1.10). 목록에 두면
+ *    누를 때마다 참여 코드가 붙은 새 방이 이 목록에 쌓인다 — 실제로 그렇게 됐었다.
+ */
 export default function TeacherDashboardPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -41,69 +50,85 @@ export default function TeacherDashboardPage() {
 
   const activeSessions = teacherSessions.filter((session) => session.status === 'active');
   const endedSessions = teacherSessions.filter((session) => session.status === 'ended');
+  const isEmpty = !isLoading && teacherSessions.length === 0;
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-10">
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-        <div className="max-w-2xl">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Teacher Dashboard</p>
-          <h1 className="mt-3 text-4xl font-medium text-stone-950">내 수업</h1>
-          <p className="mt-3 text-sm leading-7 text-stone-600">
-            진행 중인 수업을 한곳에서 확인하고, 새 수업을 만들 수 있어요. 종료한 수업은 아래에 따로 모입니다.
+    <main className="mx-auto w-full max-w-4xl px-6 py-8">
+      <header className="mb-8 flex items-end justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-2xl font-medium leading-tight tracking-tight text-stone-950">내 수업</h1>
+          <p className="mt-2 text-sm text-stone-500">
+            {teacherSessions.length}개 수업 · 진행 중 {activeSessions.length}개
           </p>
         </div>
-        {/*
-          🚨 시연작 입구를 여기 두지 않는다(2026-08-14 철거). 시연은 «수업을 하고 있는 자리»에서 켜는 것이라
-             입구는 **수업 현황 상세**에 있다(DESIGN-POLICY §9.H-14 v1.10). 목록에 두면 «수업 밖에서 켜는 것»이 되고,
-             실제로 그렇게 지었더니 누를 때마다 참여 코드가 붙은 새 방이 하나씩 이 목록에 쌓였다.
-        */}
-        <div className="flex items-end gap-2">
+        <button
+          className="inline-flex h-10 flex-shrink-0 items-center gap-1.5 rounded-[10px] bg-stone-950 px-5 text-sm font-medium text-white hover:bg-stone-800"
+          onClick={() => setIsModalOpen(true)}
+          type="button"
+        >
+          <svg
+            aria-hidden="true"
+            fill="none"
+            height="14"
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeWidth="2"
+            viewBox="0 0 16 16"
+            width="14"
+          >
+            <path d="M8 3 L8 13 M3 8 L13 8" />
+          </svg>
+          수업 만들기
+        </button>
+      </header>
+
+      {error ? <div className="mb-6 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
+
+      {isLoading ? (
+        <div className="rounded-[12px] border border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
+          수업 목록을 불러오는 중입니다.
+        </div>
+      ) : null}
+
+      {/*
+        🔑 빈 상태는 «없다»고만 말하지 않는다(DESIGN-POLICY §8) — 다음에 할 일을 버튼으로 준다.
+           점선 상자 한 줄이던 시절, 처음 들어온 교사가 무엇부터 눌러야 할지 몰라 멈췄다.
+      */}
+      {isEmpty ? (
+        <div className="flex flex-col items-center rounded-[12px] border border-dashed border-[var(--color-border)] bg-white px-6 py-14 text-center">
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-100 text-lg" aria-hidden="true">
+            📚
+          </div>
+          <p className="mt-4 text-base font-medium text-stone-900">아직 만든 수업이 없어요</p>
+          <p className="mt-1 text-sm text-stone-500">수업을 만들면 학생들이 참여할 수 있어요</p>
           <button
-            className="inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white"
+            className="mt-5 inline-flex h-10 items-center rounded-[10px] bg-stone-950 px-5 text-sm font-medium text-white hover:bg-stone-800"
             onClick={() => setIsModalOpen(true)}
             type="button"
           >
-            수업 만들기
+            첫 수업 만들기
           </button>
         </div>
-      </header>
+      ) : null}
 
-      {error ? <div className="mt-6 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
-
-      <section className="mt-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-lg font-medium text-stone-900">진행 중</h2>
-          <span className="text-sm text-stone-500">{activeSessions.length}개</span>
-        </div>
-        <div className="space-y-4">
-          {isLoading ? (
-            <div className="rounded-[24px] border border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
-              수업 목록을 불러오는 중입니다.
-            </div>
-          ) : activeSessions.length > 0 ? (
-            activeSessions.map((session) => <SessionCard key={session.id} session={session} />)
-          ) : (
-            <div className="rounded-[24px] border border-dashed border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
-              진행 중인 수업이 없습니다. 수업을 만들어 시작하세요.
-            </div>
-          )}
-        </div>
-      </section>
+      {activeSessions.length > 0 ? (
+        <section className="flex flex-col gap-3">
+          {activeSessions.map((session) => (
+            <SessionCard key={session.id} session={session} />
+          ))}
+        </section>
+      ) : null}
 
       {/*
-        🔑 「종료된 세션」은 **있을 때만** 자리를 차지한다(결정 16, 2026-08-11).
-           0개인데도 «종료된 세션이 아직 없습니다» 카드가 늘 떠 있어, 교사가 처음 들어온 화면에서
-           빈 상자 두 개를 먼저 읽었다. 종료한 수업이 실제로 생기기 전까지는 안 보인다.
-        🚨 통째로 지우지는 않았다 — 지난 수업을 다시 열어 볼 다른 통로가 아직 없기 때문이다.
-           별도 「지난 수업」 화면이 생기는 날 이 섹션을 그리로 옮긴다(에픽 6/6).
+        🔑 「종료됨」 묶음은 **있을 때만** 자리를 차지한다(결정 16, 2026-08-11).
+           0개인데도 «아직 없습니다» 카드가 늘 떠 있어 교사가 빈 상자부터 읽었다.
+        🚨 통째로 지우지는 않았다 — 지난 수업을 다시 열어 볼 다른 통로가 아직 없다.
+           별도 「지난 수업」 화면이 생기는 날 이 묶음을 그리로 옮긴다.
       */}
       {endedSessions.length > 0 ? (
-        <section className="mt-10">
-          <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-medium text-stone-900">종료됨</h2>
-            <span className="text-sm text-stone-500">{endedSessions.length}개</span>
-          </div>
-          <div className="space-y-4">
+        <section className={activeSessions.length > 0 ? 'mt-10' : ''}>
+          <p className="mb-3 text-xs tracking-[0.05em] text-stone-400">종료됨</p>
+          <div className="flex flex-col gap-3">
             {endedSessions.map((session) => (
               <SessionCard key={session.id} session={session} />
             ))}
