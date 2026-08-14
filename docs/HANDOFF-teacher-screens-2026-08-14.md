@@ -129,6 +129,9 @@ active QA LayerA crawl-260813-* (5건) · [QA sinipssaem-…] · [QA saenaegi-�
 - **머지** — 브랜치 `architecture-qa-260814`. `main` 머지 = prod 배포.
 - **QA 6번 칸 「사람눈」** — 스크린샷 실패로 픽셀 확인 미수행. 배포 후 실화면에서 한 번 훑는 것을 권한다.
 - **마스터 레포 커밋 2개**: `shared/demo-screen-qr-inventory.md`(완료) · `shared/BUILDER-UX-POLICY.md §11`(대기).
+- **머지 뒤에** L1 인벤토리 재생성 — `shared/qa/inventory/reports/inventory.architecture.*` 가 아직
+  라우트 15개(`/teacher/demo` 포함)로 적혀 있다. 지금 돌리면 «배포되지 않은 코드»를 기록하게 되므로
+  머지 후에 돌린다: `node shared/qa/inventory/extract.mjs --app architecture --src /home/claude/architecture/client/src`
 - `mockups/teacher-sessions-list-v1.html` 의 「지금(As-Is)」 탭은 이제 **옛 화면**이다 — 다음에 손댈 때 갱신하거나 지울 것.
 
 ## 7. jery 에게 물을 것
