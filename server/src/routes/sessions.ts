@@ -50,6 +50,47 @@ type ParticipantRow = {
   session_id: string;
 };
 
+
+/** IN 목록 한 번에 넣을 id 개수. 요청 길이(URL) 가 터지지 않을 만큼만. */
+const ID_CHUNK = 100;
+/** PostgREST 한 응답의 행 상한. 이보다 적게 오면 그 조각은 끝난 것이다. */
+const ROW_PAGE = 1000;
+
+/**
+ * id 목록을 쪼개고 페이지를 끝까지 넘겨 **전부** 가져온다.
+ *
+ * 🚨 이 함수가 없으면 잘림이 «에러»가 아니라 «더 작은 숫자»로 나온다 — 교사 화면이
+ *    조용히 덜 센다. 200명 × 여러 수업이면 참여자만으로도 1,000행을 넘긴다.
+ */
+async function selectAllPaged<T>(
+  ids: readonly string[],
+  query: (chunk: string[], from: number, to: number) => PromiseLike<{ data: unknown; error: unknown }>,
+): Promise<T[]> {
+  const out: T[] = [];
+
+  for (let index = 0; index < ids.length; index += ID_CHUNK) {
+    const chunk = ids.slice(index, index + ID_CHUNK);
+    if (chunk.length === 0) {
+      continue;
+    }
+
+    for (let from = 0; ; from += ROW_PAGE) {
+      const { data, error } = await query(chunk, from, from + ROW_PAGE - 1);
+      if (error) {
+        throw new Error('paged_lookup_failed');
+      }
+
+      const rows = (data ?? []) as T[];
+      out.push(...rows);
+      if (rows.length < ROW_PAGE) {
+        break;
+      }
+    }
+  }
+
+  return out;
+}
+
 async function requireTeacherId(req: Request) {
   const user = await getRequestUser(req);
   return user?.id ?? null;
@@ -216,53 +257,61 @@ router.get('/', async (req, res) => {
     return right.created_at.localeCompare(left.created_at);
   });
 
-  // 🔑 수업 수만큼 쿼리를 날리지 않는다 — 참여자 한 번, 진도 한 번. 목록은 교사가
+  // 🔑 수업 수만큼 쿼리를 날리지 않는다 — 참여자·진도를 통째로 모아 온다. 목록은 교사가
   //    수업 중에 가장 자주 새로고침하는 화면이라, 여기서 N+1 이면 반이 클 때 그대로 느려진다.
   //    (이전에는 수업 하나당 listParticipantsWithProgress 를 불러 2N 쿼리였다.)
+  // 🚨 그런데 «한 번에 다»는 두 군데서 조용히 잘린다: PostgREST 의 행 상한(기본 1,000)과
+  //    IN 목록이 길어질 때의 요청 길이. 잘리면 에러가 아니라 **더 작은 숫자**가 나와서,
+  //    교사 화면이 «덜 참여한 반»처럼 보인다 — 그게 이 앱에서 가장 나쁜 종류의 거짓말이다.
+  //    그래서 id 는 쪼개고(chunk) 페이지는 끝까지 넘긴다(range).
   const sessionIds = sessions.map((session) => session.id);
   const participantsBySession = new Map<string, { id: string; nickname: string }[]>();
   const progressByParticipant = new Map<string, ActivityProgressRow[]>();
 
   if (sessionIds.length > 0) {
-    const { data: participantRows, error: participantError } = await supabase
-      .from('architecture_participants')
-      .select('id, nickname, session_id')
-      .in('session_id', sessionIds);
+    let participants: { id: string; nickname: string; session_id: string }[];
+    let progressRows: ActivityProgressRow[];
 
-    if (participantError) {
+    try {
+      participants = await selectAllPaged<{ id: string; nickname: string; session_id: string }>(
+        sessionIds,
+        (chunk, from, to) =>
+          supabase
+            .from('architecture_participants')
+            .select('id, nickname, session_id')
+            .in('session_id', chunk)
+            .order('id', { ascending: true })
+            .range(from, to),
+      );
+
+      progressRows = await selectAllPaged<ActivityProgressRow>(
+        participants.map((participant) => participant.id),
+        (chunk, from, to) =>
+          supabase
+            .from('architecture_progress')
+            .select('participant_id, qa_id, read_at, quiz_score')
+            .in('participant_id', chunk)
+            .order('id', { ascending: true })
+            .range(from, to),
+      );
+    } catch {
       res.status(500).json({ error: 'session_list_failed' });
       return;
     }
 
-    const participants = (participantRows ?? []) as { id: string; nickname: string; session_id: string }[];
     for (const participant of participants) {
       const bucket = participantsBySession.get(participant.session_id) ?? [];
       bucket.push({ id: participant.id, nickname: participant.nickname });
       participantsBySession.set(participant.session_id, bucket);
     }
 
-    if (participants.length > 0) {
-      const { data: progressRows, error: progressError } = await supabase
-        .from('architecture_progress')
-        .select('participant_id, qa_id, read_at, quiz_score')
-        .in(
-          'participant_id',
-          participants.map((participant) => participant.id),
-        );
-
-      if (progressError) {
-        res.status(500).json({ error: 'session_list_failed' });
-        return;
+    for (const row of progressRows) {
+      if (!row.participant_id) {
+        continue;
       }
-
-      for (const row of (progressRows ?? []) as ActivityProgressRow[]) {
-        if (!row.participant_id) {
-          continue;
-        }
-        const bucket = progressByParticipant.get(row.participant_id) ?? [];
-        bucket.push(row);
-        progressByParticipant.set(row.participant_id, bucket);
-      }
+      const bucket = progressByParticipant.get(row.participant_id) ?? [];
+      bucket.push(row);
+      progressByParticipant.set(row.participant_id, bucket);
     }
   }
 
