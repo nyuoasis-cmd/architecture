@@ -129,57 +129,6 @@ function LearnLayout(props: {
   );
 }
 
-/**
- * 🎬 시연 모드 바 — 교사가 시연작 안에 있다는 사실과, 그 안에서 할 수 있는 두 가지를 말한다.
- *
- * 🚨 **QR 버튼은 조건부로 숨기지 않는다**(목업 S6 명시). 코드가 아직 안 왔으면 `disabled` 로
- *    자리를 지킨다 — 버튼이 없어졌다 나타나면 교사는 «이 앱엔 QR 이 없다»로 읽고 학생을
- *    부를 방법을 못 찾는다. 있는데 잠깐 못 누르는 것과, 아예 안 보이는 것은 다르다.
- * 🔑 「시연 끝내기」는 이 시연 세션을 종료한다. 수업 세션이 아니라 방금 만든 시연 세션이라
- *    학생 진도가 걸려 있지 않다.
- */
-function DemoBar({ sessionId, code, title }: { sessionId: string; code?: string; title: string }) {
-  const navigate = useNavigate();
-  const [isQrOpen, setIsQrOpen] = useState(false);
-  const [isEnding, setIsEnding] = useState(false);
-
-  return (
-    <div className="flex flex-shrink-0 flex-wrap items-center gap-2 border-b-2 border-indigo-200 bg-indigo-50 px-4 py-2">
-      <span className="rounded-full bg-indigo-600 px-2.5 py-1 text-xs font-bold text-white">🎬 시연 모드</span>
-      <span className="min-w-0 truncate text-sm font-medium text-stone-900">{title}</span>
-      {code ? <span className="font-mono text-sm tracking-[0.3em] text-indigo-900">{code}</span> : null}
-      <div className="ml-auto flex items-center gap-2">
-        <button
-          className="inline-flex min-h-9 items-center rounded-xl border border-indigo-200 bg-white px-3 text-xs font-medium text-stone-800 disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={!code}
-          onClick={() => setIsQrOpen(true)}
-          title={code ? '학생 참여 QR 코드' : '참여 코드를 준비하는 중입니다'}
-          type="button"
-        >
-          📱 QR코드
-        </button>
-        <button
-          className="inline-flex min-h-9 items-center rounded-xl border border-indigo-200 bg-white px-3 text-xs font-medium text-stone-800 disabled:opacity-60"
-          disabled={isEnding}
-          onClick={async () => {
-            setIsEnding(true);
-            try {
-              await endSession(sessionId);
-            } catch {
-              // 종료가 실패해도 교사를 시연 화면에 가둬 두지 않는다 — 목록으로 내보낸다.
-            }
-            navigate('/teacher/demo');
-          }}
-          type="button"
-        >
-          {isEnding ? '끝내는 중...' : '시연 끝내기'}
-        </button>
-      </div>
-      {isQrOpen && code ? <QrFullscreenModal code={code} onClose={() => setIsQrOpen(false)} /> : null}
-    </div>
-  );
-}
-
 export default function LearnPage({ mode }: LearnPageProps) {
   const params = useParams();
   const [searchParams] = useSearchParams();
@@ -194,8 +143,6 @@ export default function LearnPage({ mode }: LearnPageProps) {
   const [sessionError, setSessionError] = useState<{ status?: number; message: string } | null>(null);
 
   const isTeacherPreview = mode === 'session' && searchParams.get('role') === 'teacher';
-  // 🎬 시연 모드 = 교사가 시연작으로 들어온 것. 학생에게는 절대 참이 되지 않는다(교사 미리 보기 안에서만 본다).
-  const isDemoMode = isTeacherPreview && searchParams.get('demo') === '1';
   const sessionId = params.sessionId;
   const chapterId = Number(params.chapterId);
   const qaId = params.qaId ?? '';
@@ -331,13 +278,6 @@ export default function LearnPage({ mode }: LearnPageProps) {
     return (
       <>
         <StudentExitGuard when={!isTeacherPreview} />
-        {isDemoMode ? (
-          <DemoBar
-            code={currentSession.code}
-            sessionId={currentSession.id}
-            title={`${chapter.lessonNo}강 · ${qa.title}`}
-          />
-        ) : null}
         <LearnLayout
         allSessionQas={sessionQas}
         availableChapters={sessionChapters}
@@ -354,11 +294,9 @@ export default function LearnPage({ mode }: LearnPageProps) {
             });
           });
         }}
-        libraryHref={isDemoMode ? '/teacher/demo' : `/library?sessionId=${params.sessionId}`}
+        libraryHref={`/library?sessionId=${params.sessionId}`}
         makeQaHref={(targetQaId) =>
-          // 🚨 시연 표시는 문항을 옮겨도 따라와야 한다 — 안 그러면 한 번 클릭하는 순간
-          //    시연 바가 사라지고 교사는 QR·끝내기를 잃는다.
-          `/learn/${params.sessionId}?qa=${targetQaId}${isTeacherPreview ? '&role=teacher' : ''}${isDemoMode ? '&demo=1' : ''}`
+          `/learn/${params.sessionId}?qa=${targetQaId}${isTeacherPreview ? '&role=teacher' : ''}`
         }
         progressMapOverride={viewerProgress}
         qa={qa}
