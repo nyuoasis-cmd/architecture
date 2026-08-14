@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Navigate, useNavigate, useParams } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
+import ConfirmModal from '../components/common/ConfirmModal';
 import QrFullscreenModal from '../components/common/QrFullscreenModal';
 import QrInline from '../components/common/QrInline';
 import ParticipantList from '../components/teacher/ParticipantList';
@@ -12,6 +13,8 @@ export default function TeacherSessionPage() {
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isEnding, setIsEnding] = useState(false);
+  const [isConfirmingEnd, setIsConfirmingEnd] = useState(false);
+  const [endError, setEndError] = useState<string | null>(null);
   const [isForbidden, setIsForbidden] = useState(false);
   const [isQrFullscreen, setIsQrFullscreen] = useState(false);
   const currentSession = useSessionStore((state) => state.currentSession);
@@ -113,6 +116,10 @@ export default function TeacherSessionPage() {
   //    2026-08-11 prod QA(신입샘 t2): 참여자 0명인데도 「▶ 수업 시연 시작」이 1차 CTA 라
   //    신입 교사가 «QR 을 먼저 띄워야 하나, 시연을 먼저 눌러야 하나»에서 멈췄다.
   const hasParticipants = participants.length > 0;
+  const openedQaCount = participants.reduce((sum, participant) => sum + participant.progress_count, 0);
+  const inProgressCount = participants.filter(
+    (participant) => participant.progress_count > 0 && participant.progress_count < totalQas,
+  ).length;
 
   const primaryCta =
     'inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white disabled:bg-stone-300';
@@ -121,7 +128,19 @@ export default function TeacherSessionPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-10">
-      <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
+      {/*
+        🚨 뒤로 링크 없이 브라우저 뒤로가기에만 기대지 않는다(§4-A 금지).
+           교사는 수업 중에 QR 전체화면·학생 화면 미리 보기를 오가느라 히스토리가 엉켜 있고,
+           그때 «목록으로 어떻게 돌아가지»가 화면에 없으면 새로고침으로 길을 찾는다.
+      */}
+      <Link
+        className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900"
+        to="/teacher"
+      >
+        <span aria-hidden="true">←</span> 내 수업
+      </Link>
+
+      <section className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-6 shadow-sm">
           <h1 className="mt-3 text-4xl font-medium text-stone-950">{currentSession.name}</h1>
           <p className="mt-3 text-sm text-stone-600">{chapterLabels}</p>
@@ -165,20 +184,13 @@ export default function TeacherSessionPage() {
             <button
               className="inline-flex min-h-11 items-center rounded-2xl bg-rose-600 px-5 text-sm font-medium text-white"
               disabled={isEnding || currentSession.status === 'ended'}
-              onClick={async () => {
-                setIsEnding(true);
-                try {
-                  const ended = await endSession(currentSession.id);
-                  setCurrentSession({ ...currentSession, ...ended });
-                } catch (caught) {
-                  setError(caught instanceof Error ? caught.message : '수업을 종료하지 못했습니다.');
-                } finally {
-                  setIsEnding(false);
-                }
+              onClick={() => {
+                setEndError(null);
+                setIsConfirmingEnd(true);
               }}
               type="button"
             >
-              {currentSession.status === 'ended' ? '종료됨' : isEnding ? '종료 중...' : '수업 종료'}
+              {currentSession.status === 'ended' ? '종료됨' : '수업 종료'}
             </button>
           </div>
 
@@ -201,9 +213,34 @@ export default function TeacherSessionPage() {
 
       {error ? <div className="mt-6 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
 
+      {/*
+        🚨 §4-A 는 통계 3열을 요구하고 «참여자 수 누락»을 금지한다. 여기엔 참여자 pill 하나뿐이었다.
+        🚨 「열어 본 문항」이지 「읽은 문항」이 아니다 — 진도 행은 학생이 문항 화면을 **여는 순간**
+           생긴다(session-progress.ts). 「읽은」이라고 적으면 교사가 이해도까지 봤다고 오해한다.
+        🔑 「진행 중」 = 하나라도 열었지만 아직 다 열지는 않은 학생. 0명이 아니라 «다 끝낸» 쪽과
+           구분되는 숫자라서, 교사가 «지금 붙잡아야 할 사람이 몇인지»를 이 한 칸에서 읽는다.
+      */}
+      <section className="mt-8 grid grid-cols-3 gap-3">
+        {([
+          ['참여 학생', participants.length],
+          ['열어 본 문항', openedQaCount],
+          ['진행 중', inProgressCount],
+        ] as const).map(([label, value]) => (
+          <div className="rounded-xl border border-[var(--color-border)] bg-white p-4 text-center" key={label}>
+            <div
+              className="text-[28px] font-bold leading-tight text-stone-900"
+              style={{ fontFamily: 'var(--font-heading)' }}
+            >
+              {value}
+            </div>
+            <div className="mt-1 text-xs font-medium text-stone-400">{label}</div>
+          </div>
+        ))}
+      </section>
+
       <section className="mt-8">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-medium text-stone-900">참여자 진도</h2>
+          <h2 className="text-xl font-medium text-stone-900">학생 현황</h2>
           <span className="text-sm text-stone-500">총 {totalQas}개 문항</span>
         </div>
         <ParticipantList participants={participants} totalQas={totalQas} />
@@ -211,6 +248,35 @@ export default function TeacherSessionPage() {
 
       {isQrFullscreen ? (
         <QrFullscreenModal code={currentSession.code} onClose={() => setIsQrFullscreen(false)} />
+      ) : null}
+
+      {isConfirmingEnd ? (
+        <ConfirmModal
+          confirmLabel="종료"
+          description="학생들이 더 이상 참여할 수 없어요. 이미 저장된 학습 기록은 그대로 남아요."
+          error={endError}
+          isPending={isEnding}
+          onClose={() => {
+            if (!isEnding) {
+              setIsConfirmingEnd(false);
+            }
+          }}
+          onConfirm={async () => {
+            setIsEnding(true);
+            setEndError(null);
+            try {
+              const ended = await endSession(currentSession.id);
+              setCurrentSession({ ...currentSession, ...ended });
+              setIsConfirmingEnd(false);
+            } catch (caught) {
+              setEndError(caught instanceof Error ? caught.message : '수업을 종료하지 못했습니다.');
+            } finally {
+              setIsEnding(false);
+            }
+          }}
+          pendingLabel="종료 중…"
+          title="이 수업을 종료할까요?"
+        />
       ) : null}
     </main>
   );

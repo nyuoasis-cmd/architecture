@@ -16,6 +16,7 @@ import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { test } from 'node:test'
+import { stripComments } from './strip-comments'
 
 const ROOT = path.resolve(__dirname, '..', '..', '..')
 const read = (rel: string) => readFileSync(path.join(ROOT, rel), 'utf8')
@@ -36,59 +37,6 @@ const SCREENS = [
   'client/src/components/learn/ContentPanel.tsx',
   'client/src/components/learn/TeacherExplainPanel.tsx',
 ]
-
-/**
- * 주석만 걷어낸다. 문자열 안의 `//`(예: `https://`)를 주석으로 오인하면
- * 그 줄의 실제 문구가 통째로 사라져 계약이 조용히 눈을 감는다 — 그래서 따옴표를 센다.
- */
-export function stripComments(source: string): string {
-  let out = ''
-  let i = 0
-  let quote: string | null = null
-
-  while (i < source.length) {
-    const ch = source[i]
-    const next = source[i + 1]
-
-    if (quote) {
-      if (ch === '\\') {
-        out += ch + (next ?? '')
-        i += 2
-        continue
-      }
-      if (ch === quote) {
-        quote = null
-      }
-      out += ch
-      i += 1
-      continue
-    }
-
-    if (ch === '"' || ch === "'" || ch === '`') {
-      quote = ch
-      out += ch
-      i += 1
-      continue
-    }
-
-    if (ch === '/' && next === '/') {
-      while (i < source.length && source[i] !== '\n') i += 1
-      continue
-    }
-
-    if (ch === '/' && next === '*') {
-      i += 2
-      while (i < source.length && !(source[i] === '*' && source[i + 1] === '/')) i += 1
-      i += 2
-      continue
-    }
-
-    out += ch
-    i += 1
-  }
-
-  return out
-}
 
 test('① 교사·학생 화면에 한글 「세션」이 없다 — 그들이 하는 것은 수업이다', () => {
   const offenders: string[] = []
