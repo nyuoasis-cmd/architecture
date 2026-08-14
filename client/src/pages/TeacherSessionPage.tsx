@@ -5,6 +5,7 @@ import QrFullscreenModal from '../components/common/QrFullscreenModal';
 import QrInline from '../components/common/QrInline';
 import ParticipantList from '../components/teacher/ParticipantList';
 import { CHAPTERS, getQasByChapterId } from '../data/qa-stubs';
+import { formatRelativeTime } from '../lib/format';
 import { endSession, getSession, getSessionParticipants, SessionClientError } from '../lib/session-client';
 import { useSessionStore } from '../store/session-store';
 
@@ -121,94 +122,114 @@ export default function TeacherSessionPage() {
     (participant) => participant.progress_count > 0 && participant.progress_count < totalQas,
   ).length;
 
+  const isEnded = currentSession.status === 'ended';
   const primaryCta =
-    'inline-flex min-h-11 items-center rounded-2xl bg-stone-950 px-5 text-sm font-medium text-white disabled:bg-stone-300';
+    'inline-flex h-10 items-center rounded-[10px] bg-stone-950 px-5 text-sm font-medium text-white disabled:bg-stone-300';
   const secondaryCta =
-    'inline-flex min-h-11 items-center rounded-2xl border border-[var(--color-border)] bg-white px-5 text-sm font-medium text-stone-800 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60';
+    'inline-flex h-10 items-center rounded-[10px] border border-[var(--color-border)] bg-white px-5 text-sm font-medium text-stone-800 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60';
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-6 py-10">
+    <main className="mx-auto w-full max-w-[900px] px-6 py-8">
       {/*
         🚨 뒤로 링크 없이 브라우저 뒤로가기에만 기대지 않는다(§4-A 금지).
            교사는 수업 중에 QR 전체화면·학생 화면 미리 보기를 오가느라 히스토리가 엉켜 있고,
            그때 «목록으로 어떻게 돌아가지»가 화면에 없으면 새로고침으로 길을 찾는다.
       */}
-      <Link
-        className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900"
-        to="/teacher"
-      >
+      <Link className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900" to="/teacher">
         <span aria-hidden="true">←</span> 내 수업
       </Link>
 
-      <section className="mt-4 grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-6 shadow-sm">
-          <h1 className="mt-3 text-4xl font-medium text-stone-950">{currentSession.name}</h1>
-          <p className="mt-3 text-sm text-stone-600">{chapterLabels}</p>
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            <span className="rounded-[18px] bg-stone-950 px-5 py-3 font-mono text-[32px] tracking-[0.5em] text-white">
-              {currentSession.code}
-            </span>
-            <span className="rounded-full bg-stone-100 px-3 py-1 text-sm text-stone-600">
-              참여자 {participants.length}명
-            </span>
-          </div>
-          {!hasParticipants && currentSession.status !== 'ended' ? (
-            <p className="mt-5 rounded-2xl bg-stone-50 px-4 py-3 text-sm text-stone-700">
-              <span className="font-medium text-stone-900">아직 학생이 없어요.</span> QR을 교실 화면에 띄워 학생을 받은
-              뒤 수업을 시작하세요.
+      {/*
+        🔑 헤더는 §4 카드와 **같은 말투**를 쓴다 — 같은 코드 뱃지, 같은 상태 뱃지.
+           목록에서 상세로 들어왔을 때 «같은 수업을 계속 보고 있다»가 눈으로 이어져야 한다.
+           예전엔 32px 검정 코드 블록 + 36px 제목 + Live Session 이라 화면이 갈아탄 것처럼 보였다.
+      */}
+      <section className="mt-4 rounded-[12px] border border-[var(--color-border)] bg-white p-5 shadow-sm">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="truncate text-[22px] font-semibold text-stone-900">{currentSession.name}</h1>
+              {isEnded ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-stone-100 px-2.5 py-[3px] text-[11.5px] font-semibold text-stone-500">
+                  <span className="h-1.5 w-1.5 rounded-full bg-stone-400" />
+                  종료
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-[3px] text-[11.5px] font-semibold text-[#059669]">
+                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />
+                  진행 중
+                </span>
+              )}
+            </div>
+            <div className="mt-3 flex flex-wrap items-center gap-3 text-sm text-stone-500">
+              <span className="inline-flex h-[34px] items-center rounded-xl bg-stone-50 px-3 text-sm font-bold tracking-[0.06em] text-stone-900">
+                {currentSession.code}
+              </span>
+              <span>👤 {participants.length}명</span>
+              <span>📄 {totalQas}개 문항</span>
+            </div>
+            <p className="mt-2 truncate text-[13px] text-stone-400" title={chapterLabels}>
+              {formatRelativeTime(currentSession.created_at)} · {chapterLabels}
             </p>
-          ) : null}
-
-          <div className="mt-6 flex flex-wrap gap-2">
-            {/*
-              🔑 순서가 곧 안내다 — 학생이 0명이면 QR 이 1차, 들어오면 학생 화면 보기가 1차가 된다.
-                 「시연」은 교사에게 «학생에게 보여 주기»로도 «내가 미리 보기»로도 읽혀서,
-                 실제 동작(=학생이 볼 화면을 교사가 role=teacher 로 미리 여는 것)대로 다시 적었다.
-            */}
-            <button
-              className={hasParticipants ? primaryCta : secondaryCta}
-              disabled={currentSession.status === 'ended'}
-              onClick={() => navigate(`/library?sessionId=${currentSession.id}`)}
-              type="button"
-            >
-              👀 학생 화면 미리 보기
-            </button>
-            <button
-              className={hasParticipants ? secondaryCta : primaryCta}
-              disabled={currentSession.status === 'ended'}
-              onClick={() => setIsQrFullscreen(true)}
-              type="button"
-            >
-              📱 QR 전체화면
-            </button>
-            <button
-              className="inline-flex min-h-11 items-center rounded-2xl bg-rose-600 px-5 text-sm font-medium text-white"
-              disabled={isEnding || currentSession.status === 'ended'}
-              onClick={() => {
-                setEndError(null);
-                setIsConfirmingEnd(true);
-              }}
-              type="button"
-            >
-              {currentSession.status === 'ended' ? '종료됨' : '수업 종료'}
-            </button>
           </div>
 
-          {/*
-            🚨 교사가 수업 중에 읽는 것은 **문항별 「📋 설명 노트」** 하나다(2026-08-12, 교안 철거).
-               노트는 학생과 **같은 화면 안**에 있다 — 교사 화면 = 학생 화면의 상위집합
-               (DESIGN-POLICY §9.H-14). 어디 있는지 적어 두지 않으면 교사는 수업 중에 찾아 헤맨다.
-            🚨 «차시 순서»를 여기에 다시 만들지 않는다 — 수업 흐름은 교사가 정한다.
-          */}
-          <p className="mt-4 text-sm text-stone-500">
-            📋 문항마다 <span className="font-medium text-stone-700">설명 노트</span>가 있습니다. «학생 화면 미리 보기»로
-            들어가 우측 콘텐츠의 <span className="font-medium text-stone-700">📋 설명 노트</span> 탭을 여세요.
-          </p>
+          <div className="flex-shrink-0 rounded-xl border border-[var(--color-border)] bg-white p-3">
+            <QrInline code={currentSession.code} size={132} />
+          </div>
         </div>
 
-        <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-6 shadow-sm">
-          <QrInline code={currentSession.code} size={220} />
+        {!hasParticipants && !isEnded ? (
+          <p className="mt-5 rounded-xl bg-stone-50 px-4 py-3 text-sm text-stone-700">
+            <span className="font-medium text-stone-900">아직 학생이 없어요.</span> QR을 교실 화면에 띄워 학생을 받은 뒤
+            수업을 시작하세요.
+          </p>
+        ) : null}
+
+        <div className="mt-5 flex flex-wrap gap-2">
+          {/*
+            🔑 순서가 곧 안내다 — 학생이 0명이면 QR 이 1차, 들어오면 학생 화면 보기가 1차가 된다.
+               「시연」은 교사에게 «학생에게 보여 주기»로도 «내가 미리 보기»로도 읽혀서,
+               실제 동작(=학생이 볼 화면을 교사가 role=teacher 로 미리 여는 것)대로 다시 적었다.
+          */}
+          <button
+            className={hasParticipants ? primaryCta : secondaryCta}
+            disabled={isEnded}
+            onClick={() => navigate(`/library?sessionId=${currentSession.id}`)}
+            type="button"
+          >
+            👀 학생 화면 미리 보기
+          </button>
+          <button
+            className={hasParticipants ? secondaryCta : primaryCta}
+            disabled={isEnded}
+            onClick={() => setIsQrFullscreen(true)}
+            type="button"
+          >
+            📱 QR 전체화면
+          </button>
+          <button
+            className="ml-auto inline-flex h-10 items-center rounded-[10px] px-3.5 text-[13px] text-stone-500 hover:bg-stone-100 disabled:opacity-50"
+            disabled={isEnding || isEnded}
+            onClick={() => {
+              setEndError(null);
+              setIsConfirmingEnd(true);
+            }}
+            type="button"
+          >
+            {isEnded ? '종료됨' : '수업 종료'}
+          </button>
         </div>
+
+        {/*
+          🚨 교사가 수업 중에 읽는 것은 **문항별 「📋 설명 노트」** 하나다(2026-08-12, 교안 철거).
+             노트는 학생과 **같은 화면 안**에 있다 — 교사 화면 = 학생 화면의 상위집합
+             (DESIGN-POLICY §9.H-14). 어디 있는지 적어 두지 않으면 교사는 수업 중에 찾아 헤맨다.
+          🚨 «차시 순서»를 여기에 다시 만들지 않는다 — 수업 흐름은 교사가 정한다.
+        */}
+        <p className="mt-4 text-[13px] text-stone-500">
+          📋 문항마다 <span className="font-medium text-stone-700">설명 노트</span>가 있습니다. «학생 화면 미리 보기»로
+          들어가 우측 콘텐츠의 <span className="font-medium text-stone-700">📋 설명 노트</span> 탭을 여세요.
+        </p>
       </section>
 
       {error ? <div className="mt-6 rounded-2xl bg-rose-50 px-4 py-3 text-sm text-rose-700">{error}</div> : null}
@@ -240,7 +261,7 @@ export default function TeacherSessionPage() {
 
       <section className="mt-8">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="text-xl font-medium text-stone-900">학생 현황</h2>
+          <h2 className="text-[15px] font-semibold text-stone-900">학생 현황</h2>
           <span className="text-sm text-stone-500">총 {totalQas}개 문항</span>
         </div>
         <ParticipantList participants={participants} totalQas={totalQas} />

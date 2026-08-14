@@ -68,3 +68,40 @@ test('⑤ 확인 모달을 닫는 길이 셋이다(백드롭·ESC·X) + 파괴 �
     '포커스가 「취소」에 있지 않다 — 열자마자 Enter 를 누르면 수업이 끝난다',
   )
 })
+
+test('⑥ 상세 헤더가 §4-A 형태다 — 900px · 22px 제목 · 목록과 같은 상태/코드 뱃지', () => {
+  const source = read(DETAIL)
+  assert.ok(/max-w-\[900px\]/.test(source), '컨테이너가 900px 이 아니다')
+  assert.equal(/max-w-6xl/.test(source), false, '옛 6xl 컨테이너가 남아 있다')
+  assert.ok(/text-\[22px\] font-semibold/.test(source), '제목이 22px semibold 가 아니다(36px 짜리가 남았는지)')
+  assert.ok(/bg-emerald-50/.test(source) && /animate-pulse/.test(source), '진행 중 상태 뱃지가 §4 카드와 다르다')
+  assert.equal(
+    /font-mono text-\[32px\]/.test(source),
+    false,
+    '32px 검정 코드 블록이 남아 있다 — 목록에서 들어오면 화면이 갈아탄 것처럼 보인다',
+  )
+  // 주석에 적힌 경위(«예전엔 …Live Session 이라»)는 남겨 둔다 — 화면 문구만 본다.
+  assert.equal(/Live Session/.test(stripComments(source)), false, 'eyebrow 「Live Session」이 남아 있다')
+})
+
+test('⑦ 학생 목록이 §4-A 표준 행이다 — 상태 뱃지 세 종 + 컨테이너 하나', () => {
+  const source = read('client/src/components/teacher/ParticipantList.tsx')
+  for (const label of ['완성', '진행 중', '대기']) {
+    assert.ok(source.includes(`'${label}'`), `상태 뱃지 「${label}」이 없다`)
+  }
+  assert.ok(/overflow-hidden rounded-xl border/.test(source), '행들이 컨테이너 하나 안에 있지 않다')
+  assert.equal(/style=\{\{ width: `\$\{ratio\}%` \}\}/.test(source), false, '카드마다 진도바를 그리던 형태가 남아 있다')
+  assert.ok(source.includes('아직 들어온 학생이 없어요'), '빈 상태 문구가 §9 형태가 아니다')
+})
+
+test('⑧ 시연작 입구를 밖에 다시 만들지 않았다 — 2026-08-14 철거분이 되살아나면 빨개진다', () => {
+  const app = read('client/src/App.tsx')
+  assert.equal(/teacher\/demo/.test(app), false, '/teacher/demo 라우트가 되살아났다(CLAUDE.md 🎬 항목을 읽을 것)')
+  assert.equal(/TeacherDemoPage/.test(app), false, 'TeacherDemoPage 가 되살아났다')
+
+  const learn = read('client/src/pages/LearnPage.tsx')
+  assert.equal(/DemoBar|isDemoMode|demo=1/.test(learn), false, '시연 바가 되살아났다 — 「시연 끝내기」가 수업을 끝냈다')
+
+  // 지금 있는 시연작 = 수업 현황 상세의 「👀 학생 화면 미리 보기」. 이게 사라지면 시연이 없어진다.
+  assert.ok(read(DETAIL).includes('👀 학생 화면 미리 보기'), '시연 입구(학생 화면 미리 보기)가 사라졌다')
+})
