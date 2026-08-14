@@ -11,7 +11,6 @@ import LearnPage from './pages/LearnPage';
 import LibraryPage from './pages/LibraryPage';
 import NotFoundPage from './pages/NotFoundPage';
 import TeacherDashboardPage from './pages/TeacherDashboardPage';
-import TeacherDemoPage from './pages/TeacherDemoPage';
 import TeacherSessionPage from './pages/TeacherSessionPage';
 import ShowcasePage from './demos/_preview/ShowcasePage';
 
@@ -56,14 +55,6 @@ function AppShell() {
             element={
               <AuthGate>
                 <TeacherDashboardPage />
-              </AuthGate>
-            }
-          />
-          <Route
-            path="/teacher/demo"
-            element={
-              <AuthGate>
-                <TeacherDemoPage />
               </AuthGate>
             }
           />

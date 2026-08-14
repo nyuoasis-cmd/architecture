@@ -1,0 +1,433 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>교사 수업 리스트 — §4 D안 적용본 (architecture)</title>
+<style>
+  /* ── 유틸리티 (CDN 없이 오프라인에서 그대로 열리도록 내장) ── */
+  .flex{display:flex}.hidden{display:none!important}
+  .flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}
+  .items-start{align-items:flex-start}.items-center{align-items:center}.items-end{align-items:flex-end}
+  .justify-between{justify-content:space-between}.justify-center{justify-content:center}.justify-end{justify-content:flex-end}
+  .flex-1{flex:1 1 0%}.flex-shrink-0{flex-shrink:0}.min-w-0{min-width:0}
+  .gap-2{gap:8px}.gap-3{gap:12px}.gap-3\.5{gap:14px}.gap-4{gap:16px}
+  .mb-2{margin-bottom:8px}.mb-4{margin-bottom:16px}.mb-6{margin-bottom:24px}.mb-8{margin-bottom:32px}.mb-10{margin-bottom:40px}
+  .mt-4{margin-top:16px}.mt-5{margin-top:20px}.mt-6{margin-top:24px}.mt-8{margin-top:32px}
+  .-ml-2{margin-left:-8px}
+  .w-full{width:100%}.mx-auto{margin-left:auto;margin-right:auto}
+  .px-6{padding-left:24px;padding-right:24px}.py-8{padding-top:32px;padding-bottom:32px}.py-10{padding-top:40px;padding-bottom:40px}
+  .text-center{text-align:center}
+  .truncate{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  @media (min-width:1024px){
+    .lg\:flex-row{flex-direction:row}.lg\:items-end{align-items:flex-end}.lg\:justify-between{justify-content:space-between}
+  }
+  :root{
+    --color-surface:#ffffff; --color-surface-alt:#fafaf9;
+    --color-text-primary:#1c1917; --color-text-muted:#78716c; --color-text-faint:#a8a29e;
+    --color-border:#e7e5e4; --color-border-hover:#d6d3d1;
+    --color-btn-primary:#1c1917; --color-btn-primary-hover:#292524;
+    --radius-card-workspace:12px; --radius-btn-workspace:10px;
+    --font-body:'Pretendard Variable',Pretendard,system-ui,sans-serif;
+  }
+  html{font-family:var(--font-body);color:var(--color-text-primary);word-break:keep-all;-webkit-font-smoothing:antialiased}
+  body{margin:0;background:linear-gradient(180deg,#ffffff 0%,#fafaf9 100%);min-height:100vh}
+
+  /* ── 세션 카드 (§4 D안) ───────────────────────────── */
+  .session-card{
+    border:1px solid var(--color-border); background:var(--color-surface);
+    border-radius:var(--radius-card-workspace); padding:20px;
+    display:flex; flex-direction:column; gap:14px;
+    cursor:pointer; transition:border-color 200ms,box-shadow 200ms;
+  }
+  .session-card:hover{border-color:var(--color-border-hover);box-shadow:0 4px 14px rgba(0,0,0,.05)}
+  .session-card.is-ended{opacity:.55;cursor:default}
+  .session-card.is-ended:hover{opacity:.75;box-shadow:none;border-color:var(--color-border)}
+
+  .code-tile{
+    width:82px;height:50px;border-radius:12px;background:#fafaf9;
+    display:flex;align-items:center;justify-content:center;flex-shrink:0;
+    font-size:15px;font-weight:700;letter-spacing:.06em;
+  }
+  .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:999px;font-size:11.5px;font-weight:600}
+  .pill-active{background:#ecfdf5;color:#059669}
+  .pill-ended{background:#f5f5f4;color:#78716c}
+  .dot{width:6px;height:6px;border-radius:999px;background:currentColor}
+  .dot-pulse{animation:pulse 1.8s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  .icon-btn{
+    width:40px;height:40px;border:1px solid var(--color-border);border-radius:var(--radius-btn-workspace);
+    background:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;
+    transition:background 150ms;
+  }
+  .icon-btn:hover{background:#fafaf9}
+  .ghost-btn{
+    height:40px;padding:0 14px;border:none;background:none;border-radius:var(--radius-btn-workspace);
+    font-size:13px;color:var(--color-text-muted);cursor:pointer;transition:background 150ms;
+  }
+  .ghost-btn:hover{background:#f5f5f4}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid #f5f5f4;border-bottom:1px solid #f5f5f4;padding:12px 0}
+  .stats > div + div{border-left:1px solid #f5f5f4}
+  .stat-num{font-size:18px;font-weight:600;line-height:1.2}
+  .stat-label{font-size:11.5px;color:var(--color-text-faint);font-weight:500;margin-top:2px}
+
+  .avatar{
+    width:24px;height:24px;border-radius:999px;border:2px solid #fff;flex-shrink:0;
+    display:inline-flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:600;
+  }
+  .a0{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e}
+  .a1{background:linear-gradient(135deg,#dbeafe,#bfdbfe);color:#1e40af}
+  .a2{background:linear-gradient(135deg,#dcfce7,#bbf7d0);color:#166534}
+  .a3{background:linear-gradient(135deg,#fce7f3,#fbcfe8);color:#9f1239}
+
+  .btn-primary{
+    height:40px;padding:0 20px;border-radius:var(--radius-btn-workspace);border:none;
+    background:var(--color-btn-primary);color:#fff;font-size:14px;font-weight:500;cursor:pointer;
+    display:inline-flex;align-items:center;gap:6px;transition:background 150ms;flex-shrink:0;
+  }
+  .btn-primary:hover{background:var(--color-btn-primary-hover)}
+  .btn-secondary{
+    height:40px;padding:0 18px;border-radius:var(--radius-btn-workspace);
+    border:1px solid var(--color-border);background:#fff;font-size:14px;font-weight:500;cursor:pointer;flex-shrink:0;
+  }
+  .btn-secondary:hover{background:#fafaf9}
+
+  .note{border-left:3px solid #6366f1;background:#eef2ff;color:#3730a3;font-size:12.5px;line-height:1.7;padding:10px 14px;border-radius:0 8px 8px 0}
+  .spec{font-size:11.5px;color:#9f1239;background:#fff1f2;border:1px dashed #fecdd3;border-radius:6px;padding:2px 7px;display:inline-block}
+</style>
+</head>
+<body>
+
+<!-- ══ 목업 안내 바 (실제 화면 아님) ══════════════════ -->
+<div style="background:#1c1917;color:#e7e5e4;font-size:12.5px;padding:10px 20px;display:flex;gap:14px;flex-wrap:wrap;align-items:center">
+  <strong style="color:#fff">목업 · teacher-sessions-list-v1</strong>
+  <span>architecture 교사 「내 수업」 화면 — BUILDER-UX-POLICY §4 D안 적용본</span>
+  <span style="margin-left:auto;display:flex;gap:8px">
+    <button onclick="show('tobe')" id="tab-tobe" style="padding:4px 12px;border-radius:6px;border:none;cursor:pointer;background:#fff;color:#1c1917;font-size:12px;font-weight:600">제안 (To-Be)</button>
+    <button onclick="show('empty')" id="tab-empty" style="padding:4px 12px;border-radius:6px;border:1px solid #57534e;cursor:pointer;background:transparent;color:#d6d3d1;font-size:12px">빈 상태</button>
+    <button onclick="show('asis')" id="tab-asis" style="padding:4px 12px;border-radius:6px;border:1px solid #57534e;cursor:pointer;background:transparent;color:#d6d3d1;font-size:12px">지금 (As-Is)</button>
+    <button onclick="show('plan')" id="tab-plan" style="padding:4px 12px;border-radius:6px;border:1px solid #57534e;cursor:pointer;background:transparent;color:#d6d3d1;font-size:12px">변경 14건</button>
+  </span>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     1) 제안 — §4 D안 적용본
+     ══════════════════════════════════════════════════════════ -->
+<main id="view-tobe" class="w-full mx-auto px-6 py-8" style="max-width:896px">
+
+  <!-- 헤더 — §4 표준 (items-end, 2줄 블록 + CTA) -->
+  <header class="flex items-end justify-between gap-4 mb-8">
+    <div class="flex-1 min-w-0">
+      <h1 style="font-size:24px;font-weight:500;letter-spacing:-.015em;line-height:1.2;margin:0">내 수업</h1>
+      <p style="font-size:14px;color:var(--color-text-muted);margin:8px 0 0">5개 수업 · 진행 중 2개</p>
+    </div>
+    <div class="flex items-end gap-2">
+      <button class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3 L8 13 M3 8 L13 8"/></svg>
+        수업 만들기
+      </button>
+    </div>
+  </header>
+
+  <div class="note mb-6">
+    <strong>BUILDER-UX-POLICY §4 D안</strong>을 그대로 적용한 모습입니다. 레퍼런스 = ai-app-builder
+    <code>components/sessions/</code>. 무엇이 어떻게 바뀌는지는 상단 <strong>「변경 14건」</strong> 탭에 있습니다.
+  </div>
+
+  <!-- ── 진행 중 ─────────────────────────────────── -->
+  <section class="mb-10">
+    <div class="flex flex-col gap-3">
+
+      <!-- 카드 1 — 학생 활동 있음 -->
+      <article class="session-card">
+        <div class="flex items-start gap-3.5">
+          <div class="code-tile">4K9T2M</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 style="font-size:16px;font-weight:600;margin:0" class="truncate">2학년 3반 · 컴퓨터가 일하는 법</h3>
+              <span class="pill pill-active"><span class="dot dot-pulse"></span>진행 중</span>
+            </div>
+            <p style="font-size:13px;color:var(--color-text-muted);margin:4px 0 0">오늘 14:30 시작 · 4개 강</p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button class="icon-btn" aria-label="QR코드 보기" onclick="event.stopPropagation()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><path d="M15 12 L21 12 M15 15 L18 15 L18 21 L15 21 L15 18"/></svg>
+            </button>
+            <button class="ghost-btn" onclick="event.stopPropagation();openEnd()">종료</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="text-center"><div class="stat-num">24</div><div class="stat-label">참여 학생</div></div>
+          <div class="text-center"><div class="stat-num">137</div><div class="stat-label">읽은 문항</div></div>
+          <div class="text-center"><div class="stat-num">18</div><div class="stat-label">진행 중</div></div>
+        </div>
+
+        <div class="flex items-center gap-3" style="font-size:13px;color:var(--color-text-muted)">
+          <div class="flex items-center">
+            <span class="avatar a0" aria-label="김민수">김</span>
+            <span class="avatar a1 -ml-2" aria-label="이서연">이</span>
+            <span class="avatar a2 -ml-2" aria-label="박도윤">박</span>
+            <span class="avatar a3 -ml-2" aria-label="최하은">최</span>
+            <span class="avatar -ml-2" style="background:#f5f5f4;color:#78716c;font-weight:500">+14</span>
+          </div>
+          <div class="flex-1 min-w-0 flex items-center gap-2">
+            <span class="truncate"><strong style="color:var(--color-text-primary);font-weight:600">김민수</strong>님이 "서버는 왜 필요할까" 퀴즈 완료</span>
+            <span style="font-size:12px;color:var(--color-text-faint)" class="flex-shrink-0">2분 전</span>
+          </div>
+        </div>
+      </article>
+
+      <!-- 카드 2 — 방금 만들어 학생 0명 -->
+      <article class="session-card">
+        <div class="flex items-start gap-3.5">
+          <div class="code-tile">7WQ3RN</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 style="font-size:16px;font-weight:600;margin:0" class="truncate">1학년 1반 · 바이브코딩 첫걸음</h3>
+              <span class="pill pill-active"><span class="dot dot-pulse"></span>진행 중</span>
+            </div>
+            <p style="font-size:13px;color:var(--color-text-muted);margin:4px 0 0">방금 시작 · 2개 강</p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button class="icon-btn" aria-label="QR코드 보기" onclick="event.stopPropagation()">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><path d="M15 12 L21 12 M15 15 L18 15 L18 21 L15 21 L15 18"/></svg>
+            </button>
+            <button class="ghost-btn" onclick="event.stopPropagation();openEnd()">종료</button>
+          </div>
+        </div>
+
+        <div class="stats">
+          <div class="text-center"><div class="stat-num">0</div><div class="stat-label">참여 학생</div></div>
+          <div class="text-center"><div class="stat-num">0</div><div class="stat-label">읽은 문항</div></div>
+          <div class="text-center"><div class="stat-num">0</div><div class="stat-label">진행 중</div></div>
+        </div>
+
+        <p style="font-size:12.5px;color:var(--color-text-faint);margin:0">QR 코드를 학생에게 보여 주면 여기에 활동이 표시돼요</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- ── 종료된 수업 ─────────────────────────────── -->
+  <section>
+    <p style="font-size:12px;color:var(--color-text-faint);letter-spacing:.05em;margin:0 0 12px">종료됨</p>
+    <div class="flex flex-col gap-3">
+
+      <article class="session-card is-ended">
+        <div class="flex items-start gap-3.5">
+          <div class="code-tile" style="color:var(--color-text-faint)">8HJ4PD</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 style="font-size:16px;font-weight:600;margin:0" class="truncate">2학년 1반 · 컴퓨터가 일하는 법</h3>
+              <span class="pill pill-ended"><span class="dot"></span>종료</span>
+            </div>
+            <p style="font-size:13px;color:var(--color-text-muted);margin:4px 0 0">어제 · 4개 강</p>
+          </div>
+          <!-- 종료 카드에는 QR·종료 버튼 없음 (§4) -->
+          <button class="ghost-btn flex-shrink-0" style="color:#be123c" onclick="event.stopPropagation()">삭제</button>
+        </div>
+        <div class="stats">
+          <div class="text-center"><div class="stat-num">26</div><div class="stat-label">참여 학생</div></div>
+          <div class="text-center"><div class="stat-num">312</div><div class="stat-label">읽은 문항</div></div>
+          <div class="text-center"><div class="stat-num">0</div><div class="stat-label">진행 중</div></div>
+        </div>
+        <p style="font-size:12.5px;color:var(--color-text-faint);margin:0">종료된 수업이에요</p>
+      </article>
+
+      <article class="session-card is-ended">
+        <div class="flex items-start gap-3.5">
+          <div class="code-tile" style="color:var(--color-text-faint)">2NM8XK</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 style="font-size:16px;font-weight:600;margin:0" class="truncate">3학년 4반 · 데이터는 어디에 사나</h3>
+              <span class="pill pill-ended"><span class="dot"></span>종료</span>
+            </div>
+            <p style="font-size:13px;color:var(--color-text-muted);margin:4px 0 0">3일 전 · 3개 강</p>
+          </div>
+          <button class="ghost-btn flex-shrink-0" style="color:#be123c" onclick="event.stopPropagation()">삭제</button>
+        </div>
+        <div class="stats">
+          <div class="text-center"><div class="stat-num">19</div><div class="stat-label">참여 학생</div></div>
+          <div class="text-center"><div class="stat-num">201</div><div class="stat-label">읽은 문항</div></div>
+          <div class="text-center"><div class="stat-num">0</div><div class="stat-label">진행 중</div></div>
+        </div>
+        <p style="font-size:12.5px;color:var(--color-text-faint);margin:0">종료된 수업이에요</p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<!-- ══════════════════════════════════════════════════════════
+     2) 빈 상태
+     ══════════════════════════════════════════════════════════ -->
+<main id="view-empty" class="w-full mx-auto px-6 py-8 hidden" style="max-width:896px">
+  <header class="flex items-end justify-between gap-4 mb-8">
+    <div class="flex-1 min-w-0">
+      <h1 style="font-size:24px;font-weight:500;letter-spacing:-.015em;line-height:1.2;margin:0">내 수업</h1>
+      <p style="font-size:14px;color:var(--color-text-muted);margin:8px 0 0">0개 수업 · 진행 중 0개</p>
+    </div>
+    <div class="flex items-end gap-2">
+      <button class="btn-primary">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M8 3 L8 13 M3 8 L13 8"/></svg>
+        수업 만들기
+      </button>
+    </div>
+  </header>
+
+  <div style="border:1px solid var(--color-border);background:#fff;border-radius:var(--radius-card-workspace);padding:56px 24px;text-align:center">
+    <div style="width:44px;height:44px;border-radius:999px;background:#f5f5f4;display:inline-flex;align-items:center;justify-content:center;font-size:20px">📚</div>
+    <p style="font-size:16px;font-weight:600;margin:16px 0 0">아직 만든 수업이 없어요</p>
+    <p style="font-size:14px;color:var(--color-text-muted);margin:6px 0 20px">수업을 만들면 학생들이 참여 코드로 들어올 수 있어요</p>
+    <button class="btn-primary" style="margin:0 auto">첫 수업 만들기</button>
+  </div>
+
+  <div class="note mt-6">
+    시연은 수업 안에서만 열리므로, 수업을 하나도 안 만들었으면 시연할 것도 없습니다 —
+    그래서 이 화면의 유일한 다음 행동은 「첫 수업 만들기」 하나입니다.
+    <span class="spec">A-1</span>
+  </div>
+</main>
+
+<!-- ══════════════════════════════════════════════════════════
+     3) 지금 (As-Is) — 대조용
+     ══════════════════════════════════════════════════════════ -->
+<main id="view-asis" class="w-full mx-auto px-6 py-10 hidden" style="max-width:1152px">
+  <div style="background:#fff1f2;border:1px solid #fecdd3;color:#9f1239;font-size:13px;line-height:1.8;padding:14px 18px;border-radius:10px;margin-bottom:24px">
+    <strong>지금 화면 (As-Is) — 대조용 재현</strong><br>
+    빨간 표시가 §4 위반 지점입니다. (🎬 시연작 입구는 2026-08-14 철거 완료 — 이 화면엔 더 이상 없습니다.)
+  </div>
+
+  <header class="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+    <div style="max-width:42rem">
+      <p style="font-size:12px;font-weight:500;text-transform:uppercase;letter-spacing:.16em;color:var(--color-text-faint);margin:0">Teacher Dashboard</p>
+      <h1 style="font-size:36px;font-weight:500;margin:12px 0 0">내 세션 관리 <span class="spec">「세션」 용어 = §4 금지</span></h1>
+      <p style="font-size:14px;line-height:1.75;color:#57534e;margin:12px 0 0">
+        진행 중인 수업을 한곳에서 확인하고, 새 수업을 만들 수 있어요. 종료한 수업은 아래에 따로 모입니다.
+        <span class="spec">3줄 산문 = 「N개 수업 · 진행 중 M개」여야 함</span>
+      </p>
+    </div>
+    <div class="flex items-end gap-2">
+      <button class="btn-primary" style="border-radius:16px;height:44px">+ 새 세션 만들기</button>
+    </div>
+  </header>
+
+  <section class="mt-8">
+    <div class="flex items-center justify-between mb-4">
+      <h2 style="font-size:18px;font-weight:500;margin:0">진행 중</h2>
+      <span style="font-size:14px;color:var(--color-text-muted)">5개 <span class="spec">시연 3개가 섞여 부풀어 있음</span></span>
+    </div>
+
+    <div class="flex flex-col gap-4">
+      <article style="border:1px solid var(--color-border);background:#fff;border-radius:24px;padding:20px">
+        <div class="flex items-center gap-2 mb-2">
+          <span style="background:#f5f5f4;color:#57534e;font-size:11px;font-weight:500;padding:4px 8px;border-radius:999px">진행 중</span>
+          <span style="font-size:12px;color:var(--color-text-faint)">2분 전</span>
+          <span class="spec">회색 pill = emerald + pulse 여야 함</span>
+        </div>
+        <h3 style="font-size:20px;font-weight:500;margin:0">2학년 3반 · 컴퓨터가 일하는 법</h3>
+        <p style="font-size:14px;color:#57534e;margin:8px 0 0">컴퓨터가 일하는 법 · 서버는 왜 필요할까</p>
+        <div class="flex flex-wrap items-center gap-3 mt-4">
+          <div style="background:#0c0a09;color:#fff;border-radius:16px;padding:8px 16px;font-family:monospace;font-size:18px;letter-spacing:.35em">4K9T2M</div>
+          <div style="font-size:14px;color:var(--color-text-muted)">참여자 24명 <span class="spec">통계 3셀·활동 피드 없음</span></div>
+        </div>
+        <div class="flex flex-wrap gap-2 mt-4">
+          <button class="ghost-btn" style="border:1px solid var(--color-border)">QR 보기</button>
+          <button class="ghost-btn" style="border:1px solid var(--color-border)">종료</button>
+          <button class="ghost-btn" style="border:1px solid var(--color-border);color:#be123c">삭제</button>
+          <button class="btn-primary" style="height:36px;font-size:13px">세션 진행으로 <span class="spec" style="margin-left:6px">카드 전체가 클릭돼야 함</span></button>
+        </div>
+      </article>
+
+</div>
+  </section>
+</main>
+
+<!-- ══ 종료 확인 모달 (§6 — confirm() 금지) ══ -->
+<div id="modal-end" class="hidden" style="position:fixed;inset:0;background:rgba(28,25,23,.45);display:flex;align-items:center;justify-content:center;padding:20px;z-index:50" onclick="closeEnd()">
+  <div style="background:#fff;border-radius:16px;padding:24px;max-width:400px;width:100%" onclick="event.stopPropagation()">
+    <h3 style="font-size:18px;font-weight:600;margin:0">이 수업을 종료할까요?</h3>
+    <p style="font-size:14px;color:#57534e;line-height:1.7;margin:10px 0 20px">학생들이 더 이상 참여할 수 없어요. 이미 저장된 학습 기록은 그대로 남아요.</p>
+    <div class="flex gap-2 justify-end">
+      <button class="btn-secondary" onclick="closeEnd()">취소</button>
+      <button class="btn-primary" onclick="closeEnd()">종료하기</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ 변경 14건 ══ -->
+<main id="view-plan" class="hidden w-full mx-auto px-6 py-8" style="max-width:1100px">
+  <h1 style="font-size:24px;font-weight:500;margin:0">이 화면에서 바뀌는 것 — 14건</h1>
+  <p style="font-size:14px;color:var(--color-text-muted);margin:8px 0 0">
+    기준 = <code>shared/BUILDER-UX-POLICY.md §4</code>(D안, 2026-04-17 확정) ·
+    레퍼런스 구현 = <code>ai-app-builder/client/src/components/sessions/</code>
+  </p>
+
+  <div class="note mt-6">
+    🎬 시연작 관련 철거 7건은 <strong>2026-08-14 완료</strong>했습니다(빌드·서버 테스트 127개 초록).
+    아래 14건은 <strong>아직 손대지 않은 §4 폴리싱</strong>이고, 승인받고 착수할 부분입니다.
+  </div>
+
+  <table style="width:100%;border-collapse:collapse;font-size:13px;margin-top:20px">
+    <thead>
+      <tr style="border-bottom:2px solid var(--color-border);text-align:left">
+        <th style="padding:8px 10px">#</th><th style="padding:8px 10px">할 일</th>
+        <th style="padding:8px 10px">내용</th><th style="padding:8px 10px">등급</th>
+        <th style="padding:8px 10px">자리</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr><td style="font-weight:600;white-space:nowrap">B-1</td><td style="font-weight:500">「세션」 용어 전면 제거</td><td style="color:var(--color-text-muted)">내 세션 관리 → <b>내 수업</b> / + 새 세션 만들기 → <b>수업 만들기</b> / 종료된 세션 → <b>종료됨</b> / 「이 세션을 삭제할까요?」 → 「이 수업을…」</td><td style="white-space:nowrap">🔴 §4 명시적 금지</td><td style="color:var(--color-text-faint);white-space:nowrap">헤더·삭제 모달</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-2</td><td style="font-weight:500">헤더를 2줄 블록으로</td><td style="color:var(--color-text-muted)">3줄 산문 설명 → 「<b>5개 수업 · 진행 중 2개</b>」 한 줄</td><td style="white-space:nowrap">🟠</td><td style="color:var(--color-text-faint);white-space:nowrap">헤더</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-3</td><td style="font-weight:500">컨테이너 너비</td><td style="color:var(--color-text-muted)">max-w-6xl(1152px) → <b>max-w-4xl(896px)</b></td><td style="white-space:nowrap">🟠</td><td style="color:var(--color-text-faint);white-space:nowrap">전체</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-4</td><td style="font-weight:500">세션 list API 확장</td><td style="color:var(--color-text-muted)"><code>student_count</code> · <code>activity_count</code> · <code>recent_students</code> · <code>last_activity</code> 추가</td><td style="white-space:nowrap">🔴 B-5·B-6 선결</td><td style="color:var(--color-text-faint);white-space:nowrap">서버</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-5</td><td style="font-weight:500">통계 3셀 신설</td><td style="color:var(--color-text-muted)">참여 학생 / 읽은 문항 / 진행 중. §4 「통계 영역 생략 불가」</td><td style="white-space:nowrap">🔴</td><td style="color:var(--color-text-faint);white-space:nowrap">카드 중단</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-6</td><td style="font-weight:500">최근 활동 피드 신설</td><td style="color:var(--color-text-muted)">아바타 4개 + <code>+N</code> 뱃지 + 최근 1건 + 상대 시간</td><td style="white-space:nowrap">🔴</td><td style="color:var(--color-text-faint);white-space:nowrap">카드 하단</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-7</td><td style="font-weight:500">카드 전체 클릭</td><td style="color:var(--color-text-muted)">「세션 진행으로」 버튼 → <b>카드 전체가 버튼</b>(role=button + Enter/Space)</td><td style="white-space:nowrap">🟠</td><td style="color:var(--color-text-faint);white-space:nowrap">카드</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-8</td><td style="font-weight:500">상태 pill</td><td style="color:var(--color-text-muted)">회색 stone → <b>emerald + dot pulse</b></td><td style="white-space:nowrap">🟠</td><td style="color:var(--color-text-faint);white-space:nowrap">카드 상단</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-9</td><td style="font-weight:500">형태 토큰</td><td style="color:var(--color-text-muted)">카드 radius 24px → <b>12px</b> / 코드 뱃지 검정 큰 블록 → <b>82×50 stone-50</b></td><td style="white-space:nowrap">🟠</td><td style="color:var(--color-text-faint);white-space:nowrap">카드</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-10</td><td style="font-weight:500">확인 UI</td><td style="color:var(--color-text-muted)">카드 안 인라인 펼침 → <b>모달</b>(§4 「아코디언/펼침 금지」)</td><td style="white-space:nowrap">🟠</td><td style="color:var(--color-text-faint);white-space:nowrap">종료·삭제</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-11</td><td style="font-weight:500">종료 카드 정리</td><td style="color:var(--color-text-muted)">QR·종료 버튼 <b>미표시</b>, opacity 60% → <b>55%</b></td><td style="white-space:nowrap">🟡</td><td style="color:var(--color-text-faint);white-space:nowrap">종료 섹션</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-12</td><td style="font-weight:500">빈 상태</td><td style="color:var(--color-text-muted)">점선 박스 한 줄 → <b>아이콘 44px + 2줄 + 「첫 수업 만들기」</b></td><td style="white-space:nowrap">🟠</td><td style="color:var(--color-text-faint);white-space:nowrap">빈 상태 탭</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-13</td><td style="font-weight:500">상대 시간 유틸 점검</td><td style="color:var(--color-text-muted)">§4 표 준수 + <b>미래 시각 clamp</b>(「방금 시작」/「방금」)</td><td style="white-space:nowrap">🟡</td><td style="color:var(--color-text-faint);white-space:nowrap">lib/format.ts</td></tr>
+        <tr><td style="font-weight:600;white-space:nowrap">B-14</td><td style="font-weight:500">정책 문서 등재</td><td style="color:var(--color-text-muted)">BUILDER-UX-POLICY <b>§11 에 architecture 절 추가</b></td><td style="white-space:nowrap">🟠</td><td style="color:var(--color-text-faint);white-space:nowrap">shared/</td></tr>
+    </tbody>
+  </table>
+  <style>#view-plan td{padding:9px 10px;border-bottom:1px solid #f5f5f4;vertical-align:top;line-height:1.6}</style>
+
+  <h2 style="font-size:18px;font-weight:500;margin:32px 0 0">PR 쪼개기</h2>
+  <div class="note mt-3" style="border-left-color:#78716c;background:#fafaf9;color:#44403c">
+    <strong>PR1</strong> = B-1 (용어만. 가장 싸고 명시적 위반)<br>
+    <strong>PR2</strong> = B-4 (서버 — API 확장. B-5·B-6 선결)<br>
+    <strong>PR3</strong> = B-2·B-3·B-5~B-13 (헤더·카드 폴리싱) + B-14
+  </div>
+
+  <h2 style="font-size:18px;font-weight:500;margin:32px 0 0">확인이 필요한 것</h2>
+  <div class="warn mt-3">
+    1. <strong>통계 3셀 라벨</strong> — 「참여 학생 / 읽은 문항 / 진행 중」으로 잡았습니다(aab는 「만든 앱」인데 이 앱엔 만드는 물건이 없어 문항 기준).<br>
+    2. <strong>활동 피드 문구</strong> — 「김민수님이 "…" 퀴즈 완료」<br>
+    3. <strong>삭제 버튼</strong> — 종료된 수업에만 남겼습니다(지금은 진행 중에도 있음)<br>
+    4. <strong>「👀 학생 화면 미리 보기」 문구</strong> — 용어 정본은 「시연작」 단일인데, 이 버튼은 2026-08-11 prod QA 결과 일부러 지금 문구로 바꾼 것. 되돌릴지 그대로 둘지
+  </div>
+</main>
+
+<script>
+  function show(v){
+    for (const k of ['tobe','empty','asis','plan']) {
+      document.getElementById('view-'+k).classList.toggle('hidden', k !== v);
+      const b = document.getElementById('tab-'+k);
+      const on = k === v;
+      b.style.background = on ? '#fff' : 'transparent';
+      b.style.color = on ? '#1c1917' : '#d6d3d1';
+      b.style.border = on ? 'none' : '1px solid #57534e';
+      b.style.fontWeight = on ? '600' : '400';
+    }
+  }
+  function openEnd(){ document.getElementById('modal-end').classList.remove('hidden') }
+  function closeEnd(){ document.getElementById('modal-end').classList.add('hidden') }
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeEnd() });
+</script>
+</body>
+</html>
