@@ -103,7 +103,7 @@ npm run build
   전면 폐기했다. 이 앱엔 「수업 시작」 기록이 없어 «몇 분째»를 정직하게 셀 수 없기 때문이다(미리 만들어 둔
   세션에서 근사가 통째로 틀렸다). 교안 계약 ④⑤ 가 지키던 것을, 교안 철거 후에는
   **`teacherExplainContract` ⑤** 가 노트 쪽에서 승계한다.
-- 서버 테스트 156개(`cd server && npm test`). CI = `l1-fast.yml`, `main` 보호(required check `fast`).
+- 서버 테스트 157개(`cd server && npm test`). CI = `l1-fast.yml`, `main` 보호(required check `fast`).
 - 🧑‍🏫 **교사 화면 둘은 BUILDER-UX-POLICY §4·§4-A 정본을 따른다**(2026-08-14 정합화).
   「내 수업」 목록 = 현황 미니 대시보드(코드 뱃지 · 상태 pill · 통계 3셀 · 활동 피드 · 카드 전체 클릭),
   「수업 현황」 상세 = 900px · 22px 제목 + 같은 상태/코드 뱃지 · 통계 3열 · 표준 학생 행.
