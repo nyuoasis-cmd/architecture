@@ -222,7 +222,7 @@ export default function TeacherExplainPanel({
           <p className="teacher-explain-panel__eyebrow">{block.qaId.toUpperCase()}</p>
           <h2 className="teacher-explain-panel__title">{getQaById(currentQaId)?.title ?? currentQaId}</h2>
         </div>
-        <span className="teacher-explain-panel__badge">세션 주인 전용</span>
+        <span className="teacher-explain-panel__badge">수업 주인 전용</span>
       </div>
 
       <section className="teacher-explain-tldr">
@@ -330,7 +330,7 @@ export default function TeacherExplainPanel({
                       }
                       navigate(`/learn/${sessionId}?role=teacher&qa=${qaId}`);
                     }}
-                    title={isAvailable ? qa?.title ?? qaId : '현재 세션에 포함되지 않은 문항'}
+                    title={isAvailable ? qa?.title ?? qaId : '이 수업에 담기지 않은 문항'}
                     type="button"
                   >
                     <span>{qa?.title ?? qaId}</span>

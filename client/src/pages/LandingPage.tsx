@@ -182,7 +182,7 @@ export default function LandingPage() {
           <p className="landing-hero-caption">
             {LANDING_CHAPTER_COUNT}개 챕터 {LANDING_QA_COUNT}문항으로 IT 전체 그림을 따라가요.
             <br />
-            교사 세션 코드 하나로 반 전체가 함께 학습해요.
+            교사가 만든 수업 코드 하나로 반 전체가 함께 학습해요.
           </p>
 
           <div className="landing-cta-cluster" role="group" aria-label="수업 시작">

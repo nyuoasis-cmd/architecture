@@ -14,7 +14,7 @@ const policyItems = [
   {
     title: '개인정보 처리',
     description:
-      '학생은 세션 참여용 닉네임만 저장하고, 교사 인증은 카카오 OAuth로 분리해 운영합니다.',
+      '학생은 수업 참여용 닉네임만 저장하고, 교사 인증은 카카오 OAuth로 분리해 운영합니다.',
   },
 ];
 
@@ -28,7 +28,7 @@ export default function AboutPage() {
             책 기반 흐름을 교실에서 바로 쓰는 학습 서비스로 옮겼습니다.
           </h1>
           <p className="mt-5 max-w-3xl text-sm leading-7 text-stone-600 sm:text-base">
-            교사가 세션을 열고 학생이 코드로 참여해 IT 개념을 빠르게 따라올 수 있게 설계한 학습 서비스입니다.
+            교사가 수업을 열고 학생이 코드로 참여해 IT 개념을 빠르게 따라올 수 있게 설계한 학습 서비스입니다.
           </p>
         </div>
       </section>
@@ -39,7 +39,7 @@ export default function AboutPage() {
           <div className="mt-5 space-y-4 text-sm leading-7 text-stone-600">
             <p>
               학생 화면은 본문, 시연, AI 챗봇을 같은 흐름으로 묶어 비전공자도 개념을 단번에 연결하도록
-              구성했습니다. 교사는 세션을 만들고, 학생은 수업 코드로 들어와 같은 챕터를 함께 따라갑니다.
+              구성했습니다. 교사는 수업을 만들고, 학생은 수업 코드로 들어와 같은 챕터를 함께 따라갑니다.
             </p>
             <p>
               모든 학습 콘텐츠는 자체 작성된 학습용 텍스트로 제공합니다.
