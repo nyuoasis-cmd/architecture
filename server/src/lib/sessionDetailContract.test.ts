@@ -18,7 +18,7 @@ const read = (rel: string) => readFileSync(path.join(ROOT, rel), 'utf8')
 const DETAIL = 'client/src/pages/TeacherSessionPage.tsx'
 const MODAL = 'client/src/components/common/ConfirmModal.tsx'
 
-test('① 수업 종료는 확인 모달을 거친다 — 버튼 onClick 에 직결되지 않는다', () => {
+test('1) 수업 종료는 확인 모달을 거친다 — 버튼 onClick 에 직결되지 않는다', () => {
   const source = read(DETAIL)
 
   assert.ok(/<ConfirmModal\b/.test(source), `${DETAIL} 에 확인 모달이 없다 — 종료가 오클릭 한 번에 실행된다`)
@@ -33,20 +33,20 @@ test('① 수업 종료는 확인 모달을 거친다 — 버튼 onClick 에 직
   )
 })
 
-test('② confirm()·alert() 로 확인을 때우지 않는다 (§6 금지)', () => {
+test('2) confirm()·alert() 로 확인을 때우지 않는다 (§6 금지)', () => {
   const source = read(DETAIL)
   for (const banned of ['window.confirm(', 'window.alert(']) {
     assert.equal(source.includes(banned), false, `${DETAIL} 이 ${banned} 를 쓴다 — §6 은 커스텀 모달을 요구한다`)
   }
 })
 
-test('③ 「← 내 수업」 뒤로 링크가 있다 — 브라우저 뒤로가기에만 기대지 않는다 (§4-A 금지)', () => {
+test('3) 「← 내 수업」 뒤로 링크가 있다 — 브라우저 뒤로가기에만 기대지 않는다 (§4-A 금지)', () => {
   const source = read(DETAIL)
   assert.ok(/to="\/teacher"/.test(source), `${DETAIL} 에 목록으로 돌아가는 링크가 없다`)
   assert.ok(source.includes('내 수업'), `${DETAIL} 의 뒤로 링크 문구가 「내 수업」이 아니다`)
 })
 
-test('④ 통계 3열이 있고 참여자 수가 그 안에 있다 (§4-A 「통계에 참여자 수 누락」 금지)', () => {
+test('4) 통계 3열이 있고 참여자 수가 그 안에 있다 (§4-A 「통계에 참여자 수 누락」 금지)', () => {
   const source = read(DETAIL)
   assert.ok(/grid-cols-3/.test(source), `${DETAIL} 에 3열 통계 그리드가 없다`)
   for (const label of ['참여 학생', '열어 본 문항', '진행 중']) {
@@ -57,7 +57,7 @@ test('④ 통계 3열이 있고 참여자 수가 그 안에 있다 (§4-A 「통
   assert.equal(stripComments(source).includes('읽은 문항'), false, '「읽은 문항」은 앱이 알 수 없는 것을 안다고 말하는 문구다')
 })
 
-test('⑤ 확인 모달을 닫는 길이 셋이다(백드롭·ESC·X) + 파괴 버튼이 자동 포커스되지 않는다', () => {
+test('5) 확인 모달을 닫는 길이 셋이다(백드롭·ESC·X) + 파괴 버튼이 자동 포커스되지 않는다', () => {
   const source = read(MODAL)
   assert.ok(/onClick=\{onClose\}/.test(source), '백드롭 클릭으로 닫히지 않는다')
   assert.ok(/'Escape'/.test(source), 'ESC 로 닫히지 않는다')
@@ -69,7 +69,7 @@ test('⑤ 확인 모달을 닫는 길이 셋이다(백드롭·ESC·X) + 파괴 �
   )
 })
 
-test('⑥ 상세 헤더가 §4-A 형태다 — 900px · 22px 제목 · 목록과 같은 상태/코드 뱃지', () => {
+test('6) 상세 헤더가 §4-A 형태다 — 900px · 22px 제목 · 목록과 같은 상태/코드 뱃지', () => {
   const source = read(DETAIL)
   assert.ok(/max-w-\[900px\]/.test(source), '컨테이너가 900px 이 아니다')
   assert.equal(/max-w-6xl/.test(source), false, '옛 6xl 컨테이너가 남아 있다')
@@ -84,7 +84,7 @@ test('⑥ 상세 헤더가 §4-A 형태다 — 900px · 22px 제목 · 목록과
   assert.equal(/Live Session/.test(stripComments(source)), false, 'eyebrow 「Live Session」이 남아 있다')
 })
 
-test('⑦ 학생 목록이 §4-A 표준 행이다 — 상태 뱃지 세 종 + 컨테이너 하나', () => {
+test('7) 학생 목록이 §4-A 표준 행이다 — 상태 뱃지 세 종 + 컨테이너 하나', () => {
   const source = read('client/src/components/teacher/ParticipantList.tsx')
   for (const label of ['완성', '진행 중', '대기']) {
     assert.ok(source.includes(`'${label}'`), `상태 뱃지 「${label}」이 없다`)
@@ -94,7 +94,7 @@ test('⑦ 학생 목록이 §4-A 표준 행이다 — 상태 뱃지 세 종 + �
   assert.ok(source.includes('아직 들어온 학생이 없어요'), '빈 상태 문구가 §9 형태가 아니다')
 })
 
-test('⑧ 시연작 입구를 밖에 다시 만들지 않았다 — 2026-08-14 철거분이 되살아나면 빨개진다', () => {
+test('8) 시연작 입구를 밖에 다시 만들지 않았다 — 2026-08-14 철거분이 되살아나면 빨개진다', () => {
   const app = read('client/src/App.tsx')
   assert.equal(/teacher\/demo/.test(app), false, '/teacher/demo 라우트가 되살아났다(CLAUDE.md 🎬 항목을 읽을 것)')
   assert.equal(/TeacherDemoPage/.test(app), false, 'TeacherDemoPage 가 되살아났다')

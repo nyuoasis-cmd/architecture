@@ -18,7 +18,7 @@ const read = (rel: string) => readFileSync(path.join(ROOT, rel), 'utf8')
 const CARD = 'client/src/components/teacher/SessionCard.tsx'
 const LIST = 'client/src/pages/TeacherDashboardPage.tsx'
 
-test('① 카드 전체가 클릭 대상이다 — 「수업 현황으로」 버튼을 찾아 누르게 하지 않는다', () => {
+test('1) 카드 전체가 클릭 대상이다 — 「수업 현황으로」 버튼을 찾아 누르게 하지 않는다', () => {
   const source = read(CARD)
   assert.ok(/role="button"/.test(source), '카드에 role="button" 이 없다')
   assert.ok(/tabIndex=\{0\}/.test(source), '키보드로 카드에 닿을 수 없다')
@@ -26,7 +26,7 @@ test('① 카드 전체가 클릭 대상이다 — 「수업 현황으로」 버
   assert.ok(/navigate\(`\/teacher\/session\/\$\{session\.id\}`\)/.test(source), '카드가 상세로 가지 않는다')
 })
 
-test('② 카드 안의 버튼은 클릭을 삼킨다 — QR 을 누르려다 상세로 튀지 않게', () => {
+test('2) 카드 안의 버튼은 클릭을 삼킨다 — QR 을 누르려다 상세로 튀지 않게', () => {
   const source = read(CARD)
   const handlers = [...source.matchAll(/onClick=\{\(event\) => \{/g)].length
   const stops = [...source.matchAll(/event\.stopPropagation\(\)/g)].length
@@ -34,7 +34,7 @@ test('② 카드 안의 버튼은 클릭을 삼킨다 — QR 을 누르려다 �
   assert.equal(stops, handlers, `버튼 ${handlers}개 중 ${stops}개만 stopPropagation 한다`)
 })
 
-test('③ 통계 3셀이 있다 — §4 「통계 영역 생략 불가」', () => {
+test('3) 통계 3셀이 있다 — §4 「통계 영역 생략 불가」', () => {
   const source = read(CARD)
   assert.ok(/grid-cols-3/.test(source), '통계 3셀 그리드가 없다')
   for (const label of ['참여 학생', '열어 본 문항', '진행 중']) {
@@ -47,14 +47,14 @@ test('③ 통계 3셀이 있다 — §4 「통계 영역 생략 불가」', () =
   )
 })
 
-test('④ 진행 중 pill 은 emerald + 뛰는 점이다 — 회색 pill 은 «지금 살아 있음»을 못 말한다', () => {
+test('4) 진행 중 pill 은 emerald + 뛰는 점이다 — 회색 pill 은 «지금 살아 있음»을 못 말한다', () => {
   const source = read(CARD)
   assert.ok(/bg-emerald-50/.test(source), '진행 중 pill 이 emerald 가 아니다')
   assert.ok(/#059669/.test(source), '진행 중 pill 글자색이 §4 값이 아니다')
   assert.ok(/animate-pulse/.test(source), '진행 중 dot 이 뛰지 않는다')
 })
 
-test('⑤ 삭제는 종료된 수업에만 있다 — 진행 중 카드에서 한 칸 차이로 반 기록이 날아가지 않게', () => {
+test('5) 삭제는 종료된 수업에만 있다 — 진행 중 카드에서 한 칸 차이로 반 기록이 날아가지 않게', () => {
   const source = read(CARD)
   const actions = source.slice(source.indexOf('{isActive ? ('), source.indexOf('</div>\n        </div>'))
   const deleteAt = actions.indexOf('삭제')
@@ -63,7 +63,7 @@ test('⑤ 삭제는 종료된 수업에만 있다 — 진행 중 카드에서 �
   assert.ok(elseAt > 0 && deleteAt > elseAt, '삭제가 진행 중(isActive) 갈래에 있다')
 })
 
-test('⑥ 종료·삭제는 확인 모달을 거친다 — 인라인 펼침(§4 금지)도 confirm() 도 아니다', () => {
+test('6) 종료·삭제는 확인 모달을 거친다 — 인라인 펼침(§4 금지)도 confirm() 도 아니다', () => {
   const source = read(CARD)
   assert.equal([...source.matchAll(/<ConfirmModal/g)].length, 2, '종료·삭제 확인 모달이 둘 다 있어야 한다')
   const endAt = source.indexOf('endSession(')
@@ -77,7 +77,7 @@ test('⑥ 종료·삭제는 확인 모달을 거친다 — 인라인 펼침(§4 
   )
 })
 
-test('⑦ +N 뱃지는 activity_count 로 센다 — recent_students.length 로 재면 늘 0이다', () => {
+test('7) +N 뱃지는 activity_count 로 센다 — recent_students.length 로 재면 늘 0이다', () => {
   const source = read(CARD)
   assert.ok(
     /session\.activity_count \?\? recentStudents\.length\) - 4/.test(source),
@@ -85,7 +85,7 @@ test('⑦ +N 뱃지는 activity_count 로 센다 — recent_students.length 로 
   )
 })
 
-test('⑧ 목록 컨테이너·헤더가 §4 표준이다 (max-w-4xl · 「N개 수업 · 진행 중 M개」)', () => {
+test('8) 목록 컨테이너·헤더가 §4 표준이다 (max-w-4xl · 「N개 수업 · 진행 중 M개」)', () => {
   const source = read(LIST)
   assert.ok(/max-w-4xl/.test(source), '컨테이너가 896px 이 아니다')
   assert.equal(/max-w-6xl/.test(source), false, '옛 6xl 컨테이너가 남아 있다')
@@ -94,7 +94,7 @@ test('⑧ 목록 컨테이너·헤더가 §4 표준이다 (max-w-4xl · 「N개 
   assert.ok(source.includes('수업 만들기'), 'CTA 문구가 「수업 만들기」가 아니다')
 })
 
-test('⑨ 빈 상태가 다음 할 일을 준다 (아이콘 + 두 줄 + 첫 수업 만들기)', () => {
+test('9) 빈 상태가 다음 할 일을 준다 (아이콘 + 두 줄 + 첫 수업 만들기)', () => {
   const source = read(LIST)
   for (const piece of ['아직 만든 수업이 없어요', '수업을 만들면 학생들이 참여할 수 있어요', '첫 수업 만들기']) {
     assert.ok(source.includes(piece), `빈 상태에 「${piece}」가 없다`)
@@ -102,7 +102,7 @@ test('⑨ 빈 상태가 다음 할 일을 준다 (아이콘 + 두 줄 + 첫 수�
   assert.ok(/h-11 w-11/.test(source), '빈 상태 아이콘이 44px 이 아니다')
 })
 
-test('⑩ 상대 시간이 §4 표를 따르고 미래 시각을 clamp 한다', async () => {
+test('10) 상대 시간이 §4 표를 따르고 미래 시각을 clamp 한다', async () => {
   // 🔑 client 코드를 server tsconfig(rootDir=src) 안으로 import 하면 빌드가 깨진다.
   //    런타임에만 여는 이유가 그것이다 — 계약은 «문구»가 아니라 «동작»을 봐야 한다.
   const modulePath = path.join(ROOT, 'client/src/lib/format.ts')

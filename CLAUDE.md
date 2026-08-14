@@ -14,7 +14,7 @@
 
 - **Client**: React 19 + Vite 8 + TypeScript + Tailwind v4
 - **Server**: Express 5 + TypeScript
-- **AI**: **Claude Haiku 4.5** (`@anthropic-ai/sdk`) — ① 학생 챗봇 ② ✋「내 차례」 판정(`/api/vibe/my-turn`). prompt caching + DB 답변 캐시 + JSON 단발 응답(streaming X).
+- **AI**: **Claude Haiku 4.5** (`@anthropic-ai/sdk`) — 1) 학생 챗봇 2) ✋「내 차례」 판정(`/api/vibe/my-turn`). prompt caching + DB 답변 캐시 + JSON 단발 응답(streaming X).
   🚨 **호출 통제 켜짐**(2026-08-11). 신원은 `resolveActorId` 하나만 쓴다 — 참여자 토큰=학생 한 명, 없으면 «여럿이 뭉친 통»으로 갈라 다른 한도를 준다(IP 로 학생을 세면 교실 전체가 한 명이 된다).
   한도는 전부 Render env 로 **무배포** 조정: 「내 차례」 `MYTURN_*`(학생 분당 10·하루 300·**쿨타임 0** / 공유 분당 10·하루 1,000 / 전역 분당 120·하루 4,000, 롤백 `MYTURN_GUARD_ENABLED=0`) · 챗봇 `CHAT_*` 4층.
   🚨 **「내 차례」 지출에는 이 한도 말고 돈 천장이 없다** — `CHAT_MONTHLY_BUDGET_USD` 는 챗봇 전용이라
@@ -80,7 +80,7 @@ npm run build
   교사 전용 탭을 미는 자리는 `ContentPanel` 의 `if (teacherPanel)` **한 곳뿐이다**(계약 learnLayoutContract ⑦).
   거기서 새면 학생이 교사 대본을 읽는다.
   🚨 **「📋 교안」(23강 164칸)은 2026-08-12 에 철거했다** — 앱이 수업 흐름을 지시하는 물건이었고,
-  그건 «수업 흐름은 교사가 정한다»와 정면으로 충돌했다(jery 결정). 되살리지 말 것: `learnLayoutContract` ⑦ 이
+  그건 «수업 흐름은 교사가 정한다»와 정면으로 충돌했다(jery 결정). 되살리지 말 것: `learnLayoutContract` 7) 이
   `ContentPanel` 에서 교안의 부활을 빨갛게 잡는다. 교안이 갖고 있던 실제 사고 사례·장간 연결·🚌 견학
   운영 요령은 노트(`realLife`·`note`·`demoTip`)로 옮겼다.
   근거 = `docs/HANDOFF-lesson-plan-teardown-2026-08-12.md`
@@ -103,6 +103,14 @@ npm run build
   전면 폐기했다. 이 앱엔 「수업 시작」 기록이 없어 «몇 분째»를 정직하게 셀 수 없기 때문이다(미리 만들어 둔
   세션에서 근사가 통째로 틀렸다). 교안 계약 ④⑤ 가 지키던 것을, 교안 철거 후에는
   **`teacherExplainContract` ⑤** 가 노트 쪽에서 승계한다.
-- 서버 테스트 127개(`cd server && npm test`). CI = `l1-fast.yml`, `main` 보호(required check `fast`).
+- 서버 테스트 156개(`cd server && npm test`). CI = `l1-fast.yml`, `main` 보호(required check `fast`).
+- 🧑‍🏫 **교사 화면 둘은 BUILDER-UX-POLICY §4·§4-A 정본을 따른다**(2026-08-14 정합화).
+  「내 수업」 목록 = 현황 미니 대시보드(코드 뱃지 · 상태 pill · 통계 3셀 · 활동 피드 · 카드 전체 클릭),
+  「수업 현황」 상세 = 900px · 22px 제목 + 같은 상태/코드 뱃지 · 통계 3열 · 표준 학생 행.
+  🚨 **되돌리지 말 것 셋**: 1) 화면 문구의 「세션」 2) 확인 없는 종료·삭제 3) 진행 중 카드의 삭제 버튼.
+  지키는 계약 = `sessionWordingContract`(주석 걷어낸 화면 문구) · `sessionDetailContract`(종료가 모달 뒤에서만) ·
+  `sessionListContract`(구조 + 상대 시간) · `sessionActivityContract`(카드 숫자가 무엇을 세는가).
+  🚨 통계 가운데 칸은 「**열어 본** 문항」이다 — 진도 행은 문항을 «여는 순간» 생긴다. 「읽은」으로 적으면
+  교사가 이해도까지 봤다고 오해한다. 근거 = `docs/HANDOFF-teacher-screens-2026-08-14.md`
 - 실행 런북 = `docs/RUNBOOK-polish-base-chapters.md`
   (§0 «상태 재확인»을 착수 전에 직접 돌릴 것 — 이 문서의 숫자도 적힌 순간의 관측이다.)
