@@ -210,7 +210,7 @@ export default function LearnPage({ mode }: LearnPageProps) {
 
           setSessionError({
             status: caught instanceof SessionClientError ? caught.status : undefined,
-            message: caught instanceof Error ? caught.message : '세션 정보를 불러오지 못했습니다.',
+            message: caught instanceof Error ? caught.message : '수업 정보를 불러오지 못했습니다.',
           });
           setSessionStatus('error');
         }
@@ -268,8 +268,8 @@ export default function LearnPage({ mode }: LearnPageProps) {
       return (
         <main className="mx-auto flex min-h-[calc(100vh-56px)] w-full max-w-[920px] items-center justify-center px-6 py-10">
           <section className="w-full rounded-xl border border-[var(--color-border)] bg-white p-8 text-center shadow-sm">
-            <p className="mb-3 text-sm font-medium text-stone-500">세션 학습 로딩 중</p>
-            <p className="text-sm text-stone-600">{sessionError?.message ?? '세션과 참여자 정보를 확인하고 있습니다.'}</p>
+            <p className="mb-3 text-sm font-medium text-stone-500">수업을 불러오는 중</p>
+            <p className="text-sm text-stone-600">{sessionError?.message ?? '수업과 참여자 정보를 확인하고 있습니다.'}</p>
           </section>
         </main>
       );

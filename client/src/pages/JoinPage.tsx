@@ -19,10 +19,10 @@ export default function JoinPage() {
       return '참여 시간이 만료되었습니다. 닉네임을 다시 입력해 참여해주세요.';
     }
     if (searchParams.get('invalid') === '1') {
-      return '세션 코드를 찾지 못했습니다. 6자리 코드를 다시 확인해주세요.';
+      return '수업 코드를 찾지 못했습니다. 6자리 코드를 다시 확인해주세요.';
     }
     if (searchParams.get('closed') === '1') {
-      return '이 세션은 이미 종료되었습니다. 새 코드를 받아 다시 참여해주세요.';
+      return '이 수업은 이미 종료되었습니다. 새 코드를 받아 다시 참여해주세요.';
     }
     return null;
   }, [searchParams]);
@@ -58,7 +58,7 @@ export default function JoinPage() {
         }
       }
 
-      setError(caught instanceof Error ? caught.message : '세션 참여에 실패했습니다.');
+      setError(caught instanceof Error ? caught.message : '수업에 참여하지 못했습니다.');
     } finally {
       setIsSubmitting(false);
     }

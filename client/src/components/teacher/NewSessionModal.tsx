@@ -42,7 +42,7 @@ export default function NewSessionModal({ onClose, onCreated }: NewSessionModalP
       onCreated(session);
       onClose();
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : '세션 생성에 실패했습니다.');
+      setError(caught instanceof Error ? caught.message : '수업을 만들지 못했습니다.');
     } finally {
       setIsSubmitting(false);
     }
@@ -54,7 +54,7 @@ export default function NewSessionModal({ onClose, onCreated }: NewSessionModalP
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
             <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">New Session</p>
-            <h2 className="mt-2 text-2xl font-medium text-stone-900">새 세션 만들기</h2>
+            <h2 className="mt-2 text-2xl font-medium text-stone-900">수업 만들기</h2>
           </div>
           <button className="btn-ghost-sm" onClick={onClose} type="button">
             닫기
@@ -63,7 +63,7 @@ export default function NewSessionModal({ onClose, onCreated }: NewSessionModalP
 
         <div className="space-y-5">
           <label className="block">
-            <span className="mb-2 block text-sm font-medium text-stone-700">세션명</span>
+            <span className="mb-2 block text-sm font-medium text-stone-700">수업 이름</span>
             <input
               className="w-full rounded-2xl border border-[var(--color-border)] bg-stone-50 px-4 py-3 outline-none focus:border-stone-400"
               maxLength={60}

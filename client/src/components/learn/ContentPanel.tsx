@@ -124,7 +124,7 @@ export default function ContentPanel({
 
     if (!sessionId || !UUID_PATTERN.test(sessionId)) {
       setTeacherExplainStatus('error');
-      setTeacherExplainMessage('세션 정보 없음');
+      setTeacherExplainMessage('수업 정보 없음');
       setTeacherExplain(null);
       return;
     }
@@ -163,7 +163,7 @@ export default function ContentPanel({
           }
 
           if (error.status === 403) {
-            setTeacherExplainMessage('이 Q&A는 현재 세션에 포함되어 있지 않아요');
+            setTeacherExplainMessage('이 Q&A는 이 수업에 담겨 있지 않아요');
             setTeacherExplainStatus('error');
             return;
           }

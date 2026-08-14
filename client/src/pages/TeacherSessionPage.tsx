@@ -40,7 +40,7 @@ export default function TeacherSessionPage() {
             return;
           }
 
-          setError(caught instanceof Error ? caught.message : '세션 정보를 불러오지 못했습니다.');
+          setError(caught instanceof Error ? caught.message : '수업 정보를 불러오지 못했습니다.');
         }
       });
 
@@ -97,7 +97,7 @@ export default function TeacherSessionPage() {
     return (
       <main className="mx-auto w-full max-w-5xl px-6 py-10">
         <div className="rounded-[24px] border border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
-          {error ?? '세션 정보를 불러오는 중입니다.'}
+          {error ?? '수업 정보를 불러오는 중입니다.'}
         </div>
       </main>
     );
@@ -123,7 +123,6 @@ export default function TeacherSessionPage() {
     <main className="mx-auto w-full max-w-6xl px-6 py-10">
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="rounded-[28px] border border-[var(--color-border)] bg-white p-6 shadow-sm">
-          <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Live Session</p>
           <h1 className="mt-3 text-4xl font-medium text-stone-950">{currentSession.name}</h1>
           <p className="mt-3 text-sm text-stone-600">{chapterLabels}</p>
           <div className="mt-6 flex flex-wrap items-center gap-3">
@@ -172,14 +171,14 @@ export default function TeacherSessionPage() {
                   const ended = await endSession(currentSession.id);
                   setCurrentSession({ ...currentSession, ...ended });
                 } catch (caught) {
-                  setError(caught instanceof Error ? caught.message : '세션 종료에 실패했습니다.');
+                  setError(caught instanceof Error ? caught.message : '수업을 종료하지 못했습니다.');
                 } finally {
                   setIsEnding(false);
                 }
               }}
               type="button"
             >
-              {currentSession.status === 'ended' ? '종료됨' : isEnding ? '종료 중...' : '세션 종료'}
+              {currentSession.status === 'ended' ? '종료됨' : isEnding ? '종료 중...' : '수업 종료'}
             </button>
           </div>
 

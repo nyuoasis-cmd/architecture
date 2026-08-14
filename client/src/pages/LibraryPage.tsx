@@ -46,7 +46,7 @@ export default function LibraryPage() {
               ? caught.message
               : caught instanceof Error
                 ? caught.message
-                : '세션 정보를 불러오지 못했습니다.',
+                : '수업 정보를 불러오지 못했습니다.',
           );
         }
       });
@@ -120,7 +120,7 @@ export default function LibraryPage() {
   const headerTitle = isPreviewMode
     ? isStudentMode
       ? '챕터 라이브러리'
-      : // 🔑 교사 세션 화면의 버튼과 같은 말을 쓴다 — 「시연」은 «학생에게 보여 주기»로도
+      : // 🔑 교사 수업 현황 화면의 버튼과 같은 말을 쓴다 — 「시연」은 «학생에게 보여 주기»로도
         //    «내가 미리 보기»로도 읽혀 신입 교사가 순서에서 멈춘 낱말이다(2026-08-11 QA t2).
         '학생 화면 미리 보기 — 챕터 선택'
     : '라이브러리';
@@ -138,14 +138,14 @@ export default function LibraryPage() {
             className="inline-flex min-h-9 items-center rounded-xl border border-[var(--color-border)] bg-white px-3 text-sm font-medium text-stone-700 hover:bg-stone-50"
             to="/teacher"
           >
-            ← 내 세션 관리
+            ← 내 수업
           </Link>
           {sessionId ? (
             <Link
               className="inline-flex min-h-9 items-center rounded-xl bg-stone-950 px-3 text-sm font-medium text-white hover:bg-stone-800"
               to={`/teacher/session/${sessionId}`}
             >
-              수업 세션 페이지 →
+              수업 현황 →
             </Link>
           ) : null}
           {previewSession ? (
@@ -172,7 +172,7 @@ export default function LibraryPage() {
 
       {isPreviewMode && !previewSession && !sessionError ? (
         <div className="mb-6 rounded-2xl border border-[var(--color-border)] bg-white p-4 text-sm text-stone-500">
-          세션 정보를 불러오는 중입니다.
+          수업 정보를 불러오는 중입니다.
         </div>
       ) : null}
 

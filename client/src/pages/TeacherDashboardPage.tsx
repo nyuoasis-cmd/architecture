@@ -25,7 +25,7 @@ export default function TeacherDashboardPage() {
       })
       .catch((caught) => {
         if (!cancelled) {
-          setError(caught instanceof Error ? caught.message : '세션 목록을 불러오지 못했습니다.');
+          setError(caught instanceof Error ? caught.message : '수업 목록을 불러오지 못했습니다.');
         }
       })
       .finally(() => {
@@ -47,7 +47,7 @@ export default function TeacherDashboardPage() {
       <header className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
         <div className="max-w-2xl">
           <p className="text-xs font-medium uppercase tracking-[0.16em] text-stone-400">Teacher Dashboard</p>
-          <h1 className="mt-3 text-4xl font-medium text-stone-950">내 세션 관리</h1>
+          <h1 className="mt-3 text-4xl font-medium text-stone-950">내 수업</h1>
           <p className="mt-3 text-sm leading-7 text-stone-600">
             진행 중인 수업을 한곳에서 확인하고, 새 수업을 만들 수 있어요. 종료한 수업은 아래에 따로 모입니다.
           </p>
@@ -63,7 +63,7 @@ export default function TeacherDashboardPage() {
             onClick={() => setIsModalOpen(true)}
             type="button"
           >
-            + 새 세션 만들기
+            수업 만들기
           </button>
         </div>
       </header>
@@ -78,13 +78,13 @@ export default function TeacherDashboardPage() {
         <div className="space-y-4">
           {isLoading ? (
             <div className="rounded-[24px] border border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
-              세션 목록을 불러오는 중입니다.
+              수업 목록을 불러오는 중입니다.
             </div>
           ) : activeSessions.length > 0 ? (
             activeSessions.map((session) => <SessionCard key={session.id} session={session} />)
           ) : (
             <div className="rounded-[24px] border border-dashed border-[var(--color-border)] bg-white p-5 text-sm text-stone-500">
-              진행 중 세션이 없습니다. 새 세션을 만들어 수업을 시작하세요.
+              진행 중인 수업이 없습니다. 수업을 만들어 시작하세요.
             </div>
           )}
         </div>
@@ -100,7 +100,7 @@ export default function TeacherDashboardPage() {
       {endedSessions.length > 0 ? (
         <section className="mt-10">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-lg font-medium text-stone-900">종료된 세션</h2>
+            <h2 className="text-lg font-medium text-stone-900">종료됨</h2>
             <span className="text-sm text-stone-500">{endedSessions.length}개</span>
           </div>
           <div className="space-y-4">

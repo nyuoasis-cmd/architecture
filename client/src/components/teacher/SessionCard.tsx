@@ -39,7 +39,7 @@ export default function SessionCard({ session }: SessionCardProps) {
           ? caught.message
           : caught instanceof Error
             ? caught.message
-            : '세션을 종료하지 못했습니다.';
+            : '수업을 종료하지 못했습니다.';
       setEndError(message);
     }
   };
@@ -57,7 +57,7 @@ export default function SessionCard({ session }: SessionCardProps) {
           ? caught.message
           : caught instanceof Error
             ? caught.message
-            : '세션을 삭제하지 못했습니다.';
+            : '수업을 삭제하지 못했습니다.';
       setDeleteError(message);
     }
   };
@@ -113,7 +113,7 @@ export default function SessionCard({ session }: SessionCardProps) {
             삭제
           </button>
           <Link className="btn-primary-sm flex items-center justify-center" to={`/teacher/session/${session.id}`}>
-            세션 진행으로
+            수업 현황
           </Link>
         </div>
       </div>
@@ -151,7 +151,7 @@ export default function SessionCard({ session }: SessionCardProps) {
 
       {isConfirmingDelete ? (
         <div className="mt-4 rounded-2xl border border-rose-200 bg-rose-50 p-4">
-          <p className="text-sm font-medium text-rose-900">이 세션을 삭제할까요?</p>
+          <p className="text-sm font-medium text-rose-900">이 수업을 삭제할까요?</p>
           <p className="mt-1 text-sm text-rose-800">
             참여자 명단과 학습 진도 기록도 함께 영구 삭제됩니다. 되돌릴 수 없어요.
           </p>
