@@ -14,6 +14,14 @@ export type SessionProgressEntry = {
   quizScore?: number;
 };
 
+/** 카드 하단 활동 피드 1건. 서버가 진도 행에서 뽑아 준다(§4 Phase 2 스펙). */
+export type SessionActivityEntry = {
+  student_name: string;
+  target_title: string;
+  action: string;
+  timestamp: string;
+};
+
 export type SessionRecord = {
   id: string;
   code: string;
@@ -23,7 +31,15 @@ export type SessionRecord = {
   max_participants: number;
   created_at: string;
   ended_at: string | null;
+  /** 🚨 구 이름. student_count 와 같은 값이다 — 배포 시차 동안만 둘 다 온다. */
   participant_count?: number;
+  student_count?: number;
+  activity_count?: number;
+  recent_students?: string[];
+  last_activity?: SessionActivityEntry | null;
+  /** 학생들이 연 문항 행의 총합. 「읽은」이 아니라 「열어 본」이다. */
+  opened_qa_count?: number;
+  in_progress_count?: number;
 };
 
 export type SessionDetail = SessionRecord & {

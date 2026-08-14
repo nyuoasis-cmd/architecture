@@ -4,10 +4,11 @@ import { z } from 'zod';
 import { getRequestUser } from '../lib/auth';
 import { getParticipantTokenFromRequest, verifyParticipantToken } from '../lib/participant-token';
 import { generateSessionCode } from '../lib/session-code';
+import { summarizeSessionActivity, type ActivityProgressRow } from '../lib/session-activity';
 import { tallyProgressRows } from '../lib/session-progress';
 import { getSupabaseAdminClient } from '../lib/supabase';
 import { qaTagFields } from '../lib/qa-context';
-import { ALL_CHAPTER_IDS } from '../data/chapter-content';
+import { ALL_CHAPTER_IDS, getChapterContexts, getQaContextById } from '../data/chapter-content';
 
 const router = Router();
 
@@ -215,17 +216,80 @@ router.get('/', async (req, res) => {
     return right.created_at.localeCompare(left.created_at);
   });
 
-  const participantCounts = new Map<string, number>();
-  for (const session of sessions) {
-    participantCounts.set(session.id, (await listParticipantsWithProgress(session.id)).participants.length);
+  // 🔑 수업 수만큼 쿼리를 날리지 않는다 — 참여자 한 번, 진도 한 번. 목록은 교사가
+  //    수업 중에 가장 자주 새로고침하는 화면이라, 여기서 N+1 이면 반이 클 때 그대로 느려진다.
+  //    (이전에는 수업 하나당 listParticipantsWithProgress 를 불러 2N 쿼리였다.)
+  const sessionIds = sessions.map((session) => session.id);
+  const participantsBySession = new Map<string, { id: string; nickname: string }[]>();
+  const progressByParticipant = new Map<string, ActivityProgressRow[]>();
+
+  if (sessionIds.length > 0) {
+    const { data: participantRows, error: participantError } = await supabase
+      .from('architecture_participants')
+      .select('id, nickname, session_id')
+      .in('session_id', sessionIds);
+
+    if (participantError) {
+      res.status(500).json({ error: 'session_list_failed' });
+      return;
+    }
+
+    const participants = (participantRows ?? []) as { id: string; nickname: string; session_id: string }[];
+    for (const participant of participants) {
+      const bucket = participantsBySession.get(participant.session_id) ?? [];
+      bucket.push({ id: participant.id, nickname: participant.nickname });
+      participantsBySession.set(participant.session_id, bucket);
+    }
+
+    if (participants.length > 0) {
+      const { data: progressRows, error: progressError } = await supabase
+        .from('architecture_progress')
+        .select('participant_id, qa_id, read_at, quiz_score')
+        .in(
+          'participant_id',
+          participants.map((participant) => participant.id),
+        );
+
+      if (progressError) {
+        res.status(500).json({ error: 'session_list_failed' });
+        return;
+      }
+
+      for (const row of (progressRows ?? []) as ActivityProgressRow[]) {
+        if (!row.participant_id) {
+          continue;
+        }
+        const bucket = progressByParticipant.get(row.participant_id) ?? [];
+        bucket.push(row);
+        progressByParticipant.set(row.participant_id, bucket);
+      }
+    }
   }
 
   res.setHeader('Cache-Control', 'no-store');
   res.json(
-    sessions.map((session) => ({
-      ...session,
-      participant_count: participantCounts.get(session.id) ?? 0,
-    })),
+    sessions.map((session) => {
+      const participants = participantsBySession.get(session.id) ?? [];
+      const progressRows = participants.flatMap((participant) => progressByParticipant.get(participant.id) ?? []);
+      const totalQas = session.chapter_ids.reduce(
+        (sum, chapterId) => sum + getChapterContexts(chapterId).length,
+        0,
+      );
+      const activity = summarizeSessionActivity({
+        participants,
+        progressRows,
+        totalQas,
+        titleOf: (qaId) => getQaContextById(qaId)?.title,
+      });
+
+      return {
+        ...session,
+        // 🚨 participant_count 는 기존 클라이언트가 읽는 이름이라 남긴다 — 배포 시차 동안
+        //    두 이름이 같은 값을 가리킨다. student_count 가 §4 스펙의 이름이다.
+        participant_count: activity.student_count,
+        ...activity,
+      };
+    }),
   );
 });
 
