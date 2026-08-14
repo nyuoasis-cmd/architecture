@@ -6,16 +6,16 @@
 
 ## 0. 30초 요약
 
-1. 앞 문서가 남겨 둔 **25건(목록 14 · 상세 11)을 전부 처리**했다. 커밋 7개.
+1. 앞 문서가 남겨 둔 **25건(목록 14 · 상세 11)을 전부 처리**했다. 커밋 10개.
 2. 결정 대기 5건은 **jery 취침 중이라 내가 정하고 근거를 코드·문서에 박아 뒀다**(§3). 되돌리기는 전부 한 줄이다.
-3. 검증 = 빌드 초록 · 서버 테스트 **127 → 156** · **로컬 실흐름 스모크 11스텝 PASS** ·
+3. 검증 = 빌드 초록 · 서버 테스트 **127 → 157** · **로컬 실흐름 스모크 11스텝 PASS** ·
    실제 브라우저에서 두 화면을 열어 DOM 으로 확인(§4). 심어 둔 QA 데이터는 전부 지웠다(잔존 0).
 4. 아직 **머지하지 않았다** — `main` 머지 = prod 자동배포라 사람이 깨어 있을 때 눌러야 한다고 판단했다.
 5. 밤새 하나 발견했다: **QA 교사 계정에 「🎬 시연 · …」 세션 6건이 남아 있다**(§5). 철거한 그 기능이 만든 쓰레기다.
 
 ---
 
-## 1. 무엇이 바뀌었나 — 커밋 7개
+## 1. 무엇이 바뀌었나 — 커밋 10개(주요 8 + 문서 2)
 
 | # | 커밋 | 내용 |
 |---|---|---|
@@ -26,6 +26,7 @@
 | 5 | `feat(수업 목록 API)` | `student_count`·`activity_count`·`recent_students`·`last_activity`·`opened_qa_count`·`in_progress_count` + **N+1 제거** |
 | 6 | `feat(내 수업)` | §4 D안 — 헤더·896px·통계 3셀·활동 피드·카드 클릭·상태 pill·형태 토큰·모달·빈 상태·상대 시간 |
 | 7 | `polish(수업 현황)` | 900px · 22px 제목 · 목록과 같은 뱃지 · 표준 학생 행 · 빈 상태 |
+| 8 | `fix(목록 API)` | **조용히 잘리는 조회를 막는다** — id 100개씩 쪼개고 `range` 로 페이지를 끝까지. 잘림은 에러가 아니라 «더 작은 숫자»로 와서 교사 화면이 「덜 참여한 반」처럼 보인다 |
 
 ### 새로 생긴 계약 4개 (전부 «실패할 수 있는» 계측인지 음성 대조군으로 확인)
 
@@ -68,7 +69,7 @@
 
 ```
 npm run build            # client vite + server tsc  ✅
-cd server && npm test    # 156 pass / 0 fail  ✅ (127 → 156)
+cd server && npm test    # 157 pass / 0 fail  ✅ (127 → 157)
 ```
 
 **로컬 실흐름 스모크**(`qa/preclass-flow-smoke.mjs`, `QA_BASE_URL=http://localhost:3013`) — 이 브랜치 서버로 11스텝 **PASS**:
@@ -120,12 +121,12 @@ active QA LayerA crawl-260813-* (5건) · [QA sinipssaem-…] · [QA saenaegi-�
 
 ## 5-A. PR
 
-`https://github.com/nyuoasis-cmd/architecture/pull/219` — 커밋 8개, CI `fast` **초록**, 상태 **CLEAN**(머지 가능).
+`https://github.com/nyuoasis-cmd/architecture/pull/219` — CI `fast` **초록**, 상태 **CLEAN**(머지 가능).
 머지하지 않은 이유는 §0-4.
 
 ## 6. 남은 것
 
-- **머지** — 브랜치 `architecture-qa-260814`, 커밋 7개. `main` 머지 = prod 배포.
+- **머지** — 브랜치 `architecture-qa-260814`. `main` 머지 = prod 배포.
 - **QA 6번 칸 「사람눈」** — 스크린샷 실패로 픽셀 확인 미수행. 배포 후 실화면에서 한 번 훑는 것을 권한다.
 - **마스터 레포 커밋 2개**: `shared/demo-screen-qr-inventory.md`(완료) · `shared/BUILDER-UX-POLICY.md §11`(대기).
 - `mockups/teacher-sessions-list-v1.html` 의 「지금(As-Is)」 탭은 이제 **옛 화면**이다 — 다음에 손댈 때 갱신하거나 지울 것.
