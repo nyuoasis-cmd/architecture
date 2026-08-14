@@ -83,7 +83,8 @@ export const manifest: CrawlManifest = {
     { path: '/library/17/ch17_q05', role: 'anon' },
     // ── teacher (AuthGate) — best-effort(인증 주입 가능 시, 아니면 SKIPPED) ──
     { path: '/teacher', role: 'teacher' },
-    { path: '/teacher/demo', role: 'teacher' }, // 🎬 시연작 B형(2026-08-12) — 강 목록부터 고르는 화면
+    // 🚨 /teacher/demo 는 2026-08-14 철거했다. 시연작 = 수업 현황 상세의 「👀 학생 화면 미리 보기」
+    //    → /learn/:sessionId?role=teacher 이고, 그 줄은 아래에 이미 있다. 되살리지 말 것.
     { path: '/teacher/session/:id', role: 'teacher', dynamic: true },
     // 학생 세션-학습 화면: teacher-preview(?role=teacher)로 best-effort 크롤(참가자 쿠키 주입은 별 PR).
     { path: '/learn/:sessionId?role=teacher', role: 'teacher', dynamic: true },
