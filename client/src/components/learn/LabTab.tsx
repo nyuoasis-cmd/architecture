@@ -11,7 +11,7 @@ import {
   type LabTone,
 } from '../../lib/lab-shell';
 import { checkAll, passCount } from '../../lib/lab-checker';
-import { failureLines, labAsk, labQuota, labReview, labVerify } from '../../lib/lab-api';
+import { failureLines, labAsk, labReview, labVerify } from '../../lib/lab-api';
 import { useLearnStore } from '../../store/learn-store';
 
 type LabTabProps = {
@@ -66,8 +66,6 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorText, setEditorText] = useState('');
   const [busy, setBusy] = useState(false);
-  // 🔑 남은 횟수는 좌측 목차도 읽으므로 스토어에 둔다 — 두 곳이 따로 세면 서로 다른 숫자를 보인다.
-  const setRemaining = useLearnStore((store) => store.setLabRemaining);
   /** 위/아래로 되돌려 쓰는 지난 명령. 터미널에서 가장 먼저 기대하는 동작이다. */
   const [historyAt, setHistoryAt] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -86,17 +84,6 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
     setEditorText('');
     seq.current = 0;
   }, [qaId, session?.qaId, setSession]);
-
-  // 남은 횟수는 서버만 안다. 화면이 열릴 때 한 번 물어본다.
-  useEffect(() => {
-    let cancelled = false;
-    labQuota().then((value) => {
-      if (!cancelled && value) setRemaining(value);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [qaId]);
 
   // 화면 폭·붙여넣기 가능 여부는 화면만 알 수 있다 — 재서 셸에 넣어 준다(`lab doctor` 가 이걸 읽는다).
   useEffect(() => {
@@ -165,7 +152,6 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
     try {
       if (intent.mode === 'ask') {
         const result = await labAsk(intent.text);
-        if (result.remaining) setRemaining(result.remaining);
         if (!result.ok) {
           say(failureLines(result.failure));
           return;
@@ -176,7 +162,6 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
 
       if (intent.mode === 'review') {
         const result = await labReview(intent.text);
-        if (result.remaining) setRemaining(result.remaining);
         if (!result.ok) {
           say(failureLines(result.failure));
           return;
@@ -201,7 +186,6 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
 
       // verify — 내 규칙대로 두 번 시켜 보고, **결정적 검사기**로 판정한다.
       const result = await labVerify(intent.text);
-      if (result.remaining) setRemaining(result.remaining);
       if (!result.ok) {
         say(failureLines(result.failure));
         return;

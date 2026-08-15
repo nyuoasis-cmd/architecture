@@ -39,13 +39,6 @@ router.post('/my-turn', async (req, res) => {
       return;
     }
     if (caught instanceof MyTurnUnavailableError) {
-      // 🚨 «돈 천장에 닿았다»를 «그 문항엔 없다»(404)와 같은 답으로 돌려주면, 교사도 학생도
-      //    무엇이 막혔는지 모른 채 다시 시도한다. 조치가 완전히 다른 두 원인이라 갈라 답한다.
-      //    (돈이면 Render 에 LAB_MONTHLY_BUDGET_USD 한 줄 = 무배포 조정.)
-      if (caught.message === 'budget_exceeded') {
-        res.status(503).json({ error: 'budget_exceeded' });
-        return;
-      }
       res.status(404).json({ error: 'unavailable' });
       return;
     }

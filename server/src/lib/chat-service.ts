@@ -2,7 +2,6 @@ import Anthropic from '@anthropic-ai/sdk';
 import { createHash } from 'node:crypto';
 import { getChapterContext, getQaContextById } from '../data/chapter-content';
 import { env } from '../env';
-import { budgetVerdict, estimateCostUsd, registerUsageCost, spentUsdFor } from './ai-spend';
 import { isParticipantKey } from './actor-id';
 import { checkCopyright } from './copyright-index';
 import { getSupabaseAdminClient } from './supabase';
@@ -56,6 +55,12 @@ export function chatLimits() {
   };
 }
 const MAX_CONCURRENT_REQUESTS = 3;
+const HAIKU_INPUT_PER_MILLION_USD = 1;
+const HAIKU_OUTPUT_PER_MILLION_USD = 5;
+const SONNET_INPUT_PER_MILLION_USD = 3;
+const SONNET_OUTPUT_PER_MILLION_USD = 15;
+const CACHE_WRITE_MULTIPLIER = 1.25;
+const CACHE_READ_MULTIPLIER = 0.1;
 
 type ChatRole = 'user' | 'assistant';
 
@@ -287,19 +292,53 @@ function shouldUpgradeToSonnet(): boolean {
   return blockedRate >= 0.1 || reaskRate >= 0.25;
 }
 
-/**
- * 🚨 지출 계산·장부는 **`ai-spend.ts` 로 옮겼다**(2026-08-15, 에픽 2/5).
- *    여기 안에만 있었기 때문에 「내 차례」가 부르는 AI 는 어떤 장부에도 안 잡혔고,
- *    그 라우트에는 호출 횟수 한도만 있고 돈 천장이 없었다. 되돌리지 말 것 —
- *    장부가 둘로 갈리면 «어느 쪽이 얼마 썼는지»를 아무도 못 센다.
- */
+function estimateRequestCostUsd(
+  model: string,
+  usage: Anthropic.Messages.Usage,
+  cachePrefixUsable: boolean,
+): number {
+  const inputRate = model === SONNET_MODEL ? SONNET_INPUT_PER_MILLION_USD : HAIKU_INPUT_PER_MILLION_USD;
+  const outputRate = model === SONNET_MODEL ? SONNET_OUTPUT_PER_MILLION_USD : HAIKU_OUTPUT_PER_MILLION_USD;
+  const inputTokens = usage.input_tokens ?? 0;
+  const outputTokens = usage.output_tokens ?? 0;
+  const cacheCreationTokens = usage.cache_creation_input_tokens ?? 0;
+  const cacheReadTokens = usage.cache_read_input_tokens ?? 0;
+  const uncachedInputTokens = Math.max(0, inputTokens - cacheCreationTokens - cacheReadTokens);
+
+  const writeCost = (cacheCreationTokens / 1_000_000) * inputRate * CACHE_WRITE_MULTIPLIER;
+  const readCost = (cacheReadTokens / 1_000_000) * inputRate * CACHE_READ_MULTIPLIER;
+  const inputCost = (uncachedInputTokens / 1_000_000) * inputRate;
+  const outputCost = (outputTokens / 1_000_000) * outputRate;
+
+  if (!cachePrefixUsable) {
+    return ((inputTokens / 1_000_000) * inputRate) + outputCost;
+  }
+
+  return writeCost + readCost + inputCost + outputCost;
+}
+
+let monthlyUsdEstimate = 0;
+let hasLoggedBudgetWarning = false;
+
 function assertBudgetAvailable(): void {
-  const verdict = budgetVerdict('chat');
-  if (verdict === 'blocked') {
+  const budgetUsd = env.CHAT_MONTHLY_BUDGET_USD;
+
+  if (monthlyUsdEstimate >= budgetUsd * 1.5) {
     throw new BudgetError('budget_exceeded');
   }
-  if (verdict === 'cache_only') {
+
+  if (monthlyUsdEstimate >= budgetUsd * 1.2) {
     throw new BudgetError('budget_cache_only');
+  }
+}
+
+function registerUsageCost(costUsd: number): void {
+  monthlyUsdEstimate += costUsd;
+  const budgetUsd = env.CHAT_MONTHLY_BUDGET_USD;
+
+  if (!hasLoggedBudgetWarning && monthlyUsdEstimate >= budgetUsd * 0.8) {
+    hasLoggedBudgetWarning = true;
+    console.warn(`[chat] monthly budget crossed 80%: $${monthlyUsdEstimate.toFixed(2)} / $${budgetUsd.toFixed(2)}`);
   }
 }
 
@@ -383,7 +422,7 @@ export async function createChatReply(input: {
       console.warn(`[chat] prompt cache skipped for ${input.qaId}: tokenEstimate=${chapterContext.tokenEstimate}`);
     }
 
-    const upgradedToSonnet = shouldUpgradeToSonnet() && spentUsdFor('chat') < env.CHAT_MONTHLY_BUDGET_USD;
+    const upgradedToSonnet = shouldUpgradeToSonnet() && monthlyUsdEstimate < env.CHAT_MONTHLY_BUDGET_USD;
     const modelUsed = upgradedToSonnet ? SONNET_MODEL : HAIKU_MODEL;
     const blockedDrafts: string[] = [];
     let blockedCount = 0;
@@ -425,7 +464,7 @@ export async function createChatReply(input: {
         break;
       }
 
-      registerUsageCost('chat', estimateCostUsd(modelUsed, response.usage, chapterContext.cachePrefixUsable));
+      registerUsageCost(estimateRequestCostUsd(modelUsed, response.usage, chapterContext.cachePrefixUsable));
 
       answer = extractTextFromResponse(response);
       const copyrightCheck = checkCopyright(answer);

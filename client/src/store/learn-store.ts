@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import type { LabRemaining } from '../lib/lab-api';
 import type { LabEvent, LabState } from '../lib/lab-shell';
 
 /**
@@ -44,8 +43,6 @@ type LearnStoreState = {
   labMissionIndex: number;
   /** 🚨 «스스로» 도달한 자리. 건너뛰기(jump)를 «끝»으로 세지 않으려고 따로 둔다. */
   labEarnedIndex: number;
-  /** 🚨 서버가 말해 준 남은 AI 횟수. null 이면 아직 안 물어봤다 — «0» 과 갈라 둔다. */
-  labRemaining: LabRemaining | null;
   /**
    * 🚨 실습실의 작업 전체. **화면 밖에 둔다.**
    *    예전에는 `LabTab` 컴포넌트 안에 있었는데, 우측 탭이 조건부 렌더라 학생이 📖 읽기 탭에
@@ -59,7 +56,6 @@ type LearnStoreState = {
   setMobileTab: (mobileTab: MobileTab) => void;
   setContentTab: (contentTab: ContentTab) => void;
   setLabMissionIndex: (labMissionIndex: number, labEarnedIndex: number) => void;
-  setLabRemaining: (labRemaining: LabRemaining | null) => void;
   setLabSession: (labSession: { qaId: string; state: LabState; lines: LabEvent[]; history: string[] } | null) => void;
   resetForQa: (qaId: string, scenarioId: string) => void;
 };
@@ -73,14 +69,12 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
   contentTab: 'read',
   labMissionIndex: 0,
   labEarnedIndex: 0,
-  labRemaining: null,
   labSession: null,
   setCurrentQaId: (currentQaId) => set({ currentQaId }),
   setScenarioId: (scenarioId) => set({ scenarioId }),
   setMobileTab: (mobileTab) => set({ mobileTab }),
   setContentTab: (contentTab) => set({ contentTab }),
   setLabMissionIndex: (labMissionIndex, labEarnedIndex) => set({ labMissionIndex, labEarnedIndex }),
-  setLabRemaining: (labRemaining) => set({ labRemaining }),
   setLabSession: (labSession) => set({ labSession }),
   // 🔑 문항을 바꿔도 **탭 상태는 유지한다**(읽기 → 읽기). 매번 첫 탭으로 튕기면
   //    «견학만 몰아서 보는» 동선이 끊긴다. 새 문항에 그 탭이 없으면 ContentPanel 이 접는다.

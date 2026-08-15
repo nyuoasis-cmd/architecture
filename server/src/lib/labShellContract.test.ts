@@ -21,6 +21,9 @@ type LabState = {
   ranCommands: string[]
   seenAbout: boolean
   jumpedTo: number | null
+  rules: string
+  myOutputs: string[]
+  reviewDone: boolean
   lastKey: string | null
   env: { widthPx: number; canPaste: boolean }
 }
@@ -29,6 +32,9 @@ type LabShell = {
   missionIndexOf: (state: LabState) => number
   openingEvents: () => LabEvent[]
   earnedMissionIndex: (state: LabState) => number
+  saveRules: (state: LabState, rules: string) => { events: LabEvent[]; nextState: LabState }
+  applyMyOutputs: (state: LabState, outputs: string[]) => LabState
+  markReviewDone: (state: LabState) => LabState
   INITIAL_LAB_STATE: LabState
   LAB_COMMAND_NAMES: string[]
 }
