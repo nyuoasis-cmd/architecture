@@ -23,7 +23,7 @@ type MyTurnVerdict = {
  */
 export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
   const [prompt, setPrompt] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'unavailable' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'done' | 'unavailable' | 'budget' | 'error'>('idle');
   const [verdict, setVerdict] = useState<MyTurnVerdict | null>(null);
   const [cooldown, setCooldown] = useState(0);
 
@@ -57,6 +57,11 @@ export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
       });
       if (response.status === 404) {
         setStatus('unavailable');
+        return;
+      }
+      // 🚨 돈 천장에 닿은 것을 «오류»로 뭉뚱그리면 학생이 계속 다시 누른다. 갈라서 말한다.
+      if (response.status === 503) {
+        setStatus('budget');
         return;
       }
       if (response.status === 429) {
@@ -132,6 +137,11 @@ export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
       {status === 'unavailable' ? (
         <p className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-4 py-3 text-[13px] text-[var(--color-text-muted)]">
           이 기능은 선생님이 열어주면 사용할 수 있어요. 지금은 🎮 시연 탭에서 미리 실행해 둔 결과를 볼 수 있습니다.
+        </p>
+      ) : null}
+      {status === 'budget' ? (
+        <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
+          오늘은 AI 판정을 더 쓸 수 없어요. 선생님께 알려 주세요. (다시 눌러도 열리지 않습니다.)
         </p>
       ) : null}
       {status === 'error' ? (

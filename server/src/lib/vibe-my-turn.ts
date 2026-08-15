@@ -2,6 +2,7 @@ import Anthropic from '@anthropic-ai/sdk';
 import { z } from 'zod';
 import { isParticipantKey } from './actor-id';
 import { env } from '../env';
+import { budgetVerdict, estimateCostUsd, registerUsageCost } from './ai-spend';
 
 // «내 차례» — 학생이 쓴 부탁문을 Haiku 4.5로 실제 실행해, 다섯 칸 중
 // «학생이 정한 칸 / AI가 대신 정하게 되는 칸»을 판정한다.
@@ -9,6 +10,11 @@ import { env } from '../env';
 // 호출 통제: 학생 분당 10 · 학생 하루 300 · 전체 분당 60 · 전체 하루 500 (쿨타임 없음).
 
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
+
+// 🚨 출력 상한. 이 값이 곧 «한 호출이 최대 얼마인가»의 절반이다 — 올릴 때는 돈이 같이 올라간다.
+const MY_TURN_MAX_OUTPUT_TOKENS = envInt('MYTURN_MAX_OUTPUT_TOKENS', 800);
+// 🚨 매달린 호출이 동시성 자리를 물고 있지 않게. 수업 중 30명이 동시에 누르는 자리다.
+const MY_TURN_TIMEOUT_MS = envInt('MYTURN_TIMEOUT_MS', 20000) ;
 
 // 호출 통제 값 — 전부 Render env 로 «무배포» 조정한다(대규모 수업 전 상향 → 수업 후 원복).
 // 🚨 코드 상수로만 두면 상향에 배포가 필요해서, 수업 당일 막혔을 때 손쓸 수가 없다.
@@ -49,9 +55,10 @@ export const MY_TURN_LIMITS = {
   // 🔑 전역은 «하루 몇 차시를 받을 수 있는가»다. 실습 1차시 ≈ 24명 × 문항 4개 ≈ 96~192회 →
   //    4,000 이면 하루 20~40차시. 예전 500 은 하루 2~3반에서 닿았다(jery 확정 2026-08-11).
   //    분당 120 = 40명 학급이 동시에 눌러도 흡수. 포화 시 상한 ≈ $16/일.
-  // 🚨 지금 「내 차례」에는 **이것 말고 돈 천장이 없다** — CHAT_MONTHLY_BUDGET_USD 는 챗봇 전용이라
-  //    이 라우트의 지출을 세지 않는다(registerUsageCost 는 chat-service 안에만 있다).
-  //    즉 이 두 줄이 곧 지출 상한이다. 올릴 때는 그 사실을 알고 올린다.
+  // 💸 2026-08-15 부터 이 라우트도 **돈 천장 아래**에 있다(LAB_MONTHLY_BUDGET_USD, 기본 $30).
+  //    그 전에는 이 두 줄이 곧 지출 상한이었다 — 지출 장부가 chat-service 안에만 있어서
+  //    여기서 쓴 돈이 어디에도 안 잡혔기 때문이다. 이제 호출 횟수(여기)와 금액(ai-spend)이 따로 막는다.
+  //    🔑 그래도 이 값을 올릴 때는 여전히 «몇 차시를 받을 수 있는가»를 정하는 일이다.
   globalPerMin: envInt('MYTURN_PER_MIN', 120),
   globalDaily: envInt('MYTURN_DAILY_CAP', 4000),
 };
@@ -685,15 +692,32 @@ export async function judgeMyTurn(input: {
     throw new MyTurnUnavailableError('no_api_key');
   }
 
+  // 💸 돈 천장. 🚨 2026-08-15 이전에는 이 라우트에 **호출 횟수 한도만 있고 돈 천장이 없었다** —
+  //    지출 장부가 chat-service 안에만 있어서 여기서 쓴 돈이 어디에도 안 잡혔기 때문이다.
+  //    즉 MYTURN_* 한도를 올리는 것이 곧 상한을 올리는 일이었다. 이제는 갈라진 주머니(`lab`)로 센다.
+  // 🔑 호출 «전에» 본다 — 쓰고 나서 세면 천장을 넘긴 뒤에야 알게 된다.
+  if (budgetVerdict('lab') !== 'ok') {
+    throw new MyTurnUnavailableError('budget_exceeded');
+  }
+
   takeToken(input.actorId);
 
   const { system, user } = buildJudgePrompt(task, input.prompt.slice(0, 1200));
-  const response = await anthropic.messages.create({
-    model: HAIKU_MODEL,
-    max_tokens: 800,
-    system,
-    messages: [{ role: 'user', content: user }],
-  });
+  const response = await anthropic.messages.create(
+    {
+      model: HAIKU_MODEL,
+      max_tokens: MY_TURN_MAX_OUTPUT_TOKENS,
+      system,
+      messages: [{ role: 'user', content: user }],
+    },
+    // 🚨 시간 제한이 없으면 한 호출이 매달린 채로 동시성 자리를 물고 있는다 —
+    //    30명이 동시에 누르는 수업에서 그건 «반 전체가 멈춘다»는 뜻이다.
+    { timeout: MY_TURN_TIMEOUT_MS },
+  );
+
+  // 🚨 **성공한 뒤에** 적는다. 실패한 호출까지 세면 천장이 헛돈다.
+  // 🔑 이 라우트는 prompt caching 을 안 쓴다(단발 판정) — 그래서 cachePrefixUsable=false 다.
+  registerUsageCost('lab', estimateCostUsd(HAIKU_MODEL, response.usage, false));
 
   const text = response.content
     .filter((block) => block.type === 'text')

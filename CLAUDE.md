@@ -17,8 +17,14 @@
 - **AI**: **Claude Haiku 4.5** (`@anthropic-ai/sdk`) — 1) 학생 챗봇 2) ✋「내 차례」 판정(`/api/vibe/my-turn`). prompt caching + DB 답변 캐시 + JSON 단발 응답(streaming X).
   🚨 **호출 통제 켜짐**(2026-08-11). 신원은 `resolveActorId` 하나만 쓴다 — 참여자 토큰=학생 한 명, 없으면 «여럿이 뭉친 통»으로 갈라 다른 한도를 준다(IP 로 학생을 세면 교실 전체가 한 명이 된다).
   한도는 전부 Render env 로 **무배포** 조정: 「내 차례」 `MYTURN_*`(학생 분당 10·하루 300·**쿨타임 0** / 공유 분당 10·하루 1,000 / 전역 분당 120·하루 4,000, 롤백 `MYTURN_GUARD_ENABLED=0`) · 챗봇 `CHAT_*` 4층.
-  🚨 **「내 차례」 지출에는 이 한도 말고 돈 천장이 없다** — `CHAT_MONTHLY_BUDGET_USD` 는 챗봇 전용이라
-  이 라우트를 세지 않는다(`registerUsageCost` 가 chat-service 안에만 있다). 한도를 올리는 것이 곧 상한을 올리는 일.
+  💸 **돈 천장은 `server/src/lib/ai-spend.ts` 하나다**(2026-08-15). 주머니가 둘로 갈려 있다 —
+  챗봇 `CHAT_MONTHLY_BUDGET_USD`(기본 $173) / 실습·「내 차례」 `LAB_MONTHLY_BUDGET_USD`(기본 $30).
+  합치지 말 것: 한쪽이 많이 쓴 달에 다른 쪽이 막히고, 어느 쪽이 왜 막혔는지도 못 센다.
+  🚨 **이 장부는 프로세스 안에만 있다** — 서버가 다시 뜨면 0 부터 다시 센다(Render 는 배포·유휴 복귀마다 뜬다).
+  즉 «한 달 절대 상한»이 아니라 **«한 번 뜬 동안 폭주하면 끊는 차단기»**다. 진짜 월 상한은 DB 에 적어야 한다(미결).
+  그래서 `spendSnapshot()` 이 `persisted:false` 와 `countingSince` 를 같이 말한다 — 이름이 거짓말하지 않게.
+  🔑 2026-08-15 이전에는 「내 차례」가 **어떤 장부에도 안 잡혔다**(지출 계산이 chat-service 안에만 있었다).
+  배선이 빠지면 그 상태로 되돌아간다 — `aiSpendContract` 10) 이 잡는다.
 - **DB**: Supabase PostgreSQL (테이블 prefix `architecture_*`)
 - **Auth**: 카카오 OAuth + DEV 로그인
 - **Design**: Restrained Trust (stone palette)
