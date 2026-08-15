@@ -1,0 +1,421 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>12강 실습 — 결정 3건</title>
+<style>
+:root{
+  --paper:#faf9f7; --card:#fff; --line:#e3e0da; --line-2:#d2cec6;
+  --ink:#2b2925; --ink-2:#57534d; --dim:#8c877e;
+  --accent:#3d6b5e; --accent-w:#eef4f1; --accent-b:#bcd3c9;
+  --warn:#a8672a; --warn-w:#fdf3e8; --warn-b:#eddcc6;
+  --bad:#a63f2e; --bad-w:#fbeeeb; --bad-b:#eed6d0;
+  --good:#3f7a3f; --good-w:#eef6ee;
+  --term-bg:#191c16; --term-fg:#dce0d3; --term-dim:#7f867a;
+  --tg:#96c97e; --tr:#ef7159; --ty:#e4b264; --tb:#7fb6ab; --tw:#fff;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.7}
+.wrap{max-width:1080px;margin:0 auto;padding:38px 20px 90px}
+
+h1{font-size:27px;line-height:1.35;margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--ink-2);font-size:15px;margin:0 0 6px}
+.stamp{font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.04em;margin-bottom:16px}
+
+.tocbar{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 30px;padding:13px 15px;background:var(--card);border:1px solid var(--line);border-radius:11px}
+.tocbar b{font-size:12.5px;color:var(--dim);font-family:var(--mono);letter-spacing:.06em;align-self:center;margin-right:4px}
+.tocbar a{font-size:13.5px;color:var(--accent);text-decoration:none;border:1px solid var(--accent-b);background:var(--accent-w);padding:3px 11px;border-radius:20px}
+
+h2{font-size:21px;margin:56px 0 4px;letter-spacing:-.01em;padding-top:22px;border-top:2px solid var(--line-2)}
+h2 .n{font-family:var(--mono);font-size:12.5px;color:#fff;background:var(--ink);padding:2px 9px;border-radius:5px;margin-right:10px;vertical-align:3px;letter-spacing:.05em}
+.q{color:var(--ink-2);font-size:15px;margin:0 0 4px}
+.why{background:var(--warn-w);border:1px solid var(--warn-b);border-left:3px solid var(--warn);border-radius:0 9px 9px 0;padding:13px 16px;margin:16px 0 22px;font-size:13.8px;color:#6d4a22;line-height:1.65}
+.why b{color:#5a3a15}
+
+/* 비교 2열 */
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+.opt{border:1px solid var(--line);border-radius:12px;background:var(--card);overflow:hidden;display:flex;flex-direction:column}
+.opt.pick{border-color:var(--accent-b);box-shadow:0 0 0 2px var(--accent-w)}
+.opt.no{background:#fcfbfa}
+.opt>header{padding:13px 15px 12px;border-bottom:1px solid var(--line)}
+.opt.pick>header{background:var(--accent-w);border-bottom-color:var(--accent-b)}
+.opt.no>header{background:#f6f4f1}
+.tagrow{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+.tag{font-family:var(--mono);font-size:10px;letter-spacing:.09em;color:var(--dim)}
+.badge{font-size:10.5px;font-weight:700;padding:1.5px 8px;border-radius:20px;letter-spacing:.02em}
+.badge.rec{background:var(--accent);color:#fff}
+.badge.avoid{background:#e8e4de;color:#6f6a62}
+.opt h3{margin:0;font-size:16px;letter-spacing:-.005em;line-height:1.4}
+.opt .body{padding:14px 15px 4px}
+.opt .foot{padding:4px 15px 15px;margin-top:auto}
+
+.screen{border:1px solid var(--line-2);border-radius:9px;overflow:hidden;background:#fff;margin-bottom:12px}
+.screen .bar{background:#efece7;border-bottom:1px solid var(--line);padding:5px 10px;font-family:var(--mono);font-size:10px;color:var(--dim);letter-spacing:.05em;display:flex;justify-content:space-between}
+.termbox{background:var(--term-bg);color:var(--term-fg);font-family:var(--mono);font-size:11.6px;line-height:1.75;
+  padding:12px 13px;overflow-x:auto;white-space:pre;margin:0}
+.tp{color:var(--tg)}.tc{color:var(--tw);font-weight:600}.td{color:var(--term-dim)}
+.tgr{color:var(--tg)}.trd{color:var(--tr)}.tyl{color:var(--ty)}.tbl{color:var(--tb)}
+
+.pane{background:#fff;padding:12px 13px}
+.editor{border:1px solid var(--line);border-radius:7px;background:#fbfaf8;min-height:88px;padding:10px 11px;
+  font-family:var(--mono);font-size:11.6px;line-height:1.7;color:var(--ink-2);white-space:pre-wrap}
+.editor.empty{color:#b8b3aa;font-style:italic}
+.editor .ai{background:#f0eaf3;border-radius:3px;padding:0 3px}
+.btnrow{display:flex;gap:7px;margin-top:9px;align-items:center;flex-wrap:wrap}
+.btn{font-size:11.5px;font-weight:600;padding:5px 12px;border-radius:6px;font-family:var(--sans)}
+.btn.p{background:var(--accent);color:#fff}
+.btn.s{background:#fff;border:1px solid var(--line-2);color:var(--ink-2)}
+.cnt{font-family:var(--mono);font-size:10.5px;color:var(--warn);margin-left:auto}
+
+ul.pn{list-style:none;margin:0;padding:0;font-size:13.3px;line-height:1.6}
+ul.pn li{display:flex;gap:8px;padding:4px 0;color:var(--ink-2)}
+ul.pn li .m{flex:none;font-weight:700;width:13px;text-align:center}
+li.p .m{color:var(--good)} li.n .m{color:var(--bad)}
+li.n{color:#7d5147}
+
+table{width:100%;border-collapse:collapse;margin:22px 0 6px;font-size:13.4px;background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+th,td{text-align:left;padding:10px 13px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;font-family:var(--mono);letter-spacing:.06em;color:var(--dim);font-weight:600;background:#f6f4f1}
+td.k{width:190px;color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+td .ok{color:var(--good);font-weight:600}
+td .ng{color:var(--bad);font-weight:600}
+
+/* 비용 막대 */
+.bars{margin:20px 0 6px;border:1px solid var(--line);border-radius:11px;background:var(--card);padding:18px 18px 14px}
+.bar-row{display:grid;grid-template-columns:172px 1fr 96px;gap:12px;align-items:center;margin-bottom:11px;font-size:13.2px}
+.bar-row .lb{color:var(--ink-2)}
+.bar-row .lb b{color:var(--ink);display:block;font-size:13.5px}
+.track{background:#f0eeea;border-radius:5px;height:22px;position:relative;overflow:hidden}
+.fill{height:100%;border-radius:5px}
+.f-tiny{background:var(--good)}
+.f-mid{background:var(--warn)}
+.f-cap{background:repeating-linear-gradient(45deg,#3d6b5e,#3d6b5e 7px,#4e8073 7px,#4e8073 14px)}
+.f-bad{background:var(--bad)}
+.bar-row .amt{font-family:var(--mono);font-size:12.5px;text-align:right;color:var(--ink)}
+.capline{border-top:1px dashed var(--line-2);margin:13px 0 10px}
+.bars .note{font-size:12.4px;color:var(--dim);line-height:1.6;margin:0}
+
+.choices{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:16px 0 0}
+.ch{border:1px solid var(--line);border-radius:10px;padding:14px 15px;background:var(--card)}
+.ch.pick{border-color:var(--accent-b);background:var(--accent-w)}
+.ch .amt{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--ink);letter-spacing:-.01em}
+.ch.pick .amt{color:var(--accent)}
+.ch .lab{font-size:11px;font-family:var(--mono);color:var(--dim);letter-spacing:.08em;margin-bottom:5px}
+.ch p{margin:6px 0 0;font-size:12.8px;color:var(--ink-2);line-height:1.6}
+
+.verdict{margin:20px 0 0;border:1px solid var(--accent-b);background:var(--accent-w);border-radius:11px;padding:15px 17px}
+.verdict h4{margin:0 0 5px;font-size:14px;color:var(--accent)}
+.verdict p{margin:0;font-size:13.5px;color:#31564b;line-height:1.65}
+
+.final{margin:60px 0 0;padding:22px 24px;border:2px solid var(--ink);border-radius:13px;background:var(--card)}
+.final h3{margin:0 0 12px;font-size:17px}
+.final ol{margin:0;padding-left:20px;font-size:14px;line-height:1.9;color:var(--ink-2)}
+.final ol b{color:var(--ink)}
+.final .say{margin-top:16px;padding:12px 14px;background:#f6f4f1;border-radius:8px;font-family:var(--mono);font-size:13px;color:var(--ink)}
+
+@media(max-width:860px){
+  .cmp{grid-template-columns:1fr}
+  .choices{grid-template-columns:1fr}
+  .bar-row{grid-template-columns:1fr;gap:5px}
+  .bar-row .amt{text-align:left}
+  .wrap{padding:26px 15px 70px}
+  h1{font-size:23px}
+  td.k{width:auto}
+}
+</style>
+
+<div class="wrap">
+
+<h1>12강 실습 — 정해주셔야 할 것 셋</h1>
+<p class="sub">각 결정마다 <b>학생이 실제로 보게 될 화면</b>을 나란히 놨습니다. 눈으로 비교하고 고르시면 됩니다.</p>
+<p class="stamp">architecture · 2026-08-15 · 3모델 회의 반영 · 구현 0</p>
+
+<div class="tocbar">
+  <b>결정</b>
+  <a href="#d1">가 · 수업이 무엇을 주장하나</a>
+  <a href="#d2">나 · AI에게 뭘 시키나</a>
+  <a href="#d3">다 · 돈 천장을 얼마로</a>
+</div>
+
+<!-- ══════════ 결정 가 ══════════ -->
+<h2 id="d1"><span class="n">결정 가</span></h2>
+<p class="q">이 수업은 학생에게 무엇을 주장하는가 — <b>「AI가 똑같이 답한다」</b> 인가, <b>「AI가 약속을 지킨다」</b> 인가.</p>
+
+<div class="why">
+  <b>왜 지금 이걸 정해야 하나:</b> 원래 계획은 「규칙을 주면 3개 결과가 <b>똑같아진다</b>」였습니다. 그런데 진짜 AI는 규칙을 줘도 글자가 똑같아지지 않습니다. 그러니 초록을 띄우려면 그 장면을 <b>녹화해서 틀어야</b> 하고, 그 순간 「AI 호출은 진짜다」라는 약속이 안에서 깨집니다. 세 모델이 각자 따로 짚은 문제입니다.
+</div>
+
+<div class="cmp">
+
+  <div class="opt no">
+    <header>
+      <div class="tagrow"><span class="tag">지금 계획</span><span class="badge avoid">권하지 않음</span></div>
+      <h3>「3개가 전부 다릅니다」<br>— 다름을 눈으로 본다</h3>
+    </header>
+    <div class="body">
+      <div class="screen">
+        <div class="bar"><span>터미널</span><span>규칙 쓰기 전</span></div>
+<pre class="termbox"><span class="tp">student@lab</span>$ <span class="tc">npm test</span>
+
+  <span class="trd">✗</span> 출력이 3회 모두 동일한가
+    <span class="trd">FAIL</span> — 3개가 전부 다릅니다
+
+  <span class="td">1 failing</span></pre>
+      </div>
+      <div class="screen">
+        <div class="bar"><span>터미널</span><span>규칙 쓴 뒤</span></div>
+<pre class="termbox"><span class="tp">student@lab</span>$ <span class="tc">npm test</span>
+
+  <span class="tgr">✓</span> 출력이 3회 모두 동일한가
+
+  <span class="tgr">1 passing</span>
+<span class="td">  ⚠ 이 초록은 미리 녹화된 결과다</span></pre>
+      </div>
+      <ul class="pn">
+        <li class="p"><span class="m">＋</span>충격이 단순하고 즉각적이다</li>
+        <li class="n"><span class="m">－</span><b>거짓을 가르친다</b> — 진짜 AI는 안 똑같아진다</li>
+        <li class="n"><span class="m">－</span>초록을 만들려면 <b>녹화가 필수</b> → 고지 약속 위반</li>
+        <li class="n"><span class="m">－</span>AI 호출이 <b>4회</b> 필요한데 상한은 3회 (산수 모순)</li>
+        <li class="n"><span class="m">－</span>학생이 나중에 진짜 챗봇에서 흔들리는 걸 보면 수업 전체를 불신</li>
+      </ul>
+    </div>
+    <div class="foot"></div>
+  </div>
+
+  <div class="opt pick">
+    <header>
+      <div class="tagrow"><span class="tag">바꾼 안</span><span class="badge rec">추천</span></div>
+      <h3>「다르면 프로그램이 터진다」<br>— 다름의 결과를 본다</h3>
+    </header>
+    <div class="body">
+      <div class="screen">
+        <div class="bar"><span>터미널</span><span>규칙 쓰기 전</span></div>
+<pre class="termbox"><span class="tp">student@lab</span>$ <span class="tc">npm test</span>
+
+  <span class="tgr">✓</span> run-1  <span class="td">할인율 10%</span>
+  <span class="trd">✗</span> run-2  <span class="trd">터짐</span> <span class="td">"10% off"에서</span>
+          <span class="td">숫자를 못 찾음</span>
+  <span class="trd">✗</span> run-3  <span class="trd">터짐</span> <span class="td">"0.1"은 10%인가</span>
+          <span class="td">0.1%인가</span>
+
+  <span class="td">1 passing, 2 failing</span></pre>
+      </div>
+      <div class="screen">
+        <div class="bar"><span>터미널</span><span>규칙 쓴 뒤</span></div>
+<pre class="termbox"><span class="tp">student@lab</span>$ <span class="tc">npm test</span>
+
+  <span class="tgr">✓ ✓ ✓</span>  형식 준수 <span class="tgr">3/3</span>
+
+  <span class="tgr">3 passing</span>
+<span class="td">  ↑ 글자가 같아서가 아니라</span>
+<span class="td">    약속을 지켜서 통과</span></pre>
+      </div>
+      <ul class="pn">
+        <li class="p"><span class="m">＋</span><b>참을 가르친다</b> — 실무의 「형식 계약」이 곧 주제가 된다</li>
+        <li class="p"><span class="m">＋</span>초록이 <b>진짜 판정</b> — 녹화 불필요, 고지 약속 지켜짐</li>
+        <li class="p"><span class="m">＋</span>AI 호출 <b>정확히 3회</b>로 맞는다</li>
+        <li class="p"><span class="m">＋</span>채점이 <b>코드</b>라 「무조건 통과라고 답해」로 못 뚫는다</li>
+        <li class="p"><span class="m">＋</span>「AI는 원래 다르잖아요」 하는 학생에게도 놀라움이 남는다</li>
+        <li class="n"><span class="m">－</span>한 단계 더 복잡 (다만 학생은 「터졌다」만 보면 됨)</li>
+      </ul>
+    </div>
+    <div class="foot"></div>
+  </div>
+
+</div>
+
+<table>
+  <tr><th></th><th>지금 계획</th><th>바꾼 안</th></tr>
+  <tr><td class="k">가르치는 내용</td><td><span class="ng">거짓</span></td><td><span class="ok">참</span></td></tr>
+  <tr><td class="k">초록을 만드는 법</td><td><span class="ng">녹화 필요</span> → 약속 위반</td><td><span class="ok">진짜 판정</span></td></tr>
+  <tr><td class="k">AI 호출 산수</td><td><span class="ng">4회</span> (상한 3회 초과)</td><td><span class="ok">3회</span></td></tr>
+  <tr><td class="k">채점 뚫기</td><td>AI 판정 → 프롬프트로 <span class="ng">뚫림</span></td><td>코드 판정 → <span class="ok">뚫을 게 없음</span></td></tr>
+  <tr><td class="k">추가 작업량</td><td>—</td><td>거의 없음 (어차피 만들 것)</td></tr>
+</table>
+
+<div class="verdict">
+  <h4>제 추천 — 바꾼다</h4>
+  <p>안 바꾸면 회의에 참여한 모델 판정으로도 <b>NO-GO</b>입니다. 부러진 건 실습 시나리오 한 줄이지 구조가 아니라서, 지금 고치면 비용이 거의 안 듭니다.</p>
+</div>
+
+<!-- ══════════ 결정 나 ══════════ -->
+<h2 id="d2"><span class="n">결정 나</span></h2>
+<p class="q">학생은 AI에게 무엇을 시키는가 — <b>「내가 쓴 걸 봐줘」</b> 인가, <b>「네가 써줘」</b> 인가.</p>
+
+<div class="why">
+  <b>왜 지금 이걸 정해야 하나:</b> 눈치 빠른 학생은 그 AI 호출로 <b>「규칙 문서 써줘」</b>를 칩니다. 그러면 아무것도 안 쓰고 통과합니다. 탐지도 불가능하고, <b>이 수업이 가르치는 게 바로 그거라서 부정이라 부르기도 애매합니다.</b> 명시적으로 고르지 않으면 평가와 교육 목표가 조용히 갈라집니다.
+</div>
+
+<div class="cmp">
+
+  <div class="opt pick">
+    <header>
+      <div class="tagrow"><span class="tag">A 안</span><span class="badge rec">추천</span></div>
+      <h3>내가 쓰고 → AI가 비평한다</h3>
+    </header>
+    <div class="body">
+      <div class="screen">
+        <div class="bar"><span>편집기 · CLAUDE.md</span><span>1단계</span></div>
+        <div class="pane">
+          <div class="editor empty">여기에 규칙을 적어 보세요.
+(예시 보기 ▸)</div>
+          <div class="btnrow">
+            <span class="btn s">예시 보기</span>
+            <span class="btn p">AI에게 봐달라고 하기</span>
+            <span class="cnt">3 / 3 남음</span>
+          </div>
+        </div>
+      </div>
+      <div class="screen">
+        <div class="bar"><span>터미널</span><span>2단계</span></div>
+<pre class="termbox"><span class="tp">student@lab</span>$ <span class="tc">claude review</span>
+
+<span class="tbl">애매한 곳 2군데:</span>
+ · "형식을 통일한다" — <span class="tyl">어떤 형식인지</span>
+   안 적혀 있어 저는 마음대로 고릅니다
+ · 소수 표기 금지가 없어서 "0.1"이
+   여전히 나올 수 있습니다</pre>
+      </div>
+      <ul class="pn">
+        <li class="p"><span class="m">＋</span>배우는 것 = <b>규칙을 스스로 쓰는 힘</b></li>
+        <li class="p"><span class="m">＋</span>「내 말이 애매하면 AI가 마음대로 한다」를 몸으로 겪는다</li>
+        <li class="p"><span class="m">＋</span>12강의 요점(규칙을 쓸 줄 아는가)과 평가가 일치</li>
+        <li class="n"><span class="m">－</span>비전공자는 <b>빈 화면 앞에서 막힌다</b><br>&nbsp;&nbsp;&nbsp;→ 완화: 예시 문서를 옆에 둔다</li>
+      </ul>
+    </div>
+    <div class="foot"></div>
+  </div>
+
+  <div class="opt">
+    <header>
+      <div class="tagrow"><span class="tag">B 안</span></div>
+      <h3>AI가 쓰고 → 내가 다듬는다</h3>
+    </header>
+    <div class="body">
+      <div class="screen">
+        <div class="bar"><span>터미널</span><span>1단계</span></div>
+<pre class="termbox"><span class="tp">student@lab</span>$ <span class="tc">claude write</span>
+<span class="td">  "출력 형식 통일 규칙 써줘"</span>
+
+<span class="tbl">CLAUDE.md 를 만들었습니다.</span></pre>
+      </div>
+      <div class="screen">
+        <div class="bar"><span>편집기 · CLAUDE.md</span><span>2단계</span></div>
+        <div class="pane">
+          <div class="editor"><span class="ai">모든 출력은 「할인율 N%」 형식으로
+통일한다. 소수·영문 표기를 쓰지 않는다.
+N 은 정수로 적는다.</span></div>
+          <div class="btnrow">
+            <span class="btn s">다듬기</span>
+            <span class="btn p">제출</span>
+            <span class="cnt">2 / 3 남음</span>
+          </div>
+        </div>
+      </div>
+      <ul class="pn">
+        <li class="p"><span class="m">＋</span>배우는 것 = <b>AI를 지휘하는 힘</b> (바이브코딩 그 자체)</li>
+        <li class="p"><span class="m">＋</span>막히는 학생이 없다 — 시작이 쉽다</li>
+        <li class="n"><span class="m">－</span><b>다듬지 않고 그냥 내도 통과</b>할 수 있다</li>
+        <li class="n"><span class="m">－</span>「규칙을 쓸 줄 아는가」는 평가되지 않는다</li>
+        <li class="n"><span class="m">－</span>16강(AI에게 발주하기)과 배우는 게 겹친다</li>
+      </ul>
+    </div>
+    <div class="foot"></div>
+  </div>
+
+</div>
+
+<div class="verdict">
+  <h4>제 추천 — A 안</h4>
+  <p>A안을 골라도 학생이 몰래 「써줘」 하는 걸 <b>완전히 막지는 못합니다.</b> 다만 <b>화면이 무엇을 권하느냐</b>가 달라집니다 — A안은 빈 문서와 「봐달라고 하기」가 먼저 보이고, B안은 「써줘」가 먼저 보입니다. 그리고 「AI에게 발주하기」는 <b>16강이 이미 담당</b>합니다.</p>
+</div>
+
+<!-- ══════════ 결정 다 ══════════ -->
+<h2 id="d3"><span class="n">결정 다</span></h2>
+<p class="q">💸 AI 월 지출 상한을 얼마로 둘 것인가.</p>
+
+<div class="why">
+  <b>왜 지금 이걸 정해야 하나:</b> 지금 이 기능에는 <b>돈 천장이 아예 없습니다.</b> 분당·일일 <em>횟수</em> 제한만 있고 월 <em>금액</em> 상한이 없습니다. 게다가 이 화면은 <b>로그인이 없고</b>(수업 참여 코드만 있으면 들어옴), 코드로 토큰을 다시 받으면 1인 3회 제한도 우회됩니다. 실습을 켜기 전에 반드시 붙여야 합니다.
+</div>
+
+<div class="bars">
+  <div class="bar-row">
+    <div class="lb"><b>학생 1명</b>AI 3회</div>
+    <div class="track"><div class="fill f-tiny" style="width:0.4%"></div></div>
+    <div class="amt">$0.014</div>
+  </div>
+  <div class="bar-row">
+    <div class="lb"><b>한 반 30명</b>12강 1회 수업</div>
+    <div class="track"><div class="fill f-tiny" style="width:1.3%"></div></div>
+    <div class="amt">$0.4</div>
+  </div>
+  <div class="bar-row">
+    <div class="lb"><b>6강 전체 × 한 반</b>한 학기</div>
+    <div class="track"><div class="fill f-tiny" style="width:8%"></div></div>
+    <div class="amt">$2.5</div>
+  </div>
+  <div class="bar-row">
+    <div class="lb"><b>6강 전체 × 3개 반</b>가장 많이 쓰는 경우</div>
+    <div class="track"><div class="fill f-mid" style="width:25%"></div></div>
+    <div class="amt">$7.6</div>
+  </div>
+
+  <div class="capline"></div>
+
+  <div class="bar-row">
+    <div class="lb"><b style="color:var(--accent)">상한 $30 (추천)</b>여기서 멈춘다</div>
+    <div class="track"><div class="fill f-cap" style="width:100%"></div></div>
+    <div class="amt" style="color:var(--accent)">$30</div>
+  </div>
+  <div class="bar-row">
+    <div class="lb"><b style="color:var(--bad)">천장이 없으면</b>사고 시</div>
+    <div class="track"><div class="fill f-bad" style="width:100%;border-radius:5px 0 0 5px"></div></div>
+    <div class="amt" style="color:var(--bad)">∞</div>
+  </div>
+
+  <p class="note">Haiku 4.5 기준 · 입력 100만 토큰 $1 / 출력 100만 토큰 $5 · 호출당 입력 약 2,000 · 출력 약 500 토큰 가정</p>
+</div>
+
+<p style="font-size:14px;color:var(--ink-2);margin:16px 0 0"><b>읽는 법:</b> 정상적으로 쓰면 돈이 거의 안 듭니다 — 12강 한 반이 <b>600원</b>입니다. 천장은 정상 사용을 막으려는 게 아니라 <b>사고가 났을 때 손실을 여기서 끊으려는 것</b>입니다.</p>
+
+<div class="choices">
+  <div class="ch">
+    <div class="lab">아낌</div>
+    <div class="amt">월 $10</div>
+    <p>12강만 돌릴 거면 충분합니다. 6강 전체로 넓히면 빠듯해집니다.</p>
+  </div>
+  <div class="ch pick">
+    <div class="lab">추천</div>
+    <div class="amt">월 $30</div>
+    <p>가장 많이 쓰는 경우($7.6)의 <b>4배 여유</b>. 사고가 나도 잃는 게 <b>4만원</b>에서 멈춥니다.</p>
+  </div>
+  <div class="ch">
+    <div class="lab">넉넉</div>
+    <div class="amt">월 $100</div>
+    <p>여유롭지만 사고 시 손실도 그만큼 커집니다.</p>
+  </div>
+</div>
+
+<div class="verdict">
+  <h4>제 추천 — 월 $30</h4>
+  <p>정상 수업은 절대 못 건드리는 금액이고, 사고가 나도 잃는 게 한 끼 값입니다. 나중에 <b>Render 설정에서 배포 없이 조정</b>할 수 있게 만들겠습니다 — 챗봇이 이미 그렇게 되어 있습니다.</p>
+</div>
+
+<!-- 마무리 -->
+<div class="final">
+  <h3>정리 — 이렇게 하면 됩니다</h3>
+  <ol>
+    <li><b>가</b> — 수업의 주장을 「같아진다」 → <b>「약속을 지킨다」</b>로 바꾼다</li>
+    <li><b>나</b> — AI의 역할은 <b>「내 초안을 비평」</b>(A안)</li>
+    <li><b>다</b> — AI 월 지출 상한 <b>$30</b></li>
+  </ol>
+  <div class="say">「가는 바꾸고, 나는 A, 다는 $30」 — 이렇게 답하시면 바로 PR 계획으로 갑니다.</div>
+</div>
+
+<p class="stamp" style="margin-top:44px;padding-top:18px;border-top:1px solid var(--line)">
+설명용 목업입니다. 구현은 0줄이며, 위 셋이 정해진 뒤 착수합니다.<br>
+근거 = 3모델 회의 원본 <code>~/.claude/skills/brainstorm/runs/brainstorm-architecture-fake-terminal-12ch-2026-08-15.md</code>
+</p>
+
+</div>

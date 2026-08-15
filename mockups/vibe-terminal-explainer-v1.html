@@ -1,0 +1,340 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>터미널 실습실 — 이게 왜 실습 도구인가</title>
+<style>
+:root{
+  --paper:#faf9f7; --card:#fff; --line:#e3e0da; --line-2:#d2cec6;
+  --ink:#2b2925; --ink-2:#57534d; --dim:#8c877e;
+  --accent:#3d6b5e; --accent-w:#eef4f1;
+  --warn:#a8672a; --warn-w:#fdf3e8;
+  --bad:#a63f2e; --bad-w:#fbeeeb;
+  --good:#3f7a3f; --good-w:#eef6ee;
+  --term-bg:#191c16; --term-fg:#dce0d3; --term-dim:#7f867a;
+  --tg:#96c97e; --tr:#ef7159; --ty:#e4b264; --tb:#7fb6ab; --tw:#fff;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.7}
+.wrap{max-width:900px;margin:0 auto;padding:38px 20px 90px}
+
+h1{font-size:27px;line-height:1.35;margin:0 0 8px;letter-spacing:-.01em}
+.sub{color:var(--ink-2);font-size:15px;margin:0 0 6px}
+.stamp{font-family:var(--mono);font-size:11.5px;color:var(--dim);letter-spacing:.04em;margin-bottom:34px}
+
+h2{font-size:19px;margin:52px 0 6px;letter-spacing:-.01em;padding-top:20px;border-top:1px solid var(--line)}
+h2 .n{font-family:var(--mono);font-size:13px;color:var(--accent);margin-right:9px}
+.lead{color:var(--ink-2);font-size:14.5px;margin:0 0 20px}
+
+p{margin:0 0 14px}
+b{font-weight:640}
+code{font-family:var(--mono);font-size:.9em;background:#f0eeea;padding:1px 5px;border-radius:4px;color:#3f3b35}
+
+/* 비유 2칸 */
+.vs{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:18px 0 8px}
+.vs>div{border:1px solid var(--line);border-radius:11px;padding:17px 17px 15px;background:var(--card)}
+.vs .now{background:#f6f4f1}
+.vs .new{border-color:#bcd3c9;background:var(--accent-w)}
+.vs h4{margin:0 0 4px;font-size:12px;font-family:var(--mono);letter-spacing:.07em;color:var(--dim)}
+.vs .new h4{color:var(--accent)}
+.vs .big{font-size:16.5px;font-weight:640;margin:0 0 9px;line-height:1.45}
+.vs p{font-size:13.5px;color:var(--ink-2);margin:0}
+
+/* 화면 도해 */
+.screen{border:1px solid var(--line-2);border-radius:12px;overflow:hidden;background:var(--card);margin:20px 0 10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.screen .chrome{background:#efece7;border-bottom:1px solid var(--line);padding:8px 12px;display:flex;align-items:center;gap:8px}
+.screen .dots{display:flex;gap:5px}
+.screen .dots i{width:9px;height:9px;border-radius:50%;background:#cfcac2;display:block}
+.screen .url{flex:1;background:#fff;border:1px solid var(--line);border-radius:6px;padding:3px 10px;font-family:var(--mono);font-size:11px;color:var(--dim)}
+.screen .body{display:grid;grid-template-columns:200px 1fr 210px;min-height:340px}
+.pane{padding:13px 13px}
+.pane+.pane{border-left:1px solid var(--line)}
+.pane .tag{font-family:var(--mono);font-size:10px;letter-spacing:.09em;color:var(--dim);margin-bottom:9px;display:flex;align-items:center;gap:5px}
+.pane .tag b{color:var(--accent);font-weight:700}
+
+.mission{font-size:13px;line-height:1.55;margin:0 0 12px}
+.cps{list-style:none;margin:0;padding:0;font-size:12.3px}
+.cps li{display:flex;gap:7px;padding:4.5px 0;color:var(--ink-2);align-items:baseline}
+.cps li .mk{font-family:var(--mono);font-size:11px;flex:none;width:14px}
+.cps li.done{color:var(--good)}
+.cps li.cur{color:var(--ink);font-weight:600}
+.cps li.cur .mk{color:var(--warn)}
+.cps li.todo{color:#b3aea6}
+
+.termbox{background:var(--term-bg);color:var(--term-fg);font-family:var(--mono);font-size:11.8px;line-height:1.72;
+  padding:12px 13px;border-radius:8px;overflow-x:auto;white-space:pre;margin:0}
+.termbox.tall{min-height:270px}
+.tp{color:var(--tg)}.tc{color:var(--tw);font-weight:600}.td{color:var(--term-dim)}
+.tgr{color:var(--tg)}.trd{color:var(--tr)}.tyl{color:var(--ty)}.tbl{color:var(--tb)}
+
+.promptbox{border:1px solid var(--line);border-radius:8px;background:#f7f6f3;padding:10px;font-size:12.2px;color:var(--ink-2);min-height:96px;line-height:1.6}
+.sendrow{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-family:var(--mono);font-size:10.5px;color:var(--dim)}
+.sendrow .btn{background:var(--accent);color:#fff;border-radius:6px;padding:5px 12px;font-size:11px;font-family:var(--sans);font-weight:600}
+.note{font-size:11.8px;color:var(--dim);line-height:1.6;margin-top:14px;padding-top:11px;border-top:1px dashed var(--line)}
+
+.callouts{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin:14px 0 0}
+.callouts div{border:1px solid var(--line);border-radius:9px;padding:12px 13px;background:var(--card);font-size:12.6px;color:var(--ink-2);line-height:1.6}
+.callouts div b{display:block;color:var(--ink);font-size:13px;margin-bottom:3px}
+
+/* 타임라인 */
+.tl{border-left:2px solid var(--line-2);margin:22px 0 0;padding:0}
+.step{position:relative;padding:0 0 30px 26px}
+.step:last-child{padding-bottom:4px}
+.step::before{content:"";position:absolute;left:-7px;top:5px;width:12px;height:12px;border-radius:50%;background:var(--card);border:2px solid var(--line-2)}
+.step.key::before{border-color:var(--accent);background:var(--accent)}
+.step .when{font-family:var(--mono);font-size:11px;color:var(--dim);letter-spacing:.05em}
+.step h3{margin:2px 0 7px;font-size:15.5px;letter-spacing:-.005em}
+.step p{font-size:13.6px;color:var(--ink-2);margin:0 0 10px}
+.step .termbox{font-size:11.4px}
+
+.flag{display:inline-block;font-family:var(--mono);font-size:10.5px;padding:2px 7px;border-radius:5px;margin-left:7px;vertical-align:2px;letter-spacing:.04em}
+.flag.f-bad{background:var(--bad-w);color:var(--bad)}
+.flag.f-good{background:var(--good-w);color:var(--good)}
+.flag.f-warn{background:var(--warn-w);color:var(--warn)}
+.flag.f-ai{background:#f0eaf3;color:#7b5487}
+
+table{width:100%;border-collapse:collapse;margin:16px 0 6px;font-size:13.4px}
+th,td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:11.5px;font-family:var(--mono);letter-spacing:.06em;color:var(--dim);font-weight:600;border-bottom:1px solid var(--line-2)}
+td.k{width:112px;color:var(--ink);font-weight:600}
+tr:last-child td{border-bottom:none}
+
+.box{border:1px solid var(--line);border-left:3px solid var(--accent);background:var(--card);border-radius:0 9px 9px 0;padding:15px 17px;margin:18px 0}
+.box.warn{border-left-color:var(--warn);background:var(--warn-w);border-color:#eddcc6}
+.box.bad{border-left-color:var(--bad);background:var(--bad-w);border-color:#eed6d0}
+.box h4{margin:0 0 6px;font-size:14px}
+.box p{font-size:13.4px;color:var(--ink-2);margin:0 0 8px}
+.box p:last-child{margin:0}
+.box ul{margin:6px 0 0;padding-left:19px;font-size:13.4px;color:var(--ink-2)}
+.box li{margin-bottom:5px}
+
+.q{background:var(--card);border:1px solid var(--line);border-radius:11px;padding:16px 18px;margin:12px 0}
+.q .qn{font-family:var(--mono);font-size:11px;color:var(--warn);letter-spacing:.06em;margin-bottom:4px}
+.q .qq{font-size:15px;font-weight:640;margin-bottom:6px;line-height:1.5}
+.q p{font-size:13.3px;color:var(--ink-2);margin:0}
+
+@media(max-width:820px){
+  .screen .body{grid-template-columns:1fr}
+  .pane+.pane{border-left:none;border-top:1px solid var(--line)}
+  .vs,.callouts{grid-template-columns:1fr}
+  .wrap{padding:26px 15px 70px}
+  h1{font-size:23px}
+}
+</style>
+
+<div class="wrap">
+
+<h1>터미널 실습실 — 학생은 실제로 무엇을 하는가</h1>
+<p class="sub">「브라우저 터미널 실습실」이 왜 실습 도구가 되는지를, 12강 90분을 따라가며 그림으로 설명합니다.</p>
+<p class="stamp">architecture · 설명용 목업 · 2026-08-15 · 구현 0 (아직 코드 없음)</p>
+
+<h2><span class="n">1</span>한 줄로 하면</h2>
+<p class="lead">지금 실습과 바뀔 실습의 차이는 이겁니다.</p>
+
+<div class="vs">
+  <div class="now">
+    <h4>지금</h4>
+    <p class="big">요리를 글로 설명하게 한다</p>
+    <p>문항 아래 네모 칸에 「나는 이렇게 하겠다」를 적어 냅니다. AI가 한 번 읽고 코멘트를 답니다. 끝.<br><br>학생은 <b>한 번도 요리를 안 해봤습니다.</b> 그런데 잘 썼는지 못 썼는지도 본인은 모릅니다.</p>
+  </div>
+  <div class="new">
+    <h4>바뀔 것</h4>
+    <p class="big">진짜 주방에 세운다</p>
+    <p>브라우저 탭 하나가 열리면 그 안에 <b>진짜 컴퓨터 한 대</b>가 들어 있습니다. 파일이 있고, 명령을 치면 실제로 돌아가고, <b>틀리면 빨간 글씨로 터집니다.</b><br><br>설치는 0 — 링크만 누르면 됩니다.</p>
+  </div>
+</div>
+
+<div class="box">
+  <h4>「브라우저 안에 컴퓨터가 들어 있다」가 무슨 말인가</h4>
+  <p><b>WebContainer</b>라는 기술입니다. 원래 터미널·Node·파일시스템은 각자 노트북에 깔아야 쓰는 물건인데, 이걸 <b>웹페이지 안에서 통째로 돌립니다.</b> 학생 노트북에는 아무것도 안 깔립니다. 서버도 안 씁니다 — 학생 브라우저 안에서 돕니다.</p>
+  <p>그래서 30명 강의실에서 <b>「설치가 안 돼요」로 날리는 60분이 사라집니다.</b> 이게 이 방향을 고른 가장 실용적인 이유입니다.</p>
+</div>
+
+<h2><span class="n">2</span>학생 화면은 이렇게 생겼다</h2>
+<p class="lead">탭 하나. 세 칸으로 나뉩니다. 아래가 12강 중간 지점의 화면입니다.</p>
+
+<div class="screen">
+  <div class="chrome">
+    <div class="dots"><i></i><i></i><i></i></div>
+    <div class="url">architecture.teachermate.co.kr/lab/12 — 실습실</div>
+  </div>
+  <div class="body">
+
+    <div class="pane">
+      <div class="tag">왼쪽 · <b>지금 할 일</b></div>
+      <p class="mission">같은 요청을 3번 보냈더니 결과가 <b>매번 달랐다.</b><br>왜 그런지 알아내고, 매번 같아지게 만들어라.</p>
+      <ul class="cps">
+        <li class="done"><span class="mk">✓</span>실습실 점검</li>
+        <li class="done"><span class="mk">✓</span>폴더 둘러보기</li>
+        <li class="done"><span class="mk">✓</span>3번 돌려보기</li>
+        <li class="cur"><span class="mk">▸</span>규칙 문서 쓰기</li>
+        <li class="todo"><span class="mk">·</span>다시 3번</li>
+        <li class="todo"><span class="mk">·</span>테스트 통과</li>
+        <li class="todo"><span class="mk">·</span>제출·검증</li>
+      </ul>
+      <p class="note">막히면 <code>reset</code> = 내 마지막 저장 지점으로. <code>jump 5</code> = 모범답안을 <b>내 것 옆에</b> 놓고 다음 단계로. 내 것을 덮지 않습니다.</p>
+    </div>
+
+    <div class="pane">
+      <div class="tag">가운데 · <b>진짜 터미널</b></div>
+<pre class="termbox tall"><span class="tp">student@lab</span>:<span class="tbl">~/mission</span>$ <span class="tc">ls</span>
+CLAUDE.md   src/   test/   run.sh
+
+<span class="tp">student@lab</span>:<span class="tbl">~/mission</span>$ <span class="tc">cat out/run-1.txt</span>
+<span class="td">할인율 10%를 적용합니다</span>
+
+<span class="tp">student@lab</span>:<span class="tbl">~/mission</span>$ <span class="tc">cat out/run-2.txt</span>
+<span class="td">10% off 를 적용했어요!</span>
+
+<span class="tp">student@lab</span>:<span class="tbl">~/mission</span>$ <span class="tc">cat out/run-3.txt</span>
+<span class="td">discount: 0.1</span>
+
+<span class="tp">student@lab</span>:<span class="tbl">~/mission</span>$ <span class="tc">npm test</span>
+
+  <span class="trd">✗</span> 출력 형식이 3회 모두 동일한가
+    <span class="trd">FAIL</span> — 3개가 전부 다릅니다
+
+  <span class="td">1 failing</span>
+
+<span class="tp">student@lab</span>:<span class="tbl">~/mission</span>$ <span class="tc">_</span></pre>
+      <p class="note">학생이 직접 칩니다. <code>ls</code> <code>cat</code> <code>npm test</code> <code>git</code> — 실무에서 쓰는 그 명령 그대로입니다. 결과도 진짜입니다(우리가 미리 적어둔 답이 아닙니다).</p>
+    </div>
+
+    <div class="pane">
+      <div class="tag">오른쪽 · <b>프롬프트 상자</b></div>
+      <div class="promptbox">이 프로젝트의 모든 출력은<br>「할인율 N%」 형식으로 통일한다.<br>소수·영문 표기를 쓰지 않는다.</div>
+      <div class="sendrow"><span>남은 횟수 <b style="color:var(--warn)">2 / 3</b></span><span class="btn">AI에게 보내기</span></div>
+      <p class="note"><b>왜 터미널이 아니라 따로 상자인가:</b> 한글 입력(IME)이 터미널에서 깨질 위험이 큽니다. 그런데 이 수업의 핵심이 한글 프롬프트입니다. 그래서 <b>영문 명령은 터미널, 한글 프롬프트는 옆 상자</b>로 나눴습니다.</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="callouts">
+  <div><b>실패가 눈에 보인다</b>빨간 <code>FAIL</code>은 코멘트가 아닙니다. 기계가 내린 판정이라 변명이 안 통합니다.</div>
+  <div><b>산출물이 남는다</b>학생이 만든 <code>CLAUDE.md</code>가 파일로 남아, 19강에서 다시 꺼내 씁니다.</div>
+  <div><b>AI 횟수가 정해져 있다</b>미션당 3회. 인색해서가 아니라 <b>「세 번 안에 제대로 시켜라」가 곧 과제</b>이기 때문입니다.</div>
+</div>
+
+<h2><span class="n">3</span>90분 동안 벌어지는 일 (12강)</h2>
+<p class="lead">「AI에게 규칙을 안 주면 매번 다른 답이 온다」를 <b>말로 가르치지 않고 겪게 하는</b> 수업입니다.</p>
+
+<div class="tl">
+
+  <div class="step key">
+    <div class="when">0 – 5분</div>
+    <h3>링크 누르고 들어온다 · 점검</h3>
+    <p>QR 또는 링크 하나. 로그인·설치 없음. 들어오자마자 <code>lab doctor</code>가 6가지를 자동 점검합니다 — 브라우저 지원, 부팅, Node, <b>한글 입력</b>, 붙여넣기, 속도.</p>
+<pre class="termbox"><span class="tc">lab doctor</span>
+<span class="tgr">✓</span> 브라우저 지원    <span class="tgr">✓</span> 실습실 부팅
+<span class="tgr">✓</span> node v20.11     <span class="tgr">✓</span> 한글 입력
+<span class="tgr">✓</span> 붙여넣기        <span class="tgr">✓</span> 속도 정상
+<span class="tgr">준비 완료.</span> 미션을 시작하세요.</pre>
+    <p>여기서 빨간 게 뜨는 학생은 <b>수업 시작 5분 안에</b> 드러납니다. 40분쯤 지나서 「저는 안 되는데요」가 나오는 사태를 막는 장치입니다.</p>
+  </div>
+
+  <div class="step">
+    <div class="when">5 – 15분</div>
+    <h3>폴더를 둘러본다</h3>
+    <p>비전공자는 여기서 처음으로 <b>「컴퓨터 안이 이렇게 생겼구나」</b>를 봅니다. <code>ls</code>로 목록을 보고 <code>cat</code>으로 파일을 엽니다. 아직 아무것도 안 만듭니다.</p>
+  </div>
+
+  <div class="step key">
+    <div class="when">15 – 35분</div>
+    <h3>같은 걸 3번 시킨다 — 그리고 3번 다 다르다 <span class="flag f-bad">실패 체험</span></h3>
+    <p>같은 요청을 세 번 보냅니다. 결과 3개가 전부 다르게 나옵니다. 학생이 <code>cat</code>으로 직접 열어 눈으로 확인합니다.</p>
+    <p><b>여기가 이 수업의 심장입니다.</b> 「AI는 매번 다르게 답한다」를 교수가 말해주면 그냥 지나가지만, 자기가 시킨 게 자기 눈앞에서 세 갈래로 갈리면 그건 안 잊습니다.</p>
+    <p style="font-size:12.8px;color:var(--dim)">이 구간은 <b>AI를 안 부릅니다</b> — 결과 3종이 미리 준비돼 있고 무작위로 나옵니다. 돈이 0원이면서 체험은 진짜입니다.</p>
+  </div>
+
+  <div class="step">
+    <div class="when">35 – 55분</div>
+    <h3>규칙 문서를 쓴다 <span class="flag f-ai">AI 1회</span></h3>
+    <p>오른쪽 프롬프트 상자에 <b>「앞으로는 이렇게 해라」</b>를 한글로 적습니다. 이게 <code>CLAUDE.md</code>라는 파일이 됩니다 — 실무에서 진짜 쓰는 그 파일입니다.</p>
+    <p>학생 대부분은 첫 시도에서 애매하게 씁니다. 그러면 결과가 또 흔들립니다. <b>애매한 지시가 왜 위험한지</b>를 여기서 배웁니다.</p>
+  </div>
+
+  <div class="step">
+    <div class="when">55 – 75분</div>
+    <h3>다시 3번 — 이번엔 같다 <span class="flag f-good">성공 체험</span></h3>
+    <p>같은 요청 3번, 결과 3개가 똑같이 나옵니다. <code>npm test</code>를 치면 빨강이 <b>초록으로 바뀝니다.</b></p>
+<pre class="termbox"><span class="tc">npm test</span>
+
+  <span class="tgr">✓</span> 출력 형식이 3회 모두 동일한가
+  <span class="tgr">✓</span> 금지 표기가 없는가
+
+  <span class="tgr">2 passing</span></pre>
+    <p>빨강 → 초록. 이 두 색의 전환이 <b>「내가 뭔가를 고쳤다」는 유일하게 정직한 증거</b>입니다.</p>
+  </div>
+
+  <div class="step key">
+    <div class="when">75 – 90분</div>
+    <h3>제출한다 — 서버가 다시 채점한다 <span class="flag f-warn">채점</span></h3>
+    <p><code>lab check</code>를 치면 학생이 만든 파일이 서버로 갑니다. 서버는 <b>학생이 못 본 숨은 테스트</b>로 처음부터 다시 돌립니다.</p>
+    <div class="box warn" style="margin:10px 0 12px">
+      <p style="margin:0"><b>왜 서버가 다시 하나:</b> 학생 브라우저에서 나온 결과는 <b>얼마든지 조작할 수 있습니다.</b> 그래서 학생 화면의 초록은 <b>본인용 피드백일 뿐</b>이고, 점수는 서버가 다시 돌려서만 매깁니다. 「명령어를 몇 개 쳤나」 같은 기록으로는 <b>절대 채점하지 않습니다</b> — 위조되고, 공개하는 순간 의미 없는 명령을 남발하는 게 최적 전략이 되기 때문입니다.</p>
+    </div>
+    <p>그리고 학생이 만든 <code>CLAUDE.md</code>는 <b>지워지지 않고 남습니다.</b> 19강에서 그 파일을 다시 열어 씁니다 — 6주가 한 줄기로 이어집니다.</p>
+  </div>
+
+</div>
+
+<h2><span class="n">4</span>교사는 무엇을 보나</h2>
+<p class="lead">학생 30명 화면을 하나씩 들여다보는 건 불가능합니다. 그래서 <b>개인 카드 30장이 아니라 무리를 봅니다.</b></p>
+
+<table>
+  <tr><th>보이는 것</th><th>화면 예시</th></tr>
+  <tr><td class="k">어디서 막혔나</td><td>「3번 돌려보기」 <b>22명</b> · 「규칙 문서 쓰기」 <b>6명</b> · 「테스트 통과」 <b>2명</b> — 한 칸에 뭉쳐 있으면 <b>전체를 세우고 설명할 타이밍</b>입니다.</td></tr>
+  <tr><td class="k">무슨 오류가 많나</td><td>같은 오류 상위 3개. 대부분이 같은 데서 넘어지면 그건 학생 문제가 아니라 <b>미션 설명 문제</b>입니다.</td></tr>
+  <tr><td class="k">멈춘 사람</td><td>「N분째 진전 없음」은 <b>따로 뜨는 알림</b>입니다. 조용히 포기한 학생이 통계에 묻히지 않게.</td></tr>
+</table>
+
+<h2><span class="n">5</span>그래서 뭐가 좋아지나</h2>
+<table>
+  <tr><th></th><th>지금</th><th>바뀐 뒤</th></tr>
+  <tr><td class="k">학생이 하는 것</td><td>네모 칸에 글쓰기</td><td>진짜 셸에서 명령 치기</td></tr>
+  <tr><td class="k">최악의 경험</td><td>「좀 부족하네요」 코멘트</td><td><b>빨간 FAIL</b> — 기계 판정, 변명 불가</td></tr>
+  <tr><td class="k">끝나고 남는 것</td><td>없음 (사라짐)</td><td><b>내가 만든 파일</b> — 다음 강에서 다시 씀</td></tr>
+  <tr><td class="k">잘하는 학생</td><td>5분이면 끝, 85분 대기</td><td>선택 과제로 계속 감</td></tr>
+  <tr><td class="k">설치</td><td>—</td><td><b>0</b> (링크 하나)</td></tr>
+</table>
+
+<h2><span class="n">6</span>솔직하게 — 아직 안 풀린 것</h2>
+<p class="lead">이 방향의 위험도 같이 봐주셔야 합니다. 넷 다 답을 정하기 전엔 코드를 안 짭니다.</p>
+
+<div class="box bad">
+  <h4>가장 큰 구멍: <code>claude</code> 명령이 브라우저에서 안 돕니다</h4>
+  <p>실무에서 쓰는 진짜 Claude CLI는 <b>브라우저를 지원하지 않습니다.</b> 그래서 「진짜 터미널에서 진짜 claude를 친다」는 원래 전제가 틀렸습니다.</p>
+  <p>→ <b>수업용으로 흉내낸 claude 셸을 우리가 만들어야 합니다.</b> 명령 몇 개만 되고, 동작도 실물과 조금 다릅니다. 학생에게 「이건 수업용 축소판입니다」라고 <b>밝히고 갈 것인지</b>가 결정 1번입니다.</p>
+</div>
+
+<div class="q">
+  <div class="qn">결정 1</div>
+  <div class="qq">수업용 claude 셸을 만들고, 실물과 다르다는 걸 공개할 것인가?</div>
+  <p>아니면 이 제약 때문에 다른 환경(GitHub Codespaces 등)을 볼 것인가.</p>
+</div>
+
+<div class="q">
+  <div class="qn">결정 2</div>
+  <div class="qq">직접 만들 것인가, 있는 걸 살 것인가?</div>
+  <p>점검 장치 + 실습실 + git 흉내 + 채점 서버 + 예산 관리 + 수업용 셸 = <b>수개월치 작업</b>입니다. 제 추천은 <b>12강 하나만 만들어 한 반 돌려보고 결정</b> — 지금 책상에서 비교만 하면 탁상공론입니다.</p>
+</div>
+
+<div class="q">
+  <div class="qn">결정 3 · 💸 가장 급함</div>
+  <div class="qq">AI 월 지출 상한을 얼마로 둘 것인가?</div>
+  <p>지금 「내 차례」 기능에는 <b>돈 천장이 아예 없습니다.</b> 분당·일일 횟수 제한만 있고 월 금액 상한이 없어서, 이 실습을 켜기 전에 반드시 붙여야 합니다. 30명 × 미션 3회 × 6주 기준 추산을 계산해 드릴 수 있습니다.</p>
+</div>
+
+<div class="q">
+  <div class="qn">결정 4</div>
+  <div class="qq">몇 강부터 시작할 것인가?</div>
+  <p><b>12강 하나(추천)</b> — AI 호출이 1회뿐이라 플랫폼이 도는지 확인하는 데 <b>돈이 가장 적게 듭니다.</b> / 12+19강 / 6강 전부.</p>
+</div>
+
+<p class="stamp" style="margin-top:46px;padding-top:18px;border-top:1px solid var(--line)">
+이 문서는 설명용 목업입니다. 실제 구현은 0줄이며, 위 결정 4건이 닫힌 뒤에 착수합니다.<br>
+상세 설계 = <code>docs/HANDOFF-vibe-terminal-lab-2026-08-15.md</code>
+</p>
+
+</div>
