@@ -647,9 +647,28 @@ export function execute(command: string, state: LabState, idempotencyKey: string
   };
 }
 
-/** 화면이 처음 열릴 때 그리는 줄. 🚨 고지를 **먼저** 보여 준다(§2 「당연히 가짜임을 알려줘야지」). */
+/**
+ * 화면이 처음 열릴 때 그리는 줄.
+ *
+ * 🚨 고지를 **먼저** 보여 준다(§2 「당연히 가짜임을 알려줘야지」).
+ * 🚨 그리고 **지금 할 일과 칠 명령을 한 줄로** 준다. 새내기 QA(2026-08-15)에서 학생이
+ *    빈 프롬프트 앞에서 「뭘 입력해야 하는지 전혀 힌트가 없어」라며 막혔다. 미션은 좌측 목차에
+ *    있는데 **좁은 화면에서는 그 칸이 접혀 있어** 안 보인다 — 터미널 안에서도 보여야 한다.
+ * 🔑 「help 를 쳐 보세요」로 끝내지 않는다. 학생이 알아야 하는 것은 «명령 목록»이 아니라
+ *    «지금 무엇부터»다. 그래서 첫 미션의 할 일과 **바로 칠 수 있는 첫 명령**을 같이 적는다.
+ */
 export function openingEvents(): LabEvent[] {
-  return [...aboutLines(), line(''), line('help 를 치면 쓸 수 있는 명령이 나옵니다.', 'dim')];
+  const first = LAB_MISSIONS[0];
+  return [
+    ...aboutLines(),
+    line(''),
+    line('─────────────────────────────────────────────', 'dim'),
+    line(`지금 할 일 — ${first?.label ?? ''}`, 'warn'),
+    ...(first ? [line(`  ${first.goal}`)] : []),
+    line(''),
+    line('  아래 칸에 이렇게 쳐 보세요:  ls', 'ok'),
+    line('  전체 명령은 help · 지금 할 일은 lab missions', 'dim'),
+  ];
 }
 
 export const LAB_COMMAND_NAMES = COMMANDS.map((c) => c.name);

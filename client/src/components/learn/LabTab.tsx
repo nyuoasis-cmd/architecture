@@ -50,17 +50,34 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
   const lines = live?.lines ?? EMPTY_LINES;
   const history = live?.history ?? EMPTY_HISTORY;
 
-  const commit = (next: Partial<{ state: LabState; lines: LabEvent[]; history: string[] }>) => {
-    setSession({ qaId, state, lines, history, ...next });
+  /**
+   * 🚨 **스토어에서 그 자리에서 다시 읽는다.** 렌더 시점에 잡아 둔 `state`/`lines`/`history` 로
+   *    세션을 통째로 덮으면, 같은 마운트 안에서 먼저 쓴 값이 뒤 효과에 지워진다.
+   *    실제로 그렇게 **축소판 고지가 통째로 사라졌다** — 처음 연 학생이 빈 프롬프트만 보고
+   *    무엇을 칠지 몰랐다(2026-08-15 새내기 QA, s3·s4). 계약 `labOpeningContract` 가 잡는다.
+   */
+  const commitFrom = (next: Partial<{ state: LabState; lines: LabEvent[]; history: string[] }>) => {
+    const stored = useLearnStore.getState().labSession;
+    const base =
+      stored && stored.qaId === qaId
+        ? stored
+        : { qaId, state: INITIAL_LAB_STATE, lines: openingEvents(), history: [] as string[] };
+    setSession({ ...base, qaId, ...next });
+  };
+  const readSession = () => {
+    const stored = useLearnStore.getState().labSession;
+    return stored && stored.qaId === qaId
+      ? stored
+      : { qaId, state: INITIAL_LAB_STATE, lines: openingEvents(), history: [] as string[] };
   };
   const setState = (updater: LabState | ((prev: LabState) => LabState)) => {
-    commit({ state: typeof updater === 'function' ? updater(state) : updater });
+    commitFrom({ state: typeof updater === 'function' ? updater(readSession().state) : updater });
   };
   const setLines = (updater: LabEvent[] | ((prev: LabEvent[]) => LabEvent[])) => {
-    commit({ lines: typeof updater === 'function' ? updater(lines) : updater });
+    commitFrom({ lines: typeof updater === 'function' ? updater(readSession().lines) : updater });
   };
   const setHistory = (updater: string[] | ((prev: string[]) => string[])) => {
-    commit({ history: typeof updater === 'function' ? updater(history) : updater });
+    commitFrom({ history: typeof updater === 'function' ? updater(readSession().history) : updater });
   };
 
   const [draft, setDraft] = useState('');
