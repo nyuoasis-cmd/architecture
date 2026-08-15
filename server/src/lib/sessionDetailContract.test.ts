@@ -102,6 +102,23 @@ test('8) 시연작 입구를 밖에 다시 만들지 않았다 — 2026-08-14 �
   const learn = read('client/src/pages/LearnPage.tsx')
   assert.equal(/DemoBar|isDemoMode|demo=1/.test(learn), false, '시연 바가 되살아났다 — 「시연 끝내기」가 수업을 끝냈다')
 
-  // 지금 있는 시연작 = 수업 현황 상세의 「👀 학생 화면 미리 보기」. 이게 사라지면 시연이 없어진다.
-  assert.ok(read(DETAIL).includes('👀 학생 화면 미리 보기'), '시연 입구(학생 화면 미리 보기)가 사라졌다')
+  // 지금 있는 시연작 = 수업 현황 상세의 「🎬 시연하기」. 이게 사라지면 시연이 없어진다.
+  assert.ok(read(DETAIL).includes('🎬 시연하기'), '시연 입구(시연하기)가 사라졌다')
+})
+
+test('9) 시연 문구가 용어 정본(ui-glossary §H) 한 계열이다 — 명사=시연작 · 동작=시연하기 · 모드=시연 모드', () => {
+  // 🚨 2026-08-15 jery: 앱마다 다른 말을 쓰는 비용이 «낱말이 두 가지로 읽히는» 비용보다 크다.
+  //    한동안 «학생 화면 미리 보기»로 적어 두었던 것을 단일 용어로 되돌렸다.
+  for (const file of [DETAIL, 'client/src/pages/LibraryPage.tsx']) {
+    const body = stripComments(read(file))
+    assert.equal(
+      /미리\s?보기/.test(body),
+      false,
+      `${file} 에 「미리 보기」가 남아 있다 — §H 는 시연작/시연하기/시연 모드 한 계열만 쓴다`,
+    )
+  }
+
+  const library = stripComments(read('client/src/pages/LibraryPage.tsx'))
+  assert.ok(library.includes('시연작'), '시연작 진입 화면 제목이 §H 용어가 아니다')
+  assert.ok(library.includes('시연 모드'), '시연 중임을 알리는 표시가 §H 용어가 아니다')
 })
