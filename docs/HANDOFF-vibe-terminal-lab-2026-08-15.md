@@ -238,15 +238,22 @@ PR4 를 켜기 직전이 「천장이 진짜인지」를 따질 가장 정확한
 jery 환경에서 `claude.ai/code/artifact/...` 링크는 **윈도우 보안창에 막혀 열리지 않는다.**
 → `~/.claude/projects/-home-claude/memory/feedback_open-mockups-in-chrome-window-not-artifact.md`
 
-### 🚨 `~/scripts/open-chrome.sh` 의 「OPENED_WITH=chrome」 을 믿지 말 것 (2026-08-15 발견)
-이 스크립트는 **종료코드와 무관하게 그 줄을 항상 찍는다.** 이 세션에서 실제로는 실패했는데(WSL interop 꺼짐 → `chrome.exe: cannot execute binary file`) 판정 문구는 성공으로 나왔다.
-→ **진짜 확인처는 `/tmp/open-chrome.log`**. 실패 시 대안 = 로컬 정적 서버 + cloudflared 터널.
+### 🖥 목업 여는 법 — 크롬 창 + 터널 둘 다
+- **PC** = `~/scripts/open-chrome.sh <파일>`. 🔑 **`EXIT=126` 은 실패가 아니다** — 이미 크롬이 떠 있으면
+  `/tmp/open-chrome.log` 에 «기존 브라우저 세션에서 여는 중입니다»만 찍고 그 코드로 끝난다(2026-08-15 실측 확인).
+  로그는 **CP949** 라 그냥 `cat` 하면 깨진다: `iconv -f CP949 -t UTF-8 /tmp/open-chrome.log`.
+  종료코드로 실패 판정하지 말고 로그를 디코딩해서 볼 것.
+- **폰** = 로컬 정적 서버 + cloudflared 터널.
 ```
-cd <프로젝트>/mockups && python3 -m http.server 8907 --bind 127.0.0.1 &
-printf '{}\n' > /tmp/cf-empty.yml     # --config 로 격리 안 하면 기본 ingress 가 이겨 502
-cloudflared --config /tmp/cf-empty.yml tunnel --url http://127.0.0.1:8907 --no-autoupdate
+cd <프로젝트>/mockups && (nohup python3 -m http.server 8907 --bind 127.0.0.1 >/dev/null 2>&1 &)
+CFG=<세션 스크래치패드>/mockup-cf.yml
+printf 'url: http://127.0.0.1:8907\nno-autoupdate: true\n' > "$CFG"
+cloudflared --config "$CFG" tunnel      # 백그라운드 실행 도구로
 ```
-🚨 **터널 URL 은 세션이 끝나면 죽는다.**
+🚨 **`--config` 로 격리하지 않으면** 기본 `~/.cloudflared/config.yml` 의 ingress 가 이겨 `--url` 이 무시되고 502 가 난다.
+🚨 **설정 파일을 `/tmp` 에 두지 말 것** — 청소되면서 사라지고 터널이 `open ...: no such file` 로 조용히 죽는다.
+   이 세션에서 두 번 당했다. 세션 스크래치패드에 둔다.
+🚨 **터널 URL 은 세션이 끝나면 죽는다.** 다음 세션에서 다시 띄우고 새 URL 을 알려야 한다.
 
 ### 🚨 목업 HTML 에 `<meta charset="utf-8">` 을 빼먹지 말 것
 python `http.server` 는 charset 없이 내보내서 한글이 `âœ³ ì‹¤ìŠµì‹¤` 로 깨진다. `viewport` 도 같이.
