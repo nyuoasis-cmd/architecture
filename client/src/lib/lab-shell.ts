@@ -27,7 +27,11 @@ export type LabTone = 'input' | 'plain' | 'dim' | 'ok' | 'bad' | 'warn';
 export type LabEvent =
   | { kind: 'line'; text: string; tone: LabTone }
   | { kind: 'clear' }
-  | { kind: 'exit' };
+  | { kind: 'exit' }
+  /** 옆 패널 편집기를 연다. 🚨 터미널 안에서 nano·heredoc 을 흉내 내지 않는다 — 태블릿엔 Ctrl·Esc 가 없다. */
+  | { kind: 'editor' }
+  /** 🚨 셸은 순수 함수라 AI 를 못 부른다. **의도만** 내보내고 화면이 부른다. */
+  | { kind: 'ai'; mode: 'review' | 'verify' | 'ask'; text: string };
 
 /** 화면 쪽이 재어서 넣어 주는 값. 셸은 재지 않는다(순수해야 하므로). */
 export type LabEnv = {
@@ -45,6 +49,10 @@ export type LabState = {
   ranCommands: string[];
   /** 고지를 한 번이라도 봤는가. */
   seenAbout: boolean;
+  /** 학생이 편집기에 쓴 규칙 문서. 🔑 비어 있으면 아직 «재생 3종»을 검사한다. */
+  rules: string;
+  /** 내 규칙대로 시켜서 받은 결과. 있으면 `npm test` 가 이것을 검사한다. */
+  myOutputs: string[];
   /**
    * 🚨 건너뛴 미션 번호(0-based). 막힌 학생이 수업에서 낙오하지 않게 열어 두되, **건너뛴 사실을 지운다고
    *    없어지지 않게** 상태에 남긴다 — 과정 점수는 0 이고 산출물 점수는 살린다(§5 골격 5).
@@ -61,19 +69,24 @@ export const INITIAL_LAB_STATE: LabState = {
   openedFiles: [],
   ranCommands: [],
   seenAbout: false,
+  rules: '',
+  myOutputs: [],
   jumpedTo: null,
   lastKey: null,
   env: { widthPx: 0, canPaste: false },
 };
 
 /** PR1 에서 실제로 도는 명령. 🔑 `help` 가 이 목록에서 나온다 — 손으로 적으면 곧 어긋난다. */
-const COMMANDS: { name: string; args: string; what: string; group: '둘러보기' | '확인하기' | '나가기' }[] = [
+const COMMANDS: { name: string; args: string; what: string; group: '둘러보기' | '만들기' | '확인하기' | '나가기' }[] = [
   { name: 'ls', args: '[폴더]', what: '이 폴더에 무엇이 있는지 본다', group: '둘러보기' },
   { name: 'cat', args: '<파일>', what: '파일 내용을 연다', group: '둘러보기' },
   { name: 'cd', args: '<폴더>', what: '폴더 안으로 들어간다 (cd .. 로 나온다)', group: '둘러보기' },
   { name: 'pwd', args: '', what: '지금 어느 폴더인지 본다', group: '둘러보기' },
   { name: 'clear', args: '', what: '화면을 지운다', group: '둘러보기' },
-  { name: 'npm test', args: '', what: '세 결과를 파서에 넣어 본다', group: '확인하기' },
+  { name: 'edit', args: '', what: '옆에 편집기를 열어 규칙을 쓴다', group: '만들기' },
+  { name: 'claude review', args: '', what: '내가 쓴 것의 어디가 애매한지 AI 에게 듣는다', group: '만들기' },
+  { name: 'ask', args: '<질문>', what: '모르는 것을 물어본다 (미션 횟수와 따로)', group: '만들기' },
+  { name: 'npm test', args: '', what: '결과를 파서에 넣어 본다', group: '확인하기' },
   { name: 'lab missions', args: '', what: '미션 목록과 지금 할 일을 본다', group: '확인하기' },
   { name: 'lab version', args: '', what: '재생본을 만든 모델·날짜를 본다', group: '확인하기' },
   { name: 'reset', args: '', what: '실습실을 처음으로 되돌린다', group: '나가기' },
@@ -89,11 +102,8 @@ const COMMANDS: { name: string; args: string; what: string; group: '둘러보기
  */
 const NOT_YET: Record<string, string> = {
   git: '이 실습실에는 git 이 없습니다. 22강에서 다시 만나요.',
-  claude: 'AI 비평은 아직 안 열렸습니다.',
-  ask: 'AI 에게 묻기는 아직 안 열렸습니다.',
-  edit: '편집기는 아직 안 열렸습니다. 지금은 파일을 읽기만 할 수 있어요.',
-  nano: '편집기는 아직 안 열렸습니다. 지금은 파일을 읽기만 할 수 있어요.',
-  vi: '편집기는 아직 안 열렸습니다. 지금은 파일을 읽기만 할 수 있어요.',
+  nano: '이 실습실에는 nano 가 없습니다. edit 로 옆에 편집기를 여세요.',
+  vi: '이 실습실에는 vi 가 없습니다. edit 로 옆에 편집기를 여세요.',
   check: '제출은 아직 안 열렸습니다.',
   rm: '이 실습실은 읽기 전용입니다. 파일을 지우거나 고칠 수 없어요.',
   mv: '이 실습실은 읽기 전용입니다. 파일을 지우거나 고칠 수 없어요.',
@@ -164,8 +174,37 @@ export function earnedMissionIndex(state: LabState): number {
   const openedAllRuns = LAB_RUN_FILES.every((file) => state.openedFiles.includes(file));
   if (!openedAllRuns) return 1;
   if (!state.ranCommands.includes('npm')) return 2;
-  // 🚨 4번부터는 이 PR 에서 판정하지 않는다. «다 끝났다»가 아니라 «여기서 멈춘다»로 세운다.
-  return 3;
+  // 🔑 4~6 은 «쓴 것»과 «부른 것»에서 계산한다. 🚨 규칙의 **내용을 채점하지 않는다** —
+  //    낱말로 채점하면 그 낱말만 적는 것이 최적 전략이 된다(굿하트). 채점은 검사기가 결과로 한다.
+  if (state.rules.trim() === '') return 3;
+  if (state.rules.trim().length < MIN_RULES_CHARS) return 4;
+  if (!state.ranCommands.includes('claude')) return 5;
+  // 🚨 7번(제출)은 이 PR 에서 판정하지 않는다. «다 끝났다»가 아니라 «여기서 멈춘다»로 세운다.
+  return 6;
+}
+
+/** 규칙 문서가 «한 번 써 본 것»으로 인정되는 최소 길이. 🔑 내용이 아니라 길이만 본다. */
+export const MIN_RULES_CHARS = 40;
+
+/**
+ * 편집기에서 저장했다. 🚨 셸 밖에서 상태를 직접 주무르지 않게 여기 한 자리로 모은다 —
+ *    저장 경로가 둘이 되면 «저장했는데 미션이 안 넘어간다» 가 생긴다.
+ */
+export function saveRules(state: LabState, rules: string): LabResult {
+  const cleaned = normalizeInput(rules);
+  const events: LabEvent[] = [
+    line('CLAUDE.md 를 저장했습니다.', 'ok'),
+    line(`  ${cleaned.trim().length}자 — npm test 로 내 규칙대로 시켜 볼 수 있습니다.`, 'dim'),
+  ];
+  if (cleaned.trim().length > 0 && cleaned.trim().length < MIN_RULES_CHARS) {
+    events.push(line(`  (아직 짧습니다. ${MIN_RULES_CHARS}자는 넘어야 «써 봤다»로 셉니다.)`, 'warn'));
+  }
+  return { events, nextState: { ...state, rules: cleaned } };
+}
+
+/** 내 규칙으로 받은 결과를 상태에 담는다. 🔑 판정은 화면이 결정적 검사기로 한다. */
+export function applyMyOutputs(state: LabState, outputs: string[]): LabState {
+  return { ...state, myOutputs: outputs };
 }
 
 // ─────────────────────────── 출력 조각 ───────────────────────────
@@ -176,7 +215,7 @@ function line(text: string, tone: LabTone = 'plain'): LabEvent {
 
 function helpLines(): LabEvent[] {
   const out: LabEvent[] = [];
-  for (const group of ['둘러보기', '확인하기', '나가기'] as const) {
+  for (const group of ['둘러보기', '만들기', '확인하기', '나가기'] as const) {
     const rows = COMMANDS.filter((c) => c.group === group);
     if (rows.length === 0) continue;
     out.push(line(group, 'warn'));
@@ -289,12 +328,26 @@ export type LabResult = { events: LabEvent[]; nextState: LabState };
  * @param idempotencyKey 같은 키로 두 번 부르면 두 번째는 **아무 일도 하지 않는다**.
  *        훗날 서버가 붙었을 때 재전송이 진행을 두 칸 밀지 않게 하는 자리다(§5 골격 4).
  */
+/**
+ * 🚨 **스마트따옴표를 ASCII 로 되돌린다. 입력 최전방에서.**
+ *    iOS·안드로이드 자동교정이 `"` 를 `“`/`”` 로 바꿔 놓는다 — 30명이 동시에, 아무도 눈치 못 채게.
+ *    이걸 안 하면 학생은 자기가 제대로 쳤는데 계속 터지는 것을 보게 되고, 그건 «내가 못한다»로 읽힌다.
+ * 🔑 태블릿이 이 수업의 기본 기기라 이건 예외 처리가 아니라 **정상 경로**다.
+ */
+export function normalizeInput(raw: string): string {
+  return raw
+    .replace(/[\u201C\u201D\u201E\u2033]/g, '"')
+    .replace(/[\u2018\u2019\u201A\u2032]/g, "'")
+    .replace(/[\u2013\u2014]/g, '-')
+    .replace(/\u00A0/g, ' ');
+}
+
 export function execute(command: string, state: LabState, idempotencyKey: string): LabResult {
   if (idempotencyKey !== '' && idempotencyKey === state.lastKey) {
     return { events: [], nextState: state };
   }
   const base: LabState = { ...state, lastKey: idempotencyKey };
-  const raw = command.trim();
+  const raw = normalizeInput(command).trim();
   const echo = line(`${pathLabel(state.cwd)}$ ${raw}`, 'input');
 
   if (raw === '') return { events: [echo], nextState: base };
@@ -342,12 +395,77 @@ export function execute(command: string, state: LabState, idempotencyKey: string
       if (rest[0] !== 'test') {
         return { events: [echo, line('이 실습실이 아는 npm 명령은 npm test 하나입니다.', 'bad')], nextState: base };
       }
+      // 🔑 규칙을 쓴 뒤에는 **내 규칙대로 시켜서** 검사한다. 그 전에는 재생 3종을 검사한다.
+      //    같은 명령이 «지금 무엇을 검사하는지»는 화면이 매번 밝혀 준다 — 안 밝히면 학생이 뒤섞는다.
+      if (base.rules.trim() !== '') {
+        return {
+          events: [
+            echo,
+            line('내 규칙대로 두 번 시켜 봅니다. (AI 를 실제로 부릅니다)', 'warn'),
+            { kind: 'ai', mode: 'verify', text: base.rules },
+          ],
+          nextState: remember('npm'),
+        };
+      }
       // 🚨 순서를 강제하지 않는다 — 세 결과를 안 열고 쳐도 돈다. 다만 «무엇을 보고 있는지» 한 줄 알려 준다.
       const openedAll = LAB_RUN_FILES.every((file) => base.openedFiles.includes(file));
       const head: LabEvent[] = openedAll
         ? []
         : [line('  (아직 안 연 결과가 있습니다. cat 으로 셋 다 열어 보면 왜 터지는지 보입니다.)', 'dim')];
-      return { events: [echo, ...head, ...npmTestLines()], nextState: remember('npm') };
+      return {
+        events: [echo, line('  검사 대상 — runs/ 의 사전 생성 결과 3개', 'dim'), ...head, ...npmTestLines()],
+        nextState: remember('npm'),
+      };
+    }
+
+    case 'edit': {
+      return {
+        events: [echo, line('옆에 편집기를 열었습니다. 다 쓰면 «저장» 을 누르세요.', 'dim'), { kind: 'editor' }],
+        nextState: remember('edit'),
+      };
+    }
+
+    case 'claude': {
+      if (rest[0] !== 'review') {
+        return {
+          events: [echo, line('이 실습실이 아는 claude 명령은 claude review 하나입니다.', 'bad')],
+          nextState: base,
+        };
+      }
+      if (base.rules.trim() === '') {
+        return {
+          events: [
+            echo,
+            line('아직 쓴 것이 없습니다. edit 로 규칙을 먼저 써 보세요.', 'warn'),
+            line('  AI 는 여러분이 쓴 것을 «비평»합니다 — 대신 써 주지 않습니다.', 'dim'),
+          ],
+          nextState: base,
+        };
+      }
+      return {
+        events: [
+          echo,
+          line('내가 쓴 것을 AI 에게 보여 주고 비평을 받습니다. (AI 를 실제로 부릅니다)', 'warn'),
+          { kind: 'ai', mode: 'review', text: base.rules },
+        ],
+        nextState: remember('claude'),
+      };
+    }
+
+    case 'ask': {
+      // 🔑 따옴표를 요구하지 않는다. `ask 이게 무슨 뜻이에요` 처럼 그냥 이어 쓰면 된다 —
+      //    태블릿에서 따옴표는 자동교정에 가장 잘 망가지는 글자다(정규화가 있어도 안 만드는 게 낫다).
+      const question = rest.join(' ').replace(/^["']|["']$/g, '').trim();
+      if (question.length < 2) {
+        return {
+          events: [echo, line('무엇이 궁금한지 이어서 적어 주세요. 예) ask 파서가 뭐예요', 'bad')],
+          nextState: base,
+        };
+      }
+      return {
+        events: [echo, { kind: 'ai', mode: 'ask', text: question }],
+        nextState: remember('ask'),
+      };
     }
 
     case 'reset': {

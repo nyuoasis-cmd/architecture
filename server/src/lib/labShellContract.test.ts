@@ -191,7 +191,8 @@ test('13) 실습실은 12강의 마지막 문항 하나에만 걸린다', () => 
 
 test('14) 미션 표시가 «못 하는 일»을 할 수 있는 것처럼 적지 않는다', () => {
   const live = data.LAB_MISSIONS.filter((m) => m.live)
-  assert.equal(live.length, 3, '지금 실제로 판정되는 미션은 3개다 — 숫자가 바뀌면 판정부도 같이 바뀌어야 한다')
+  assert.equal(live.length, 6, '지금 실제로 판정되는 미션은 6개다 — 숫자가 바뀌면 판정부도 같이 바뀌어야 한다')
+  assert.equal(data.LAB_MISSIONS[6]?.live, false, '제출(7번)은 PR5 의 몫이다 — 열려 있으면 학생이 없는 기능을 누른다')
   const out = textOf(run(['lab missions']).events)
   assert.ok(out.includes('잠김'), '아직 안 열린 미션을 잠김으로 표시하지 않는다 — 학생이 그 앞에서 기다린다')
 })
@@ -267,7 +268,7 @@ test('23) jump 가 스스로 더 나아간 학생을 뒤로 끌어내리지 않�
 })
 
 test('24) 잠긴 미션으로는 못 건너뛴다 — 없는 곳으로 보내면 학생이 빈 화면 앞에서 기다린다', () => {
-  const out = textOf(execute('jump 6', INITIAL_LAB_STATE, 'j3').events)
+  const out = textOf(execute('jump 7', INITIAL_LAB_STATE, 'j3').events)
   assert.ok(out.includes('아직'), '잠긴 미션으로 건너뛰는 것을 안 막는다')
   const bad = textOf(execute('jump 99', INITIAL_LAB_STATE, 'j4').events)
   assert.ok(/1~7/.test(bad), '범위 밖 번호에 무엇을 적어야 하는지 안 알려 준다')
