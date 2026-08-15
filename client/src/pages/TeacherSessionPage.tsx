@@ -132,7 +132,7 @@ export default function TeacherSessionPage() {
     <main className="mx-auto w-full max-w-[900px] px-6 py-8">
       {/*
         🚨 뒤로 링크 없이 브라우저 뒤로가기에만 기대지 않는다(§4-A 금지).
-           교사는 수업 중에 QR 전체화면·학생 화면 미리 보기를 오가느라 히스토리가 엉켜 있고,
+           교사는 수업 중에 QR 전체화면·시연작을 오가느라 히스토리가 엉켜 있고,
            그때 «목록으로 어떻게 돌아가지»가 화면에 없으면 새로고침으로 길을 찾는다.
       */}
       <Link className="inline-flex items-center gap-1.5 text-sm text-stone-500 hover:text-stone-900" to="/teacher">
@@ -187,9 +187,11 @@ export default function TeacherSessionPage() {
 
         <div className="mt-5 flex flex-wrap gap-2">
           {/*
-            🔑 순서가 곧 안내다 — 학생이 0명이면 QR 이 1차, 들어오면 학생 화면 보기가 1차가 된다.
-               「시연」은 교사에게 «학생에게 보여 주기»로도 «내가 미리 보기»로도 읽혀서,
-               실제 동작(=학생이 볼 화면을 교사가 role=teacher 로 미리 여는 것)대로 다시 적었다.
+            🔑 순서가 곧 안내다 — 학생이 0명이면 QR 이 1차, 들어오면 시연하기가 1차가 된다.
+            🚨 문구는 용어 정본(ui-glossary §H)의 **「시연작」 단일 계열**을 쓴다 — 명사=시연작 · 동작=시연하기.
+               2026-08-11 QA(신입샘 t2)에서 「시연」이 두 가지로 읽힌 적이 있어 한동안 «학생 화면 미리 보기»로
+               적어 두었으나, 2026-08-15 jery 가 **용어 단일화**를 택했다(앱마다 다른 말을 쓰는 비용이 더 크다).
+               읽히는 문제는 낱말이 아니라 «누르면 무엇이 열리는지»를 옆에서 알려 주는 안내로 푼다.
           */}
           <button
             className={hasParticipants ? primaryCta : secondaryCta}
@@ -197,7 +199,7 @@ export default function TeacherSessionPage() {
             onClick={() => navigate(`/library?sessionId=${currentSession.id}`)}
             type="button"
           >
-            👀 학생 화면 미리 보기
+            🎬 시연하기
           </button>
           <button
             className={hasParticipants ? secondaryCta : primaryCta}
@@ -227,8 +229,8 @@ export default function TeacherSessionPage() {
           🚨 «차시 순서»를 여기에 다시 만들지 않는다 — 수업 흐름은 교사가 정한다.
         */}
         <p className="mt-4 text-[13px] text-stone-500">
-          📋 문항마다 <span className="font-medium text-stone-700">설명 노트</span>가 있습니다. «학생 화면 미리 보기»로
-          들어가 우측 콘텐츠의 <span className="font-medium text-stone-700">📋 설명 노트</span> 탭을 여세요.
+          «🎬 시연하기»를 누르면 <span className="font-medium text-stone-700">학생이 볼 화면이 그대로</span> 열립니다.
+          문항마다 <span className="font-medium text-stone-700">📋 설명 노트</span>가 있어요 — 우측 콘텐츠의 같은 이름 탭.
         </p>
       </section>
 
