@@ -8,6 +8,8 @@
 //    `import … from '../../../client/…'` 를 쓰면 tsx 는 멀쩡한데 `tsc` 가 TS6059 로 죽는다
 //    (vibeQuizContract.test.ts 가 같은 이유로 같은 방식을 쓴다). 경로를 실행 시점에 계산해 읽는다.
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 import path from 'node:path'
 import { test } from 'node:test'
 
@@ -18,6 +20,7 @@ type LabState = {
   openedFiles: string[]
   ranCommands: string[]
   seenAbout: boolean
+  jumpedTo: number | null
   lastKey: string | null
   env: { widthPx: number; canPaste: boolean }
 }
@@ -25,6 +28,7 @@ type LabShell = {
   execute: (command: string, state: LabState, key: string) => { events: LabEvent[]; nextState: LabState }
   missionIndexOf: (state: LabState) => number
   openingEvents: () => LabEvent[]
+  earnedMissionIndex: (state: LabState) => number
   INITIAL_LAB_STATE: LabState
   LAB_COMMAND_NAMES: string[]
 }
@@ -187,7 +191,7 @@ test('13) 실습실은 12강의 마지막 문항 하나에만 걸린다', () => 
 
 test('14) 미션 표시가 «못 하는 일»을 할 수 있는 것처럼 적지 않는다', () => {
   const live = data.LAB_MISSIONS.filter((m) => m.live)
-  assert.equal(live.length, 2, 'PR1 에서 실제로 판정되는 미션은 2개다 — 숫자가 바뀌면 판정부도 같이 바뀌어야 한다')
+  assert.equal(live.length, 3, '지금 실제로 판정되는 미션은 3개다 — 숫자가 바뀌면 판정부도 같이 바뀌어야 한다')
   const out = textOf(run(['lab missions']).events)
   assert.ok(out.includes('잠김'), '아직 안 열린 미션을 잠김으로 표시하지 않는다 — 학생이 그 앞에서 기다린다')
 })
@@ -196,4 +200,96 @@ test('15) 가드가 실패할 수 있는 계측인지 — 셸이 실제로 무�
   const { events } = run(['ls'])
   assert.ok(events.length >= 2, 'ls 가 아무것도 안 돌려준다 — 위 검사들이 빈 문자열로 공짜 통과할 수 있다')
   assert.ok(textOf(events).includes('runs/'), 'ls 에 폴더 표시(/)가 없다 — 학생이 폴더와 파일을 못 가른다')
+})
+
+// ─── PR3 — 실패 체험(`npm test`)·건너뛰기·버전 고정 ───
+
+test('16) npm test 가 세 결과 중 2개를 터뜨린다 — 여기가 12강이 실제로 가르치는 자리다', () => {
+  const out = textOf(run(['npm test']).events)
+  assert.ok(/PASS\s+run-1/.test(out), 'run-1 이 통과하지 않는다 — 약속을 지킨 답까지 터지면 배울 것이 없다')
+  assert.ok(/FAIL\s+run-2/.test(out), 'run-2 가 안 터진다 — 「형식이 다르면 터진다」를 못 보여 준다')
+  assert.ok(/FAIL\s+run-3/.test(out), 'run-3 이 안 터진다')
+  assert.ok(/1 통과 · 2 실패/.test(out), `요약이 «1 통과 · 2 실패» 가 아니다:\n${out}`)
+})
+
+test('17) 판정을 색이 아니라 «문자»로 말한다 — 빨강/초록만으로 말하면 못 읽는 학생이 있다', () => {
+  const out = textOf(run(['npm test']).events)
+  assert.ok(out.includes('PASS'), 'PASS 문자가 없다')
+  assert.ok(out.includes('FAIL'), 'FAIL 문자가 없다')
+})
+
+test('18) 왜 터졌는지를 «못 찾음»으로 끝내지 않는다 — 학생이 고쳐야 할 것은 «어디가 애매한가»다', () => {
+  const out = textOf(run(['npm test']).events)
+  assert.ok(/10% off/.test(out), 'run-2 가 어느 대목에서 걸렸는지 안 보여 준다')
+  assert.ok(/0\.1/.test(out) && /0\.1%/.test(out), 'run-3 의 «0.1 은 10%인가 0.1%인가» 가 안 나온다')
+})
+
+test('19) 검사기는 결정적이다 — 같은 입력에 같은 답. 흔들리면 형식을 가르치는 수업이 형식을 안 지킨다', () => {
+  const first = textOf(run(['npm test']).events)
+  for (let i = 0; i < 5; i += 1) {
+    assert.equal(textOf(run(['npm test']).events), first, '같은 입력에 다른 판정이 나왔다')
+  }
+})
+
+test('20) npm test 를 치면 미션 3이 끝난다', () => {
+  const before = run(['ls', 'pwd', ...data.LAB_RUN_FILES.map((f) => `cat ${f}`)]).state
+  assert.equal(missionIndexOf(before), 2, '세 결과를 다 열었는데 미션 3에 안 와 있다')
+  const after = execute('npm test', before, 'z').nextState
+  assert.equal(missionIndexOf(after), 3, 'npm test 를 쳤는데 미션 3이 안 끝난다')
+})
+
+test('21) reset 은 처음으로 되돌리고, 무엇이 사라지는지 말한다', () => {
+  const advanced = run(['ls', 'pwd', 'cat runs/run-1.txt']).state
+  const result = execute('reset', advanced, 'r1')
+  assert.equal(missionIndexOf(result.nextState), 0, 'reset 했는데 진행이 남아 있다')
+  assert.deepEqual(result.nextState.openedFiles, [], 'reset 했는데 연 파일이 남아 있다')
+  assert.ok(
+    textOf(result.events).includes('사라졌'),
+    'reset 이 무엇을 지웠는지 안 말한다 — 학생은 되돌린 줄 모르고 다시 친다',
+  )
+  // 🔑 재어 둔 화면 값은 살린다 — 되돌린다고 화면 폭이 0 이 되면 lab doctor 가 거짓말한다.
+  const measured = { ...advanced, env: { widthPx: 900, canPaste: true } }
+  assert.deepEqual(execute('reset', measured, 'r2').nextState.env, { widthPx: 900, canPaste: true })
+})
+
+test('22) jump 는 건너뛴 사실을 남긴다 — 지운다고 없어지면 과정 점수를 정직하게 못 센다', () => {
+  const result = execute('jump 3', INITIAL_LAB_STATE, 'j1')
+  assert.equal(result.nextState.jumpedTo, 2, 'jump 3 이 상태에 안 남는다')
+  assert.equal(missionIndexOf(result.nextState), 2, 'jump 했는데 그 미션으로 안 간다')
+  assert.equal(shell.earnedMissionIndex(result.nextState), 0, '건너뛴 것이 «스스로 도달한 자리»로 잡힌다')
+  assert.ok(textOf(result.events).includes('과정 점수'), '건너뛰면 무엇이 달라지는지 안 말한다')
+})
+
+test('23) jump 가 스스로 더 나아간 학생을 뒤로 끌어내리지 않는다 — 건너뛴 것이 벌이 되면 안 쓴다', () => {
+  const jumped = execute('jump 3', INITIAL_LAB_STATE, 'j2').nextState
+  const worked = run(['ls', 'pwd', ...data.LAB_RUN_FILES.map((f) => `cat ${f}`), 'npm test'], jumped).state
+  assert.equal(missionIndexOf(worked), 3, '건너뛴 뒤에 스스로 더 나아갔는데 건너뛴 자리로 끌려간다')
+})
+
+test('24) 잠긴 미션으로는 못 건너뛴다 — 없는 곳으로 보내면 학생이 빈 화면 앞에서 기다린다', () => {
+  const out = textOf(execute('jump 6', INITIAL_LAB_STATE, 'j3').events)
+  assert.ok(out.includes('아직'), '잠긴 미션으로 건너뛰는 것을 안 막는다')
+  const bad = textOf(execute('jump 99', INITIAL_LAB_STATE, 'j4').events)
+  assert.ok(/1~7/.test(bad), '범위 밖 번호에 무엇을 적어야 하는지 안 알려 준다')
+})
+
+test('25) lab version 이 «무엇으로 만든 재생본인가»를 말한다 — 없으면 규칙 효과와 모델 변화를 못 가른다', () => {
+  const out = textOf(run(['lab version']).events)
+  assert.ok(/2026-08-15/.test(out), '재생본을 만든 날짜가 없다')
+  assert.ok(/claude-haiku/.test(out), '재생본을 만든 모델이 없다')
+  assert.ok(/해당 없음/.test(out), '지금 AI 를 안 부른다는 사실을 안 말한다 — 있는 것처럼 보인다')
+})
+
+test('26) 이 PR 까지 AI 를 부르는 명령이 하나도 없다 — 실패 체험은 돈 0원으로 겪는다', () => {
+  const shellSource = readFileSync(
+    resolve(__dirname, '..', '..', '..', 'client', 'src', 'lib', 'lab-shell.ts'),
+    'utf8',
+  )
+  for (const forbidden of ['fetch(', 'anthropic', 'XMLHttpRequest']) {
+    assert.equal(
+      shellSource.toLowerCase().includes(forbidden.toLowerCase()),
+      false,
+      `셸이 ${forbidden} 를 쓰고 있다 — 이 PR 은 AI 비용 0원이어야 한다`,
+    )
+  }
 })
