@@ -1,7 +1,9 @@
 import { Link } from 'react-router-dom';
 import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getCategoryMeaning } from '../../data/category-meanings';
+import { LAB_MISSIONS, LAB_QA_ID } from '../../data/vibe-lab-ch18';
 import { useProgressMap } from '../../lib/progress';
+import { useLearnStore } from '../../store/learn-store';
 
 type ChapterNavPanelProps = {
   chapter: Chapter;
@@ -38,6 +40,9 @@ export default function ChapterNavPanel({
   const localProgressMap = useProgressMap();
   const progressMap = progressMapOverride ?? localProgressMap;
   const categoryMeaning = getCategoryMeaning(chapter.category);
+  // 🔑 미션은 «실습 탭을 보고 있을 때만» 편다. 다른 탭에서 목차가 미션으로 채워지면
+  //    학생이 이 장의 문항 목록을 잃는다.
+  const isLabTab = useLearnStore((state) => state.contentTab) === 'lab';
 
   const chapterIndex = availableChapters.findIndex((item) => item.id === chapter.id);
   const previousChapter = chapterIndex > 0 ? availableChapters[chapterIndex - 1] : undefined;
@@ -134,10 +139,24 @@ export default function ChapterNavPanel({
                     {item.title}
                   </span>
                 </button>
+                {/*
+                  🚨 미션은 실습 문항의 **하위 목록**이다. 목차와 미션은 둘 다 «지금 어디쯤인가»에
+                     답하므로, 화면에 진도 표시를 둘 두지 않는다(2026-08-15 jery: 미션판 컬럼 폐지).
+                  🔑 장 밖의 문항을 세우는 것이 아니라 이 문항 안을 펴는 것이라 계약 5) 를 안 깬다.
+                */}
+                {isCurrent && item.id === LAB_QA_ID && isLabTab ? <LabMissionList /> : null}
               </li>
             );
           })}
         </ul>
+
+        {isLabTab ? (
+          <div className="mt-3 flex items-center justify-between rounded-lg border border-[var(--color-border)] px-3 py-2 font-mono text-[11px] text-[var(--color-text-faint)]">
+            <span>AI 남은 횟수</span>
+            {/* 🚨 아직 AI 를 부르는 명령이 없다. 「3 / 3」 이라 적으면 있는 기능처럼 보인다. */}
+            <span className="font-semibold text-[var(--color-text-muted)]">아직 안 열림</span>
+          </div>
+        ) : null}
 
         {nextChapter ? (
           <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-2.5">
@@ -186,6 +205,53 @@ export default function ChapterNavPanel({
           </button>
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * 실습 문항 아래에 펴는 미션 목록.
+ * 🚨 아직 판정하지 않는 미션은 «곧 열림»이 아니라 **«잠김»**으로 적는다 —
+ *    앱이 못 하는 일을 할 수 있는 것처럼 적으면 학생이 그 앞에서 기다린다.
+ */
+function LabMissionList() {
+  const missionIndex = useLearnStore((state) => state.labMissionIndex);
+  const current = LAB_MISSIONS[missionIndex];
+
+  return (
+    <div className="mb-1 ml-[26px] mt-0.5 border-l-2 border-[var(--color-accent)] pl-2.5">
+      <ol className="space-y-[3px]">
+        {LAB_MISSIONS.map((mission, index) => {
+          const done = index < missionIndex;
+          const now = index === missionIndex;
+          return (
+            <li
+              key={mission.label}
+              className={`flex items-baseline gap-1.5 text-[12px] leading-[1.45] ${
+                now
+                  ? 'font-semibold text-[var(--color-text-primary)]'
+                  : done
+                    ? 'text-[var(--color-text-body)]'
+                    : 'text-[var(--color-text-faint)]'
+              }`}
+            >
+              <span aria-hidden className="w-[13px] shrink-0 text-center font-mono text-[10px]">
+                {done ? '✓' : mission.live ? index + 1 : '·'}
+              </span>
+              <span className="min-w-0 flex-1">
+                {mission.label}
+                {/* 🚨 색만으로 «잠김»을 말하지 않는다 — 문자를 같이 적는다(접근성). */}
+                {!mission.live ? <span className="ml-1 text-[10px] text-[var(--color-text-faint)]">(잠김)</span> : null}
+              </span>
+            </li>
+          );
+        })}
+      </ol>
+      {current ? (
+        <p className="mt-2 border-t border-[var(--color-border)] pt-2 text-[12px] leading-[1.5] text-[var(--color-text-body)]">
+          지금 할 일 — {current.goal}
+        </p>
+      ) : null}
     </div>
   );
 }

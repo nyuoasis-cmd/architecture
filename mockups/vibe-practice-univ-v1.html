@@ -1,0 +1,317 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>관통 실습 설계</title>
+<style>
+:root{
+  --ink:#17150f; --ink-2:#4a463c; --ink-3:#7a7466; --ink-4:#a8a294;
+  --paper:#faf8f3; --card:#ffffff; --rule:#e6e1d6; --rule-2:#d3ccbc;
+  --pine:#1f5045; --pine-soft:#e7f0ec; --pine-line:#bcd6cd;
+  --rust:#9a3d21; --rust-soft:#fbeae3;
+  --gold:#8a6a12; --gold-soft:#faf1d9;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#f2eee4; --ink-2:#c3bcab; --ink-3:#948d7d; --ink-4:#6b6559;
+    --paper:#13120f; --card:#1c1a16; --rule:#2e2b24; --rule-2:#403c32;
+    --pine:#7fc4b0; --pine-soft:#152520; --pine-line:#2c4a41;
+    --rust:#e39272; --rust-soft:#2a1811;
+    --gold:#d8b45c; --gold-soft:#26200f;
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#f2eee4; --ink-2:#c3bcab; --ink-3:#948d7d; --ink-4:#6b6559;
+  --paper:#13120f; --card:#1c1a16; --rule:#2e2b24; --rule-2:#403c32;
+  --pine:#7fc4b0; --pine-soft:#152520; --pine-line:#2c4a41;
+  --rust:#e39272; --rust-soft:#2a1811;
+  --gold:#d8b45c; --gold-soft:#26200f;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.75;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 24px 96px}
+header.top{border-bottom:2px solid var(--ink);padding:56px 0 22px;margin-bottom:44px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,4.6vw,46px);line-height:1.18;margin:10px 0 12px;text-wrap:balance;letter-spacing:-.01em}
+.lede{font-size:16.5px;color:var(--ink-2);max-width:64ch;margin:0}
+h2{font-family:var(--serif);font-size:26px;font-weight:600;margin:64px 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h2 .num{font-family:var(--mono);font-size:12px;color:var(--pine);display:block;letter-spacing:.14em;margin-bottom:6px}
+h3{font-size:16px;font-weight:700;margin:34px 0 8px;letter-spacing:-.005em}
+p{margin:10px 0;max-width:66ch;color:var(--ink-2)}
+p strong{color:var(--ink)}
+.sub{color:var(--ink-3);font-size:14px;max-width:66ch;margin-top:2px}
+code{font-family:var(--mono);font-size:.88em;background:var(--rule);padding:1px 5px;border-radius:4px;color:var(--ink)}
+hr{border:0;border-top:1px solid var(--rule);margin:0}
+
+/* 진단 */
+.diag{display:grid;grid-template-columns:repeat(auto-fit,minmax(224px,1fr));gap:14px;margin-top:22px}
+.diag div{border:1px solid var(--rule);border-left:3px solid var(--rust);background:var(--card);padding:14px 16px;border-radius:3px}
+.diag b{display:block;font-size:14px;margin-bottom:4px}
+.diag span{font-size:13.5px;color:var(--ink-3);line-height:1.65}
+
+/* 파이프라인 */
+.pipe{display:flex;gap:0;overflow-x:auto;margin-top:24px;border:1px solid var(--rule);border-radius:4px;background:var(--card)}
+.pipe .stage{min-width:150px;flex:1;padding:16px 14px;border-right:1px solid var(--rule)}
+.pipe .stage:last-child{border-right:0}
+.pipe .lesson{font-family:var(--mono);font-size:11px;color:var(--pine);letter-spacing:.08em}
+.pipe .what{font-size:13.5px;font-weight:700;margin:6px 0 8px;line-height:1.4}
+.pipe .out{font-size:12px;color:var(--ink-3);font-family:var(--mono);line-height:1.6;border-top:1px dashed var(--rule-2);padding-top:8px}
+.pipe .out em{font-style:normal;color:var(--rust)}
+
+/* 화면 목업 프레임 */
+.screen{border:1px solid var(--rule-2);border-radius:6px;background:var(--card);margin-top:18px;overflow:hidden;
+  box-shadow:0 1px 0 var(--rule),0 12px 28px -22px rgba(0,0,0,.4)}
+.screen .bar{display:flex;align-items:center;gap:8px;padding:9px 14px;border-bottom:1px solid var(--rule);background:var(--paper)}
+.screen .bar .dot{width:9px;height:9px;border-radius:50%;background:var(--rule-2)}
+.screen .bar .t{font-family:var(--mono);font-size:11.5px;color:var(--ink-3);margin-left:4px}
+.screen .body{padding:20px}
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--rule);padding:0 14px;background:var(--card);flex-wrap:wrap}
+.tabs span{font-size:12.5px;padding:9px 11px;color:var(--ink-3);border-bottom:2px solid transparent}
+.tabs span.on{color:var(--ink);font-weight:700;border-bottom-color:var(--pine)}
+.field{border:1px solid var(--rule-2);border-radius:5px;padding:11px 13px;font-family:var(--mono);font-size:12.5px;
+  color:var(--ink-2);background:var(--paper);white-space:pre-wrap;line-height:1.7}
+.btn{display:inline-block;background:var(--ink);color:var(--paper);font-size:13px;font-weight:600;padding:8px 15px;border-radius:5px}
+.btn.ghost{background:transparent;color:var(--ink-2);border:1px solid var(--rule-2)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:13px;margin-top:12px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+td.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.tag{display:inline-block;font-family:var(--mono);font-size:11px;padding:2px 7px;border-radius:3px;line-height:1.7}
+.tag.ok{background:var(--pine-soft);color:var(--pine);border:1px solid var(--pine-line)}
+.tag.bad{background:var(--rust-soft);color:var(--rust);border:1px solid var(--rust)}
+.tag.warn{background:var(--gold-soft);color:var(--gold);border:1px solid var(--gold)}
+.meter{height:6px;background:var(--rule);border-radius:3px;overflow:hidden;min-width:110px}
+.meter i{display:block;height:100%;background:var(--pine)}
+.meter.bad i{background:var(--rust)}
+.scroll{overflow-x:auto}
+.note{border-left:3px solid var(--gold);background:var(--gold-soft);padding:12px 16px;border-radius:0 4px 4px 0;margin-top:20px}
+.note b{color:var(--ink)}
+.note p{margin:4px 0;color:var(--ink-2);font-size:14px}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:720px){.split{grid-template-columns:1fr}}
+.why{margin-top:14px;font-size:14px;color:var(--ink-2);border-top:1px solid var(--rule);padding-top:12px;max-width:70ch}
+.why b{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--pine);display:block;margin-bottom:3px}
+ul{max-width:66ch;color:var(--ink-2);padding-left:20px}
+li{margin:6px 0}
+.deck{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;margin-top:18px}
+.deck>div{border:1px solid var(--rule);border-radius:4px;background:var(--card);padding:15px 16px}
+.deck h4{margin:0 0 6px;font-size:14.5px}
+.deck p{font-size:13.5px;margin:0;color:var(--ink-3)}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">architecture · 바이브코딩 12~23강 실습 재설계 제안</div>
+  <h1>한 문항짜리 실습을,<br>여섯 주짜리 프로젝트로</h1>
+  <p class="lede">지금 실습은 문항 하나 안에서 열리고 닫힙니다. 대학생에게는 <strong>쓴 것이 실제로 돌아가고, 틀린 것이 눈앞에서 무너지고, 다음 주에 그 산출물을 다시 써야</strong> 학습이 남습니다. 아래는 그 구조 하나와, 그 위에 얹는 실습 유형 다섯 개의 화면 목업입니다.</p>
+</header>
+
+<h2><span class="num">진단</span>지금 실습이 얕게 끝나는 이유</h2>
+<p>현재 실습 강(12·13·16·19·22·23강)의 마지막 문항은 전부 같은 모양입니다 — 텍스트 상자 한 칸에 쓰고, <code>/api/vibe/my-turn</code> 이 «네가 정한 칸 / AI가 대신 정한 칸»을 한 번 판정하고, 끝. 이 구조가 만드는 한계는 네 가지입니다.</p>
+<div class="diag">
+  <div><b>1) 산출물이 남지 않는다</b><span>제출하면 사라집니다. 12강에서 쓴 규칙 문서를 19강에서 다시 꺼낼 방법이 없어, 여섯 강이 서로 남남입니다.</span></div>
+  <div><b>2) 실패할 수가 없다</b><span>평가 대상이 «내가 쓴 글»이라 최악의 결과도 «부족하다는 코멘트»입니다. 코드가 안 돌거나 테스트가 빨개지는 경험이 0회입니다.</span></div>
+  <div><b>3) 판정이 1회·정성</b><span>AI 코멘트 한 단락뿐이라 «좋아졌는가»를 학생이 숫자로 못 봅니다. 고쳐서 다시 낼 동기가 약합니다.</span></div>
+  <div><b>4) 난이도가 한 겹</b><span>잘하는 학생도 5분이면 칸을 채웁니다. 대학 수업 90분을 지탱할 밀도가 아닙니다.</span></div>
+</div>
+
+<h2><span class="num">골격</span>여섯 강을 관통하는 프로젝트 하나</h2>
+<p>제안의 뼈대는 단순합니다. <strong>실습 6강이 각각 다른 과제를 내는 대신, 한 개의 진짜 앱을 여섯 번에 걸쳐 만듭니다.</strong> 각 강의 산출물이 다음 강의 <em>입력</em>이 되게 묶으면, 3주 전에 대충 쓴 규칙 문서가 오늘 자기 발목을 잡습니다 — 그게 이 과목이 가르치려는 바로 그 경험입니다.</p>
+<div class="pipe scroll">
+  <div class="stage"><div class="lesson">12강</div><div class="what">규칙 문서 작성<br>CLAUDE.md</div><div class="out">산출 →<br><em>rules.md</em></div></div>
+  <div class="stage"><div class="lesson">13강</div><div class="what">반복 작업을<br>스킬로 굳히기</div><div class="out">입력 ← rules.md<br>산출 → <em>skill.md</em></div></div>
+  <div class="stage"><div class="lesson">16강</div><div class="what">만들 것을<br>이슈·AC로</div><div class="out">산출 →<br><em>issue #1~3</em></div></div>
+  <div class="stage"><div class="lesson">19강</div><div class="what">AC를 테스트로<br>빨강 → 초록</div><div class="out">입력 ← AC<br>산출 → <em>test+code</em></div></div>
+  <div class="stage"><div class="lesson">22강</div><div class="what">커밋·PR·<br>동료 리뷰</div><div class="out">입력 ← 코드<br>산출 → <em>PR·리뷰</em></div></div>
+  <div class="stage"><div class="lesson">23강</div><div class="what">남의 AC로<br>내 앱 인수시험</div><div class="out">입력 ← 남의 AC<br>산출 → <em>합격표</em></div></div>
+</div>
+<div class="why"><b>왜 이 순서인가</b>지금 진열 순서(12→13→16→19→22→23강)를 그대로 씁니다. 순서를 바꾸지 않고 <strong>산출물의 연결선만</strong> 새로 긋는 제안이라, 견학·사례·퀴즈·학생 진도·공유 링크는 하나도 건드리지 않습니다.</div>
+
+<h2><span class="num">화면 1</span>내 작업실 — 산출물이 쌓이는 자리</h2>
+<p>학습 화면 옆에 <strong>강을 넘어 살아남는 탭</strong>이 하나 필요합니다. 여기에 학생 산출물이 파일처럼 쌓이고, 다음 실습은 「빈 칸」이 아니라 「3주 전 내 파일」에서 시작합니다.</p>
+<div class="screen">
+  <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">architecture.teachermate.co.kr/learn · 김OO</span></div>
+  <div class="tabs"><span>본문</span><span>시연</span><span>견학</span><span>퀴즈</span><span class="on">🧰 내 작업실</span><span>챗봇</span></div>
+  <div class="body">
+    <div class="scroll"><table>
+      <tr><th>산출물</th><th>만든 강</th><th>상태</th><th>이번 강에서 쓰임</th></tr>
+      <tr><td><code>rules.md</code> 우리 팀 규칙 6줄</td><td class="num">12강</td><td><span class="tag ok">v3 · 흔들림 0.4</span></td><td>19강 AI에게 매 요청마다 자동 첨부</td></tr>
+      <tr><td><code>skills/주간보고.md</code></td><td class="num">13강</td><td><span class="tag ok">동작 확인</span></td><td>22강 커밋 메시지 생성에 재사용</td></tr>
+      <tr><td>이슈 #1 «출석 체크 화면»</td><td class="num">16강</td><td><span class="tag warn">AC 3개 중 1개 판정불가</span></td><td>19강 테스트로 옮길 때 막힘 ←</td></tr>
+      <tr><td><code>attendance.test.ts</code></td><td class="num">19강</td><td><span class="tag bad">빨강 2 / 초록 3</span></td><td>22강 PR 올리려면 초록이어야 함</td></tr>
+      <tr><td>PR #7</td><td class="num">22강</td><td><span class="tag warn">리뷰 대기 · 배정 2명</span></td><td>—</td></tr>
+    </table></div>
+    <div class="row"><span class="btn">이어서 작업하기</span><span class="btn ghost">팀원에게 공유</span><span class="btn ghost">교수 제출</span></div>
+  </div>
+</div>
+<div class="why"><b>이 표가 노리는 것</b>3주 전 이슈의 AC 하나가 «판정불가»로 남아 있으면, 오늘 테스트를 못 씁니다. 강의로 열 번 말하는 것보다 <strong>막힌 화면 한 번</strong>이 빠릅니다.</div>
+
+<h2><span class="num">화면 2</span>실습 A · 재현성 시험대 <span style="font-size:14px;color:var(--ink-3)">(12강 규칙 문서)</span></h2>
+<p>「AI가 매번 다르다」를 말로 설명하는 대신 <strong>측정</strong>합니다. 같은 부탁을 3회 실행해 흔들린 항목을 세고, 규칙을 추가한 뒤 다시 3회 실행해 숫자가 내려가는지 봅니다. 학생이 보는 것은 코멘트가 아니라 <em>내려간 숫자</em>입니다.</p>
+<div class="screen">
+  <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">실습 A · 재현성 시험대 · 3회 실행</span></div>
+  <div class="body">
+    <div class="split">
+      <div>
+        <div class="eyebrow" style="margin-bottom:6px">내 규칙 문서 (v1)</div>
+        <div class="field">대상: 우리 반 안내문
+규칙:
+- 존댓말을 쓴다
+- 친절하게 쓴다</div>
+      </div>
+      <div>
+        <div class="eyebrow" style="margin-bottom:6px">3회 실행 결과 · 흔들린 항목</div>
+        <div class="scroll"><table style="margin-top:0">
+          <tr><th>항목</th><th>1회</th><th>2회</th><th>3회</th><th></th></tr>
+          <tr><td>길이</td><td class="num">180자</td><td class="num">420자</td><td class="num">240자</td><td><span class="tag bad">흔들림</span></td></tr>
+          <tr><td>이모지</td><td class="num">4개</td><td class="num">0개</td><td class="num">7개</td><td><span class="tag bad">흔들림</span></td></tr>
+          <tr><td>학부모 호칭</td><td class="num">학부모님</td><td class="num">보호자님</td><td class="num">학부모님</td><td><span class="tag bad">흔들림</span></td></tr>
+          <tr><td>존댓말</td><td class="num">O</td><td class="num">O</td><td class="num">O</td><td><span class="tag ok">고정</span></td></tr>
+        </table></div>
+      </div>
+    </div>
+    <div class="row" style="margin-top:18px;gap:14px">
+      <span style="font-family:var(--mono);font-size:12px;color:var(--ink-3)">흔들림 지수 v1</span>
+      <span class="meter bad" style="width:180px"><i style="width:75%"></i></span>
+      <span class="num" style="font-family:var(--mono);font-size:13px;color:var(--rust)">3 / 4 항목</span>
+      <span style="color:var(--ink-4)">→</span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--ink-3)">규칙 3줄 추가 후 v2</span>
+      <span class="meter" style="width:180px"><i style="width:25%"></i></span>
+      <span class="num" style="font-family:var(--mono);font-size:13px;color:var(--pine)">1 / 4 항목</span>
+    </div>
+    <div class="row"><span class="btn">규칙 고쳐서 다시 3회 실행</span><span class="btn ghost">v1 ↔ v2 결과 나란히 보기</span></div>
+  </div>
+</div>
+<div class="why"><b>대학생용 난이도 손잡이</b>흔들림 지수를 0.2 이하로 내리되 <strong>규칙은 5줄을 못 넘게</strong> 제한을 겁니다. 무한정 규칙을 붙이면 누구나 통과하니, 제약이 있어야 «지킬 수 있는 세 줄»을 고민합니다.</div>
+
+<h2><span class="num">화면 3</span>실습 B · 고장 진단소 <span style="font-size:14px;color:var(--ink-3)">(16강 요구사항·AC)</span></h2>
+<p>좋은 것을 쓰게 하는 대신 <strong>망가진 것을 준비해 두고 고치게</strong> 합니다. 백지 앞의 학생은 무엇을 써야 할지 모르지만, 틀린 문장 앞의 학생은 «이건 이상한데»부터 시작합니다. 채점도 명확해집니다 — 심어 둔 결함이 몇 개고 몇 개를 잡았는지 세면 됩니다.</p>
+<div class="screen">
+  <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">실습 B · 고장 진단소 · 이슈 #14 «출석 체크 화면» · 심어 둔 결함 4</span></div>
+  <div class="body">
+    <div class="field">## 인수 조건 (AC)
+1. 교사가 출석을 <span style="color:var(--rust)">편하게</span> 체크할 수 있다
+2. 학생이 <span style="color:var(--rust)">많아도</span> 화면이 <span style="color:var(--rust)">느리지 않다</span>
+3. 결석 처리 시 사유를 입력한다
+4. 저장 버튼을 누르면 저장된다</div>
+    <div class="scroll"><table>
+      <tr><th>줄</th><th>내 진단</th><th>다시 쓴 문장</th><th>채점</th></tr>
+      <tr><td class="num">1</td><td><span class="tag bad">판정 불가</span> «편하게»는 사람마다 다름</td><td class="num">30명 학급을 3번 클릭 이내로 전원 출석 처리할 수 있다</td><td><span class="tag ok">정확</span></td></tr>
+      <tr><td class="num">2</td><td><span class="tag bad">판정 불가</span> 숫자 없음</td><td class="num">학생 60명일 때 첫 화면이 2초 안에 뜬다</td><td><span class="tag ok">정확</span></td></tr>
+      <tr><td class="num">3</td><td><span class="tag ok">문제 없음</span></td><td class="num">—</td><td><span class="tag warn">놓침 · 「사유 없이 저장하면?」 예외 미정</span></td></tr>
+      <tr><td class="num">4</td><td><span class="tag bad">동어반복</span></td><td class="num">저장 후 새로고침해도 값이 남아 있다</td><td><span class="tag ok">정확</span></td></tr>
+    </table></div>
+    <div class="row"><span class="btn">진단 제출</span><span style="font-family:var(--mono);font-size:12px;color:var(--ink-3)">잡은 결함 3 / 4 · 오탐 0</span></div>
+  </div>
+</div>
+<div class="why"><b>왜 오탐도 세는가</b>멀쩡한 문장을 «이상하다»고 찍는 것도 실무에서는 비용입니다. 잡은 수만 세면 학생이 전부 빨강으로 찍고 만점을 받습니다.</div>
+
+<h2><span class="num">화면 4</span>실습 C · 빨강에서 초록으로, 그리고 거짓말 잡기 <span style="font-size:14px;color:var(--ink-3)">(19·20강)</span></h2>
+<p>이 실습이 여섯 개 중 가장 값비싸고 가장 중요합니다. 학생은 테스트를 먼저 쓰고, <strong>AI는 그 테스트만 통과시키는 가짜 구현</strong>을 냅니다(고의). 학생의 임무는 가짜를 잡는 테스트를 한 줄 더 쓰는 것 — 20강 「합격, 불합격, 그리고 거짓말」이 여기서 몸으로 옵니다.</p>
+<div class="screen">
+  <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">실습 C · 라운드 2 / 3 · attendance.test.ts</span></div>
+  <div class="body">
+    <div class="split">
+      <div>
+        <div class="eyebrow" style="margin-bottom:6px">1) 내가 쓴 테스트</div>
+        <div class="field">test('결석은 사유가 있어야 저장된다', () =&gt; {
+  expect(save({state:'결석', reason:''}))
+    .toBe(false)
+})</div>
+      </div>
+      <div>
+        <div class="eyebrow" style="margin-bottom:6px">2) AI가 낸 구현 <span class="tag bad">통과함</span></div>
+        <div class="field">function save(r){
+  <span style="color:var(--rust)">return false   // 항상 실패시킨다</span>
+}</div>
+      </div>
+    </div>
+    <div class="note" style="margin-top:16px">
+      <b>초록인데 틀렸습니다.</b>
+      <p>테스트는 통과했지만 이 구현은 <strong>정상 출석도 저장 못 합니다</strong>. 통과를 막는 테스트를 한 줄 더 쓰세요.</p>
+    </div>
+    <div class="row" style="margin-top:14px">
+      <span class="btn">테스트 추가하고 다시 돌리기</span>
+      <span style="font-family:var(--mono);font-size:12px;color:var(--ink-3)">라운드 1 <span class="tag ok">잡음</span> · 라운드 2 <span class="tag bad">놓침</span> · 라운드 3 대기</span>
+    </div>
+  </div>
+</div>
+<div class="note">
+  <b>결정이 필요한 지점 — 진짜로 코드를 돌릴 것인가</b>
+  <p><strong>무거운 안</strong>: 브라우저 안에서 JS 테스트를 실제 실행(<code>new Function</code> + 샌드박스 워커). 서버 비용 0, 언어는 JS 한정, 구현은 중간 규모. <strong>가벼운 안</strong>: 실행 없이 «미리 준비한 가짜 구현 3종» 중 학생 테스트가 몇 개를 걸러내는지 정적 판정. 비용 0·구현 작음·현실감 낮음. <strong>제대로 된 안</strong>: <code>generator</code> 의 E2B microVM 재사용 — 진짜 실행·언어 자유지만 <em>월 $150 라인과 학생당 VM 시간</em>이 붙습니다.</p>
+  <p>세 안은 비용·구현량·학습효과가 전부 다릅니다. <strong>제 추천은 무거운 안(브라우저 내 실행)</strong> — 추가 지출 0으로 «빨강이 초록이 되는» 경험까지 갑니다. 다만 이건 jery 결정 사항이라 고르시면 그때 설계로 넘기겠습니다.</p>
+</div>
+
+<h2><span class="num">화면 5</span>실습 D · 블라인드 교차 리뷰 <span style="font-size:14px;color:var(--ink-3)">(22강 PR)</span></h2>
+<p>대학 수업에서 가장 값싸게 난이도를 올리는 방법은 <strong>서로를 채점하게 하는 것</strong>입니다. 학생은 익명으로 배정된 동료 PR 2건을 체크리스트로 승인/반려하고, <em>반려 사유의 정확도</em>로 점수를 받습니다. 리뷰당하는 쪽보다 리뷰하는 쪽이 더 배웁니다.</p>
+<div class="screen">
+  <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">실습 D · 배정된 리뷰 2건 · 익명</span></div>
+  <div class="body">
+    <div class="eyebrow">PR #12 · 익명 제출자 B · 「출석 저장 기능」 · 3 파일 변경</div>
+    <div class="field" style="margin-top:8px">+ function save(record) {
++   db.insert(record)          <span style="color:var(--rust)">// 반환값을 확인하지 않음</span>
++   return true
++ }
+- <span style="color:var(--rust)">test('사유 없이 저장하면 거부한다')   // 삭제됨</span></div>
+    <div class="scroll"><table>
+      <tr><th>체크</th><th>내 판정</th><th>근거 (필수)</th></tr>
+      <tr><td>AC를 전부 덮는가</td><td><span class="tag bad">아니오</span></td><td>이슈 #14 AC 3번(사유 필수)에 해당하는 코드가 없음</td></tr>
+      <tr><td>테스트가 줄지 않았는가</td><td><span class="tag bad">아니오</span></td><td>기존 테스트 1건이 삭제됨 — 초록을 만들려고 지운 것으로 보임</td></tr>
+      <tr><td>실패를 감추지 않는가</td><td><span class="tag bad">아니오</span></td><td>insert 실패해도 true를 반환</td></tr>
+      <tr><td>비밀값이 섞이지 않았는가</td><td><span class="tag ok">예</span></td><td>—</td></tr>
+    </table></div>
+    <div class="row"><span class="btn">반려하고 사유 보내기</span><span class="btn ghost">승인</span><span style="font-family:var(--mono);font-size:12px;color:var(--ink-3)">교수 대조: 심어 둔 결함 3 · 내가 잡은 것 3 · 오탐 0</span></div>
+  </div>
+</div>
+
+<h2><span class="num">화면 6</span>실습 E · 남의 인수 조건으로 내 앱 시험 <span style="font-size:14px;color:var(--ink-3)">(23강 졸업)</span></h2>
+<p>마지막 강은 <strong>교차</strong>입니다. 내 앱을 내가 시험하면 늘 통과합니다. 다른 팀이 16강에 쓴 AC를 받아 내 앱에 그대로 들이대면, 3주 전 내가 쓴 AC가 얼마나 헐거웠는지가 그 자리에서 드러납니다.</p>
+<div class="screen">
+  <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="t">실습 E · 인수 시험 · 시험관 = 3조 · 대상 = 우리 앱</span></div>
+  <div class="body">
+    <div class="scroll"><table>
+      <tr><th>3조가 쓴 AC</th><th>결과</th><th>무엇이 드러났나</th></tr>
+      <tr><td class="num">30명을 3클릭 이내에 전원 출석 처리</td><td><span class="tag ok">합격</span></td><td>—</td></tr>
+      <tr><td class="num">결석 저장 시 사유가 비면 거부</td><td><span class="tag bad">불합격</span></td><td>우리 AC에는 «사유를 입력한다»만 있었고 «비면 어떻게»가 없었다</td></tr>
+      <tr><td class="num">새로고침 후에도 값이 남는다</td><td><span class="tag bad">불합격</span></td><td>저장을 화면 상태로만 했다 — 아무도 시험하지 않아 몰랐다</td></tr>
+      <tr><td class="num">학생 60명일 때 2초 안에 첫 화면</td><td><span class="tag warn">측정 불가</span></td><td>60명짜리 데이터를 만들 방법이 앱에 없다</td></tr>
+    </table></div>
+    <div class="row"><span class="btn">불합격 2건을 이슈로 만들기</span><span class="btn ghost">우리 AC 다시 쓰기 (16강으로)</span></div>
+  </div>
+</div>
+<div class="why"><b>여기서 고리가 닫힌다</b>「우리 AC 다시 쓰기」가 16강 화면으로 되돌립니다. 여섯 강이 직선이 아니라 <strong>한 바퀴</strong>가 되고, 두 번째 바퀴는 학생이 스스로 돕니다.</div>
+
+<h2><span class="num">운영</span>90분 수업 한 회분 배치</h2>
+<div class="scroll"><table>
+  <tr><th>시간</th><th>무엇을</th><th>형태</th><th>교수가 보는 화면</th></tr>
+  <tr><td class="num">0–15</td><td>본문·시연 (기존 그대로)</td><td>개인</td><td>진도 현황</td></tr>
+  <tr><td class="num">15–25</td><td>지난 주 산출물 꺼내기 · 오늘 무엇을 받아 쓰는지 확인</td><td>개인</td><td>작업실 미제출자 명단</td></tr>
+  <tr><td class="num">25–60</td><td>실습 본체 (A~E 중 그 주의 것) · 2~3 라운드 반복</td><td>2인 1조</td><td>라운드별 통과/막힘 분포</td></tr>
+  <tr><td class="num">60–75</td><td>교차 검증 — 옆 조 산출물 판정</td><td>조 교차</td><td>오탐·미탐 상위 사례</td></tr>
+  <tr><td class="num">75–90</td><td>가장 많이 막힌 지점 2개만 전체 공유</td><td>전체</td><td>막힘 랭킹(자동 집계)</td></tr>
+</table></div>
+<p class="sub">25–60 구간이 지금의 ✋「내 차례」 자리입니다. 나머지 칸은 새로 만드는 것이 아니라 <strong>이미 있는 화면을 순서대로 쓰는</strong> 것입니다.</p>
+
+<h2><span class="num">채점</span>루브릭 — 결과물이 아니라 «고친 횟수»를 본다</h2>
+<div class="deck">
+  <div><h4>재현성 (A)</h4><p>흔들림 지수를 몇 회 만에, 규칙 몇 줄로 내렸는가. 5줄 제한 준수.</p></div>
+  <div><h4>진단 정확도 (B·D)</h4><p>심어 둔 결함 대비 잡은 수 <em>−</em> 오탐 수. 근거 문장의 구체성.</p></div>
+  <div><h4>거짓 초록 감지 (C)</h4><p>3라운드 중 가짜 구현을 몇 번 잡았는가. 못 잡은 라운드의 회고 한 줄.</p></div>
+  <div><h4>피시험 성적 (E)</h4><p>남의 AC로 내 앱이 몇 개 합격했는가. <strong>불합격을 이슈로 옮겼는가</strong>가 더 큰 배점.</p></div>
+</div>
+
+<h2><span class="num">범위</span>지금 구조에서 무엇을 새로 만들어야 하나</h2>
+<ul>
+  <li><strong>강을 넘어 남는 저장소</strong> — 현재 「내 차례」는 제출 후 아무것도 남기지 않습니다. 산출물 테이블 하나(<code>architecture_workspace_*</code>)와 작업실 탭 하나가 이 제안의 최소 전제입니다.</li>
+  <li><strong>3회 실행 · 라운드 반복</strong> — AI 호출이 문항당 1회에서 3~6회로 늘어납니다. <code>MYTURN_*</code> 한도(학생 분당 10 · 하루 300)를 다시 계산해야 하고, <strong>「내 차례」 지출에는 아직 돈 천장이 없습니다</strong>. 이 제안을 실제로 태우기로 하면 예산 상한부터 붙이는 게 순서입니다.</li>
+  <li><strong>심어 둔 결함 데이터</strong> — 실습 B·C·D는 AI 판정이 아니라 <em>미리 만든 정답표</em>로 채점합니다. AI 호출 없이 도는 부분이 늘어 비용이 오히려 내려갑니다.</li>
+  <li><strong>교차 배정</strong> — 실습 D·E는 세션 안 학생끼리 익명 배정이 필요합니다. 세션 참여자 명단은 이미 있습니다.</li>
+</ul>
+<div class="note">
+  <b>이건 아이디어 목업입니다 — 아직 아무것도 구현하지 않았습니다.</b>
+  <p>다섯 개를 다 만들 필요는 없습니다. <strong>A(재현성 시험대) + 작업실 탭</strong> 둘만 해도 「단순 조작」에서는 벗어납니다. 어느 것부터 갈지, 실습 C의 실행 방식을 셋 중 무엇으로 할지 정해 주시면 그때 설계·PR 분할로 넘어가겠습니다.</p>
+</div>
+</div>

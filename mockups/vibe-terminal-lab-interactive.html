@@ -1,0 +1,347 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>12강 실습실 체험판</title>
+<style>
+:root{
+  --bg:#0e100d; --bg-2:#16190f; --panel:#191c16; --line:#272b22;
+  --fg:#dce0d3; --dim:#7f867a; --dim-2:#5c6357;
+  --green:#96c97e; --red:#ef7159; --yellow:#e4b264; --blue:#7fb6ab; --mag:#c79ad0; --white:#fff;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);font-family:var(--sans);overscroll-behavior:none}
+body{min-height:100dvh;display:flex;flex-direction:column}
+
+/* 상단 미션 바 */
+.bar{position:sticky;top:0;z-index:5;background:var(--panel);border-bottom:1px solid var(--line);padding:9px 14px}
+.bar .meta{display:flex;justify-content:space-between;align-items:center;gap:10px;font-family:var(--mono);font-size:10.5px;color:var(--dim-2);letter-spacing:.04em}
+.bar .meta b{color:var(--green);font-weight:600}
+.bar .mission{margin-top:5px;font-size:13.5px;line-height:1.55;color:var(--fg)}
+.bar .mission em{font-style:normal;color:var(--yellow)}
+.prog{display:flex;gap:3px;margin-top:8px}
+.prog i{flex:1;height:3px;border-radius:2px;background:var(--line)}
+.prog i.on{background:var(--green)}
+.prog i.cur{background:var(--yellow)}
+
+/* 터미널 */
+.term{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 8px;
+  font-family:var(--mono);font-size:12.6px;line-height:1.7;background:var(--bg)}
+.term .ln{white-space:pre-wrap;word-break:break-word}
+.p{color:var(--green)}.c{color:var(--white);font-weight:600}.d{color:var(--dim)}
+.g{color:var(--green)}.r{color:var(--red)}.y{color:var(--yellow)}.b{color:var(--blue)}.m{color:var(--mag)}
+.box{color:var(--dim-2)}
+.cursor{display:inline-block;width:7px;height:14px;background:var(--fg);vertical-align:-2px;animation:bl 1.05s steps(2) infinite}
+@keyframes bl{0%,50%{opacity:1}51%,100%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.cursor{animation:none}}
+
+/* 하단 조작부 */
+.dock{position:sticky;bottom:0;background:var(--panel);border-top:1px solid var(--line);padding:11px 12px calc(11px + env(safe-area-inset-bottom))}
+.hint{font-family:var(--mono);font-size:10.5px;color:var(--dim-2);letter-spacing:.05em;margin-bottom:7px;display:flex;justify-content:space-between;gap:8px}
+.hint span.k{color:var(--dim)}
+.run{width:100%;display:flex;align-items:center;gap:9px;background:#20251c;border:1px solid #384030;color:var(--fg);
+  font-family:var(--mono);font-size:12.8px;text-align:left;padding:13px 13px;border-radius:8px;cursor:pointer;line-height:1.45}
+.run:active{background:#2a3125}
+.run:disabled{opacity:.45;cursor:default}
+.run .arrow{color:var(--green);flex:none;font-weight:700}
+.run .cmd{flex:1;word-break:break-all}
+.run:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+.alt{display:flex;gap:8px;margin-top:8px}
+.alt button{flex:1;background:transparent;border:1px solid var(--line);color:var(--dim);font-family:var(--mono);
+  font-size:11.5px;padding:9px;border-radius:7px;cursor:pointer}
+.alt button:active{background:#20251c}
+
+/* 편집기 오버레이 */
+.sheet{position:fixed;inset:0;z-index:20;background:rgba(6,8,5,.72);display:none;align-items:flex-end;justify-content:center}
+.sheet.open{display:flex}
+.sheet .inner{width:100%;max-width:620px;background:var(--panel);border-top:1px solid var(--line);
+  border-radius:14px 14px 0 0;padding:16px 15px calc(16px + env(safe-area-inset-bottom));max-height:88dvh;overflow-y:auto}
+.sheet h3{margin:0 0 3px;font-family:var(--mono);font-size:12px;color:var(--green);letter-spacing:.06em}
+.sheet p.sh{margin:0 0 12px;font-size:12.8px;color:var(--dim);line-height:1.6}
+.rule{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:11px 12px;margin-bottom:7px;cursor:pointer;background:#14170f}
+.rule.on{border-color:var(--green);background:#182115}
+.rule .box2{width:16px;height:16px;flex:none;border:1px solid #3d4535;border-radius:4px;margin-top:2px;font-size:11px;
+  display:flex;align-items:center;justify-content:center;color:var(--bg);font-family:var(--mono)}
+.rule.on .box2{background:var(--green);border-color:var(--green)}
+.rule .txt{font-family:var(--mono);font-size:12.4px;color:var(--fg);line-height:1.55}
+.rule .txt small{display:block;color:var(--dim-2);font-family:var(--sans);font-size:11.5px;margin-top:2px}
+.sheet .save{width:100%;margin-top:10px;background:var(--green);color:#0e1a08;border:0;font-family:var(--mono);
+  font-weight:700;font-size:13px;padding:13px;border-radius:8px;cursor:pointer}
+.sheet .count{font-family:var(--mono);font-size:11px;color:var(--dim);text-align:center;margin-top:8px}
+.sheet .count.over{color:var(--red)}
+
+/* 안내 푸터 */
+.foot{background:#0b0d0a;border-top:1px solid var(--line);padding:16px 16px calc(20px + env(safe-area-inset-bottom));display:none}
+.foot.show{display:block}
+.foot h4{margin:0 0 6px;font-size:14px;color:var(--fg)}
+.foot p{margin:0 0 10px;font-size:13px;color:var(--dim);line-height:1.7;max-width:62ch}
+.foot p b{color:var(--yellow)}
+.foot .k{font-family:var(--mono);color:var(--blue)}
+@media(min-width:820px){
+  .term{font-size:13.2px;padding:20px 26px}
+  .bar{padding:12px 26px}.dock{padding:14px 26px 18px}
+  .bar .mission{font-size:14.5px}
+  .foot{padding:26px}
+}
+</style>
+
+<div class="bar">
+  <div class="meta"><span>🖥 실습실 · 12강 «왜 하네스인가»</span><span>세션 <b>4K7Q2M</b> · 김OO</span></div>
+  <div class="mission" id="mission">터미널이 켜졌습니다. 아래 버튼을 눌러 명령을 실행하세요.</div>
+  <div class="prog" id="prog"></div>
+</div>
+
+<div class="term" id="term"></div>
+
+<div class="dock" id="dock">
+  <div class="hint"><span id="hintLeft">눌러서 실행 · 실제 수업에서는 직접 타이핑합니다</span><span class="k" id="stepNo">0 / 9</span></div>
+  <button class="run" id="run"><span class="arrow">▸</span><span class="cmd" id="cmd">시작하기</span></button>
+  <div class="alt">
+    <button id="hintBtn">lab hint</button>
+    <button id="resetBtn">lab reset</button>
+  </div>
+</div>
+
+<div class="sheet" id="sheet"><div class="inner">
+  <h3>nano CLAUDE.md</h3>
+  <p class="sh">흔들린 칸을 고정할 규칙을 고르세요. 실제 수업에서는 직접 타이핑합니다 — 여기서는 눌러서 고릅니다.<br><b style="color:var(--yellow)">규칙은 5줄을 넘길 수 없습니다.</b></p>
+  <div id="rules"></div>
+  <div class="count" id="ruleCount">0 / 5 줄</div>
+  <button class="save" id="save">저장하고 나가기 (Ctrl+O, Ctrl+X)</button>
+</div></div>
+
+<div class="foot" id="foot">
+  <h4>지금 이건 «느낌»만 흉내 낸 목업입니다</h4>
+  <p>버튼을 눌러 진행하는 대본이고, 출력은 미리 적어 둔 글자입니다. <b>WebContainer로 만들면 여기서 달라지는 것</b>은 이렇습니다 —</p>
+  <p>▸ <span class="k">ls</span> · <span class="k">cat</span> · <span class="k">diff</span> · <span class="k">npm test</span> · <span class="k">git</span> 이 진짜로 돕니다. 대본에 없는 명령을 쳐도 진짜 결과가 나오고, 오타를 내면 진짜로 <span class="k">command not found</span> 가 납니다.<br>
+  ▸ 파일이 진짜로 만들어집니다. 학생이 <span class="k">CLAUDE.md</span> 를 자기 문장으로 씁니다 — 위처럼 고르는 게 아니라.<br>
+  ▸ 학생 브라우저가 직접 돌리므로 <b>서버 비용이 0</b>이고, 30명이 동시에 들어와도 서로 안 느려집니다.<br>
+  ▸ 다만 <span class="k">claude</span> 명령만은 우리 서버를 거칩니다(키를 학생 브라우저에 둘 수 없음). <b>여기가 유일하게 돈이 드는 지점</b>이라 미션당 호출 상한이 필요합니다.</p>
+  <p style="color:var(--dim-2);border-top:1px solid var(--line);padding-top:12px">확인이 필요한 것 하나 — 학교 PC 브라우저에서 WebContainer가 실제로 뜨는지 <b>현장에서 한 번</b> 봐야 합니다. 안 뜨는 교실이 있으면 그 반은 수업이 통째로 멈춥니다.</p>
+</div>
+
+<script>
+const RULE_OPTIONS = [
+  {id:'greet', txt:'- 학부모 호칭은 «학부모님»으로 통일한다', note:'호칭 흔들림을 잡습니다', fixes:'호칭'},
+  {id:'len',   txt:'- 안내문은 200자 안팎으로 쓴다',          note:'길이 흔들림을 잡습니다', fixes:'길이'},
+  {id:'emoji', txt:'- 이모지는 쓰지 않는다',                   note:'이모지 흔들림을 잡습니다', fixes:'이모지'},
+  {id:'kind',  txt:'- 친절하게 쓴다',                          note:'판정할 수 없는 문장입니다', fixes:null},
+  {id:'polite',txt:'- 존댓말을 쓴다',                          note:'이미 흔들리지 않던 칸입니다', fixes:null},
+  {id:'target',txt:'대상: 우리 반 학급 안내문 전체',           note:'규칙이 어디 적용되는지', fixes:null},
+];
+const picked = new Set();
+let step = 0, ended = false;
+
+const term = document.getElementById('term');
+const runBtn = document.getElementById('run');
+const cmdEl = document.getElementById('cmd');
+const missionEl = document.getElementById('mission');
+const progEl = document.getElementById('prog');
+const stepNoEl = document.getElementById('stepNo');
+const hintLeft = document.getElementById('hintLeft');
+const sheet = document.getElementById('sheet');
+
+function out(html, cls){
+  const d = document.createElement('div');
+  d.className = 'ln' + (cls ? ' ' + cls : '');
+  d.innerHTML = html;
+  term.appendChild(d);
+  term.scrollTop = term.scrollHeight;
+}
+function typed(cmd){ out('<span class="p">~/notice-app $</span> <span class="c">' + cmd + '</span>'); }
+function blank(){ out('&nbsp;'); }
+
+/* 대본 — 각 단계: 미션 문장 · 버튼에 뜰 명령 · 실행 결과 */
+const SCRIPT = [
+  { mission:'먼저 폴더에 뭐가 있는지 봅니다. 규칙 문서(<em>CLAUDE.md</em>)가 있는지 확인하세요.',
+    cmd:'ls',
+    run(){ typed('ls'); out('package.json  src/'); blank();
+           out('<span class="d">↑ CLAUDE.md 가 없습니다. 이 상태로 AI에게 일을 시키면 어떻게 되는지 먼저 봅니다.</span>'); } },
+
+  { mission:'같은 부탁을 <em>세 번</em> 합니다. 첫 번째.',
+    cmd:'claude "학급 안내문 하나 써 줘" --out out/run1.md',
+    run(){ typed('claude "학급 안내문 하나 써 줘" --out out/run1.md');
+           out('<span class="y">⚠ CLAUDE.md 가 없습니다. 기본값으로 진행합니다.</span>');
+           out('<span class="d">…생성 중</span>');
+           out('<span class="g">✓ out/run1.md</span> <span class="d">(184자 · 이모지 4 · «학부모님»)</span>'); blank(); } },
+
+  { mission:'글자 하나 안 바꾸고 두 번째. 무엇이 달라지는지 보세요.',
+    cmd:'claude "학급 안내문 하나 써 줘" --out out/run2.md',
+    run(){ typed('claude "학급 안내문 하나 써 줘" --out out/run2.md');
+           out('<span class="g">✓ out/run2.md</span> <span class="d">(421자 · 이모지 0 · «보호자 여러분»)</span>'); blank(); } },
+
+  { mission:'세 번째. 이제 세 파일이 생겼습니다.',
+    cmd:'claude "학급 안내문 하나 써 줘" --out out/run3.md',
+    run(){ typed('claude "학급 안내문 하나 써 줘" --out out/run3.md');
+           out('<span class="g">✓ out/run3.md</span> <span class="d">(238자 · 이모지 7 · «학부모님»)</span>'); blank(); } },
+
+  { mission:'1번과 2번을 직접 비교해 봅니다.',
+    cmd:'diff out/run1.md out/run2.md',
+    run(){ typed('diff out/run1.md out/run2.md');
+           out('<span class="y">3c3</span>');
+           out('<span class="r">&lt; 학부모님께 안내드립니다 🙌</span>');
+           out('<span class="d">---</span>');
+           out('<span class="g">&gt; 보호자 여러분께 알려드립니다.</span>');
+           out('<span class="y">7c7</span>');
+           out('<span class="r">&lt; (총 184자)</span>');
+           out('<span class="d">---</span>');
+           out('<span class="g">&gt; (총 421자)</span>'); blank(); } },
+
+  { mission:'무엇이 흔들렸는지 세어 봅시다.',
+    cmd:'lab check',
+    run(){ typed('lab check');
+           out('<span class="box">──────────────────────────────</span>');
+           out(' <span class="r">흔들린 칸 3</span>  <span class="d">호칭 · 길이 · 이모지</span>');
+           out(' <span class="g">고정된 칸 1</span>  <span class="d">존댓말</span>');
+           out('<span class="box">──────────────────────────────</span>');
+           out(' <span class="y">→ AI가 대충 한 게 아닙니다. 내가 안 정한 칸이 3개였습니다.</span>');
+           out(' <span class="d">다음: CLAUDE.md 를 만들어 그 칸을 고정하세요.</span>'); blank(); } },
+
+  { mission:'이제 규칙 문서를 씁니다. <em>5줄까지만</em> 쓸 수 있습니다 — 무엇이 진짜 필요한지 고르세요.',
+    cmd:'nano CLAUDE.md',
+    editor:true,
+    run(){ typed('nano CLAUDE.md'); openSheet(); } },
+
+  { mission:'같은 부탁을 다시 두 번. 이번엔 규칙 문서를 읽고 만듭니다.',
+    cmd:'claude "학급 안내문 하나 써 줘" --out out/run4.md',
+    run(){ typed('claude "학급 안내문 하나 써 줘" --out out/run4.md');
+           out('<span class="m">✳ CLAUDE.md 를 읽었습니다 (' + picked.size + '줄)</span>');
+           out('<span class="g">✓ out/run4.md</span>');
+           typed('claude "학급 안내문 하나 써 줘" --out out/run5.md');
+           out('<span class="m">✳ CLAUDE.md 를 읽었습니다 (' + picked.size + '줄)</span>');
+           out('<span class="g">✓ out/run5.md</span>'); blank(); } },
+
+  { mission:'고정됐는지 확인합니다.',
+    cmd:'lab check',
+    run(){ typed('lab check'); verdict(); } },
+];
+
+function verdict(){
+  const map = {'호칭':'greet','길이':'len','이모지':'emoji'};
+  let fixed = 0;
+  out('<span class="box">──────────────────────────────</span>');
+  for (const [name, id] of Object.entries(map)){
+    const ok = picked.has(id);
+    if (ok) fixed++;
+    out(' ' + (ok ? '<span class="g">고정</span>' : '<span class="r">흔들림</span>') +
+        ' <span class="d">' + name + '</span>' +
+        (ok ? '' : ' <span class="d">← 규칙에 없었습니다</span>'));
+  }
+  out('<span class="box">──────────────────────────────</span>');
+  out(' <span class="' + (fixed === 3 ? 'g' : 'y') + '">' + fixed + ' / 3 고정 · 규칙 ' + picked.size + '줄</span>');
+  const junk = [...picked].filter(id => !RULE_OPTIONS.find(r => r.id === id).fixes && id !== 'target');
+  if (junk.length){
+    out(' <span class="y">⚠ 판정할 수 없는 줄이 있습니다 — ' +
+        junk.map(id => '«' + RULE_OPTIONS.find(r => r.id === id).txt.replace('- ','') + '»').join(', ') + '</span>');
+    out(' <span class="d">   누가 읽어도 지켰는지 같게 판정할 수 있어야 규칙입니다.</span>');
+  }
+  blank();
+  if (fixed === 3 && !junk.length){
+    out('<span class="g">✓ 미션 완료 — 흔들림 0. AI가 똑똑해진 게 아니라, 채울 빈칸이 없어진 겁니다.</span>');
+    finish();
+  } else {
+    out('<span class="y">→ CLAUDE.md 를 고쳐서 다시 해 보세요. 바로 다시 낼 수 있습니다.</span>');
+    step = 6; // 편집기 단계로 되돌린다
+    render();
+  }
+}
+
+function finish(){
+  ended = true;
+  runBtn.disabled = true;
+  cmdEl.textContent = '실습 완료 · 아래 설명을 읽어 보세요';
+  missionEl.innerHTML = '<span style="color:var(--green)">미션 완료.</span> 여기까지가 12강 실습 한 회분입니다.';
+  hintLeft.textContent = '이 화면은 대본 목업입니다';
+  document.getElementById('foot').classList.add('show');
+  setTimeout(() => document.getElementById('foot').scrollIntoView({behavior:'smooth'}), 400);
+}
+
+function render(){
+  const s = SCRIPT[step];
+  progEl.innerHTML = SCRIPT.map((_, i) =>
+    '<i class="' + (i < step ? 'on' : i === step ? 'cur' : '') + '"></i>').join('');
+  stepNoEl.textContent = step + ' / ' + SCRIPT.length;
+  if (!s) return;
+  missionEl.innerHTML = s.mission;
+  cmdEl.textContent = s.cmd;
+}
+
+runBtn.addEventListener('click', () => {
+  if (ended) return;
+  const s = SCRIPT[step];
+  if (!s) return;
+  runBtn.disabled = true;
+  s.run();
+  if (s.editor) return;             // 편집기는 저장할 때 진행한다
+  step++;
+  if (step >= SCRIPT.length) { runBtn.disabled = true; return; }
+  render();
+  runBtn.disabled = false;
+});
+
+/* ── 편집기 시트 ── */
+function openSheet(){
+  sheet.classList.add('open');
+  drawRules();
+}
+function drawRules(){
+  const wrap = document.getElementById('rules');
+  wrap.innerHTML = '';
+  RULE_OPTIONS.forEach(r => {
+    const el = document.createElement('div');
+    el.className = 'rule' + (picked.has(r.id) ? ' on' : '');
+    el.innerHTML = '<span class="box2">' + (picked.has(r.id) ? '✓' : '') + '</span>' +
+                   '<span class="txt">' + r.txt + '<small>' + r.note + '</small></span>';
+    el.addEventListener('click', () => {
+      if (picked.has(r.id)) picked.delete(r.id);
+      else if (picked.size >= 5) { flashCount(); return; }
+      else picked.add(r.id);
+      drawRules();
+    });
+    wrap.appendChild(el);
+  });
+  const c = document.getElementById('ruleCount');
+  c.textContent = picked.size + ' / 5 줄';
+  c.className = 'count' + (picked.size >= 5 ? ' over' : '');
+}
+function flashCount(){
+  const c = document.getElementById('ruleCount');
+  c.textContent = '5줄이 끝입니다 — 무엇을 뺄지 고르세요';
+  c.className = 'count over';
+}
+document.getElementById('save').addEventListener('click', () => {
+  if (picked.size === 0) { flashCount(); return; }
+  sheet.classList.remove('open');
+  out('<span class="d">저장됨 · CLAUDE.md ' + picked.size + '줄</span>');
+  [...picked].forEach(id => out('<span class="d">  ' + RULE_OPTIONS.find(r => r.id === id).txt + '</span>'));
+  blank();
+  step++;
+  render();
+  runBtn.disabled = false;
+});
+
+/* ── 힌트 · 리셋 ── */
+document.getElementById('hintBtn').addEventListener('click', () => {
+  const s = SCRIPT[step];
+  typed('lab hint');
+  if (!s) { out('<span class="d">지금은 힌트가 없습니다.</span>'); return; }
+  out('<span class="y">힌트 1/3 — ' + s.mission.replace(/<[^>]+>/g,'') + '</span>');
+  out('<span class="d">힌트 2/3 — 쓸 명령: ' + s.cmd.split(' ')[0] + ' …</span>');
+  out('<span class="d">힌트 3/3 — ' + s.cmd + '   <span class="y">(3단계까지 쓴 것은 기록에 남지만 감점은 없습니다)</span></span>');
+  blank();
+});
+document.getElementById('resetBtn').addEventListener('click', () => {
+  term.innerHTML = ''; picked.clear(); step = 0; ended = false;
+  runBtn.disabled = false;
+  document.getElementById('foot').classList.remove('show');
+  boot();
+});
+
+function boot(){
+  out('<span class="m">✳ 실습실이 열렸습니다</span> <span class="d">· notice-app · Node 20 · 브라우저 안에서 실행 중</span>');
+  out('<span class="d">이 터미널은 당신의 브라우저가 직접 돌립니다. 설치한 것은 없습니다.</span>');
+  blank();
+  render();
+}
+boot();
+</script>

@@ -1,0 +1,402 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>강별 실습 구현안</title>
+<style>
+:root{
+  --ink:#16150f; --ink-2:#4b4739; --ink-3:#7c7666; --ink-4:#a9a394;
+  --paper:#faf9f4; --card:#fff; --rule:#e5e1d4; --rule-2:#d2ccba;
+  --pine:#1d5347; --pine-soft:#e6f0ec; --rust:#9b3d1f; --rust-soft:#fbe9e2;
+  --gold:#87680f; --gold-soft:#faf1d7; --plum:#5c3566; --plum-soft:#f2eaf4;
+  --t-bg:#12130f; --t-bg-2:#1a1c17; --t-fg:#d8dbd0; --t-dim:#7d8377;
+  --t-green:#8ec07c; --t-red:#eb6f5c; --t-yellow:#e0b062; --t-blue:#7daea3; --t-mag:#c99bd0;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#f1eee3; --ink-2:#c2bbaa; --ink-3:#948d7c; --ink-4:#6a6458;
+  --paper:#121210; --card:#1b1a16; --rule:#2d2b23; --rule-2:#3f3b31;
+  --pine:#7ec3ae; --pine-soft:#152420; --rust:#e39070; --rust-soft:#2a1710;
+  --gold:#d7b35b; --gold-soft:#251f0f; --plum:#c9a0d4; --plum-soft:#221826;
+}}
+:root[data-theme="dark"]{
+  --ink:#f1eee3; --ink-2:#c2bbaa; --ink-3:#948d7c; --ink-4:#6a6458;
+  --paper:#121210; --card:#1b1a16; --rule:#2d2b23; --rule-2:#3f3b31;
+  --pine:#7ec3ae; --pine-soft:#152420; --rust:#e39070; --rust-soft:#2a1710;
+  --gold:#d7b35b; --gold-soft:#251f0f; --plum:#c9a0d4; --plum-soft:#221826;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:0 18px 90px}
+header.top{padding:44px 0 18px;border-bottom:2px solid var(--ink);margin-bottom:34px}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(27px,5.4vw,44px);line-height:1.16;margin:9px 0 11px;letter-spacing:-.012em;text-wrap:balance}
+.lede{font-size:16px;color:var(--ink-2);max-width:64ch;margin:0}
+h2{font-family:var(--serif);font-size:clamp(21px,3.4vw,26px);font-weight:600;margin:58px 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h2 .num{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.13em;color:var(--pine);margin-bottom:5px;text-transform:uppercase}
+h3{font-size:15.5px;font-weight:700;margin:28px 0 5px}
+p{margin:9px 0;max-width:66ch;color:var(--ink-2);font-size:14.8px}
+p strong{color:var(--ink)}
+.sub{font-size:13.6px;color:var(--ink-3);max-width:68ch}
+code{font-family:var(--mono);font-size:.87em;background:var(--rule);padding:1px 5px;border-radius:4px;color:var(--ink);word-break:break-word}
+ul{max-width:67ch;color:var(--ink-2);padding-left:19px;font-size:14.6px}li{margin:5px 0}
+
+.term{background:var(--t-bg);border-radius:7px;overflow:hidden;margin-top:14px;box-shadow:0 16px 36px -26px rgba(0,0,0,.7)}
+.term .chrome{display:flex;align-items:center;gap:6px;padding:8px 12px;background:var(--t-bg-2);border-bottom:1px solid #262922}
+.term .chrome i{width:9px;height:9px;border-radius:50%;background:#3a3f36;display:block}
+.term .chrome .title{font-family:var(--mono);font-size:10.8px;color:var(--t-dim);margin-left:5px}
+.term pre{margin:0;padding:14px 15px;font-family:var(--mono);font-size:12.1px;line-height:1.7;color:var(--t-fg);white-space:pre-wrap;word-break:break-word}
+.p{color:var(--t-green)}.c{color:#fff;font-weight:600}.d{color:var(--t-dim)}
+.g{color:var(--t-green)}.r{color:var(--t-red)}.y{color:var(--t-yellow)}.b{color:var(--t-blue)}.m{color:var(--t-mag)}
+
+.ch{border:1px solid var(--rule-2);border-radius:8px;background:var(--card);margin-top:20px;overflow:hidden}
+.ch .hd{padding:13px 16px;border-bottom:1px solid var(--rule);background:var(--pine-soft);display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.ch .hd .n{font-family:var(--mono);font-size:11.5px;color:var(--pine);font-weight:700;letter-spacing:.06em}
+.ch .hd .t{font-size:16.5px;font-weight:700;color:var(--ink)}
+.ch .hd .sub2{font-size:12.5px;color:var(--ink-3);width:100%;margin-top:1px}
+.ch .bd{padding:15px 16px}
+.spec{display:grid;grid-template-columns:96px 1fr;gap:6px 12px;font-size:13.8px;margin:0 0 6px}
+.spec dt{font-family:var(--mono);font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--pine);padding-top:4px}
+.spec dd{margin:0;color:var(--ink-2)}
+@media(max-width:560px){.spec{grid-template-columns:1fr;gap:2px 0}.spec dt{padding-top:9px}}
+
+.why{margin-top:13px;border-top:1px solid var(--rule);padding-top:11px;font-size:13.8px;color:var(--ink-2)}
+.why b{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--pine);margin-bottom:3px}
+.note{border-left:3px solid var(--gold);background:var(--gold-soft);padding:12px 15px;margin-top:18px;border-radius:0 4px 4px 0}
+.note b{color:var(--ink)}.note p{margin:4px 0;font-size:14px}
+.warn{border-left-color:var(--rust);background:var(--rust-soft)}
+.dis{border-left-color:var(--plum);background:var(--plum-soft)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{width:100%;border-collapse:collapse;font-size:13.2px;margin-top:12px;min-width:440px}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+th{font-family:var(--mono);font-size:10.2px;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+td.k{color:var(--ink);font-weight:600}
+td.num,.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.4px;padding:1px 6px;border-radius:3px;border:1px solid;white-space:nowrap}
+.tag.ok{background:var(--pine-soft);color:var(--pine);border-color:var(--pine)}
+.tag.bad{background:var(--rust-soft);color:var(--rust);border-color:var(--rust)}
+.tag.warn{background:var(--gold-soft);color:var(--gold);border-color:var(--gold)}
+.tag.src{background:transparent;color:var(--ink-3);border-color:var(--rule-2)}
+.deck{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-top:16px}
+.deck>div{border:1px solid var(--rule);border-radius:5px;padding:13px 14px;background:var(--card)}
+.deck h4{margin:0 0 4px;font-size:13.8px}.deck p{margin:0;font-size:13px;color:var(--ink-3)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:680px){.grid2{grid-template-columns:1fr}}
+.q{border:1px solid var(--rule-2);border-left:4px solid var(--plum);border-radius:0 6px 6px 0;padding:13px 15px;margin-top:12px;background:var(--card)}
+.q .qt{font-weight:700;font-size:14.5px;color:var(--ink);margin-bottom:5px}
+.q .qo{font-size:13.6px;color:var(--ink-2);margin:3px 0}
+.q .rec{color:var(--pine);font-weight:600}
+.lab{border:1px solid var(--rule-2);border-radius:7px;overflow:hidden;background:var(--card);margin-top:16px}
+.lab .top2{padding:9px 13px;border-bottom:1px solid var(--rule);background:var(--paper);font-family:var(--mono);font-size:11px;color:var(--ink-3);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.lab .bd2{padding:14px 15px}
+.chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:8px}
+.chips span{font-family:var(--mono);font-size:11px;padding:4px 8px;border-radius:20px;border:1px solid var(--rule-2);color:var(--ink-3)}
+.chips span.on{border-color:var(--pine);color:var(--pine);background:var(--pine-soft)}
+.chips span.now{border-color:var(--gold);color:var(--gold);background:var(--gold-soft);font-weight:700}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">architecture · 바이브코딩 실습 · 3모델 브레인스토밍 종합 · 2026-08-14</div>
+  <h1>강별로 터미널에서<br>무엇을 시킬 것인가</h1>
+  <p class="lede">Claude · Codex(gpt-5.5) · GLM 5.2 세 모델을 다른 렌즈로 발산시키고 서로 비평시킨 결과입니다. 아래는 <strong>6개 강의 실습 구현안</strong>과, 그 밑에 깔릴 <strong>플랫폼 골격</strong>, 그리고 <strong>모델끼리 갈린 지점</strong>입니다. 갈린 지점이 결정하실 자리입니다.</p>
+</header>
+
+<h2><span class="num">먼저</span>회의가 뒤집은 것 세 가지</h2>
+<p>제가 앞서 드린 안에서 <strong>세 개가 반박당해 바뀌었습니다.</strong> 이게 이번 브레인스토밍의 실질 소득입니다.</p>
+<div class="deck">
+  <div><h4>1) <code>claude</code> CLI는 브라우저에서 안 돕니다</h4><p><span class="tag src">Codex</span> 공식 CLI는 브라우저를 지원 환경으로 두지 않습니다. WebContainer 안에서 <code>claude</code> 를 그대로 돌린다는 제 전제가 틀렸습니다. → <strong>수업 전용 <code>claude</code> 셸을 우리가 만든다</strong>(지원 명령을 명시하고, 실물과 다르다는 것을 학생에게 공개).</p></div>
+  <div><h4>2) 명령 로그로 채점하면 안 됩니다</h4><p><span class="tag src">Codex</span><span class="tag src">GLM</span> 둘 다 반대. 클라이언트 이벤트는 위조 가능하고, 짝의 내비게이터는 로그가 없고, 루브릭을 공개하는 순간 <code>git log</code> 남발이 최적 전략이 됩니다. → <strong>채점은 서버 재검증</strong>, 로그는 <em>관제용 신호</em>로 강등.</p></div>
+  <div><h4>3) 하드 릴레이는 6주에 안 맞습니다</h4><p><span class="tag src">GLM</span> 3주 전 AC가 오늘을 막는 구조는 12~15주 과목의 것입니다. 결석 1회가 성적 하락으로 구조화됩니다. → <strong>체크포인트 격자</strong>로 완화(맥락은 잇되 의존은 끊는다).</p></div>
+</div>
+
+<h2><span class="num">골격</span>모든 강이 공유하는 판</h2>
+<p>강별 설계 전에, 여섯 강이 똑같이 올라탈 바닥을 먼저 정합니다. 이게 흔들리면 강 설계는 의미가 없습니다.</p>
+
+<h3>1) 체크포인트 격자 — <code>reset</code> 과 <code>jump</code> 을 같은 자 위에 놓는다</h3>
+<div class="lab">
+  <div class="top2"><span>🧭 12강 · 김OO</span><span>체크포인트 3 / 7</span></div>
+  <div class="bd2">
+    <div class="chips">
+      <span class="on">CP1 폴더 열기</span><span class="on">CP2 3회 실행</span><span class="now">CP3 규칙 쓰기</span><span>CP4 재실행</span><span>CP5 비교</span><span>CP6 줄이기</span><span>CP7 제출</span>
+    </div>
+    <div class="scroll"><table>
+      <tr><th>명령</th><th>어디로 간다</th><th>채점 영향</th></tr>
+      <tr><td class="k"><code>lab reset</code></td><td class="num">내 마지막 체크포인트(CP3 시작 상태)</td><td>없음 · 2회째부터 「원인 가설」 한 줄 요구</td></tr>
+      <tr><td class="k"><code>lab jump 5</code></td><td class="num">정규 체크포인트 5 — 모범 스냅샷이 <strong>내 것을 덮지 않고 나란히</strong> 열린다</td><td>그 구간 과정점수 0 · 산출물 점수는 살아남음</td></tr>
+      <tr><td class="k"><code>lab check</code></td><td class="num">서버가 내 변경분을 원본 위에 얹어 재검증</td><td><strong>채점의 유일한 근거</strong></td></tr>
+    </table></div>
+    <div class="why"><b>왜 이렇게 묶나</b><span class="tag src">GLM 비평</span> 앞선 안에서는 <code>reset</code>(처음으로)과 <code>jump</code>(모범답안으로)이 서로 모순이었습니다 — 릴레이 상태에서 «처음»이 6주치 삭제를 뜻할 수 있었습니다. 둘을 <strong>같은 격자 위의 앞뒤 이동</strong>으로 정의하면 모순이 사라지고, 결석 복구가 채점을 오염시키지 않습니다. <span class="tag src">Codex</span> 점프 시 «모범과 내 것의 차이 1개를 설명해야 복귀 완료».</div>
+  </div>
+</div>
+
+<h3>2) 입장 게이트 5분 — 못 뜨는 학생을 수업 전에 골라낸다</h3>
+<div class="term">
+  <div class="chrome"><i></i><i></i><i></i><span class="title">수업 시작 · 자동 진단 · 학생 화면</span></div>
+  <pre><span class="p">$</span> <span class="c">lab doctor</span>
+<span class="g">✓</span> 크로스오리진 격리 (COOP/COEP)   <span class="d">crossOriginIsolated = true</span>
+<span class="g">✓</span> SharedArrayBuffer               <span class="d">사용 가능</span>
+<span class="g">✓</span> WebContainer 부팅                <span class="d">2.4초</span>
+<span class="g">✓</span> node 실행                        <span class="d">v20.11</span>
+<span class="y">△</span> 한글 입력(IME)                   <span class="d">터미널 직접 입력 시 조합 깨짐 → 「프롬프트 상자」 사용</span>
+<span class="g">✓</span> 붙여넣기 권한
+<span class="r">✗</span> <span class="d">— 이 항목이 하나라도 빨강이면 —</span>
+<span class="y">  원격 비상석으로 전환합니다. 같은 미션을 그대로 진행합니다.</span></pre>
+</div>
+<div class="why"><b>이게 왜 첫 화면인가</b><span class="tag src">Codex</span> WebContainer는 COOP·COEP 헤더가 필수고, iOS 사파리는 사실상 불가, iframe 지원은 Chromium 한정입니다. <span class="tag src">GLM</span> 게다가 <strong>xterm 한글 조합 입력</strong>이 미검증입니다 — 프롬프트를 다루는 수업인데 한글이 안 쳐지면 수업이 성립하지 않습니다. 그래서 <strong>프롬프트는 터미널에 직접 치지 않고 옆의 「프롬프트 상자」에서 쓴 뒤 보냅니다</strong>(영문 명령만 터미널에 직접).</div>
+
+<h3>3) 채점 스파인 — 서버가 다시 돌린 것만 점수가 된다</h3>
+<div class="scroll"><table>
+  <tr><th>층</th><th>무엇을</th><th>점수 되나</th></tr>
+  <tr><td class="k">로컬 <code>npm test</code></td><td>학생에게 즉시 피드백</td><td><span class="tag bad">아니오</span> 학생이 <code>echo PASS</code> 로 바꿀 수 있다</td></tr>
+  <tr><td class="k">서버 재검증</td><td>불변 원본 위에 학생 변경분을 얹어 <strong>숨은 테스트</strong>로 재실행 · red→green 순서 확인</td><td><span class="tag ok">예 — 유일한 근거</span></td></tr>
+  <tr><td class="k">서버 래퍼 이벤트</td><td><code>lab</code>·<code>git</code>·<code>claude</code> 래퍼가 남기는 사건(테스트 실행, 체크포인트 통과)</td><td><span class="tag warn">보조</span> 과정 점수만</td></tr>
+  <tr><td class="k">키 입력·명령 문자열</td><td>교사 관제용 «어디서 막혔나»</td><td><span class="tag bad">아니오</span> 위조 가능 · 원문 프롬프트는 수집 안 함</td></tr>
+</table></div>
+
+<h3>4) AI 예산 3중 — 이 수업에서 유일하게 돈이 드는 곳</h3>
+<div class="deck">
+  <div><h4>학생 입력 3회 / 미션</h4><p>「AI에게 보내기」를 미션당 3번. 교사가 1회 추가 지급 가능. <strong>이 숫자가 곧 교육 설계</strong>입니다 — 16강은 3회 안에 승인받는 것이 과제 그 자체입니다.</p></div>
+  <div><h4>모델 왕복 8회 / 입력</h4><p>도구 호출 루프가 안에서 8번 돌면 학생은 1회로 알지만 요금은 8배입니다. 서버가 원자적으로 끊습니다.</p></div>
+  <div><h4>토큰 상한 + 순번 큐</h4><p>30명이 동시에 시작하면 429가 납니다. 재시도 대신 <strong>순번을 화면에 보여줍니다</strong>.</p></div>
+  <div><h4>🚨 지금 없는 것</h4><p><code>MYTURN_*</code> 한도는 있지만 <strong>월 지출 상한이 없습니다</strong>(<code>CHAT_MONTHLY_BUDGET_USD</code>는 챗봇 전용). 이 실습을 켜기 전에 붙여야 합니다.</p></div>
+</div>
+
+<h3>5) 골든 스냅샷 — <code>npm install</code> 을 아예 안 시킨다</h3>
+<p><span class="tag src">Codex</span> 30명이 동시에 설치하면 학교망·레지스트리·브라우저 메모리가 같이 터집니다. 게다가 WebContainer는 네이티브 애드온을 못 돌립니다. 그래서 <strong>순수 JS + Node 내장 <code>node:test</code></strong> 로만 미션을 구성하고, 버전 고정된 폴더를 통째로 마운트합니다. <span class="tag src">GLM</span> 그리고 이 고정 스냅샷을 <em>안전장치가 아니라 교재로</em> 씁니다 — 12강에서 「내 것 3회」와 「고정본 3회」를 나란히 diff 하는 것이 수업의 핵심 장면이 됩니다.</p>
+
+<h2><span class="num">강별</span>여섯 강, 각각 무엇을 시킬 것인가</h2>
+
+<!-- 12강 -->
+<div class="ch">
+  <div class="hd"><span class="n">12강</span><span class="t">왜 하네스인가 · CLAUDE.md</span><span class="sub2">실습명 「흔들림 시험대」 · AI 호출 0회로 시작한다</span></div>
+  <div class="bd">
+    <dl class="spec">
+      <dt>실패 장치</dt><dd>규칙 없이 같은 작업을 3회 실행 → 결과가 매번 다르다. <strong>이 실패는 AI를 부르지 않고 로컬에서 결정적으로</strong> 만든다.</dd>
+      <dt>핵심 장면</dt><dd>내 3회 결과 vs 고정 스냅샷 3회 결과를 나란히 <code>diff</code>.</dd>
+      <dt>AI 호출</dt><dd>규칙 문서를 쓴 뒤 <strong>딱 1회</strong>. (미션 예산 3회 중 1)</dd>
+      <dt>채점</dt><dd>서버가 CLAUDE.md 를 스키마로 검사(대상·규칙·예외·안 하는 것) + 흔들림 재현을 서버에서 재실행.</dd>
+    </dl>
+    <div class="term">
+      <div class="chrome"><i></i><i></i><i></i><span class="title">12강 · CP2 → CP3</span></div>
+      <pre><span class="p">~/notice $</span> <span class="c">npm run notice</span>   <span class="d"># 로컬 스크립트 · API 0회</span>
+<span class="g">✓</span> out/run1.md <span class="d">(184자 · 이모지 4 · «학부모님»)</span>
+<span class="p">~/notice $</span> <span class="c">npm run notice</span>
+<span class="g">✓</span> out/run2.md <span class="d">(421자 · 이모지 0 · «보호자 여러분»)</span>
+<span class="p">~/notice $</span> <span class="c">npm run notice</span>
+<span class="g">✓</span> out/run3.md <span class="d">(238자 · 이모지 7 · «학부모님»)</span>
+
+<span class="p">~/notice $</span> <span class="c">lab check</span>
+ <span class="r">흔들린 칸 3</span> <span class="d">호칭 · 길이 · 이모지</span>   <span class="g">고정 1</span> <span class="d">존댓말</span>
+ <span class="y">→ «AI가 대충 한다»가 아니라 «내가 안 정한 칸이 3개»다.</span>
+
+<span class="p">~/notice $</span> <span class="c">lab compare --pinned</span>   <span class="d"># 고정본과 나란히</span>
+<span class="d">   내 실행 3회   :</span> <span class="r">흔들림 3</span>
+<span class="d">   고정본 3회    :</span> <span class="g">흔들림 0</span>
+<span class="y">   차이는 실력이 아니라 «적어 둔 것»의 유무다.</span></pre>
+    </div>
+    <div class="why"><b>여기서 갈린 지점</b>원래 저는 이 실패를 AI 3회 호출로 만들려 했습니다. <span class="tag src">GLM 비평</span>이 «개강 직후 30명이 동시에 호출하면 예산 큐에 걸려 <strong>「무너지는 순간」이 대기 스피너로 바뀐다</strong>»고 반박했고, 맞습니다. 1강의 실패는 로컬·즉시·결정적이어야 합니다. AI의 비결정성은 <strong>13강으로 미룹니다</strong>.</div>
+  </div>
+</div>
+
+<!-- 13강 -->
+<div class="ch">
+  <div class="hd"><span class="n">13강</span><span class="t">나만의 스킬 · /init</span><span class="sub2">실습명 「레시피 전수」 · 내 설명의 빈틈이 남의 손에서 드러난다</span></div>
+  <div class="bd">
+    <dl class="spec">
+      <dt>실패 장치</dt><dd>내가 만든 스킬을 <strong>무작위 다른 조에게 넘긴다.</strong> 받은 조는 그 스킬만으로 15분 안에 지정 과제를 해야 한다. 내 머릿속에만 있던 전제가 여기서 전부 터진다.</dd>
+      <dt>핵심 장면</dt><dd>「내 스킬로 남이 실패하는 것」을 보는 순간.</dd>
+      <dt>AI 호출</dt><dd>스킬 작성 1 + 실행 1 + 받은 스킬 실행 1 = 3회.</dd>
+      <dt>채점</dt><dd><strong>남이 내 스킬로 성공했는가</strong>(타자 성공률) + 스킬 파일 서버 스키마 검사.</dd>
+    </dl>
+    <div class="term">
+      <div class="chrome"><i></i><i></i><i></i><span class="title">13강 · 후반 · 받은 스킬로 과제 수행</span></div>
+      <pre><span class="p">~/app $</span> <span class="c">lab skill export</span>
+<span class="g">✓</span> <span class="d">내 스킬 «주간안내문» 을 교환소에 올렸습니다.</span>
+
+<span class="p">~/app $</span> <span class="c">lab skill import</span>
+<span class="d">무작위 배정 — 7조의 스킬 «표만들기» 를 받았습니다.</span>
+
+<span class="p">~/app $</span> <span class="c">claude /표만들기 5월 급식 식단</span>
+<span class="r">✖ 스킬이 멈췄습니다</span>
+<span class="d">   SKILL.md 3행: «위에서 만든 데이터를 표로»</span>
+<span class="y">   → «위에서 만든 데이터»가 무엇인지 이 스킬에는 적혀 있지 않습니다.</span>
+<span class="d">   7조에게는 당연했지만, 나에게는 없는 정보입니다.</span>
+
+<span class="p">~/app $</span> <span class="c">lab report 7조 --line 3</span>
+<span class="g">✓</span> <span class="d">7조 화면에 이 실패가 전달됐습니다. 7조는 지금 고치는 중입니다.</span></pre>
+    </div>
+    <div class="why"><b>출처</b><span class="tag src">GLM 발산</span> 「낯선 주방: 스킬 전수 요리 대결」을 순화했습니다. 대결·승패를 빼고 <strong>전수와 실패 보고만</strong> 남겼습니다 — <span class="tag src">Codex</span>가 «스킬 난이도 편차로 조 간 공정성이 무너진다»고 지적했고, 점수를 걸지 않으면 그 문제가 사라집니다.</div>
+  </div>
+</div>
+
+<!-- 16강 -->
+<div class="ch">
+  <div class="hd"><span class="n">16강</span><span class="t">기획 · 요구사항 · 인수조건(AC)</span><span class="sub2">실습명 「악덕 하청업체」 · 예산 3회가 곧 과제다</span></div>
+  <div class="bd">
+    <dl class="spec">
+      <dt>실패 장치</dt><dd>AI를 <strong>«가장 싸게, 글자 그대로만» 이행하는 하청업체</strong>로 고정한다(서버 프롬프트). 모호한 AC는 반드시 엉뚱하게 납품된다.</dd>
+      <dt>핵심 장면</dt><dd>「저장 버튼을 누르면 저장된다」로 발주했더니 <em>화면에만</em> 저장되어 오는 것.</dd>
+      <dt>AI 호출</dt><dd><strong>3회 = 발주 3번.</strong> 3회 안에 승인받는 것이 과제. 예산 제약이 그대로 학습 목표가 된다.</dd>
+      <dt>채점</dt><dd>승인까지 걸린 라운드 수 + 서버의 AC 판정가능성 검사(수치·검증방법이 있는가).</dd>
+    </dl>
+    <div class="term">
+      <div class="chrome"><i></i><i></i><i></i><span class="title">16강 · 발주 1회차 / 3</span></div>
+      <pre><span class="p">~/attend $</span> <span class="c">lab order</span>
+<span class="d">인수조건(AC)을 읽고 납품합니다. 남은 발주: 3회</span>
+<span class="m">✳ 하청업체가 납품했습니다.</span>
+
+<span class="p">~/attend $</span> <span class="c">lab inspect</span>
+<span class="d">AC 4«저장 버튼을 누르면 저장된다»</span>
+<span class="g">  납품 : 버튼을 누르면 화면에 «저장됨» 이 뜹니다.</span>
+<span class="r">  실제 : 새로고침하면 사라집니다. 어디에도 안 남았습니다.</span>
+<span class="y">  업체 변명 : «저장된다»가 무엇에 저장인지 적혀 있지 않았습니다.</span>
+
+<span class="d">AC 1«교사가 출석을 편하게 체크할 수 있다»</span>
+<span class="r">  납품 : 학생 30명을 한 명씩 30번 클릭. 편하다고 판단했습니다.</span>
+
+<span class="p">~/attend $</span> <span class="c">lab revise</span>   <span class="d"># AC 고쳐서 재발주 (남은 2회)</span></pre>
+    </div>
+    <div class="why"><b>왜 이게 강한가</b><span class="tag src">GLM 발산</span> 「악덕 하청업체」. 이 설계의 묘미는 <strong>돈 제약과 교육 목표가 같은 방향</strong>이라는 겁니다 — 호출 3회 상한이 인색함이 아니라 「세 번 안에 계약서를 제대로 써라」는 과제가 됩니다. <span class="tag src">Codex 우려</span>는 «악의적 해석 프롬프트의 품질 관리가 전부 교수 몫»인데, 이건 <strong>AC 유형별 고정 함정 목록</strong>(모호한 형용사·수치 없음·예외 없음·동어반복)을 서버가 갖고 있으면 해결됩니다.</div>
+  </div>
+</div>
+
+<!-- 19강 -->
+<div class="ch">
+  <div class="hd"><span class="n">19강</span><span class="t">TDD 한 바퀴 · 빨강 → 초록</span><span class="sub2">실습명 「거짓 초록」 · AI 호출 없이 도는 강</span></div>
+  <div class="bd">
+    <dl class="spec">
+      <dt>실패 장치</dt><dd>학생이 테스트를 먼저 쓰면, <strong>미리 만들어 둔 가짜 구현 3종</strong>이 라운드마다 순서대로 나온다(항상 실패 · 하드코딩 · 예외 삼킴). 전부 테스트를 통과한다.</dd>
+      <dt>핵심 장면</dt><dd>초록인데 틀린 화면. 「합격 표시가 곧 합격은 아니다」.</dd>
+      <dt>AI 호출</dt><dd><strong>0~1회.</strong> 가짜는 사전 제작이라 공짜다. 가장 중요한 강이 가장 싸다.</dd>
+      <dt>채점</dt><dd>서버가 red→green <strong>순서</strong>를 재검증(테스트가 먼저 빨갰는가) + 3라운드 중 몇 개를 잡았는가.</dd>
+    </dl>
+    <div class="term">
+      <div class="chrome"><i></i><i></i><i></i><span class="title">19강 · 라운드 2 / 3</span></div>
+      <pre><span class="p">~/attend $</span> <span class="c">npm test</span>
+<span class="g">Tests: 1 passed, 1 total</span>
+
+<span class="p">~/attend $</span> <span class="c">cat src/save.js</span>
+export function save(r){ <span class="r">return false</span> }   <span class="d">// 항상 거절한다</span>
+
+<span class="p">~/attend $</span> <span class="c">lab check</span>
+ <span class="g">테스트 초록 1 / 1</span>
+ <span class="r">그런데 이 구현은 정상 출석도 저장하지 못합니다.</span>
+ <span class="y">이 구현을 «불합격»시키는 테스트를 한 줄 더 쓰세요.</span>
+
+<span class="p">~/attend $</span> <span class="c">npm test</span>
+<span class="r">✕ 사유가 있는 결석은 저장된다</span>   <span class="d">expected true, got false</span>
+<span class="g">✓ 결석은 사유가 있어야 저장된다</span>
+<span class="y">빨강 1 · 초록 1  ← 여기가 TDD 의 시작점입니다</span></pre>
+    </div>
+    <div class="why"><b>20강과 이어지는 곳</b>20강 「합격, 불합격, 그리고 거짓말」이 이 화면 하나로 설명됩니다. <span class="tag src">Codex</span> 서버가 red→green 순서를 재검증하므로 <strong>«초록 먼저 만들고 테스트를 나중에 맞추는»</strong> 우회가 막힙니다.</div>
+  </div>
+</div>
+
+<!-- 22강 -->
+<div class="ch">
+  <div class="hd"><span class="n">22강</span><span class="t">커밋 · PR · 보안</span><span class="sub2">실습명 「.env 사고 + PR 법정」 · 사고를 한 번 치게 둔다</span></div>
+  <div class="bd">
+    <dl class="spec">
+      <dt>실패 장치</dt><dd>폴더에 <code>.env</code> 가 들어 있다. 대부분 <code>git add .</code> 를 친다. <strong>진짜 훅이 진짜로 커밋을 막는다</strong> — 되살리는 명령을 함께 출력하면서.</dd>
+      <dt>핵심 장면</dt><dd>「히스토리에 올라가면 되돌릴 수 없습니다」가 내 화면에 뜨는 순간.</dd>
+      <dt>후반</dt><dd>PR 법정 — 익명 배정된 동료 PR 2건을 <strong>근거를 적어야만</strong> 승인/반려할 수 있다. 근거 없는 승인은 무효 처리.</dd>
+      <dt>채점</dt><dd>심어 둔 결함 대비 잡은 수 − 오탐 수. 커밋은 서버가 git 객체로 확인.</dd>
+    </dl>
+    <div class="term">
+      <div class="chrome"><i></i><i></i><i></i><span class="title">22강 · 커밋 직전</span></div>
+      <pre><span class="p">~/attend $</span> <span class="c">git add . && git commit -m "출석 저장"</span>
+<span class="r">✖ 커밋이 막혔습니다 — 비밀값으로 보이는 파일</span>
+<span class="d">   .env:2  SUPABASE_SERVICE_KEY=eyJhbGciOi…</span>
+<span class="y">   올라가면 되돌릴 수 없습니다. 히스토리에 영원히 남습니다.</span>
+<span class="d">   빼려면: git restore --staged .env && echo .env >> .gitignore</span>
+
+<span class="p">~/attend $</span> <span class="c">lab lesson secrets</span>
+<span class="y">   ⚠ 오해 주의 — CLAUDE.md 에 «비밀값을 커밋하지 마»라고 적는 것은</span>
+<span class="y">     보안 장치가 아닙니다. 그건 AI에게 주는 «부탁»이지 «벽»이 아닙니다.</span>
+<span class="d">   진짜 벽 셋: 1) 권한 제한  2) 비밀값 격리  3) 커밋 전 검토(훅)</span></pre>
+    </div>
+    <div class="why"><b>여기서 GLM 안을 하나 버렸습니다</b><span class="tag src">GLM 발산</span>은 「CLAUDE.md 성채 — 프롬프트 탈옥 방어전」을 냈고 재밌지만, <span class="tag src">Codex 비평</span>이 «CLAUDE.md 는 보안 경계가 아니다. 문서를 보강하면 인젝션을 막을 수 있다는 <strong>잘못된 보안 감각</strong>을 심는다»고 반박했습니다. 타당합니다. 그래서 방어전 대신 <strong>그 오해를 명시적으로 깨는 화면</strong>(위 <code>lab lesson secrets</code>)을 넣었습니다.</div>
+  </div>
+</div>
+
+<!-- 23강 -->
+<div class="ch">
+  <div class="hd"><span class="n">23강</span><span class="t">종합 = 졸업</span><span class="sub2">실습명 「인수 시험 교차」 + 개인 검증 5분</span></div>
+  <div class="bd">
+    <dl class="spec">
+      <dt>실패 장치</dt><dd>다른 조가 쓴 AC로 <strong>내 앱</strong>을 시험한다. 내가 쓴 AC가 얼마나 헐거웠는지가 그 자리에서 드러난다.</dd>
+      <dt>핵심 장면</dt><dd>불합격 2건을 <strong>이슈로 만들어 16강 화면으로 되돌아가는</strong> 순간 — 여섯 강이 직선이 아니라 한 바퀴가 된다.</dd>
+      <dt>마지막 5분</dt><dd><span class="tag src">Codex</span> <strong>개인 검증</strong> — 새 스냅샷에서 각자 혼자 작은 수정 1개 + 「무엇을 왜 바꿨나」 한 문장. 짝 중 한 명만 배우는 것을 막는 유일한 장치.</dd>
+      <dt>채점</dt><dd>합격 수보다 <strong>불합격을 이슈로 옮겼는가</strong>에 배점이 크다.</dd>
+    </dl>
+    <div class="term">
+      <div class="chrome"><i></i><i></i><i></i><span class="title">23강 · 시험관 = 3조 · 대상 = 우리 앱</span></div>
+      <pre><span class="p">~/attend $</span> <span class="c">lab accept --from 3조</span>
+<span class="g">✓ 합격</span> <span class="d">30명을 3클릭 이내에 전원 출석 처리</span>
+<span class="r">✗ 불합격</span> <span class="d">결석 저장 시 사유가 비면 거부 →</span> <span class="y">우리 AC엔 «비면 어떻게»가 없었다</span>
+<span class="r">✗ 불합격</span> <span class="d">새로고침 후에도 값이 남는다 →</span> <span class="y">화면 상태로만 저장했다</span>
+<span class="y">△ 측정 불가</span> <span class="d">60명일 때 2초 →</span> <span class="y">60명 데이터를 만들 방법이 앱에 없다</span>
+
+<span class="p">~/attend $</span> <span class="c">lab issue --from-failures</span>
+<span class="g">✓</span> <span class="d">이슈 2건 생성 · 16강 화면에서 AC를 다시 씁니다.</span></pre>
+    </div>
+  </div>
+</div>
+
+<h2><span class="num">교사</span>30명을 한 명이 보는 화면</h2>
+<div class="lab">
+  <div class="top2"><span>👩‍🏫 관제 · 16강 · 접속 28 / 30</span><span>평균 CP 4.2 / 7</span></div>
+  <div class="bd2">
+    <div class="scroll"><table>
+      <tr><th>무리</th><th>인원</th><th>상태</th><th>교사 행동</th></tr>
+      <tr><td class="k">CP3 «AC 고쳐 재발주» 에 몰림</td><td class="num">14</td><td><span class="tag warn">정체</span></td><td>전체에게 힌트 한 줄</td></tr>
+      <tr><td class="k">발주 3회 소진 · 미승인</td><td class="num">4</td><td><span class="tag bad">막힘</span></td><td>1회 추가 지급</td></tr>
+      <tr><td class="k">12분째 진전 없음</td><td class="num">1</td><td><span class="tag bad">단독 알림</span></td><td>직접 간다</td></tr>
+      <tr><td class="k">부팅 실패 → 비상석</td><td class="num">2</td><td><span class="tag ok">진행 중</span></td><td>—</td></tr>
+    </table></div>
+    <div class="why"><b>혼자 막힌 1명</b>무리 단위로만 보면 조용히 혼자 막힌 학생이 안 보입니다. 그래서 <strong>「N분째 진전 없음」은 별도 단독 알림</strong>으로 뺐습니다. 관제는 <strong>채점과 분리</strong>되어 있고, 원문 프롬프트·키 입력·전체 소스는 수집하지 않습니다.</div>
+  </div>
+</div>
+
+<h2><span class="num">이견</span>모델끼리 갈린 지점 — 여기가 결정하실 자리</h2>
+
+<div class="note dis">
+  <b>이견 1 · 게임화를 어디까지 넣을 것인가</b>
+  <p><span class="tag src">GLM</span> 「git 탐정: 저장소 살인사건」, 「PR 법정」, 「주식회사 30인」 같은 서사 구조를 강하게 밀었습니다. <span class="tag src">Codex</span>는 «역할극 설정이 터미널 초심자에겐 오버헤드», «재판 절차가 시간을 먹어 90분 회전이 준다»고 반대했습니다.<br><strong>제 판단</strong>: 서사는 <strong>강당 하나만</strong>. 위 안에서는 16강(하청업체)과 22강 후반(PR 법정)에만 넣고 나머지는 담백하게 뒀습니다. 첫 학기에는 이 정도가 안전합니다.</p>
+</div>
+
+<div class="note dis">
+  <b>이견 2 · 산출물을 얼마나 강하게 이을 것인가</b>
+  <p><span class="tag src">Claude</span> 6강 하드 릴레이(3주 전 AC가 오늘을 막는다). <span class="tag src">GLM</span> 정면 반박 — «초보자의 정상적 학습곡선에 대한 처벌», «결석 1회가 성적 하락으로 구조화». <span class="tag src">Codex</span>는 유지하되 요구사항 ID로 추적하자는 절충.<br><strong>제 판단</strong>: GLM이 맞습니다. <strong>체크포인트 격자 + 얇은 공통 맥락</strong>으로 갑니다. 다음 강은 이전 산출물이 없어도 시작되고, 있으면 더 좋습니다.</p>
+</div>
+
+<div class="note dis">
+  <b>이견 3 · 만들 것인가 살 것인가 <span class="tag warn">미해결</span></b>
+  <p><span class="tag src">GLM</span>이 제기한 가장 아픈 질문입니다 — 입장 게이트 + 원격 비상석 + 격리 실행기 + git 래퍼 + PR 화면 + 예산 서버 + 텔레메트리 + <strong>수업용 <code>claude</code> 셸</strong>을 다 만들면 <strong>수개월치 플랫폼 작업</strong>입니다. 6주·30명 강좌에 이걸 자체 구축하는 게 맞는가? GitHub Codespaces·Classroom 대비 비교가 아직 없습니다.<br><strong>제 판단</strong>: 이건 제가 정할 게 아닙니다. 다만 <strong>MVP 컷</strong>은 있습니다 — 아래.</p>
+</div>
+
+<h2><span class="num">MVP</span>가장 작게 시작한다면 (1개 강 · 4~5 PR)</h2>
+<div class="scroll"><table>
+  <tr><th>넣는다</th><th>뺀다 (2차로)</th></tr>
+  <tr><td class="k">12강 하나 · 체크포인트 7개</td><td>나머지 5강</td></tr>
+  <tr><td class="k">입장 게이트 <code>lab doctor</code> (한글 IME 항목 포함)</td><td>원격 비상석 → 못 뜨면 <strong>짝의 화면을 같이 본다</strong>로 대체</td></tr>
+  <tr><td class="k">골든 스냅샷 · 순수 JS · <code>npm install</code> 0</td><td>격리 실행기 → 제출 스냅샷을 <strong>서버에서 재생</strong>하는 수준으로 축소</td></tr>
+  <tr><td class="k"><code>lab check</code> 서버 재검증 · <code>reset</code>/<code>jump</code></td><td>git 래퍼·PR 화면 (22강용)</td></tr>
+  <tr><td class="k">AI 예산 3중 + <strong>월 지출 상한</strong></td><td>텔레메트리 대시보드 → 1차는 단계 분포만</td></tr>
+  <tr><td class="k">12강은 AI 호출 1회뿐 — <strong>비용 위험이 가장 낮은 강</strong></td><td>—</td></tr>
+</table></div>
+<p class="sub">12강을 고른 이유가 하나 더 있습니다: 이 강은 <strong>AI를 거의 안 부릅니다</strong>. 플랫폼이 도는지 확인하는 데 돈이 거의 안 드는 강으로 먼저 시험하는 게 순서입니다.</p>
+
+<h2><span class="num">마지막</span>주무시고 나서 정해주실 것 넷</h2>
+<div class="q"><div class="qt">1. 수업용 <code>claude</code> 셸을 만드는 것에 동의하시는지</div>
+  <div class="qo">실물 CLI는 브라우저에서 안 돕니다. 우리가 만든 셸은 <strong>지원 명령이 한정되고 동작도 실물과 다릅니다.</strong> 학생에게 「이건 수업용이고 실물은 이렇게 다르다」를 명시하고 갈 것인지, 아니면 이 제약 때문에 다른 실행 환경(Codespaces 등)을 볼 것인지.</div></div>
+<div class="q"><div class="qt">2. 만들 것인가 살 것인가</div>
+  <div class="qo">자체 구축(수개월) vs GitHub Codespaces·Classroom 조합. <span class="rec">제 추천은 「12강 MVP만 자체 구축해서 한 반 돌려보고 결정」</span> — 지금 비교만 하면 탁상공론이 됩니다.</div></div>
+<div class="q"><div class="qt">3. AI 월 지출 상한을 얼마로 둘 것인지</div>
+  <div class="qo">이 실습을 켜기 전에 반드시 붙여야 합니다. 「내 차례」 라우트에는 지금 <strong>돈 천장이 없습니다</strong>. 30명 × 미션 3회 × 6주 기준 추산을 붙여 드릴 수 있습니다.</div></div>
+<div class="q"><div class="qt">4. 시작 범위</div>
+  <div class="qo"><span class="rec">12강 하나(추천)</span> / 12+19강 둘 / 6강 전부. <strong>19강은 AI를 거의 안 쓰면서 학습 효과가 가장 큰 강</strong>이라 두 번째로 좋은 후보입니다.</div></div>
+
+<p class="sub" style="margin-top:26px;border-top:1px solid var(--rule);padding-top:14px">브레인스토밍 원본(3모델 발산 + 교차비평 전문)은 <code>~/.claude/skills/brainstorm/runs/brainstorm-architecture-vibe-terminal-lab-2026-08-14.md</code> 에 저장했습니다. 이 문서는 <strong>아이디어 목업</strong>이며 아직 아무것도 구현하지 않았습니다.</p>
+</div>

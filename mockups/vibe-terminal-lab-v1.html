@@ -1,0 +1,353 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>터미널 실습실</title>
+<style>
+:root{
+  --ink:#16150f; --ink-2:#4b4739; --ink-3:#7c7666; --ink-4:#a9a394;
+  --paper:#faf9f4; --card:#fff; --rule:#e5e1d4; --rule-2:#d2ccba;
+  --pine:#1d5347; --pine-soft:#e6f0ec; --rust:#9b3d1f; --rust-soft:#fbe9e2;
+  --gold:#87680f; --gold-soft:#faf1d7;
+  /* 터미널 팔레트 — 문서 테마와 무관하게 항상 어둡다(터미널은 터미널이다) */
+  --t-bg:#12130f; --t-bg-2:#1a1c17; --t-fg:#d8dbd0; --t-dim:#7d8377;
+  --t-green:#8ec07c; --t-red:#eb6f5c;  --t-blue:#7daea3; --t-mag:#c99bd0;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --serif:"Iowan Old Style","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+}
+:root{--t-yellow:#e0b062}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ink:#f1eee3; --ink-2:#c2bbaa; --ink-3:#948d7c; --ink-4:#6a6458;
+  --paper:#121210; --card:#1b1a16; --rule:#2d2b23; --rule-2:#3f3b31;
+  --pine:#7ec3ae; --pine-soft:#152420; --rust:#e39070; --rust-soft:#2a1710;
+  --gold:#d7b35b; --gold-soft:#251f0f;
+}}
+:root[data-theme="dark"]{
+  --ink:#f1eee3; --ink-2:#c2bbaa; --ink-3:#948d7c; --ink-4:#6a6458;
+  --paper:#121210; --card:#1b1a16; --rule:#2d2b23; --rule-2:#3f3b31;
+  --pine:#7ec3ae; --pine-soft:#152420; --rust:#e39070; --rust-soft:#2a1710;
+  --gold:#d7b35b; --gold-soft:#251f0f;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding:0 22px 96px}
+header.top{padding:56px 0 20px;border-bottom:2px solid var(--ink);margin-bottom:40px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+h1{font-family:var(--serif);font-weight:600;font-size:clamp(30px,4.6vw,46px);line-height:1.16;margin:10px 0 12px;letter-spacing:-.012em;text-wrap:balance}
+.lede{font-size:16.5px;color:var(--ink-2);max-width:64ch;margin:0}
+h2{font-family:var(--serif);font-size:26px;font-weight:600;margin:66px 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h2 .num{display:block;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--pine);margin-bottom:6px;text-transform:uppercase}
+h3{font-size:15.5px;font-weight:700;margin:32px 0 6px}
+p{margin:10px 0;max-width:66ch;color:var(--ink-2)}
+p strong{color:var(--ink)}
+.sub{font-size:14px;color:var(--ink-3);max-width:68ch}
+code{font-family:var(--mono);font-size:.88em;background:var(--rule);padding:1px 5px;border-radius:4px;color:var(--ink)}
+ul{max-width:67ch;color:var(--ink-2);padding-left:20px}li{margin:6px 0}
+
+/* ── 터미널 ── */
+.term{background:var(--t-bg);border-radius:7px;overflow:hidden;margin-top:16px;
+  box-shadow:0 18px 40px -26px rgba(0,0,0,.75),0 0 0 1px rgba(0,0,0,.25)}
+.term .chrome{display:flex;align-items:center;gap:7px;padding:9px 13px;background:var(--t-bg-2);border-bottom:1px solid #262922}
+.term .chrome i{width:10px;height:10px;border-radius:50%;background:#3a3f36;display:block}
+.term .chrome .title{font-family:var(--mono);font-size:11.5px;color:var(--t-dim);margin-left:6px}
+.term pre{margin:0;padding:16px 18px;font-family:var(--mono);font-size:12.6px;line-height:1.72;color:var(--t-fg);
+  white-space:pre-wrap;word-break:break-word;overflow-x:auto}
+.p{color:var(--t-green)}       /* 프롬프트 */
+.c{color:#fff;font-weight:600} /* 학생이 친 명령 */
+.d{color:var(--t-dim)}         /* 출력 부연 */
+.g{color:var(--t-green)}.r{color:var(--t-red)}.y{color:var(--t-yellow)}.b{color:var(--t-blue)}.m{color:var(--t-mag)}
+.cur{background:var(--t-fg);color:var(--t-bg)}
+
+/* ── 실습실 레이아웃 목업 ── */
+.lab{border:1px solid var(--rule-2);border-radius:7px;overflow:hidden;background:var(--card);margin-top:18px;
+  box-shadow:0 12px 30px -24px rgba(0,0,0,.5)}
+.lab .top{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;border-bottom:1px solid var(--rule);background:var(--paper);flex-wrap:wrap}
+.lab .top .who{font-family:var(--mono);font-size:11.5px;color:var(--ink-3)}
+.mission{padding:13px 16px;border-bottom:1px solid var(--rule);background:var(--pine-soft)}
+.mission b{font-size:13.5px;color:var(--pine)}
+.mission p{margin:3px 0 0;font-size:13.5px;color:var(--ink-2)}
+.panes{display:grid;grid-template-columns:210px 1fr;min-height:300px}
+@media(max-width:760px){.panes{grid-template-columns:1fr}}
+.tree{border-right:1px solid var(--rule);padding:12px 10px;font-family:var(--mono);font-size:12px;color:var(--ink-3);line-height:2}
+.tree .f{color:var(--ink)}
+.tree .new{color:var(--pine)}
+.tree .del{color:var(--rust);text-decoration:line-through}
+.pane-term{background:var(--t-bg)}
+.pane-term pre{margin:0;padding:14px 16px;font-family:var(--mono);font-size:12.4px;line-height:1.72;color:var(--t-fg);white-space:pre-wrap}
+.steps{display:flex;gap:0;border-top:1px solid var(--rule);background:var(--paper);overflow-x:auto}
+.steps div{padding:9px 13px;font-size:12px;color:var(--ink-4);border-right:1px solid var(--rule);white-space:nowrap;font-family:var(--mono)}
+.steps div.done{color:var(--pine)}.steps div.now{color:var(--ink);font-weight:700;background:var(--card)}
+
+.why{margin-top:14px;border-top:1px solid var(--rule);padding-top:12px;font-size:14px;color:var(--ink-2);max-width:70ch}
+.why b{display:block;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--pine);margin-bottom:3px}
+.note{border-left:3px solid var(--gold);background:var(--gold-soft);padding:13px 16px;margin-top:20px;border-radius:0 4px 4px 0}
+.note b{color:var(--ink)}.note p{margin:4px 0;font-size:14px}
+.warn{border-left-color:var(--rust);background:var(--rust-soft)}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13.2px;margin-top:14px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--rule);vertical-align:top;color:var(--ink-2)}
+th{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+td.k{color:var(--ink);font-weight:600}
+td.num,.num{font-variant-numeric:tabular-nums;font-family:var(--mono)}
+.tag{display:inline-block;font-family:var(--mono);font-size:10.8px;padding:2px 7px;border-radius:3px;border:1px solid}
+.tag.ok{background:var(--pine-soft);color:var(--pine);border-color:var(--pine)}
+.tag.bad{background:var(--rust-soft);color:var(--rust);border-color:var(--rust)}
+.tag.warn{background:var(--gold-soft);color:var(--gold);border-color:var(--gold)}
+.deck{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:13px;margin-top:18px}
+.deck>div{border:1px solid var(--rule);border-radius:4px;padding:14px 15px;background:var(--card)}
+.deck h4{margin:0 0 5px;font-size:14px}.deck p{margin:0;font-size:13.2px;color:var(--ink-3)}
+</style>
+
+<div class="wrap">
+<header class="top">
+  <div class="eyebrow">architecture · 바이브코딩 실습 재설계 v2 · 터미널 체험판</div>
+  <h1>브라우저 안에 진짜 터미널을 켜고,<br>거기서 수업을 한다</h1>
+  <p class="lede">읽고 텍스트 칸을 채우는 실습이 아니라, <strong>학생이 <code>claude</code> 를 직접 띄우고, <code>CLAUDE.md</code> 를 만들고, 테스트를 빨갛게 만들었다가 초록으로 되돌리고, 커밋을 찍는</strong> 실습입니다. 아래는 6강 전체의 터미널 세션 전사와 화면 목업입니다.</p>
+</header>
+
+<h2><span class="num">전제</span>왜 «설치 없이 브라우저 안에서» 인가</h2>
+<p>대학 강의실에서 30명에게 Node·git·Claude Code를 각자 설치시키면 <strong>90분 중 60분이 설치 지옥</strong>입니다. 학교 PC는 관리자 권한이 없고, 맥·윈도우가 섞여 있고, 방화벽이 있습니다. 그래서 실습실은 브라우저 탭 하나로 열리고, 세션 코드만 넣으면 <strong>모두 똑같은 상태의 프로젝트 폴더</strong>가 눈앞에 뜹니다.</p>
+<p>이건 «터미널 흉내»가 아닙니다. 학생이 치는 것은 진짜 명령어이고, <code>ls</code>·<code>cat</code>·<code>npm test</code>·<code>git diff</code> 가 진짜로 동작하며, 오타를 내면 진짜로 <code>command not found</code> 가 납니다. 실행 엔진 선택지는 문서 맨 끝에 따로 정리했습니다.</p>
+
+<h2><span class="num">화면</span>실습실 — 미션·파일·터미널 한 화면</h2>
+<div class="lab">
+  <div class="top"><span class="who">🖥 architecture 실습실 · 12강 · 세션 <b>4K7Q2M</b> · 김OO</span><span class="who">3 / 7 단계</span></div>
+  <div class="mission"><b>미션 3 — 흔들리는 칸을 규칙으로 고정하라</b><p>지금 <code>claude</code> 에게 같은 부탁을 세 번 했더니 세 번 다른 결과가 왔습니다. <code>CLAUDE.md</code> 를 만들어 흔들린 칸을 고정한 뒤, 같은 부탁을 다시 세 번 하세요.</p></div>
+  <div class="panes">
+    <div class="tree">
+📁 notice-app<br>
+&nbsp;├ <span class="f">package.json</span><br>
+&nbsp;├ <span class="new">CLAUDE.md</span> <span style="color:var(--pine)">←지금</span><br>
+&nbsp;├ 📁 src<br>
+&nbsp;│ ├ <span class="f">notice.ts</span><br>
+&nbsp;│ └ <span class="f">index.ts</span><br>
+&nbsp;└ 📁 out<br>
+&nbsp;&nbsp;&nbsp;├ run1.md<br>
+&nbsp;&nbsp;&nbsp;├ run2.md<br>
+&nbsp;&nbsp;&nbsp;└ run3.md
+    </div>
+    <div class="pane-term"><pre><span class="p">~/notice-app $</span> <span class="c">diff out/run1.md out/run2.md</span>
+<span class="y">3c3</span>
+<span class="r">&lt; 학부모님께 안내드립니다 🙌</span>
+<span class="d">---</span>
+<span class="g">&gt; 보호자 여러분께 알려드립니다.</span>
+<span class="y">7c7</span>
+<span class="r">&lt; (총 184자)</span>
+<span class="g">&gt; (총 421자)</span>
+
+<span class="p">~/notice-app $</span> <span class="c">nano CLAUDE.md</span>
+<span class="d">저장됨 · 6줄</span>
+
+<span class="p">~/notice-app $</span> <span class="c">claude "학급 안내문 하나 써 줘" --out out/run4.md</span>
+<span class="m">✳ CLAUDE.md 를 읽었습니다 (6줄)</span>
+<span class="d">…생성 중</span>
+<span class="g">✓ out/run4.md</span>
+
+<span class="p">~/notice-app $</span> <span class="c">lab check</span>
+<span class="d">흔들린 칸: 호칭 </span><span class="g">고정</span><span class="d"> · 길이 </span><span class="g">고정</span><span class="d"> · 이모지 </span><span class="r">흔들림</span>
+<span class="y">2 / 3 고정 · 규칙 6줄 (제한 5줄 초과)</span>
+<span class="p">~/notice-app $</span> <span class="cur">&nbsp;</span></pre></div>
+  </div>
+  <div class="steps"><div class="done">1 폴더 열기</div><div class="done">2 세 번 실행</div><div class="now">3 규칙 쓰기</div><div>4 재실행</div><div>5 diff 확인</div><div>6 5줄로 줄이기</div><div>7 제출</div></div>
+</div>
+<div class="why"><b>이 화면의 규칙</b>왼쪽 파일 트리는 <strong>읽기 전용 안내판</strong>이고, 파일을 바꾸는 일은 전부 터미널에서 일어납니다. 편집기 버튼을 달아 두면 학생이 터미널을 피해 가고, 그러면 이 수업의 목적이 사라집니다. <code>lab check</code> 만 우리가 심은 명령입니다 — 나머지는 전부 진짜입니다.</div>
+
+<h2><span class="num">전사 1 · 12강</span>하네스가 없을 때 무슨 일이 벌어지는가</h2>
+<p>첫 5분은 <strong>일부러 실패시킵니다</strong>. 규칙 문서 없이 세 번 돌려 세 번 다른 결과를 눈으로 본 다음에야 <code>CLAUDE.md</code> 를 만들게 합니다.</p>
+<div class="term">
+  <div class="chrome"><i></i><i></i><i></i><span class="title">12강 · 미션 1~2 · 예상 소요 8분</span></div>
+  <pre><span class="p">~/notice-app $</span> <span class="c">ls</span>
+package.json  src/
+
+<span class="p">~/notice-app $</span> <span class="c">claude "학급 안내문 하나 써 줘" --out out/run1.md</span>
+<span class="y">⚠ CLAUDE.md 가 없습니다. 기본값으로 진행합니다.</span>
+<span class="g">✓ out/run1.md (184자)</span>
+
+<span class="p">~/notice-app $</span> <span class="c">claude "학급 안내문 하나 써 줘" --out out/run2.md</span>
+<span class="g">✓ out/run2.md (421자)</span>
+
+<span class="p">~/notice-app $</span> <span class="c">claude "학급 안내문 하나 써 줘" --out out/run3.md</span>
+<span class="g">✓ out/run3.md (238자)</span>
+
+<span class="p">~/notice-app $</span> <span class="c">lab check</span>
+<span class="d">─────────────────────────────────────────</span>
+ <span class="r">흔들린 칸 3</span>  호칭 · 길이 · 이모지
+ <span class="g">고정된 칸 1</span>  존댓말
+<span class="d">─────────────────────────────────────────</span>
+ <span class="y">→ 미션 3: 흔들린 칸을 CLAUDE.md 로 고정하세요.</span>
+ <span class="d">힌트가 필요하면: lab hint</span></pre>
+</div>
+<div class="why"><b>왜 <code>lab check</code> 이 필요한가</b>학생이 세 파일을 눈으로 비교하면 «다르네» 에서 멈춥니다. <strong>무엇이 다른지를 항목으로 세어 주는 순간</strong> «내가 안 정한 칸» 이라는 개념이 생깁니다. 이게 12강 본문이 말로 하던 것을, 화면이 대신 하는 자리입니다.</div>
+
+<h2><span class="num">전사 2 · 13강</span><code>/init</code> 과 나만의 스킬</h2>
+<p>13강은 «반복되는 일을 굳히는» 강입니다. 학생은 <code>claude</code> 대화 모드로 들어가 <code>/init</code> 을 치고, 자기 스킬 하나를 만들어 <strong>두 번째 호출부터 짧아지는 것</strong>을 확인합니다.</p>
+<div class="term">
+  <div class="chrome"><i></i><i></i><i></i><span class="title">13강 · 대화 모드 · 슬래시 명령</span></div>
+  <pre><span class="p">~/notice-app $</span> <span class="c">claude</span>
+<span class="m">✳ Claude Code</span> <span class="d">· /help 로 명령 목록 · Ctrl+C 로 종료</span>
+
+<span class="b">&gt;</span> <span class="c">/init</span>
+<span class="d">프로젝트를 훑는 중… package.json, src/*.ts 3개</span>
+<span class="g">✓ CLAUDE.md 초안을 만들었습니다 (14줄)</span>
+<span class="y">  ⚠ 「안 하는 것」 칸이 비어 있습니다.</span>
+
+<span class="b">&gt;</span> <span class="c">우리는 안내문에 이모지를 안 쓴다는 걸 규칙에 넣어줘</span>
+<span class="g">✓ CLAUDE.md 수정 (+2줄)</span>
+
+<span class="b">&gt;</span> <span class="c">/skill 주간안내문</span>
+<span class="d">스킬 파일을 만듭니다 → .claude/skills/주간안내문/SKILL.md</span>
+<span class="d">무엇을 하는 스킬인가요?</span>
+<span class="b">&gt;</span> <span class="c">이번 주 일정을 받아 안내문 초안을 만들고 out/ 에 저장</span>
+<span class="g">✓ 스킬 생성 · 이제 /주간안내문 으로 부를 수 있습니다</span>
+
+<span class="b">&gt;</span> <span class="c">/주간안내문 5/12~5/16 현장체험학습 목요일</span>
+<span class="g">✓ out/week-0512.md</span>
+
+<span class="b">&gt;</span> <span class="c">/exit</span>
+<span class="p">~/notice-app $</span> <span class="c">lab check</span>
+ <span class="g">✓</span> CLAUDE.md 에 「안 하는 것」 칸 있음
+ <span class="g">✓</span> 스킬 1개 · 실제 호출 1회
+ <span class="y">→ 미션 5: 같은 일을 스킬 없이 하려면 몇 자를 쳐야 했는지 세어 보세요.</span></pre>
+</div>
+
+<h2><span class="num">전사 3 · 19강</span>빨강 → 초록, 그리고 <span style="color:var(--rust)">거짓 초록</span></h2>
+<p>여기가 이 설계의 심장입니다. 학생은 <strong>테스트를 먼저 씁니다.</strong> 그리고 AI에게 구현을 시킵니다. AI는 <em>의도적으로</em> 테스트만 통과하는 가짜를 냅니다. 학생은 초록을 보고 넘어갈 수도 있고, 의심할 수도 있습니다 — 그 갈림길이 20강 «합격, 불합격, 그리고 거짓말» 의 몸통입니다.</p>
+<div class="term">
+  <div class="chrome"><i></i><i></i><i></i><span class="title">19강 · 라운드 2 / 3 · attendance</span></div>
+  <pre><span class="p">~/attend $</span> <span class="c">npm test</span>
+<span class="d"> PASS </span> src/save.test.ts
+<span class="d"> ✓ 결석은 사유가 있어야 저장된다 (3 ms)</span>
+<span class="g">Tests: 1 passed, 1 total</span>
+
+<span class="p">~/attend $</span> <span class="c">cat src/save.ts</span>
+export function save(record) {
+  <span class="r">return false            // ← AI 가 낸 구현</span>
+}
+
+<span class="p">~/attend $</span> <span class="c">lab check</span>
+<span class="d">─────────────────────────────────────────</span>
+ <span class="g">테스트 초록 1 / 1</span>
+ <span class="r">그러나 이 구현은 정상 출석도 저장하지 못합니다.</span>
+ <span class="y">이 구현을 <span class="r">불합격</span>시키는 테스트를 한 줄 더 쓰세요.</span>
+<span class="d">─────────────────────────────────────────</span>
+
+<span class="p">~/attend $</span> <span class="c">nano src/save.test.ts</span>
+<span class="d">저장됨 · +4줄</span>
+
+<span class="p">~/attend $</span> <span class="c">npm test</span>
+<span class="d"> FAIL </span> src/save.test.ts
+<span class="d"> ✓ 결석은 사유가 있어야 저장된다</span>
+<span class="r"> ✕ 사유가 있는 결석은 저장된다</span>
+<span class="d">   expected: true   received: false</span>
+<span class="r">Tests: 1 failed, 1 passed</span>
+
+<span class="p">~/attend $</span> <span class="c">claude "테스트를 통과하게 save 를 고쳐줘"</span>
+<span class="g">✓ src/save.ts 수정</span>
+
+<span class="p">~/attend $</span> <span class="c">npm test</span>
+<span class="g">Tests: 2 passed, 2 total</span>
+<span class="p">~/attend $</span> <span class="c">lab check</span>
+ <span class="g">✓ 라운드 2 통과 · 가짜 구현을 잡았습니다</span>
+ <span class="d">라운드 1 </span><span class="g">잡음</span><span class="d"> · 라운드 2 </span><span class="g">잡음</span><span class="d"> · 라운드 3 </span><span class="y">대기</span></pre>
+</div>
+<div class="why"><b>가짜 구현은 AI가 즉흥으로 내지 않는다</b>라운드마다 <strong>미리 만들어 둔 가짜 3종</strong>(항상 false · 하드코딩된 값 · 예외를 삼킴)을 순서대로 냅니다. 그래야 30명이 같은 난이도를 겪고, 채점이 «몇 라운드를 잡았는가»로 딱 떨어집니다. AI 호출도 그만큼 줄어듭니다.</div>
+
+<h2><span class="num">전사 4 · 22강</span>커밋 · PR · 그리고 비밀값 사고</h2>
+<p>22강은 <strong>사고를 한 번 치게 두는</strong> 강입니다. 실습 폴더에는 <code>.env</code> 가 들어 있고, 학생 대부분은 <code>git add .</code> 를 칩니다. 커밋 직전에 걸리는 경험이 훈계 열 마디보다 셉니다.</p>
+<div class="term">
+  <div class="chrome"><i></i><i></i><i></i><span class="title">22강 · 미션 4 · 커밋 직전</span></div>
+  <pre><span class="p">~/attend $</span> <span class="c">git status</span>
+<span class="d">On branch feat/attendance</span>
+<span class="r">        modified:   src/save.ts</span>
+<span class="r">        new file:   .env</span>
+<span class="r">        new file:   src/save.test.ts</span>
+
+<span class="p">~/attend $</span> <span class="c">git add .</span>
+<span class="p">~/attend $</span> <span class="c">git commit -m "출석 저장"</span>
+<span class="r">✖ 커밋이 막혔습니다 — 비밀값으로 보이는 파일이 포함됨</span>
+<span class="d">   .env:2   SUPABASE_SERVICE_KEY=eyJhbGciOi…</span>
+<span class="y">   이 값이 올라가면 되돌릴 수 없습니다. 히스토리에 영원히 남습니다.</span>
+<span class="d">   빼려면:  git restore --staged .env  &amp;&amp;  echo .env &gt;&gt; .gitignore</span>
+
+<span class="p">~/attend $</span> <span class="c">git restore --staged .env &amp;&amp; echo .env &gt;&gt; .gitignore</span>
+<span class="p">~/attend $</span> <span class="c">git add .gitignore &amp;&amp; git commit -m "feat: 결석 사유 필수 저장"</span>
+<span class="g">[feat/attendance 8c21f0e] feat: 결석 사유 필수 저장</span>
+<span class="d"> 3 files changed, 27 insertions(+)</span>
+
+<span class="p">~/attend $</span> <span class="c">lab pr</span>
+<span class="d">PR 본문을 만듭니다. 세 칸을 채우세요 —</span>
+<span class="d">  무엇을 / 안 하는 것 / 어떻게 확인했나</span>
+<span class="g">✓ PR #12 · 리뷰어 2명 자동 배정 (익명)</span></pre>
+</div>
+<div class="note warn">
+  <b>이 «막힘»은 진짜 장치여야 합니다.</b>
+  <p>가짜 경고로 흉내 내면 학생은 5초 뒤에 잊습니다. 실습 폴더에 진짜 pre-commit 훅을 넣어 두고, <strong>진짜로 커밋이 실패</strong>하게 하세요. 되살리는 명령까지 출력에 적어 두는 것이 핵심입니다 — 막고 방치하면 그때부터는 학습이 아니라 좌절입니다.</p>
+</div>
+
+<h2><span class="num">채점</span>학생이 친 명령어가 그대로 채점 자료다</h2>
+<p>터미널 실습의 가장 큰 이점은 <strong>제출물을 따로 받을 필요가 없다</strong>는 것입니다. 명령어 로그 한 줄 한 줄이 학습 과정 그 자체입니다.</p>
+<div class="scroll"><table>
+  <tr><th>무엇을 본다</th><th>어디서 나오나</th><th>읽는 법</th></tr>
+  <tr><td class="k">막힌 지점</td><td class="num">같은 명령을 3회 이상 반복한 구간</td><td>30명 중 절반이 같은 데서 막히면 그건 학생 문제가 아니라 미션 문장 문제</td></tr>
+  <tr><td class="k">이해 없이 복붙</td><td class="num"><code>lab hint</code> 직후 0초 만에 정답 명령</td><td>힌트를 명령어째 주지 말고 «무엇을 확인해 보라»로 쓰면 사라진다</td></tr>
+  <tr><td class="k">거짓 초록 감지</td><td class="num">19강 라운드별 잡음/놓침</td><td>배점 최상위 항목</td></tr>
+  <tr><td class="k">되돌린 경험</td><td class="num"><code>git restore</code>·<code>--amend</code> 사용 여부</td><td>«실수하고 되돌린» 학생이 «한 번에 맞힌» 학생보다 잘 배운다 — 감점하지 않는다</td></tr>
+  <tr><td class="k">스스로 연 것</td><td class="num">미션에 없던 명령(<code>git log</code>, <code>--help</code>)</td><td>가산점. 터미널을 «무서운 것»에서 «만져 보는 것»으로 옮긴 신호</td></tr>
+</table></div>
+
+<h2><span class="num">교사</span>30명이 각자 다른 데서 막힐 때 보는 화면</h2>
+<div class="lab">
+  <div class="top"><span class="who">👩‍🏫 교사 관제 · 12강 · 세션 4K7Q2M · 접속 28 / 30</span><span class="who">평균 4.2 / 7 단계</span></div>
+  <div style="padding:16px 18px">
+    <div class="scroll"><table style="margin-top:0">
+      <tr><th>단계</th><th>인원</th><th>분포</th><th>상태</th></tr>
+      <tr><td class="k">1~2 세 번 실행</td><td class="num">3</td><td class="num">▓▓▓</td><td><span class="tag ok">정상</span></td></tr>
+      <tr><td class="k">3 규칙 쓰기</td><td class="num">14</td><td class="num">▓▓▓▓▓▓▓▓▓▓▓▓▓▓</td><td><span class="tag warn">여기 몰림</span></td></tr>
+      <tr><td class="k">4~5 재실행·diff</td><td class="num">8</td><td class="num">▓▓▓▓▓▓▓▓</td><td><span class="tag ok">정상</span></td></tr>
+      <tr><td class="k">6~7 줄이기·제출</td><td class="num">3</td><td class="num">▓▓▓</td><td><span class="tag ok">정상</span></td></tr>
+    </table></div>
+    <div style="margin-top:16px;border-top:1px solid var(--rule);padding-top:12px">
+      <div class="eyebrow">지금 가장 많이 난 오류 3개</div>
+      <table style="margin-top:6px">
+        <tr><td class="num">9명</td><td><code>nano: command not found</code></td><td class="num"><span class="tag bad">미션 문장 문제</span> «편집기를 여세요»만 적혀 있음</td></tr>
+        <tr><td class="num">5명</td><td>CLAUDE.md 를 만들었는데 <code>claude</code> 를 다시 안 돌림</td><td class="num"><span class="tag warn">안내 필요</span></td></tr>
+        <tr><td class="num">2명</td><td><code>--out</code> 오타</td><td class="num"><span class="tag ok">개별</span></td></tr>
+      </table>
+    </div>
+    <div style="margin-top:14px;font-size:13.5px;color:var(--ink-2)">▸ 한 명 화면 붙어서 보기 · ▸ 전체에게 힌트 한 줄 쏘기 · ▸ 모두 미션 3에서 정지</div>
+  </div>
+</div>
+<div class="why"><b>「9명이 같은 오류」가 이 화면의 존재 이유</b>교사가 30명 어깨 너머를 도는 대신, <strong>같은 데서 막힌 무리</strong>를 먼저 봅니다. 위 사례에서 진짜 고칠 것은 학생이 아니라 미션 문장입니다 — 편집기 이름을 안 알려 줬습니다.</div>
+
+<h2><span class="num">안전</span>터미널을 열어 주면 반드시 생기는 문제들</h2>
+<div class="deck">
+  <div><h4>망가뜨리는 학생</h4><p><code>rm -rf</code> 는 <strong>막지 않습니다.</strong> 대신 <code>lab reset</code> 으로 3초 만에 처음 상태로 되돌립니다. 망가뜨려 보는 것도 수업입니다.</p></div>
+  <div><h4>딴짓</h4><p>실습 폴더 밖으로는 못 나가고, 네트워크는 우리 서버만 열립니다. <code>curl</code> 로 외부를 못 칩니다.</p></div>
+  <div><h4>AI 호출 폭주</h4><p><code>claude</code> 한 번이 곧 돈입니다. 미션당 호출 상한을 두고, 초과하면 «왜 또 부르려 하는지 한 줄 적기»를 시킵니다.</p></div>
+  <div><h4>못 따라오는 학생</h4><p><code>lab hint</code> 3단계 — 1) 무엇을 확인할지 2) 어떤 명령 계열인지 3) 명령 전문. 3단계까지 쓰면 기록에 남되 감점은 없습니다.</p></div>
+</div>
+
+<h2><span class="num">결정</span>이 터미널을 무엇으로 돌릴 것인가 — 세 갈래</h2>
+<p>겉보기는 같지만 <strong>비용·구현량·되돌리기 난이도가 전혀 다릅니다.</strong> 이건 제가 조용히 정할 일이 아니라 골라 주셔야 하는 지점입니다.</p>
+<div class="scroll"><table>
+  <tr><th></th><th>가짜 셸 (대본형)</th><th>WebContainer (브라우저 안 Node)</th><th>E2B microVM (진짜 리눅스)</th></tr>
+  <tr><td class="k">학생이 겪는 것</td><td>정해진 명령만 반응. 벗어나면 «이 실습에서는 안 씁니다»</td><td><strong>진짜 Node·npm·git이 브라우저 탭 안에서 실행</strong>. 오타·에러도 진짜</td><td>진짜 서버. 무엇이든 설치·실행 가능</td></tr>
+  <tr><td class="k">서버 비용</td><td class="num">0</td><td class="num">0 <span class="d">(학생 브라우저가 돌린다)</span></td><td class="num"><span class="tag bad">월 $150 라인 + 학생당 VM 시간</span></td></tr>
+  <tr><td class="k">구현량</td><td class="num">작음 (2~3 PR)</td><td class="num">중간 (5~6 PR)</td><td class="num">큼 · <code>generator</code> 재사용해도 5+</td></tr>
+  <tr><td class="k">30명 동시</td><td><span class="tag ok">문제 없음</span></td><td><span class="tag ok">문제 없음 · 각자 자기 브라우저</span></td><td><span class="tag warn">VM 30개 · 사전 예열 필요</span></td></tr>
+  <tr><td class="k">한계</td><td>대본 밖은 죽은 화면. 학생이 금방 눈치챈다</td><td>Node/JS 세계 한정. 학교 구형 브라우저 확인 필요</td><td>비용·운영. 수업 끝나고 안 끄면 계속 샌다</td></tr>
+  <tr><td class="k">추천</td><td class="num">—</td><td class="num"><span class="tag ok">이걸 추천합니다</span></td><td class="num">2차</td></tr>
+</table></div>
+<div class="note">
+  <b>추천은 가운데 안(WebContainer)입니다 — 다만 확인할 것이 둘 있습니다.</b>
+  <p>추가 지출 0으로 «진짜 명령이 진짜로 도는» 경험까지 갑니다. 대신 1) 이 앱은 지금 <strong>Node 서버 코드를 학생 브라우저에서 돌린 적이 없어</strong> 번들·격리 구조가 새로 필요하고, 2) 학교 PC 브라우저에서 실제로 뜨는지 <strong>현장 1회 확인</strong>이 선행되어야 합니다. 안 뜨는 교실이 있으면 그 반은 수업이 통째로 멈춥니다.</p>
+  <p>그리고 <code>claude</code> 명령은 어느 안이든 <strong>우리 서버를 거칩니다</strong>(키를 학생 브라우저에 둘 수 없습니다). 지금 「내 차례」 지출에는 돈 천장이 없으므로 — <code>CHAT_MONTHLY_BUDGET_USD</code> 는 챗봇 전용입니다 — <strong>이 실습을 켜기 전에 예산 상한부터 붙이는 것이 순서</strong>입니다.</p>
+</div>
+
+<h2><span class="num">범위</span>가장 작게 시작한다면</h2>
+<ul>
+  <li><strong>1차 (1개 강만)</strong> — 12강 하나를 터미널 실습으로 만듭니다. 미션 7단계, <code>lab check</code>, 교사 관제 최소판. 이걸로 한 반 돌려 보고 나머지 5강을 결정합니다.</li>
+  <li><strong>2차</strong> — 19강(빨강→초록·거짓 초록). 실습의 심장이자 가장 어려운 강.</li>
+  <li><strong>3차</strong> — 13·16·22·23강 + 산출물이 강을 넘어 이어지는 작업실.</li>
+</ul>
+<p class="sub">이 문서는 <strong>아이디어 목업</strong>입니다 — 아직 아무것도 구현하지 않았습니다. 실행 엔진(가운데 안으로 갈지)과 시작 범위(12강 하나로 갈지)를 정해 주시면 설계·PR 분할로 넘기겠습니다.</p>
+</div>

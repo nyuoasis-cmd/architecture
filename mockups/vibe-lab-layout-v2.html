@@ -1,0 +1,338 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>12강 실습 탭 — 레이아웃 v2 (2칸)</title>
+<style>
+:root{
+  --page:#faf9f7; --card:#fff; --line:#e7e5e4; --line2:#d6d3d1;
+  --ink:#1c1917; --ink2:#57534e; --ink3:#a8a29e;
+  --accent:#0f766e; --warn:#b45309; --bad:#b91c1c;
+  --t-bg:#0e100d; --t-panel:#191c16; --t-line:#272b22;
+  --t-fg:#dce0d3; --t-dim:#7f867a; --t-dim2:#5c6357;
+  --t-green:#96c97e; --t-red:#ef7159; --t-yellow:#e4b264; --t-blue:#7fb6ab;
+  --mono:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;
+  --sans:system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans KR",sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);line-height:1.6}
+.wrap{max-width:1180px;margin:0 auto;padding:32px 20px 80px}
+h1{font-size:23px;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--ink2);font-size:14px;margin:0 0 4px}
+.meta{font-family:var(--mono);font-size:11.5px;color:var(--ink3);letter-spacing:.03em;margin-bottom:26px}
+h2{font-size:16.5px;margin:38px 0 4px;padding-top:22px;border-top:1px solid var(--line)}
+h2 .w{font-family:var(--mono);font-size:12px;color:var(--accent);font-weight:600}
+.why{color:var(--ink2);font-size:13.5px;margin:2px 0 14px}
+.why b{color:var(--ink);font-weight:600}
+code{font-family:var(--mono);font-size:.92em;background:#f5f5f4;padding:1px 4px;border-radius:4px}
+.flag{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:11px 13px;font-size:13.2px;color:#78350f;margin:12px 0}
+.flag.bad{background:#fef2f2;border-color:#fecaca;color:#7f1d1d}
+.flag.ok{background:#f0fdfa;border-color:#99f6e4;color:#115e59}
+.flag code{background:rgba(0,0,0,.05)}
+.frame{border:1px solid var(--line2);border-radius:10px;background:var(--card);overflow:hidden;
+  transform-origin:top left;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.scaler{overflow:hidden;margin-bottom:6px}
+.rule{font-family:var(--mono);font-size:11px;color:var(--ink3);display:flex;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.rule b{color:var(--accent);font-weight:600}
+.rule s{color:var(--bad);text-decoration:none}
+
+.hd{height:44px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:0 14px;
+  font-size:12.5px;color:var(--ink2);background:var(--card);flex:none}
+.hd .lo{font-weight:650;color:var(--ink);font-size:13px}
+.hd .code{margin-left:auto;font-family:var(--mono);font-size:11px;color:var(--ink3)}
+.cols{display:flex;height:452px}
+
+/* 좌측 = 목차 + 미션 (합쳐진 칸) */
+.nav{width:280px;flex:none;border-right:1px solid var(--line);overflow:hidden;background:var(--card);
+  display:flex;flex-direction:column}
+.nav .ch{padding:11px 14px 7px;font-size:11px;font-family:var(--mono);color:var(--ink3);letter-spacing:.04em}
+.nav .list{flex:1;overflow:hidden}
+.q{padding:7px 14px;font-size:12.6px;color:var(--ink2);border-left:2px solid transparent;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q.on{background:#f0fdfa;border-left-color:var(--accent);color:var(--ink);font-weight:650}
+.q .dot{color:var(--accent)}
+/* 미션 = 실습 문항의 하위 목록 */
+.ms{list-style:none;margin:0;padding:2px 0 6px;background:#f0fdfa;border-left:2px solid var(--accent)}
+.ms li{display:flex;gap:7px;padding:4px 14px 4px 26px;font-size:12.2px;color:var(--ink3);align-items:baseline}
+.ms li .n{font-family:var(--mono);font-size:10.5px;width:12px;flex:none;text-align:center}
+.ms li.done{color:var(--ink2)}
+.ms li.done .n{color:var(--accent)}
+.ms li.cur{color:var(--ink);font-weight:650;background:#ccfbf1;margin:1px 0}
+.ms li.cur .n{color:var(--warn)}
+.ms .goal{padding:7px 14px 8px 26px;font-size:12.2px;color:var(--ink);line-height:1.55;
+  border-top:1px solid #99f6e4;margin-top:4px}
+.ms .goal em{font-style:normal;color:var(--warn);font-weight:650}
+.navfoot{flex:none;border-top:1px solid var(--line);padding:9px 14px;
+  font-family:var(--mono);font-size:11px;color:var(--ink3);display:flex;justify-content:space-between}
+.navfoot b{color:var(--ink2);font-weight:600}
+
+/* 우측 = 탭 + 터미널 */
+.content{flex:1;min-width:0;display:flex;flex-direction:column;background:var(--card)}
+.tabs{display:flex;flex-wrap:wrap;gap:4px;padding:9px 14px;border-bottom:1px solid var(--line);flex:none}
+.tabs span{font-size:12px;padding:4px 9px;border-radius:6px;color:var(--ink2);border:1px solid transparent;white-space:nowrap}
+.tabs span.on{background:var(--ink);color:#fff;font-weight:600}
+.tabs span.new{border-color:var(--accent);color:var(--accent);font-weight:600}
+.term{flex:1;background:var(--t-bg);color:var(--t-fg);font-family:var(--mono);font-size:12.6px;line-height:1.7;
+  padding:12px 14px;overflow:hidden;white-space:pre-wrap;word-break:break-word}
+.p{color:var(--t-green)}.c{color:#fff;font-weight:600}.d{color:var(--t-dim)}
+.g{color:var(--t-green)}.r{color:var(--t-red)}.y{color:var(--t-yellow)}.b{color:var(--t-blue)}
+.box{color:var(--t-dim2)}
+.cur2{display:inline-block;width:7px;height:13px;background:var(--t-fg);vertical-align:-2px}
+.tdock{flex:none;background:var(--t-panel);border-top:1px solid var(--t-line);padding:9px 12px;
+  font-family:var(--mono);font-size:12.2px;color:var(--t-dim);display:flex;align-items:center;gap:8px}
+.tdock .pr{color:var(--t-green)}
+.tdock .in{flex:1;color:var(--t-fg)}
+.tdock .hint{font-size:10.5px;color:var(--t-dim2)}
+
+.notice{flex:1;background:var(--t-bg);padding:24px 30px;font-family:var(--mono);font-size:12.8px;color:var(--t-fg);line-height:1.85;overflow:hidden}
+.notice h3{margin:0 0 12px;font-size:14px;color:var(--t-green);letter-spacing:.04em}
+.notice ul{margin:0 0 14px;padding-left:17px;color:var(--t-dim)}
+.notice li{margin-bottom:2px}
+.notice li b{color:var(--t-fg);font-weight:600}
+.notice .btn{display:inline-block;border:1px solid #384030;background:#20251c;color:var(--t-fg);
+  border-radius:7px;padding:8px 16px;font-size:12.5px;margin-top:4px}
+
+table{border-collapse:collapse;width:100%;font-size:13px;margin:14px 0}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:#f5f5f4;font-weight:650;font-size:12.3px}
+td.n{font-family:var(--mono);font-size:12px;white-space:nowrap}
+td.ok{color:#115e59}td.no{color:var(--bad);font-weight:600}
+.foot{margin-top:44px;padding-top:18px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink3)}
+</style>
+
+<div class="wrap">
+<h1>12강 「🧪 실습」 탭 — 레이아웃 v2 <span style="color:var(--accent);font-size:16px">(2칸)</span></h1>
+<p class="sub">v1(3칸)에서 <b>미션판 컬럼을 없애고 목차에 합쳤다</b>. jery 지시 — 「섹션 2개면 공간도 좋고 오버레이도 필요 없어지잖아」.</p>
+<p class="meta">2026-08-15 · 에픽 1/5 · 근거 = docs/HANDOFF-vibe-terminal-lab-2026-08-15.md §6 PR1</p>
+
+<div class="flag ok">
+✔ <b>2칸이 산수를 통째로 풀었다.</b> 어제 회의가 잡은 「1180px 레이아웃이 산술적으로 성립 안 함」은
+<b>미션판 320px 이 원인</b>이었다. 그걸 빼니 전 구간이 통과하고, <b>목차 오버레이도 새 분기점도 필요 없어진다</b> —
+PR1 이 만드는 반응형 분기가 <b>0개</b>가 된다.
+</div>
+
+<table>
+<tr><th>화면 폭</th><th>3칸 (v1)</th><th class="ok">2칸 (v2)</th><th>차이</th></tr>
+<tr><td class="n">1440</td><td class="n">840px = 107칸</td><td class="n ok"><b>1160px = 149칸</b></td><td class="n">+42칸</td></tr>
+<tr><td class="n">1180</td><td class="n no">580px = 73칸 ✘</td><td class="n ok"><b>900px = 115칸</b> ✔</td><td class="n">+42칸</td></tr>
+<tr><td class="n">1024</td><td class="n">오버레이 필요</td><td class="n ok"><b>744px = 94칸</b> ✔</td><td class="n">분기 불필요</td></tr>
+<tr><td class="n">960</td><td class="n">오버레이 필요</td><td class="n ok"><b>680px = 86칸</b> ✔</td><td class="n">분기 불필요</td></tr>
+<tr><td class="n">&lt;1024</td><td colspan="2" class="n">기존 <code>lg:</code> 분기가 한 칸 전면으로 — <b>양쪽 동일, 새로 만들 것 없음</b></td><td class="n">—</td></tr>
+</table>
+
+<!-- ───────────────── A ───────────────── -->
+<h2>A. <span class="w">1440px</span> — 목차가 곧 미션판이다</h2>
+<p class="why">좌측 「6. 실습」 문항 아래에 <b>미션 7단계가 하위 목록으로 펼쳐진다</b>. 목차와 미션은 둘 다 <b>「지금 어디쯤인가」</b>에 답하므로, 진도 표시가 화면에 둘 있을 이유가 없었다. 미션과 터미널을 <b>동시에</b> 본다 — 탭으로 뺐다면 미션을 볼 때 터미널이 사라진다.</p>
+
+<div class="scaler" style="height:508px">
+<div class="frame" style="width:1440px;transform:scale(.7778)">
+  <div class="hd"><span class="lo">Architecture</span><span>12강 · 규칙을 문서로 쓴다</span><span class="code">CODE 4821 · 학생</span></div>
+  <div class="cols">
+    <div class="nav">
+      <div class="ch">12강 — ch18 · 문항 6</div>
+      <div class="list">
+        <div class="q"><span class="dot">●</span> 1. 왜 매번 다른 답이 오는가</div>
+        <div class="q"><span class="dot">●</span> 2. 규칙을 어디에 적는가</div>
+        <div class="q"><span class="dot">●</span> 3. 좋은 규칙과 나쁜 규칙</div>
+        <div class="q"><span class="dot">●</span> 4. AI 에게 비평을 받는다</div>
+        <div class="q"><span class="dot">●</span> 5. 형식을 지킨다는 것</div>
+        <div class="q on"><span class="dot">▸</span> 6. 실습 — 직접 써 본다</div>
+        <ul class="ms">
+          <li class="done"><span class="n">✓</span><span>실습실 둘러보기</span></li>
+          <li class="done"><span class="n">✓</span><span>세 결과 열어 보기</span></li>
+          <li class="cur"><span class="n">▸</span><span>파서에 넣어 보기</span></li>
+          <li><span class="n">4</span><span>무엇이 다른지 적기</span></li>
+          <li><span class="n">5</span><span>규칙 문서 쓰기</span></li>
+          <li><span class="n">6</span><span>AI 비평 받기</span></li>
+          <li><span class="n">7</span><span>제출</span></li>
+          <li class="goal">지금 할 일 — 세 결과가 <em>같은 형식</em>인지 확인한다. 먼저 <b>run-2</b> 가 왜 터졌는지 읽어라.</li>
+        </ul>
+      </div>
+      <div class="navfoot"><span>AI 남은 횟수</span><b>3 / 3</b></div>
+    </div>
+    <div class="content">
+      <div class="tabs"><span>📖 읽기</span><span>🚌 견학</span><span class="on new">🧪 실습</span><span>📝 퀴즈</span></div>
+      <div class="term"><span class="d">이 실습실은 오늘 배울 12개 명령만 압니다. </span><span class="y">lab about</span><span class="d"> 으로 다시 볼 수 있어요.</span>
+
+<span class="p">student@lab</span>:<span class="b">~/pricing</span>$ <span class="c">ls</span>
+<span class="box">CLAUDE.md   parse.js   runs/   package.json</span>
+
+<span class="p">student@lab</span>:<span class="b">~/pricing</span>$ <span class="c">cat runs/run-2.txt</span>
+<span class="box">─ </span><span class="y">REPLAY — 사전 생성 예시</span><span class="box"> ──────────────────────────────────────────────────</span>
+할인율은 10% off 입니다. 최종가는 9,000원.
+<span class="box">──────────────────────────────────────────────────────────────────────</span>
+
+<span class="p">student@lab</span>:<span class="b">~/pricing</span>$ <span class="c">npm test</span>
+<span class="g">  PASS</span>  run-1   할인율 10%
+<span class="r">  FAIL</span>  run-2   터짐: "10% off" 에서 숫자를 못 찾음
+<span class="r">  FAIL</span>  run-3   터짐: "0.1" 은 10%인가 0.1%인가
+
+<span class="d">  1 통과 · 2 실패 — 세 답이 </span><span class="y">뜻은 같은데 형식이 다르다</span><span class="d">. 다음 미션으로 넘어갈 수 있어요.</span>
+
+<span class="p">student@lab</span>:<span class="b">~/pricing</span>$ <span class="cur2"></span></div>
+      <div class="tdock"><span class="pr">$</span><span class="in">명령을 입력하세요</span><span class="hint">help 로 전체 명령 · ask 로 질문</span></div>
+    </div>
+  </div>
+</div>
+</div>
+<p class="rule">터미널 <b>1160px = 149칸</b> · 목차+미션 280 · <b>오버레이 없음</b> · 새 분기점 <b>0개</b></p>
+
+<!-- ───────────────── B ───────────────── -->
+<h2>B. <span class="w">1180px</span> — 똑같다. 접을 것이 없다</h2>
+<p class="why">v1 이 여기서 <b>73칸</b>으로 무너져 목차를 오버레이로 밀어야 했다. 2칸에서는 <b>115칸</b>이라 <b>아무것도 안 해도 된다</b>. 1440 과 <b>구조가 완전히 같다</b> — 폭만 줄어든다.</p>
+
+<div class="scaler" style="height:490px">
+<div class="frame" style="width:1180px;transform:scale(.9492)">
+  <div class="hd"><span class="lo">Architecture</span><span>12강 · 규칙을 문서로 쓴다</span><span class="code">CODE 4821 · 학생</span></div>
+  <div class="cols" style="height:452px">
+    <div class="nav">
+      <div class="ch">12강 — ch18 · 문항 6</div>
+      <div class="list">
+        <div class="q"><span class="dot">●</span> 1. 왜 매번 다른 답이 오는가</div>
+        <div class="q"><span class="dot">●</span> 2. 규칙을 어디에 적는가</div>
+        <div class="q"><span class="dot">●</span> 3. 좋은 규칙과 나쁜 규칙</div>
+        <div class="q"><span class="dot">●</span> 4. AI 에게 비평을 받는다</div>
+        <div class="q"><span class="dot">●</span> 5. 형식을 지킨다는 것</div>
+        <div class="q on"><span class="dot">▸</span> 6. 실습 — 직접 써 본다</div>
+        <ul class="ms">
+          <li class="done"><span class="n">✓</span><span>실습실 둘러보기</span></li>
+          <li class="done"><span class="n">✓</span><span>세 결과 열어 보기</span></li>
+          <li class="cur"><span class="n">▸</span><span>파서에 넣어 보기</span></li>
+          <li><span class="n">4</span><span>무엇이 다른지 적기</span></li>
+          <li><span class="n">5</span><span>규칙 문서 쓰기</span></li>
+          <li><span class="n">6</span><span>AI 비평 받기</span></li>
+          <li><span class="n">7</span><span>제출</span></li>
+        </ul>
+      </div>
+      <div class="navfoot"><span>AI 남은 횟수</span><b>3 / 3</b></div>
+    </div>
+    <div class="content">
+      <div class="tabs"><span>📖 읽기</span><span>🚌 견학</span><span class="on new">🧪 실습</span><span>📝 퀴즈</span></div>
+      <div class="term"><span class="p">student@lab</span>:<span class="b">~/pricing</span>$ <span class="c">npm test</span>
+<span class="g">  PASS</span>  run-1   할인율 10%
+<span class="r">  FAIL</span>  run-2   터짐: "10% off" 에서 숫자를 못 찾음
+<span class="r">  FAIL</span>  run-3   터짐: "0.1" 은 10%인가 0.1%인가
+
+<span class="d">  1 통과 · 2 실패 — 세 답이 </span><span class="y">뜻은 같은데 형식이 다르다</span><span class="d">.</span>
+
+<span class="p">student@lab</span>:<span class="b">~/pricing</span>$ <span class="c">help</span>
+<span class="box">둘러보기   </span><span class="y">ls</span><span class="box">  </span><span class="y">cat</span><span class="box">  </span><span class="y">cd</span><span class="box">  </span><span class="y">pwd</span><span class="box">  </span><span class="y">clear</span>
+<span class="box">확인하기   </span><span class="y">npm test</span><span class="box">  </span><span class="y">lab doctor</span><span class="box">  </span><span class="y">lab about</span>
+<span class="box">나가기     </span><span class="y">exit</span>
+
+<span class="p">student@lab</span>:<span class="b">~/pricing</span>$ <span class="cur2"></span></div>
+      <div class="tdock"><span class="pr">$</span><span class="in">명령을 입력하세요</span><span class="hint">help 로 전체 명령</span></div>
+    </div>
+  </div>
+</div>
+</div>
+<p class="rule">터미널 <b>900px = 115칸</b> · v1 은 여기서 <s>73칸</s> 이라 목차를 접어야 했다</p>
+
+<!-- ───────────────── C ───────────────── -->
+<h2>C. <span class="w">≤1024px</span> — 기존 분기를 그대로 쓴다</h2>
+<p class="why">지금 <code>LearnPage</code> 가 <code>lg:</code>(1024) 아래에서 한 칸씩 전면으로 바꾼다. 실습 탭에서 달라지는 건 <b>하단 전환 칸이 2개가 되는 것</b> 하나 — 챗봇 칸이 없으므로 「목차」와 「실습」만 남는다.</p>
+
+<div class="scaler" style="height:460px">
+<div class="frame" style="width:834px">
+  <div class="hd"><span class="lo">Architecture</span><span>12강</span><span class="code">CODE 4821</span></div>
+  <div class="cols" style="height:372px">
+    <div class="content">
+      <div class="tabs"><span>📖 읽기</span><span>🚌 견학</span><span class="on new">🧪 실습</span><span>📝 퀴즈</span></div>
+      <div class="term"><span class="d">미션 3/7 — 세 결과가 </span><span class="y">같은 형식</span><span class="d">인지 확인한다.</span>
+
+<span class="p">student@lab</span>:<span class="b">~/pricing</span>$ <span class="c">npm test</span>
+<span class="g">  PASS</span>  run-1   할인율 10%
+<span class="r">  FAIL</span>  run-2   터짐: "10% off" 에서 숫자를 못 찾음
+<span class="r">  FAIL</span>  run-3   터짐: "0.1" 은 10%인가 0.1%인가
+
+<span class="d">  1 통과 · 2 실패 — 세 답이 </span><span class="y">뜻은 같은데 형식이 다르다</span><span class="d">.</span>
+
+<span class="p">student@lab</span>:<span class="b">~/pricing</span>$ <span class="cur2"></span></div>
+      <div class="tdock"><span class="pr">$</span><span class="in">명령을 입력하세요</span><span class="hint">help</span></div>
+    </div>
+  </div>
+  <div style="display:flex;border-top:1px solid var(--line);font-size:12.5px;text-align:center">
+    <div style="flex:1;padding:11px;color:var(--ink3)">☰ 목차 · 미션</div>
+    <div style="flex:1;padding:11px;color:var(--ink);font-weight:650;background:#f5f5f4;border-left:1px solid var(--line)">🖥 실습</div>
+  </div>
+</div>
+</div>
+<p class="rule">터미널 <b>834px = 106칸</b> · 하단 전환 칸 <b>3개 → 2개</b>(챗봇 칸이 없다) · 미션 한 줄은 터미널 머리에 요약</p>
+
+<!-- ───────────────── D ───────────────── -->
+<h2>D. 실습 탭을 처음 열면 — <span class="w">축소판 고지</span></h2>
+<p class="why">jery 지시: <b>「당연히 가짜임을 알려줘야지」</b>. 무엇이 가짜이고 <b>무엇이 진짜인지</b>를 같은 화면에서 말한다 — 「가짜」만 말하면 학생이 실습 전체를 흉내로 여긴다.</p>
+
+<div class="scaler" style="height:400px">
+<div class="frame" style="width:1180px;transform:scale(.9492)">
+  <div class="hd"><span class="lo">Architecture</span><span>12강 · 규칙을 문서로 쓴다</span><span class="code">CODE 4821 · 학생</span></div>
+  <div class="cols" style="height:370px">
+    <div class="nav">
+      <div class="ch">12강 — ch18 · 문항 6</div>
+      <div class="list">
+        <div class="q"><span class="dot">●</span> 5. 형식을 지킨다는 것</div>
+        <div class="q on"><span class="dot">▸</span> 6. 실습 — 직접 써 본다</div>
+        <ul class="ms"><li class="cur"><span class="n">▸</span><span>실습실 둘러보기</span></li>
+        <li><span class="n">2</span><span>세 결과 열어 보기</span></li>
+        <li><span class="n">3</span><span>파서에 넣어 보기</span></li></ul>
+      </div>
+      <div class="navfoot"><span>AI 남은 횟수</span><b>3 / 3</b></div>
+    </div>
+    <div class="content">
+      <div class="tabs"><span>📖 읽기</span><span>🚌 견학</span><span class="on new">🧪 실습</span><span>📝 퀴즈</span></div>
+      <div class="notice">
+<h3>이 실습실에 대하여</h3>
+<span class="d">여기는 <b style="color:var(--t-fg)">수업용으로 줄인 터미널</b>입니다. 오늘 배울 <b style="color:var(--t-fg)">12개 명령</b>만 알아듣습니다.</span>
+
+<ul>
+<li><b>진짜</b> — 파일. <span class="y">cat</span> 으로 여는 내용은 실제 파일 그대로입니다.</li>
+<li><b>진짜</b> — 판정. <span class="y">npm test</span> 는 실제 검사기가 돌려 준 결과입니다.</li>
+<li><b>진짜</b> — AI. <span class="y">claude review</span> 는 실제로 AI 를 부릅니다.</li>
+<li><b>줄인 것</b> — 셸 자체. 명령 12개 밖은 모릅니다.</li>
+<li><b>사전 생성</b> — <span class="y">runs/</span> 의 세 결과. <span class="y">REPLAY</span> 라벨이 붙어 있습니다.</li>
+</ul>
+
+<span class="d">막히면 <span class="y">help</span>, 화면이 이상하면 <span class="y">lab doctor</span>.</span>
+
+<div class="btn">시작하기  →</div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<p class="rule">한 번 읽으면 다시 안 뜬다 · <b>lab about</b> 으로 언제든 다시 · 진짜 3 / 줄인 것 1 / 사전 생성 1 을 <b>나란히</b></p>
+
+<!-- ───────────────── 계약 ───────────────── -->
+<h2>계약과 부딪히는 곳</h2>
+
+<div class="flag">
+🔑 <b>칸 교체를 <code>extras</code> 에 매달지 않는다.</b> 계약 ② 는 <code>LearnPage</code> 안에서 <b>데이터 유무로 화면을 가르는 것</b>을 금지한다 —
+3컬럼을 몇 주 동안 죽은 코드로 만든 그 사고다. 그래서 <b>탭의 존재</b>만 <code>extras</code> 로 켜고(계약 ③ 방식 그대로),
+<b>칸 교체는 「지금 열린 탭」</b>에 건다. <code>contentTab</code> 은 이미 <code>learn-store</code> 에 있어 새 분기 구조가 필요 없다.
+</div>
+
+<table>
+<tr><th>계약</th><th>지금 요구</th><th>PR1 이 하는 일</th></tr>
+<tr><td class="n">① 세 컬럼</td><td><code>LearnPage</code> 가 <code>&lt;ChatPanel&gt;</code> 을 그린다</td><td class="ok"><b>개정</b> — 「실습 탭에서만 챗봇 칸이 접히고, 물어보는 일은 터미널 <code>ask</code> 로 옮긴다」. <b>나머지 125개 문항에서 챗봇이 사라지는 것은 계속 금지</b></td></tr>
+<tr><td class="n">② 분기 금지</td><td>형판 import 금지 · <code>extras</code> 분기 금지</td><td class="ok"><b>그대로</b> — 교체를 탭에 걸어 이 조건을 안 건드린다</td></tr>
+<tr><td class="n">③ 탭 조건</td><td>데이터 있을 때만 탭이 켜진다</td><td class="ok"><b>항목 추가</b> — 🧪 실습도 같은 방식</td></tr>
+<tr><td class="n">④ 폭 예외</td><td><code>max-w-[1440px]</code></td><td class="ok"><b>그대로</b></td></tr>
+<tr><td class="n">⑤ 좌측</td><td><code>chapterQas.map(</code> 으로 이 장의 문항만 세운다</td><td class="ok"><b>그대로</b> — 미션은 문항의 <b>하위 목록</b>이라 장 밖 문항을 세우지 않는다</td></tr>
+<tr><td class="n">⑦ 교사 탭</td><td>교사 전용 탭을 미는 자리는 한 곳</td><td class="ok"><b>그대로</b> — 🧪 실습은 <b>학생 탭</b>이라 그 블록 밖</td></tr>
+</table>
+
+<div class="flag bad">
+🚨 <b>새로 세울 계약</b> — 「실습 탭이 <u>아닌</u> 125개 문항에서는 챗봇 칸이 그대로 있다」.
+이게 없으면 2칸이 조용히 전 문항으로 새어 <b>학생이 막혔을 때 물어볼 통로가 사라진다</b>(계약 ① 이 챗봇을 지키던 이유).
+계약 ① 이 <code>&lt;ChatPanel&gt;</code> 의 <b>존재</b>만 보므로, 「탭이 실습일 때만 접힌다」를 <b>따로</b> 물어야 한다.
+</div>
+
+<div class="flag">
+🔑 <b>물어보는 일은 터미널 안에서 끝난다.</b> 실습 탭에서 학생이 AI 에게 묻는 통로는 <code>ask</code> 하나뿐이고,
+다른 탭으로 보내지 않는다 — 최종 화면에 없는 길을 가르치지 않기 위해서다(2026-08-15 jery).
+<code>ask</code> 는 AI 를 쓰므로 돈 천장(PR2) 뒤인 <b>PR4</b> 에 들어온다.
+</div>
+
+<p class="foot">
+목업 = <code>mockups/vibe-lab-layout-v2.html</code> (v1 3칸안은 폐기) · 설계 근거 = <code>docs/HANDOFF-vibe-terminal-lab-2026-08-15.md</code><br>
+터미널 안 문구·명령 집합은 PR1 범위이되 <b>이 문서에서 확정하지 않는다</b> — 여기서 정하는 것은 <b>배치</b>다.
+</p>
+</div>
