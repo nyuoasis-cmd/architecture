@@ -1,0 +1,137 @@
+// 실습실 제출(`lab-submissions.ts` · `lab-checker.ts` · `routes/lab.ts`)의 계약.
+//
+// 🚨 이 PR 의 핵심은 하나다: **점수는 서버가 저장된 본문으로 낸다.** 화면이 보낸 «통과했어요»는
+//    근거가 아니다 — 채점 로그와 같은 이유로 위조된다.
+//
+// 🚨 그리고 그 대가로 **판정 규칙이 두 벌**이 됐다(클라 `lab-checker.ts` / 서버 `lab-checker.ts`).
+//    두 벌이 어긋나면 학생 화면은 초록인데 교사 화면은 빨강이 된다 — 수업 중에 아무도 못 고친다.
+//    1) 이 그 정합을 매번 대조한다. **규칙을 고칠 때는 두 파일을 같이 고친다.**
+import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
+import path from 'node:path'
+import { test } from 'node:test'
+
+import { buildVerdict, parseResult } from './lab-checker'
+import { submit, toLabActor, type LabActor } from './lab-submissions'
+
+const read = (...parts: string[]) => readFileSync(path.resolve(__dirname, ...parts), 'utf8')
+const clientChecker = require(
+  path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'lib', 'lab-checker'),
+) as { parseResult: (text: string) => { ok: boolean; reason?: string } }
+
+/** 실제 수업에서 나오는 모양들 — 통과하는 것, 터지는 것, 애매한 것. */
+const SAMPLES = [
+  '할인율: 10%\n최종가: 9000',
+  '할인율은 10% off 입니다. 최종가는 9,000원.',
+  '{ "discount": 0.1, "final": 9000 }',
+  '# 할인 계산\n\n**할인율:** 10%\n**최종가:** 9,000원',
+  '할인율: 10%',
+  '',
+  '아무 말이나 적어 본 답',
+  '할인율: 007%\n최종가: 9000',
+]
+
+test('1) 클라와 서버의 판정이 같다 — 어긋나면 학생 화면은 초록인데 교사 화면은 빨강이 된다', () => {
+  for (const sample of SAMPLES) {
+    const server = parseResult(sample)
+    const client = clientChecker.parseResult(sample)
+    assert.equal(
+      server.ok,
+      client.ok,
+      `판정이 갈렸다 (서버 ${server.ok} / 클라 ${client.ok}):\n${JSON.stringify(sample)}`,
+    )
+    if (!server.ok && !client.ok) {
+      assert.equal(server.reason, client.reason, `왜 터졌는지가 갈렸다:\n${JSON.stringify(sample)}`)
+    }
+  }
+
+  // 음성 대조군 — 대조가 실제로 갈림을 잡는지.
+  assert.notEqual(parseResult(SAMPLES[0]!).ok, parseResult(SAMPLES[1]!).ok, '표본이 전부 같은 답이면 1) 은 공짜다')
+})
+
+test('2) 판정에 결과 원문이 같이 남는다 — 없으면 「왜 이렇게 나왔나」를 아무도 재현 못 한다', () => {
+  const verdict = buildVerdict(['할인율: 10%\n최종가: 9000', '10퍼센트 할인입니다'])
+  assert.deepEqual(verdict.outputs, ['할인율: 10%\n최종가: 9000', '10퍼센트 할인입니다'], '결과 원문이 안 남는다')
+  assert.equal(verdict.passed, 1)
+  assert.equal(verdict.total, 2)
+  assert.equal(verdict.rows[1]?.ok, false)
+  assert.ok(verdict.rows[1]?.reason, '왜 터졌는지가 안 남는다 — 교사가 읽을 것이 사라진다')
+})
+
+test('3) 서버가 저장된 본문으로 다시 돌린다 — 화면이 보낸 판정을 저장하지 않는다', () => {
+  const route = read('..', 'routes', 'lab.ts')
+  // 제출 본문에 판정이 들어올 자리가 없어야 한다.
+  const schema = route.slice(route.indexOf('const submitSchema'), route.indexOf('const submitSchema') + 200)
+  for (const forbidden of ['verdict', 'passed', 'outputs', 'rows']) {
+    assert.equal(schema.includes(forbidden), false, `제출 본문이 화면의 판정(${forbidden})을 받고 있다`)
+  }
+  const store = read('lab-submissions.ts')
+  assert.ok(/const verdict = buildVerdict\(outputs\)/.test(store), '서버가 스스로 판정하지 않는다')
+  assert.ok(/const outputs = await runRules\(trimmed\)/.test(store), '서버가 **저장할 본문**으로 안 돌린다')
+})
+
+test('4) 낸 것을 덮어쓰지 않는다 — 판을 쌓는다', () => {
+  const sql = read('..', '..', '..', 'sql', '008_lab_submissions.sql')
+  assert.ok(/revision int not null/.test(sql), '판 번호가 없다')
+  assert.equal(/on conflict.*update/i.test(sql), false, 'upsert 로 덮어쓰고 있다 — 고쳐 온 과정이 사라진다')
+  const store = read('lab-submissions.ts')
+  assert.ok(/\.insert\(/.test(store), 'insert 가 아니다')
+  assert.equal(/\.update\(|\.upsert\(/.test(store), false, '제출물을 고쳐 쓰고 있다')
+})
+
+test('5) 두 탭에서 동시에 내도 학생에게 「다시 눌러 주세요」를 시키지 않는다', () => {
+  const store = read('lab-submissions.ts')
+  assert.ok(/'23505'/.test(store), '판 번호 충돌을 안 다룬다')
+  assert.ok(/for \(let attempt = 0; attempt < 3/.test(store), '충돌 시 다시 읽어 이어 붙이지 않는다')
+})
+
+test('6) 제출은 조용히 성공한 척하지 않는다 — DB 가 없으면 실패로 말한다', async () => {
+  // 🚨 성공한 척하면 학생은 냈다고 믿고 교사는 아무것도 못 본다.
+  //    이 환경에는 DB 가 없으므로 여기서 실제로 던져야 한다.
+  const actor: LabActor = { ownerToken: 'ip:test' }
+  await assert.rejects(
+    () => submit(actor, 'ch18_q04', 'x'.repeat(50), async () => ['할인율: 10%\n최종가: 9000']),
+    /no_database|fetch failed|Invalid URL|TypeError/,
+    'DB 없이도 제출이 «성공»했다',
+  )
+
+  const route = read('..', 'routes', 'lab.ts')
+  assert.ok(/LabSubmitUnavailableError/.test(route), '라우트가 제출 실패를 갈라 답하지 않는다')
+})
+
+test('7) 신원이 수업 참여자와 자습을 가른다 — IP 로 학생을 세면 교실 전체가 한 명이 된다', () => {
+  assert.deepEqual(toLabActor('pt:abc-123'), { participantId: 'abc-123' })
+  assert.deepEqual(toLabActor('ip:10.0.0.1'), { ownerToken: 'ip:10.0.0.1' })
+
+  const sql = read('..', '..', '..', 'sql', '008_lab_submissions.sql')
+  assert.ok(/lab_submissions_owner_xor/.test(sql), '참여자와 자습이 동시에 들어갈 수 있다')
+})
+
+test('8) 「냈다」는 서버가 판 번호를 준 뒤에만 기록된다 — 보낸 시점이 아니다', () => {
+  const tab = readFileSync(
+    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'LabTab.tsx'),
+    'utf8',
+  )
+  const submitFn = tab.slice(tab.indexOf('const runSubmit'), tab.indexOf('const saveEditor'))
+  const okAt = submitFn.indexOf('if (!result.ok)')
+  const markAt = submitFn.indexOf('markSubmitted')
+  assert.ok(okAt > 0 && markAt > okAt, '서버 응답을 보기 전에 «냈다»고 기록한다')
+
+  const shell = require(
+    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'lib', 'lab-shell'),
+  ) as {
+    INITIAL_LAB_STATE: { submittedRevision: number }
+    markSubmitted: (state: unknown, revision: number) => { submittedRevision: number }
+  }
+  assert.equal(shell.INITIAL_LAB_STATE.submittedRevision, 0, '처음부터 낸 것으로 되어 있다')
+  assert.equal(shell.markSubmitted(shell.INITIAL_LAB_STATE, 3).submittedRevision, 3)
+})
+
+test('9) 낸 뒤에도 몇 번이고 고쳐 낼 수 있다고 말한다 — 한 번뿐이라고 읽히면 학생이 안 낸다', () => {
+  const tab = readFileSync(
+    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'LabTab.tsx'),
+    'utf8',
+  )
+  assert.ok(/고쳐서 또 내도 됩니다/.test(tab), '실패했을 때 다시 낼 수 있다고 안 말한다')
+  assert.equal(/제출은 한 번|다시 낼 수 없/.test(tab), false, '한 번뿐이라고 말하고 있다')
+})

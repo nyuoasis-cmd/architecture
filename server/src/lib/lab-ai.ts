@@ -177,7 +177,7 @@ const REVIEW_SYSTEM = `너는 글쓰기 코치다. 학생이 쓴 "규칙 문서"
 
 export type LabReview = { good: string; issues: { where: string; why: string }[] };
 
-export async function reviewDraft(actorId: string, draft: string, signal?: AbortSignal): Promise<LabReview> {
+export async function reviewDraft(draft: string, signal?: AbortSignal): Promise<LabReview> {
   const trimmed = draft.trim();
   if (trimmed.length < 10) throw new LabUnavailableError('draft_too_short');
 
@@ -217,7 +217,7 @@ const VERIFY_TASK = `원가 10,000원짜리 물건을 1,000원 깎아 판다. �
 
 export const LAB_VERIFY_RUNS = 2;
 
-export async function verifyWithRules(actorId: string, rules: string, signal?: AbortSignal): Promise<string[]> {
+export async function verifyWithRules(rules: string, signal?: AbortSignal): Promise<string[]> {
   const trimmed = rules.trim();
   if (trimmed.length < 10) throw new LabUnavailableError('rules_too_short');
 
@@ -243,7 +243,7 @@ const ASK_SYSTEM = `너는 IT 수업의 조교다. 학생이 터미널 실습 �
 - 학생의 과제(규칙 문서)를 대신 써 주지 마라. 방법만 알려 준다.
 - 이 실습실이 아는 명령: help ls cat cd pwd clear npm test edit claude review ask reset jump lab exit`;
 
-export async function askQuestion(actorId: string, question: string, signal?: AbortSignal): Promise<string> {
+export async function askQuestion(question: string, signal?: AbortSignal): Promise<string> {
   const trimmed = question.trim();
   if (trimmed.length < 2) throw new LabUnavailableError('question_too_short');
   return callHaiku(ASK_SYSTEM, trimmed, (text) => text, { signal });
