@@ -150,7 +150,6 @@ export default function ChapterNavPanel({
           })}
         </ul>
 
-        {isLabTab ? <LabQuotaRow /> : null}
 
         {nextChapter ? (
           <div className="mt-4 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-3 py-2.5">
@@ -258,36 +257,3 @@ function LabMissionList() {
   );
 }
 
-/**
- * 좌측 아래 「AI 남은 횟수」.
- * 🚨 이 숫자는 **서버가 말해 준 것만** 쓴다. 화면이 스스로 세면 채점 로그와 똑같이 위조된다.
- * 🔑 «아직 안 물어봤다»(null)와 «0 회 남았다»를 갈라 적는다 — 뭉치면 멀쩡한데 다 쓴 것처럼 보인다.
- */
-function LabQuotaRow() {
-  const remaining = useLearnStore((state) => state.labRemaining);
-  return (
-    <div className="mt-3 space-y-1 rounded-lg border border-[var(--color-border)] px-3 py-2 font-mono text-[11px] text-[var(--color-text-faint)]">
-      {/*
-        🚨 자습(참여 코드 없이 들어온 경우)은 **학생당 횟수를 안 센다.** 그런데도 숫자를 적으면
-           그건 실제 잔량이 아니다(2026-08-15 Codex 리뷰). 숫자 대신 «따로 잽니다»라고 말한다.
-      */}
-      <div className="flex items-center justify-between">
-        <span>AI 남은 횟수</span>
-        <span className="font-semibold text-[var(--color-text-muted)]">
-          {!remaining ? '확인 중' : remaining.perStudent ? `${remaining.mission}회` : '따로 잽니다'}
-        </span>
-      </div>
-      <div className="flex items-center justify-between">
-        <span>질문 (따로)</span>
-        <span className="font-semibold text-[var(--color-text-muted)]">
-          {!remaining ? '확인 중' : remaining.perStudent ? `${remaining.ask}회` : '따로 잽니다'}
-        </span>
-      </div>
-      {remaining && !remaining.perStudent ? (
-        <p className="pt-1 text-[10px] leading-[1.4] text-[var(--color-text-faint)]">
-          수업 코드로 들어오면 내 몫으로 셉니다.
-        </p>
-      ) : null}
-    </div>
-  );
-}
