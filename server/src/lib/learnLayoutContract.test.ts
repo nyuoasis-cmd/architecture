@@ -19,8 +19,12 @@ const read = (rel: string) => readFileSync(path.join(ROOT, rel), 'utf8')
 const LEARN_PAGE = 'client/src/pages/LearnPage.tsx'
 const CONTENT_PANEL = 'client/src/components/learn/ContentPanel.tsx'
 const NAV_PANEL = 'client/src/components/learn/ChapterNavPanel.tsx'
+const LEARN_STORE = 'client/src/store/learn-store.ts'
 
 test('① 학습 화면에 세 컬럼이 전부 살아 있다 — 하나라도 빠지면 학생이 못 보는 기능이 생긴다', () => {
+  // 🔑 2026-08-15 개정: 🧪 실습 탭에서만 챗봇 칸이 접힌다(학생이 묻는 일이 터미널 안으로 옮겨간다).
+  //    ① 이 지키는 것은 그대로다 — **세 컬럼이 코드에 살아 있는가**. 접히는 조건이 «실습 탭 하나»인지는
+  //    8) 이 따로 본다. 여기서 <ChatPanel> 이 사라지면 나머지 125개 문항에서도 챗봇이 없어진다.
   const source = read(LEARN_PAGE)
   for (const [component, why] of [
     ['ChapterNavPanel', '좌측 문항 목록이 없으면 학생이 이 장의 어디쯤인지 모른다'],
@@ -142,6 +146,67 @@ test('⑦ 교사 전용 탭은 교사에게만 켜진다 — 학생 화면에 �
     false,
     '추출식이 블록 밖의 push 를 블록 안으로 세면 ⑦ 은 실패할 수 없는 계측이다',
   )
+})
+
+test('8) 챗봇 칸이 접히는 조건은 «실습 탭» 하나뿐이다 — 조건이 늘면 나머지 문항에서도 챗봇이 사라진다', () => {
+  // 🚨 왜 있는가(2026-08-15): 12강 실습실이 2칸 배치라 챗봇 칸을 접는다. 학생이 묻는 일은
+  //    터미널 안(`ask`)으로 옮겨간다 — 그래서 「다른 탭 챗봇에 물어보라」고 안내하지 않는다(jery).
+  //    문제는 이 «접기»가 조용히 넓어지는 것이다. 조건이 `extras` 나 장 번호로 바뀌는 순간
+  //    나머지 125개 문항에서도 챗봇이 사라지고, 학생은 막혔을 때 물어볼 곳을 잃는다.
+  //    그건 실습 아닌 문항을 열어 보기 전까지 아무도 안 알려 준다.
+  const store = read(LEARN_STORE)
+  const page = read(LEARN_PAGE)
+
+  const rule = store.match(/export function tabHidesChat\([\s\S]*?\n\}/)
+  assert.ok(rule, `${LEARN_STORE} 에 tabHidesChat 이 없다 — 접기 조건이 한 곳에 모여 있지 않다`)
+  assert.ok(
+    /contentTab === 'lab'/.test(rule![0]),
+    'tabHidesChat 이 실습 탭 말고 다른 것으로 판정한다',
+  )
+  const otherTabs = ["'read'", "'demo'", "'tour'", "'myturn'", "'quiz'", "'explain'"]
+  for (const tab of otherTabs) {
+    assert.equal(
+      rule![0].includes(tab),
+      false,
+      `tabHidesChat 이 ${tab} 탭에서도 챗봇을 접고 있다 — 그 탭 문항의 학생은 물어볼 통로를 잃는다`,
+    )
+  }
+
+  // 🚨 «데이터가 있으면 다른 화면»으로 되돌아가는 것도 여기서 잡는다(② 와 같은 사고의 형태).
+  assert.equal(
+    /extras|EXTRAS_CHAPTER_IDS|chapterHasExtras/.test(rule![0]),
+    false,
+    'tabHidesChat 이 extras 로 판정한다 — 2026-08-11 에 3컬럼을 죽인 그 조건이다',
+  )
+
+  // 화면 쪽은 그 판정만 쓴다. 자기가 따로 조건을 지어내면 위 검사가 헛돈다.
+  assert.ok(/tabHidesChat\(/.test(page), `${LEARN_PAGE} 이 tabHidesChat 을 안 쓴다 — 접기 조건이 둘로 갈렸다`)
+  assert.ok(
+    /\{hideChat \? null : \(/.test(page),
+    `${LEARN_PAGE} 에서 챗봇 칸이 hideChat 뒤에 있지 않다 — 접기가 다른 방식으로 일어나고 있다`,
+  )
+
+  // 음성 대조군 — 추출식이 실제로 함수 몸통을 잡는지.
+  const probe = "export function tabHidesChat(t: ContentTab): boolean {\n  return t === 'read'\n}"
+  const probeRule = probe.match(/export function tabHidesChat\([\s\S]*?\n\}/)
+  assert.equal(
+    /contentTab === 'lab'/.test(probeRule![0]),
+    false,
+    '추출식이 아무 몸통이나 통과시키면 8) 은 실패할 수 없는 계측이다',
+  )
+})
+
+test('9) 🧪 실습 탭은 학생 탭이다 — 교사 블록 안으로 들어가면 학생이 실습을 못 한다', () => {
+  const source = read(CONTENT_PANEL)
+  const guard = source.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
+  assert.ok(guard, `${CONTENT_PANEL} 에 «if (teacherPanel)» 블록이 없다`)
+  assert.equal(
+    guard![1].includes("list.push('lab')"),
+    false,
+    '🧪 실습이 교사 전용 블록 안에서 켜지고 있다 — 학생 화면에 실습 탭이 안 뜬다',
+  )
+  const pushes = [...source.matchAll(/list\.push\('lab'\)/g)].length
+  assert.equal(pushes, 1, `🧪 실습 탭을 ${pushes} 곳에서 켜고 있다 — 켜는 자리는 하나여야 한다`)
 })
 
 test('⑥ 가드가 실패할 수 있는 계측인지 — 대조 대상 파일이 비어 있지 않다', () => {

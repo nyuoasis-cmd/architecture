@@ -5,10 +5,13 @@ import QrFullscreen from '../common/QrFullscreen';
 import type { DemoMeta } from '../../data/demos';
 import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getExtras } from '../../data/learn-extras';
+import { LAB_QA_ID } from '../../data/vibe-lab-ch18';
 import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
 import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
+import { missionIndexOf } from '../../lib/lab-shell';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
+import LabTab from './LabTab';
 import MyTurnTab from './MyTurnTab';
 import NextQuestionDoor from './NextQuestionDoor';
 import { getNextQuestionDoorTarget } from './next-question-door';
@@ -37,6 +40,7 @@ const TAB_LABELS: Record<ContentTab, string> = {
   demo: '🎮 시연',
   tour: '🚌 견학',
   myturn: '✋ 내 차례',
+  lab: '🧪 실습',
   quiz: '📝 퀴즈',
   explain: '📋 설명 노트',
 };
@@ -71,6 +75,7 @@ export default function ContentPanel({
   const navigate = useNavigate();
   const contentTab = useLearnStore((state) => state.contentTab);
   const setContentTab = useLearnStore((state) => state.setContentTab);
+  const setLabMissionIndex = useLearnStore((state) => state.setLabMissionIndex);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [teacherExplain, setTeacherExplain] = useState<TeacherExplainBlock | null>(null);
   const [teacherExplainStatus, setTeacherExplainStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
@@ -90,6 +95,11 @@ export default function ContentPanel({
     if (extras?.myTurn) {
       list.push('myturn');
     }
+    // 🔑 실습실은 12강 마지막 문항 하나에만 붙는다. 조건은 다른 탭과 **같은 모양**이다 —
+    //    «이 문항에 그 데이터가 있는가» 하나뿐이고, 화면 종류를 가르는 데는 쓰지 않는다.
+    if (qaId === LAB_QA_ID) {
+      list.push('lab');
+    }
     list.push('quiz');
     // 🚨 여기가 «교사에게만»의 **유일한** 자리다. 교사 전용 탭을 이 블록 밖에서 밀어 넣으면
     //    학생 화면에 교사용 대본이 새고, 그건 화면을 열어 보기 전까지 아무도 안 알려 준다.
@@ -98,7 +108,7 @@ export default function ContentPanel({
       list.push('explain');
     }
     return list;
-  }, [chapter.id, extras, inlineMeta, teacherPanel]);
+  }, [chapter.id, extras, inlineMeta, qaId, teacherPanel]);
 
   // 🔑 탭 상태는 문항을 바꿔도 유지한다(읽기 → 읽기). 새 문항에 그 탭이 없을 때만 첫 탭으로 접는다 —
   //    없는 탭에 머무르면 화면이 통째로 비고, 학생은 «고장»으로 읽는다.
@@ -323,6 +333,16 @@ export default function ContentPanel({
         {activeTab === 'tour' && extras?.tour?.length ? <TourTab missions={extras.tour} qaId={qaId} /> : null}
 
         {activeTab === 'myturn' && extras?.myTurn ? <MyTurnTab config={extras.myTurn} qaId={qaId} /> : null}
+
+        {activeTab === 'lab' ? (
+          <div className="h-full p-3 lg:p-4">
+            <LabTab
+              onExit={() => setContentTab('read')}
+              onStateChange={(labState) => setLabMissionIndex(missionIndexOf(labState))}
+              qaId={qaId}
+            />
+          </div>
+        ) : null}
 
         {activeTab === 'quiz' ? (
           <div className="mx-auto w-full max-w-[720px] p-6 lg:p-8">

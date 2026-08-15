@@ -10,7 +10,7 @@ import { getDemoByQaId } from '../data/demos';
 import { markRead } from '../lib/progress';
 import { endSession, getSession, patchProgress, SessionClientError } from '../lib/session-client';
 import { clearSessionTokenHint } from '../lib/session-token';
-import { useLearnStore } from '../store/learn-store';
+import { tabHidesChat, useLearnStore } from '../store/learn-store';
 import { useSessionStore } from '../store/session-store';
 
 const MOBILE_LABELS = {
@@ -53,6 +53,16 @@ function LearnLayout(props: {
   const scenarioId = useLearnStore((state) => state.scenarioId);
   const setMobileTab = useLearnStore((state) => state.setMobileTab);
   const setScenarioId = useLearnStore((state) => state.setScenarioId);
+  const contentTab = useLearnStore((state) => state.contentTab);
+  const hideChat = tabHidesChat(contentTab);
+
+  // 🚨 좁은 화면에서 «챗» 칸에 머문 채로 실습 탭을 켜면 그 칸이 사라져 **빈 화면**이 남는다.
+  //    학생은 «고장»으로 읽고 되돌아올 길을 못 찾는다 — 실습으로 데려다 놓는다.
+  useEffect(() => {
+    if (hideChat && mobileTab === 'chat') {
+      setMobileTab('content');
+    }
+  }, [hideChat, mobileTab, setMobileTab]);
 
   const goToQa = (qaId: string) => {
     navigate(props.makeQaHref(qaId));
@@ -71,7 +81,9 @@ function LearnLayout(props: {
     */
     <div className="flex min-h-0 flex-1 flex-col">
       <nav className="flex flex-shrink-0 border-b border-[var(--color-border)] bg-white lg:hidden">
-        {(Object.keys(MOBILE_LABELS) as Array<keyof typeof MOBILE_LABELS>).map((tab) => (
+        {(Object.keys(MOBILE_LABELS) as Array<keyof typeof MOBILE_LABELS>)
+          .filter((tab) => !(hideChat && tab === 'chat'))
+          .map((tab) => (
           <button
             key={tab}
             className={`mtab flex-1 py-2.5 text-sm font-medium ${mobileTab === tab ? 'is-active' : ''}`}
@@ -104,11 +116,20 @@ function LearnLayout(props: {
           />
         </aside>
 
-        <section
-          className={`${mobileTab === 'chat' ? 'flex' : 'hidden'} w-full flex-col border-r border-[var(--color-border)] lg:flex lg:w-[320px] lg:min-w-[280px] lg:flex-shrink-0`}
-        >
-          <ChatPanel qaId={props.qa.id} qaTitle={props.qa.title} />
-        </section>
+        {/*
+          🚨 챗봇 칸은 **실습 탭에서만** 접힌다(`tabHidesChat`). 실습에서는 학생이 묻는 일이
+             터미널 안으로 옮겨가기 때문이다 — 다른 탭으로 보내면 최종 화면에 없는 길을 가르치게 된다
+             (2026-08-15 jery). 나머지 문항에서는 그대로 있어야 한다: 학생이 막혔을 때 물어볼 통로다.
+          🚨 판정을 «이 문항에 데이터가 있는가»로 바꾸지 말 것 — 2026-08-11 에 3컬럼을 통째로
+             죽인 사고가 정확히 그 형태였다(learnLayoutContract 2)).
+        */}
+        {hideChat ? null : (
+          <section
+            className={`${mobileTab === 'chat' ? 'flex' : 'hidden'} w-full flex-col border-r border-[var(--color-border)] lg:flex lg:w-[320px] lg:min-w-[280px] lg:flex-shrink-0`}
+          >
+            <ChatPanel qaId={props.qa.id} qaTitle={props.qa.title} />
+          </section>
+        )}
 
         <section className={`${mobileTab === 'content' ? 'flex' : 'hidden'} w-full min-w-0 flex-1 flex-col lg:flex`}>
           <ContentPanel

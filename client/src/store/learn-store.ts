@@ -19,17 +19,32 @@ export type MobileTab = 'nav' | 'chat' | 'content';
  *    (ContentPanel 의 `if (teacherPanel)` 한 곳). 여기 열거돼 있다는 것은 «그런 탭이 있다»는
  *    뜻일 뿐, «누구에게 보인다»는 뜻이 아니다.
  */
-export type ContentTab = 'read' | 'demo' | 'tour' | 'myturn' | 'quiz' | 'explain';
+export type ContentTab = 'read' | 'demo' | 'tour' | 'myturn' | 'lab' | 'quiz' | 'explain';
+
+/**
+ * 🚨 실습 탭에서만 챗봇 칸을 접는다 — 학생이 묻는 일이 **터미널 안으로** 옮겨가기 때문이다
+ *    (2026-08-15 jery: 「터미널에도 AI가 있는데 왜 읽기 탭 챗봇에 물어봐야 해」).
+ * 🔑 여기 한 줄이 «가운데 칸이 접히는» 유일한 조건이다. 조건을 늘리면 나머지 문항에서도
+ *    챗봇이 조용히 사라진다 — 그러면 학생이 막혔을 때 물어볼 통로가 없어진다.
+ * 🚨 이 판정을 **`extras` 유무에 매달지 말 것.** 데이터가 화면 골격을 가르는 것이 2026-08-11
+ *    사고의 형태였다(3컬럼이 몇 주 동안 죽은 코드였다). 판정 기준은 «지금 열린 탭» 하나다.
+ */
+export function tabHidesChat(contentTab: ContentTab): boolean {
+  return contentTab === 'lab';
+}
 
 type LearnStoreState = {
   currentQaId: string;
   scenarioId: string;
   mobileTab: MobileTab;
   contentTab: ContentTab;
+  /** 🧪 실습에서 지금 몇 번째 미션인가(0-based). 좌측 목차가 이것을 읽어 진도를 세운다. */
+  labMissionIndex: number;
   setCurrentQaId: (qaId: string) => void;
   setScenarioId: (scenarioId: string) => void;
   setMobileTab: (mobileTab: MobileTab) => void;
   setContentTab: (contentTab: ContentTab) => void;
+  setLabMissionIndex: (labMissionIndex: number) => void;
   resetForQa: (qaId: string, scenarioId: string) => void;
 };
 
@@ -40,10 +55,12 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
   //    문항 목록이 먼저 뜨면 «고르는 화면»으로 읽혀 한 번 더 눌러야 시작된다.
   mobileTab: 'content',
   contentTab: 'read',
+  labMissionIndex: 0,
   setCurrentQaId: (currentQaId) => set({ currentQaId }),
   setScenarioId: (scenarioId) => set({ scenarioId }),
   setMobileTab: (mobileTab) => set({ mobileTab }),
   setContentTab: (contentTab) => set({ contentTab }),
+  setLabMissionIndex: (labMissionIndex) => set({ labMissionIndex }),
   // 🔑 문항을 바꿔도 **탭 상태는 유지한다**(읽기 → 읽기). 매번 첫 탭으로 튕기면
   //    «견학만 몰아서 보는» 동선이 끊긴다. 새 문항에 그 탭이 없으면 ContentPanel 이 접는다.
   resetForQa: (currentQaId, scenarioId) => set({ currentQaId, scenarioId }),
