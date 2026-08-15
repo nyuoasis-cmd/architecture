@@ -81,3 +81,27 @@ export function failureLines(failure: LabFailure): { text: string; tone: 'bad' |
       ];
   }
 }
+
+export type LabVerdictRow = { name: string; ok: boolean; reason?: string };
+export type LabVerdict = { outputs: string[]; rows: LabVerdictRow[]; passed: number; total: number };
+
+export function labSubmit(qaId: string, rules: string) {
+  return post<{ revision: number; verdict: LabVerdict }>('/api/lab/submit', { qaId, rules });
+}
+
+/**
+ * 내가 낸 마지막 판. 🔑 화면이 열릴 때 읽어 «이어서 고치기»를 가능하게 한다 —
+ *    탭을 닫았다 와도, 다른 기기에서 열어도 낸 것이 남아 있어야 한다.
+ */
+export async function labLatestSubmission(
+  qaId: string,
+): Promise<{ revision: number; rules: string; verdict: LabVerdict | null } | null> {
+  try {
+    const response = await fetch(`/api/lab/submission?qaId=${encodeURIComponent(qaId)}`);
+    if (!response.ok) return null;
+    const payload = (await response.json()) as { submission?: { revision: number; rules: string; verdict: LabVerdict | null } | null };
+    return payload.submission ?? null;
+  } catch {
+    return null;
+  }
+}

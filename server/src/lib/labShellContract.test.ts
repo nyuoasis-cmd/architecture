@@ -24,6 +24,7 @@ type LabState = {
   rules: string
   myOutputs: string[]
   reviewDone: boolean
+  submittedRevision: number
   lastKey: string | null
   env: { widthPx: number; canPaste: boolean }
 }
@@ -35,6 +36,7 @@ type LabShell = {
   saveRules: (state: LabState, rules: string) => { events: LabEvent[]; nextState: LabState }
   applyMyOutputs: (state: LabState, outputs: string[]) => LabState
   markReviewDone: (state: LabState) => LabState
+  markSubmitted: (state: LabState, revision: number) => LabState
   INITIAL_LAB_STATE: LabState
   LAB_COMMAND_NAMES: string[]
 }
@@ -195,12 +197,38 @@ test('13) 실습실은 12강의 마지막 문항 하나에만 걸린다', () => 
   assert.equal(data.LAB_QA_ID, 'ch18_q04', '실습실이 붙는 문항이 바뀌었다 — 12강 마지막 문항이 아니면 수업 흐름이 달라진다')
 })
 
-test('14) 미션 표시가 «못 하는 일»을 할 수 있는 것처럼 적지 않는다', () => {
+test('14) 화면이 «열렸다»고 말하는 미션은 실제로 판정된다 — 못 하는 일을 할 수 있는 것처럼 적지 않는다', () => {
+  // 🔑 개수를 세지 않는다(강이 늘면 곧 어긋난다). **표시(live)와 판정이 맞는가**를 본다.
+  //    열린 미션은 `missionIndexOf` 가 도달할 수 있어야 하고, 잠긴 미션은 도달할 수 없어야 한다.
   const live = data.LAB_MISSIONS.filter((m) => m.live)
-  assert.equal(live.length, 6, '지금 실제로 판정되는 미션은 6개다 — 숫자가 바뀌면 판정부도 같이 바뀌어야 한다')
-  assert.equal(data.LAB_MISSIONS[6]?.live, false, '제출(7번)은 PR5 의 몫이다 — 열려 있으면 학생이 없는 기능을 누른다')
+  assert.ok(live.length > 0, '열린 미션이 하나도 없다')
+
+  const done = run([
+    'ls',
+    'pwd',
+    ...data.LAB_RUN_FILES.map((f) => `cat ${f}`),
+    'npm test',
+  ]).state
+  const withRules = shell.saveRules(done, 'x'.repeat(60)).nextState
+  const reviewed = shell.markReviewDone(shell.applyMyOutputs(withRules, ['할인율: 10%\n최종가: 9000']))
+  const submitted = shell.markSubmitted(reviewed, 1)
+
+  // 전부 열려 있다면, 전부 해낸 상태에서 마지막 미션 너머까지 도달해야 한다.
+  const reachable = missionIndexOf(submitted)
+  assert.equal(
+    reachable,
+    live.length,
+    `열린 미션은 ${live.length}개인데 판정이 도달한 자리는 ${reachable} 이다 — 표시와 판정이 어긋난다`,
+  )
+
+  // 잠긴 미션이 있다면 «잠김»이라고 적혀야 한다.
   const out = textOf(run(['lab missions']).events)
-  assert.ok(out.includes('잠김'), '아직 안 열린 미션을 잠김으로 표시하지 않는다 — 학생이 그 앞에서 기다린다')
+  const locked = data.LAB_MISSIONS.filter((m) => !m.live)
+  assert.equal(
+    /잠김/.test(out),
+    locked.length > 0,
+    locked.length > 0 ? '잠긴 미션을 잠김으로 안 적는다' : '잠긴 미션이 없는데 «잠김»이 보인다',
+  )
 })
 
 test('15) 가드가 실패할 수 있는 계측인지 — 셸이 실제로 무언가를 돌려주는가', () => {
@@ -273,11 +301,18 @@ test('23) jump 가 스스로 더 나아간 학생을 뒤로 끌어내리지 않�
   assert.equal(missionIndexOf(worked), 3, '건너뛴 뒤에 스스로 더 나아갔는데 건너뛴 자리로 끌려간다')
 })
 
-test('24) 잠긴 미션으로는 못 건너뛴다 — 없는 곳으로 보내면 학생이 빈 화면 앞에서 기다린다', () => {
-  const out = textOf(execute('jump 7', INITIAL_LAB_STATE, 'j3').events)
-  assert.ok(out.includes('아직'), '잠긴 미션으로 건너뛰는 것을 안 막는다')
+test('24) 없는 미션으로는 못 건너뛴다 — 없는 곳으로 보내면 학생이 빈 화면 앞에서 기다린다', () => {
   const bad = textOf(execute('jump 99', INITIAL_LAB_STATE, 'j4').events)
   assert.ok(/1~7/.test(bad), '범위 밖 번호에 무엇을 적어야 하는지 안 알려 준다')
+  const zero = textOf(execute('jump 0', INITIAL_LAB_STATE, 'j5').events)
+  assert.ok(/1~7/.test(zero), '0 도 막아야 한다')
+
+  // 🔑 잠긴 미션이 다시 생기면(다른 강이 붙으면) 그때도 막아야 한다.
+  const lockedIndex = data.LAB_MISSIONS.findIndex((m) => !m.live)
+  if (lockedIndex >= 0) {
+    const out = textOf(execute(`jump ${lockedIndex + 1}`, INITIAL_LAB_STATE, 'j6').events)
+    assert.ok(/아직/.test(out), '잠긴 미션으로 건너뛰는 것을 안 막는다')
+  }
 })
 
 test('25) lab version 이 «무엇으로 만든 재생본인가»를 말한다 — 없으면 규칙 효과와 모델 변화를 못 가른다', () => {

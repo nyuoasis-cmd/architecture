@@ -31,7 +31,9 @@ export type LabEvent =
   /** 옆 패널 편집기를 연다. 🚨 터미널 안에서 nano·heredoc 을 흉내 내지 않는다 — 태블릿엔 Ctrl·Esc 가 없다. */
   | { kind: 'editor' }
   /** 🚨 셸은 순수 함수라 AI 를 못 부른다. **의도만** 내보내고 화면이 부른다. */
-  | { kind: 'ai'; mode: 'review' | 'verify' | 'ask'; text: string };
+  | { kind: 'ai'; mode: 'review' | 'verify' | 'ask'; text: string }
+  /** 🚨 제출. 판정은 **서버가 저장된 본문으로** 낸다 — 화면이 판정해서 보내지 않는다. */
+  | { kind: 'submit'; rules: string };
 
 /** 화면 쪽이 재어서 넣어 주는 값. 셸은 재지 않는다(순수해야 하므로). */
 export type LabEnv = {
@@ -59,6 +61,8 @@ export type LabState = {
    *    (2026-08-15 Codex 리뷰). 이 값은 서버 응답이 온 뒤에만 참이 된다.
    */
   reviewDone: boolean;
+  /** 🔑 서버가 받아 준 마지막 판 번호. 0 이면 아직 낸 적이 없다. */
+  submittedRevision: number;
   /**
    * 🚨 건너뛴 미션 번호(0-based). 막힌 학생이 수업에서 낙오하지 않게 열어 두되, **건너뛴 사실을 지운다고
    *    없어지지 않게** 상태에 남긴다 — 과정 점수는 0 이고 산출물 점수는 살린다(§5 골격 5).
@@ -78,6 +82,7 @@ export const INITIAL_LAB_STATE: LabState = {
   rules: '',
   myOutputs: [],
   reviewDone: false,
+  submittedRevision: 0,
   jumpedTo: null,
   lastKey: null,
   env: { widthPx: 0, canPaste: false },
@@ -96,6 +101,7 @@ const COMMANDS: { name: string; args: string; what: string; group: '둘러보기
   { name: 'npm test', args: '', what: '결과를 파서에 넣어 본다', group: '확인하기' },
   { name: 'lab missions', args: '', what: '미션 목록과 지금 할 일을 본다', group: '확인하기' },
   { name: 'lab version', args: '', what: '재생본을 만든 모델·날짜를 본다', group: '확인하기' },
+  { name: 'lab check', args: '', what: '낸다 — 서버가 내 규칙으로 직접 시켜 본다', group: '확인하기' },
   { name: 'reset', args: '', what: '실습실을 처음으로 되돌린다', group: '나가기' },
   { name: 'jump', args: '<번호>', what: '막혔을 때 그 미션으로 건너뛴다', group: '나가기' },
   { name: 'lab about', args: '', what: '이 실습실이 무엇인지 다시 읽는다', group: '확인하기' },
@@ -215,8 +221,14 @@ export function earnedMissionIndex(state: LabState): number {
   //    예전에는 `claude` 를 친 것만 봐서, 호출이 실패해도·검증을 한 번도 안 해도
   //    미션이 전부 끝난 것으로 표시됐다(2026-08-15 Codex 리뷰).
   if (!state.reviewDone || state.myOutputs.length === 0) return 5;
-  // 🚨 7번(제출)은 아직 판정하지 않는다. «다 끝났다»가 아니라 «여기서 멈춘다»로 세운다.
-  return 6;
+  // 🔑 «냈는가»는 서버가 받아 준 판 번호로 센다 — 화면이 «냈어요»라고 기억하는 것으로 세지 않는다.
+  if (state.submittedRevision === 0) return 6;
+  return 7;
+}
+
+/** 🚨 **서버가 받아 준 뒤에만** 부른다. 보낸 시점이 아니다. */
+export function markSubmitted(state: LabState, revision: number): LabState {
+  return { ...state, submittedRevision: revision };
 }
 
 /** 🚨 AI 비평을 **실제로 받았을 때만** 부른다. 명령을 친 시점이 아니다. */
@@ -413,10 +425,30 @@ export function execute(command: string, state: LabState, idempotencyKey: string
     if (sub === 'missions') return { events: [echo, ...missionLines(base)], nextState: remember('lab') };
     if (sub === 'doctor') return { events: [echo, ...doctorLines(base)], nextState: remember('lab') };
     if (sub === 'version') return { events: [echo, ...versionLines()], nextState: remember('lab') };
+    if (sub === 'check') {
+      if (base.rules.trim() === '') {
+        return {
+          events: [
+            echo,
+            line('낼 것이 없습니다. edit 로 규칙을 먼저 써 보세요.', 'warn'),
+            line('  낸 뒤에도 몇 번이고 고쳐서 다시 낼 수 있습니다.', 'dim'),
+          ],
+          nextState: base,
+        };
+      }
+      return {
+        events: [
+          echo,
+          line('제출합니다. 서버가 여러분이 낸 규칙으로 직접 두 번 시켜 봅니다.', 'warn'),
+          { kind: 'submit', rules: base.rules },
+        ],
+        nextState: remember('lab'),
+      };
+    }
     return {
       events: [
         echo,
-        line(`lab ${sub} 은 없습니다. lab about · lab missions · lab doctor · lab version 중에서 골라 주세요.`, 'bad'),
+        line(`lab ${sub} 은 없습니다. lab about · lab missions · lab doctor · lab version · lab check 중에서 골라 주세요.`, 'bad'),
       ],
       nextState: base,
     };

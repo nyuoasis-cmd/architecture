@@ -4,6 +4,7 @@ import {
   applyMyOutputs,
   execute,
   markReviewDone,
+  markSubmitted,
   openingEvents,
   saveRules,
   type LabEvent,
@@ -11,7 +12,7 @@ import {
   type LabTone,
 } from '../../lib/lab-shell';
 import { checkAll, passCount } from '../../lib/lab-checker';
-import { failureLines, labAsk, labReview, labVerify } from '../../lib/lab-api';
+import { failureLines, labAsk, labLatestSubmission, labReview, labSubmit, labVerify } from '../../lib/lab-api';
 import { useLearnStore } from '../../store/learn-store';
 
 type LabTabProps = {
@@ -85,6 +86,22 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
     seq.current = 0;
   }, [qaId, session?.qaId, setSession]);
 
+  // 🔑 낸 것이 있으면 읽어 와서 이어 쓴다 — 탭을 닫았다 와도, 다른 기기에서 열어도 남아 있어야 한다.
+  useEffect(() => {
+    let cancelled = false;
+    void labLatestSubmission(qaId).then((previous) => {
+      if (cancelled || !previous) return;
+      setState((prev) =>
+        prev.submittedRevision >= previous.revision
+          ? prev
+          : { ...markSubmitted(prev, previous.revision), rules: prev.rules.trim() === '' ? previous.rules : prev.rules },
+      );
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [qaId]);
+
   // 화면 폭·붙여넣기 가능 여부는 화면만 알 수 있다 — 재서 셸에 넣어 준다(`lab doctor` 가 이걸 읽는다).
   useEffect(() => {
     const measure = () => {
@@ -132,6 +149,11 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
 
     const intent = events.find((event): event is Extract<LabEvent, { kind: 'ai' }> => event.kind === 'ai');
     if (intent) void runAi(intent, nextState);
+
+    const submitIntent = events.find(
+      (event): event is Extract<LabEvent, { kind: 'submit' }> => event.kind === 'submit',
+    );
+    if (submitIntent) void runSubmit(submitIntent.rules);
   };
 
   const say = (rows: { text: string; tone: LabTone }[]) => {
@@ -223,6 +245,47 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
         said.push({ text: '  규칙이 아직 애매합니다. cat 으로 내 답을 열어 보고 edit 로 고쳐 보세요.', tone: 'dim' });
       }
       say(said);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  /**
+   * 낸다. 🚨 판정은 **서버가 저장된 본문으로** 낸다 — 화면은 결과를 받아 적기만 한다.
+   * 🔑 «냈다»는 서버가 판 번호를 돌려준 뒤에만 기록한다. 보낸 시점이 아니다.
+   */
+  const runSubmit = async (rules: string) => {
+    if (busy) {
+      say([{ text: '  앞의 요청이 아직 돌고 있습니다. 잠깐만요.', tone: 'dim' }]);
+      return;
+    }
+    setBusy(true);
+    say([{ text: '  … 서버가 여러분의 규칙으로 시켜 보는 중', tone: 'dim' }]);
+    try {
+      const result = await labSubmit(qaId, rules);
+      if (!result.ok) {
+        say(failureLines(result.failure));
+        return;
+      }
+      const { revision, verdict } = result.data;
+      setState((prev) => markSubmitted(prev, revision));
+      const rows: { text: string; tone: LabTone }[] = verdict.rows.map((row) => ({
+        text: row.ok ? `  PASS  ${row.name}       읽혔습니다` : `  FAIL  ${row.name}       터짐: ${row.reason ?? ''}`,
+        tone: row.ok ? ('ok' as const) : ('bad' as const),
+      }));
+      rows.push({ text: '', tone: 'plain' });
+      if (verdict.passed === verdict.total) {
+        rows.push({ text: `  ${verdict.passed} 통과 · 0 실패 — 제출했습니다 (${revision}번째 판)`, tone: 'ok' });
+        rows.push({ text: '  선생님이 여러분이 낸 규칙과 이 결과를 그대로 봅니다.', tone: 'dim' });
+      } else {
+        rows.push({
+          text: `  ${verdict.passed} 통과 · ${verdict.total - verdict.passed} 실패 — 제출했습니다 (${revision}번째 판)`,
+          tone: 'warn',
+        });
+        // 🚨 «실패했으니 다시»가 아니라 «고쳐서 또 내도 된다»로 적는다. 낸 것이 지워지지 않는다.
+        rows.push({ text: '  고쳐서 또 내도 됩니다. 낸 것은 지워지지 않고 새 판으로 쌓입니다.', tone: 'dim' });
+      }
+      say(rows);
     } finally {
       setBusy(false);
     }

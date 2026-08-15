@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { resolveActorId } from '../lib/actor-id';
+import { classStatus, LabSubmitUnavailableError, latestSubmission, submit, toLabActor } from '../lib/lab-submissions';
+import { getRequestUser } from '../lib/auth';
+import { getSupabaseAdminClient } from '../lib/supabase';
 import {
   askQuestion,
   LabAbortedError,
@@ -34,11 +37,18 @@ function abortSignalOf(req: import('express').Request): AbortSignal | undefined 
 const reviewSchema = z.object({ draft: z.string().min(1).max(8000) });
 const verifySchema = z.object({ rules: z.string().min(1).max(8000) });
 const askSchema = z.object({ question: z.string().min(1).max(500) });
+const submitSchema = z.object({ qaId: z.string().min(1).max(32), rules: z.string().min(1).max(8000) });
 
 function handle(caught: unknown, res: import('express').Response, tag: string): void {
   // 🔑 학생이 화면을 닫은 것은 «고장»이 아니다. 로그를 시끄럽게 만들지 않고, 답도 보내지 않는다
   //    (받을 사람이 없다). 이걸 502 로 세면 수업 중 오류 로그가 이탈로 가득 찬다.
   if (caught instanceof LabAbortedError) return;
+  if (caught instanceof LabSubmitUnavailableError) {
+    // 🚨 제출은 조용히 성공한 척하지 않는다 — 학생은 냈다고 믿고 교사는 아무것도 못 본다.
+    console.error(`[lab/${tag}] submit unavailable`, caught.message);
+    res.status(503).json({ error: 'unavailable', reason: 'submit_unavailable' });
+    return;
+  }
   if (caught instanceof LabRateLimitError) {
     res.status(429).json({ error: 'rate_limited', retryAfterSeconds: caught.retryAfterSeconds });
     return;
@@ -56,13 +66,12 @@ function handle(caught: unknown, res: import('express').Response, tag: string): 
 // POST /api/lab/review — 내 초안의 어디가 애매한가 (초안을 대신 써 주지 않는다)
 router.post('/review', async (req, res) => {
   const parsed = reviewSchema.safeParse(req.body);
-  const actorId = resolveActorId(req);
   if (!parsed.success) {
     res.status(400).json({ error: 'invalid_request' });
     return;
   }
   try {
-    const review = await reviewDraft(actorId, parsed.data.draft, abortSignalOf(req));
+    const review = await reviewDraft(parsed.data.draft, abortSignalOf(req));
     res.json({ review });
   } catch (caught) {
     handle(caught, res, 'review');
@@ -73,13 +82,12 @@ router.post('/review', async (req, res) => {
 // 🔑 판정은 여기서 안 한다. 결과 문자열만 돌려주고 결정적 검사기가 판정한다.
 router.post('/verify', async (req, res) => {
   const parsed = verifySchema.safeParse(req.body);
-  const actorId = resolveActorId(req);
   if (!parsed.success) {
     res.status(400).json({ error: 'invalid_request' });
     return;
   }
   try {
-    const outputs = await verifyWithRules(actorId, parsed.data.rules, abortSignalOf(req));
+    const outputs = await verifyWithRules(parsed.data.rules, abortSignalOf(req));
     res.json({ outputs });
   } catch (caught) {
     handle(caught, res, 'verify');
@@ -89,16 +97,87 @@ router.post('/verify', async (req, res) => {
 // POST /api/lab/ask — 모르는 것 물어보기 (미션 횟수와 별도)
 router.post('/ask', async (req, res) => {
   const parsed = askSchema.safeParse(req.body);
-  const actorId = resolveActorId(req);
   if (!parsed.success) {
     res.status(400).json({ error: 'invalid_request' });
     return;
   }
   try {
-    const answer = await askQuestion(actorId, parsed.data.question, abortSignalOf(req));
+    const answer = await askQuestion(parsed.data.question, abortSignalOf(req));
     res.json({ answer });
   } catch (caught) {
     handle(caught, res, 'ask');
+  }
+});
+
+// POST /api/lab/submit — 낸다. 🚨 판정은 **저장된 본문으로 서버가** 낸다.
+//    화면이 보낸 판정은 받지도 저장하지도 않는다 — 그건 근거가 아니다.
+router.post('/submit', async (req, res) => {
+  const parsed = submitSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'invalid_request' });
+    return;
+  }
+  const actor = toLabActor(resolveActorId(req));
+  try {
+    const result = await submit(actor, parsed.data.qaId, parsed.data.rules, (rules) =>
+      verifyWithRules(rules, abortSignalOf(req)),
+    );
+    res.json(result);
+  } catch (caught) {
+    handle(caught, res, 'submit');
+  }
+});
+
+// GET /api/lab/submission?qaId= — 내가 낸 마지막 판. 화면이 «이어서 고치기»를 하려고 읽는다.
+router.get('/submission', async (req, res) => {
+  const qaId = typeof req.query.qaId === 'string' ? req.query.qaId : '';
+  if (!qaId) {
+    res.status(400).json({ error: 'invalid_request' });
+    return;
+  }
+  try {
+    res.json({ submission: await latestSubmission(toLabActor(resolveActorId(req)), qaId) });
+  } catch (caught) {
+    handle(caught, res, 'submission');
+  }
+});
+
+// GET /api/lab/class?sessionId=&qaId= — 이 수업의 실습 현황 (교사 전용)
+//
+// 🚨 **교사 확인이 없으면 학생 작업물이 열린다.** 로그인한 사람이 이 수업의 교사인지까지 본다 —
+//    로그인만 보면 남의 수업을 들여다볼 수 있다.
+router.get('/class', async (req, res) => {
+  const sessionId = typeof req.query.sessionId === 'string' ? req.query.sessionId : '';
+  const qaId = typeof req.query.qaId === 'string' ? req.query.qaId : '';
+  if (!sessionId || !qaId) {
+    res.status(400).json({ error: 'invalid_request' });
+    return;
+  }
+
+  const user = await getRequestUser(req);
+  if (!user?.id) {
+    res.status(401).json({ error: 'unauthorized' });
+    return;
+  }
+
+  try {
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new LabSubmitUnavailableError('no_database');
+    const { data: session, error } = await supabase
+      .from('architecture_sessions')
+      .select('id, teacher_id')
+      .eq('id', sessionId)
+      .maybeSingle();
+    if (error) throw new LabSubmitUnavailableError(error.message);
+    // 🚨 «이 수업의 교사인가»까지 본다. 없는 수업과 남의 수업을 같은 답으로 돌려준다 —
+    //    갈라 답하면 어떤 수업이 존재하는지가 새어 나간다.
+    if (!session || session.teacher_id !== user.id) {
+      res.status(403).json({ error: 'forbidden' });
+      return;
+    }
+    res.json(await classStatus(sessionId, qaId));
+  } catch (caught) {
+    handle(caught, res, 'class');
   }
 });
 
