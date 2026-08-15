@@ -15,6 +15,13 @@ import { buildVerdict, parseResult } from './lab-checker'
 import { submit, toLabActor, type LabActor } from './lab-submissions'
 
 const read = (...parts: string[]) => readFileSync(path.resolve(__dirname, ...parts), 'utf8')
+
+/**
+ * 🔑 **주석을 걷어낸 화면 문구.** 안 걷어내면 「이렇게 쓰지 말라」고 적어 둔 주석이
+ *    그 금지어를 스스로 위반한 것으로 잡힌다(sessionWordingContract 가 쓰는 방식과 같다).
+ */
+const visibleText = (source: string) =>
+  source.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, '')
 const clientChecker = require(
   path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'lib', 'lab-checker'),
 ) as { parseResult: (text: string) => { ok: boolean; reason?: string } }
@@ -134,4 +141,74 @@ test('9) 낸 뒤에도 몇 번이고 고쳐 낼 수 있다고 말한다 — 한 
   )
   assert.ok(/고쳐서 또 내도 됩니다/.test(tab), '실패했을 때 다시 낼 수 있다고 안 말한다')
   assert.equal(/제출은 한 번|다시 낼 수 없/.test(tab), false, '한 번뿐이라고 말하고 있다')
+})
+
+// ─── 5b — 교사 실습 현황 ───
+
+test('10) 실습 현황은 교사 전용이다 — 학생 화면에 반 전체 작업물이 새면 안 된다', () => {
+  const panel = readFileSync(
+    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'ContentPanel.tsx'),
+    'utf8',
+  )
+  // 🚨 «if (teacherPanel)» 블록 **안에서만** 켜져야 한다(learnLayoutContract ⑦ 과 같은 이유).
+  const guard = panel.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
+  assert.ok(guard, 'ContentPanel 에 «if (teacherPanel)» 블록이 없다')
+  assert.ok(guard![1].includes("list.push('labclass')"), '🧪 실습 현황이 교사 블록 밖에서 켜진다')
+  const pushes = [...panel.matchAll(/list\.push\('labclass'\)/g)].length
+  assert.equal(pushes, 1, `🧪 실습 현황을 ${pushes} 곳에서 켜고 있다 — 켜는 자리는 하나여야 한다`)
+  // 그리는 자리에서도 한 번 더 본다 — 탭 목록만 막으면 URL 로 열릴 수 있다.
+  assert.ok(
+    /activeTab === 'labclass' && teacherPanel \?/.test(panel),
+    '실습 현황을 그릴 때 교사인지 다시 안 본다',
+  )
+})
+
+test('11) 서버가 «이 수업의 교사인가»까지 본다 — 로그인만 보면 남의 수업을 들여다본다', () => {
+  const route = read('..', 'routes', 'lab.ts')
+  const classRoute = route.slice(route.indexOf("router.get('/class'"))
+  assert.ok(/getRequestUser/.test(classRoute), '로그인 확인이 없다')
+  assert.ok(/session\.teacher_id !== user\.id/.test(classRoute), '«이 수업의 교사인가»를 안 본다')
+  assert.ok(/res\.status\(401\)/.test(classRoute), '로그인 없음을 401 로 답하지 않는다')
+  assert.ok(/res\.status\(403\)/.test(classRoute), '남의 수업을 403 으로 막지 않는다')
+  // 🚨 없는 수업과 남의 수업을 갈라 답하면 어떤 수업이 존재하는지가 새어 나간다.
+  assert.ok(/if \(!session \|\| session\.teacher_id !== user\.id\)/.test(classRoute), '없는 수업과 남의 수업을 갈라 답한다')
+})
+
+test('12) 안 낸 학생도 줄에 세운다 — 낸 학생만 보이면 교사는 「다 냈다」고 오해한다', () => {
+  const store = read('lab-submissions.ts')
+  const classFn = store.slice(store.indexOf('export async function classStatus'))
+  assert.ok(/roster\.map\(/.test(classFn), '참여자 전체가 아니라 제출한 학생만 세우고 있다')
+  assert.ok(/revision: mine\?\.revision \?\? 0/.test(classFn), '안 낸 학생의 자리가 없다')
+})
+
+test('13) 「N분째 진전 없음」 알림을 만들지 않는다 — 멀쩡히 쓰는 학생을 쫓아가게 만든다', () => {
+  // 🚨 CLAUDE.md 의 «앱은 수업 진행 시간을 말하지 않는다»와 같은 이유다. 우리가 아는 것은
+  //    «낸 시각»뿐이고, 안 낸 것이 막힌 것인지 쓰는 중인지는 이 데이터로 알 수 없다.
+  const tab = readFileSync(
+    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'LabClassTab.tsx'),
+    'utf8',
+  )
+  assert.equal(
+    /분째|진전 없음|정체|막힘 알림/.test(visibleText(tab)),
+    false,
+    '「N분째 진전 없음」이 되살아났다',
+  )
+  // 대신 «모르는 것»을 화면이 말해야 한다.
+  assert.ok(/막혔다는 뜻이 아니라/.test(tab), '「안 냄」이 「막혔다」로 읽히는 것을 막는 문장이 없다')
+})
+
+test('14) 상대 시간은 «마지막으로 낸 뒤»다 — 수업이 몇 분째인지가 아니다', () => {
+  const tab = readFileSync(
+    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'LabClassTab.tsx'),
+    'utf8',
+  )
+  assert.ok(/lastSubmittedAt/.test(tab), '무엇을 기준으로 재는지가 없다')
+  assert.ok(/아직 안 냄/.test(tab), '낸 적 없는 학생의 시간을 지어내고 있다')
+})
+
+test('15) 오류 상위는 «여럿이 같은 데서 터진 것»만 모은다 — 통과한 줄을 세면 신호가 아니다', () => {
+  const store = read('lab-submissions.ts')
+  const classFn = store.slice(store.indexOf('export async function classStatus'))
+  assert.ok(/if \(row\.ok \|\| !row\.reason\) continue/.test(classFn), '통과한 줄까지 오류로 세고 있다')
+  assert.ok(/\.slice\(0, 3\)/.test(classFn), '상위 3개로 안 자른다 — 다 보여 주면 교사가 못 읽는다')
 })

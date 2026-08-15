@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { resolveActorId } from '../lib/actor-id';
-import { LabSubmitUnavailableError, latestSubmission, submit, toLabActor } from '../lib/lab-submissions';
+import { classStatus, LabSubmitUnavailableError, latestSubmission, submit, toLabActor } from '../lib/lab-submissions';
+import { getRequestUser } from '../lib/auth';
+import { getSupabaseAdminClient } from '../lib/supabase';
 import {
   askQuestion,
   LabAbortedError,
@@ -137,6 +139,45 @@ router.get('/submission', async (req, res) => {
     res.json({ submission: await latestSubmission(toLabActor(resolveActorId(req)), qaId) });
   } catch (caught) {
     handle(caught, res, 'submission');
+  }
+});
+
+// GET /api/lab/class?sessionId=&qaId= — 이 수업의 실습 현황 (교사 전용)
+//
+// 🚨 **교사 확인이 없으면 학생 작업물이 열린다.** 로그인한 사람이 이 수업의 교사인지까지 본다 —
+//    로그인만 보면 남의 수업을 들여다볼 수 있다.
+router.get('/class', async (req, res) => {
+  const sessionId = typeof req.query.sessionId === 'string' ? req.query.sessionId : '';
+  const qaId = typeof req.query.qaId === 'string' ? req.query.qaId : '';
+  if (!sessionId || !qaId) {
+    res.status(400).json({ error: 'invalid_request' });
+    return;
+  }
+
+  const user = await getRequestUser(req);
+  if (!user?.id) {
+    res.status(401).json({ error: 'unauthorized' });
+    return;
+  }
+
+  try {
+    const supabase = getSupabaseAdminClient();
+    if (!supabase) throw new LabSubmitUnavailableError('no_database');
+    const { data: session, error } = await supabase
+      .from('architecture_sessions')
+      .select('id, teacher_id')
+      .eq('id', sessionId)
+      .maybeSingle();
+    if (error) throw new LabSubmitUnavailableError(error.message);
+    // 🚨 «이 수업의 교사인가»까지 본다. 없는 수업과 남의 수업을 같은 답으로 돌려준다 —
+    //    갈라 답하면 어떤 수업이 존재하는지가 새어 나간다.
+    if (!session || session.teacher_id !== user.id) {
+      res.status(403).json({ error: 'forbidden' });
+      return;
+    }
+    res.json(await classStatus(sessionId, qaId));
+  } catch (caught) {
+    handle(caught, res, 'class');
   }
 });
 

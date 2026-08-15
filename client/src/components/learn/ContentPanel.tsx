@@ -11,6 +11,7 @@ import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
 import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
 import { earnedMissionIndex, missionIndexOf } from '../../lib/lab-shell';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
+import LabClassTab from './LabClassTab';
 import LabTab from './LabTab';
 import MyTurnTab from './MyTurnTab';
 import NextQuestionDoor from './NextQuestionDoor';
@@ -43,6 +44,7 @@ const TAB_LABELS: Record<ContentTab, string> = {
   lab: '🧪 실습',
   quiz: '📝 퀴즈',
   explain: '📋 설명 노트',
+  labclass: '🧪 실습 현황',
 };
 
 const QA_ID_PATTERN = /^ch\d{2}_q\d{2}$/;
@@ -106,6 +108,10 @@ export default function ContentPanel({
     //    (learnLayoutContract ⑦ 이 이 블록 밖의 explain 을 빨갛게 잡는다.)
     if (teacherPanel) {
       list.push('explain');
+      // 🔑 실습이 있는 문항에서만. 없는 문항에 빈 현황판을 띄우지 않는다.
+      if (qaId === LAB_QA_ID) {
+        list.push('labclass');
+      }
     }
     return list;
   }, [chapter.id, extras, inlineMeta, qaId, teacherPanel]);
@@ -333,6 +339,8 @@ export default function ContentPanel({
         {activeTab === 'tour' && extras?.tour?.length ? <TourTab missions={extras.tour} qaId={qaId} /> : null}
 
         {activeTab === 'myturn' && extras?.myTurn ? <MyTurnTab config={extras.myTurn} qaId={qaId} /> : null}
+
+        {activeTab === 'labclass' && teacherPanel ? <LabClassTab qaId={qaId} sessionId={sessionId} /> : null}
 
         {activeTab === 'lab' ? (
           <div className="h-full p-3 lg:p-4">

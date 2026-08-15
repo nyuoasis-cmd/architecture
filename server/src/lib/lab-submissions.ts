@@ -99,50 +99,99 @@ export async function submit(
   throw new LabSubmitUnavailableError('revision_conflict');
 }
 
-/** 이 수업의 실습 현황 — 교사 화면(PR5b)이 읽는다. */
+/**
+ * 이 수업의 실습 현황 — 교사 화면이 읽는다.
+ *
+ * 🚨 **모르는 것을 아는 척하지 않는다.** 여기서 셀 수 있는 것은 «낸 것»뿐이다.
+ *    아직 안 낸 학생이 «막힌» 것인지 «열심히 쓰는 중»인지 이 데이터로는 알 수 없다 —
+ *    그래서 「N분째 진전 없음」 같은 알림을 만들지 않는다. 그건 멀쩡히 쓰고 있는 학생을
+ *    교사가 쫓아가게 만드는 오탐이고, 수업 중의 오탐은 없느니만 못하다.
+ */
 export type LabClassRow = {
   participantId: string;
+  nickname: string;
+  /** 낸 적이 없으면 0. */
   revision: number;
   passed: number;
   total: number;
-  createdAt: string;
+  /** 마지막으로 낸 시각. 낸 적이 없으면 null. */
+  lastSubmittedAt: string | null;
 };
 
-export async function classStatus(sessionId: string, qaId: string): Promise<LabClassRow[]> {
+export type LabClassStatus = {
+  rows: LabClassRow[];
+  /** 🔑 여러 학생이 **같은 데서** 터졌는가. 교사가 칠판에서 한 번에 풀 수 있는 것이 여기 보인다. */
+  topReasons: { reason: string; count: number }[];
+  submittedCount: number;
+  passedCount: number;
+};
+
+export async function classStatus(sessionId: string, qaId: string): Promise<LabClassStatus> {
   const supabase = getSupabaseAdminClient();
   if (!supabase) throw new LabSubmitUnavailableError('no_database');
 
   const { data: participants, error: pErr } = await supabase
     .from('architecture_participants')
-    .select('id')
-    .eq('session_id', sessionId);
+    .select('id, nickname, joined_at')
+    .eq('session_id', sessionId)
+    .order('joined_at', { ascending: true });
   if (pErr) throw new LabSubmitUnavailableError(pErr.message);
-  const ids = (participants ?? []).map((row) => row.id as string);
-  if (ids.length === 0) return [];
+  const roster = participants ?? [];
+  if (roster.length === 0) return { rows: [], topReasons: [], submittedCount: 0, passedCount: 0 };
 
   const { data, error } = await supabase
     .from('architecture_lab_submissions')
     .select('participant_id, revision, verdict, created_at')
-    .in('participant_id', ids)
+    .in(
+      'participant_id',
+      roster.map((row) => row.id as string),
+    )
     .eq('qa_id', qaId)
     .order('revision', { ascending: false });
   if (error) throw new LabSubmitUnavailableError(error.message);
 
-  // 🔑 학생마다 «마지막 판»만 남긴다(정렬이 내림차순이라 처음 만나는 것이 마지막 판).
-  const seen = new Set<string>();
-  const rows: LabClassRow[] = [];
+  // 학생마다 «마지막 판»만 남긴다(내림차순이라 처음 만나는 것이 마지막 판).
+  const latest = new Map<string, { revision: number; verdict: LabVerdict | null; createdAt: string }>();
   for (const row of data ?? []) {
-    const participantId = row.participant_id as string;
-    if (seen.has(participantId)) continue;
-    seen.add(participantId);
-    const verdict = row.verdict as LabVerdict | null;
-    rows.push({
-      participantId,
+    const id = row.participant_id as string;
+    if (latest.has(id)) continue;
+    latest.set(id, {
       revision: row.revision as number,
-      passed: verdict?.passed ?? 0,
-      total: verdict?.total ?? 0,
+      verdict: (row.verdict as LabVerdict | null) ?? null,
       createdAt: row.created_at as string,
     });
   }
-  return rows;
+
+  // 🚨 **안 낸 학생도 줄에 세운다.** 낸 학생만 보이면 교사는 «다 냈다»고 오해한다.
+  const rows: LabClassRow[] = roster.map((participant) => {
+    const id = participant.id as string;
+    const mine = latest.get(id);
+    return {
+      participantId: id,
+      nickname: (participant.nickname as string) ?? '',
+      revision: mine?.revision ?? 0,
+      passed: mine?.verdict?.passed ?? 0,
+      total: mine?.verdict?.total ?? 0,
+      lastSubmittedAt: mine?.createdAt ?? null,
+    };
+  });
+
+  const tally = new Map<string, number>();
+  for (const mine of latest.values()) {
+    for (const row of mine.verdict?.rows ?? []) {
+      if (row.ok || !row.reason) continue;
+      tally.set(row.reason, (tally.get(row.reason) ?? 0) + 1);
+    }
+  }
+  const topReasons = [...tally.entries()]
+    .map(([reason, count]) => ({ reason, count }))
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3);
+
+  return {
+    rows,
+    topReasons,
+    submittedCount: rows.filter((row) => row.revision > 0).length,
+    passedCount: rows.filter((row) => row.total > 0 && row.passed === row.total).length,
+  };
 }

@@ -20,7 +20,7 @@ export type MobileTab = 'nav' | 'chat' | 'content';
  *    (ContentPanel 의 `if (teacherPanel)` 한 곳). 여기 열거돼 있다는 것은 «그런 탭이 있다»는
  *    뜻일 뿐, «누구에게 보인다»는 뜻이 아니다.
  */
-export type ContentTab = 'read' | 'demo' | 'tour' | 'myturn' | 'lab' | 'quiz' | 'explain';
+export type ContentTab = 'read' | 'demo' | 'tour' | 'myturn' | 'lab' | 'quiz' | 'explain' | 'labclass';
 
 /**
  * 🚨 실습 탭에서만 챗봇 칸을 접는다 — 학생이 묻는 일이 **터미널 안으로** 옮겨가기 때문이다
