@@ -77,8 +77,9 @@ export const LAB_MISSIONS: LabMission[] = [
     live: true,
   },
   {
-    label: 'AI 비평 받기',
-    goal: 'claude review 로 어디가 애매한지 들어 보세요. AI 는 대신 써 주지 않습니다.',
+    // 🚨 라벨이 판정과 같아야 한다. 「비평 받기」만 적고 검증까지 요구하면 학생이 왜 안 넘어가는지 모른다.
+    label: 'AI 비평 받고 다시 시켜 보기',
+    goal: 'claude review 로 어디가 애매한지 듣고 고친 뒤, npm test 로 내 규칙대로 시켜 보세요.',
     live: true,
   },
   { label: '제출', goal: '아직 안 열린 미션입니다.', live: false },

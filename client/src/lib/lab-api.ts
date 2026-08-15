@@ -6,7 +6,7 @@
  *    학생이 다음에 할 행동도 다르다. 하나로 뭉치면 다시 누르기만 반복한다.
  */
 
-export type LabRemaining = { mission: number; ask: number };
+export type LabRemaining = { mission: number; ask: number; perStudent: boolean };
 
 export type LabFailure =
   | { kind: 'budget' }
@@ -44,7 +44,7 @@ async function post<T>(path: string, body: unknown): Promise<LabApiResult<T>> {
   const remaining = payload?.remaining ?? null;
 
   if (response.ok && payload) {
-    return { ok: true, data: payload as T, remaining: remaining ?? { mission: 0, ask: 0 } };
+    return { ok: true, data: payload as T, remaining: remaining ?? { mission: 0, ask: 0, perStudent: true } };
   }
 
   const failure: LabFailure =
@@ -94,7 +94,8 @@ export function failureLines(failure: LabFailure): { text: string; tone: 'bad' |
   switch (failure.kind) {
     case 'budget':
       return [
-        { text: '오늘은 이 실습실의 AI 를 더 쓸 수 없습니다.', tone: 'bad' },
+        // 🚨 「오늘은」이라 쓰면 안 된다 — 장부는 **월** 단위(UTC)라 내일도 막혀 있다.
+        { text: '이번 달 이 실습실의 AI 예산을 다 썼습니다.', tone: 'bad' },
         { text: '  선생님께 알려 주세요. 다시 눌러도 열리지 않습니다.', tone: 'dim' },
       ];
     case 'quota':

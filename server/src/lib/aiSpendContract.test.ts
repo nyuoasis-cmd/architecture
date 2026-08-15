@@ -12,6 +12,7 @@ import { resolve } from 'node:path'
 import { test } from 'node:test'
 
 import {
+  __markPersistBrokenForTest,
   __resetSpendForTest,
   budgetUsdFor,
   budgetVerdict,
@@ -179,4 +180,78 @@ test('12) chat-service 가 자기 장부를 다시 만들지 않았다 — 갈�
     'chat-service 안에 지출 누계가 되살아났다 — 장부는 ai-spend 하나여야 한다',
   )
   assert.ok(/from '\.\/ai-spend'/.test(source), 'chat-service 가 공용 장부를 안 쓴다')
+})
+
+// ─── 영속화 계약 (2026-08-15, 별도 PR) ───
+
+test('13) 장부가 «저장됐는가»를 정직하게 말한다 — 조용히 메모리로 떨어지면 아무도 모른다', () => {
+  __resetSpendForTest()
+  __markPersistBrokenForTest(true)
+  assert.equal(
+    spendSnapshot('lab').persisted,
+    false,
+    'DB 쓰기가 깨졌는데 «저장됨»이라고 말한다 — «월 상한이 있다»고 믿는 쪽이 속는다',
+  )
+})
+
+test('14) 못 보낸 금액을 숨기지 않는다 — 0 이 아니면 장부가 뒤처져 있다는 뜻이다', () => {
+  __resetSpendForTest()
+  registerUsageCost('lab', 1.5)
+  const snapshot = spendSnapshot('lab')
+  assert.equal(typeof snapshot.pendingUsd, 'number', '못 보낸 금액을 안 말한다')
+  assert.ok(snapshot.spentUsd >= 1.5, '누계에 안 잡혔다')
+})
+
+test('15) 장부가 안 돼도 천장은 여전히 선다 — 못 적는다고 지출이 열리면 안 된다', () => {
+  __resetSpendForTest()
+  __markPersistBrokenForTest(true)
+  registerUsageCost('lab', budgetUsdFor('lab') * 2)
+  assert.equal(
+    budgetVerdict('lab'),
+    'blocked',
+    'DB 가 안 되자 천장까지 사라졌다 — 메모리 차단기라도 남아 있어야 한다',
+  )
+})
+
+test('16) SQL 이 «증분 더하기»로 쓴다 — 읽고 덮어쓰면 인스턴스 둘이 서로의 지출을 지운다', () => {
+  const sql = readFileSync(resolve(__dirname, '..', '..', '..', 'sql', '008_ai_spend.sql'), 'utf8')
+  assert.ok(/ON CONFLICT/i.test(sql), 'upsert 가 아니다 — 같은 달 두 번째 쓰기가 실패한다')
+  assert.ok(
+    /usd = architecture_ai_spend\.usd \+/i.test(sql),
+    '기존 값에 더하지 않고 덮어쓴다 — 동시에 뜬 두 인스턴스가 서로를 지운다',
+  )
+  assert.ok(/PRIMARY KEY \(bucket, month_key\)/i.test(sql), '주머니·달이 키가 아니다')
+  // 되돌리기가 있는가 — 없으면 잘못 나갔을 때 손으로 지워야 한다.
+  const down = readFileSync(resolve(__dirname, '..', '..', '..', 'sql', '008_ai_spend.down.sql'), 'utf8')
+  assert.ok(/DROP TABLE/i.test(down), '되돌리기 스크립트가 표를 안 지운다')
+})
+
+test('17) /health 가 지출과 «저장됐는가»를 같이 낸다 — 안 내면 조용히 떨어져도 아무도 모른다', () => {
+  const source = readFileSync(resolve(__dirname, '..', 'index.ts'), 'utf8')
+  assert.ok(/aiSpend/.test(source), '/health 에 지출 장부가 없다')
+  assert.ok(/spendSnapshot\('lab'\)/.test(source), '/health 가 실습 주머니를 안 낸다')
+  assert.ok(/initSpendLedger\(\)/.test(source), '서버가 뜰 때 이 달 누계를 안 읽어 온다 — 늘 0 부터 센다')
+})
+
+test('18) 같은 증분을 두 번 보내도 한 번만 적용된다 — 응답 유실 → 재전송이 예산을 조기에 막는다', () => {
+  // 🚨 2026-08-15 Codex 리뷰: DB 는 커밋됐는데 응답만 유실되면 catch 가 delta 를 되돌리고
+  //    다음 flush 가 같은 지출을 또 더했다. 연산 식별자로 한 번만 적용한다.
+  const sql = readFileSync(resolve(__dirname, '..', '..', '..', 'sql', '008_ai_spend.sql'), 'utf8')
+  assert.ok(/architecture_ai_spend_ops/.test(sql), '적용한 연산을 기록하는 표가 없다')
+  assert.ok(/p_op_id UUID/.test(sql), '증분 함수가 연산 식별자를 안 받는다')
+  assert.ok(/ON CONFLICT \(op_id\) DO NOTHING/.test(sql), '같은 연산이 두 번 와도 막지 않는다')
+
+  const source = readFileSync(resolve(__dirname, 'ai-spend.ts'), 'utf8')
+  assert.ok(/p_op_id: opId/.test(source), '코드가 연산 식별자를 안 보낸다')
+  assert.ok(
+    /ledger\.pendingOpId \?\? randomUUID\(\)/.test(source),
+    '재전송 때 **같은** 키를 안 쓴다 — 새 키를 만들면 중복 방지가 헛돈다',
+  )
+})
+
+test('19) 「저장됐는가」를 주머니별로 센다 — 공용이면 chat 성공이 lab 실패를 지운다', () => {
+  __resetSpendForTest()
+  __markPersistBrokenForTest(true, 'lab')
+  __markPersistBrokenForTest(false, 'chat')
+  assert.equal(spendSnapshot('lab').persisted, false, 'chat 성공이 lab 실패 상태를 지웠다')
 })

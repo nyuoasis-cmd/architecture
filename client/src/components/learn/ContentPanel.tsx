@@ -9,7 +9,7 @@ import { LAB_QA_ID } from '../../data/vibe-lab-ch18';
 import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
 import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
-import { missionIndexOf } from '../../lib/lab-shell';
+import { earnedMissionIndex, missionIndexOf } from '../../lib/lab-shell';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
 import LabTab from './LabTab';
 import MyTurnTab from './MyTurnTab';
@@ -338,7 +338,7 @@ export default function ContentPanel({
           <div className="h-full p-3 lg:p-4">
             <LabTab
               onExit={() => setContentTab('read')}
-              onStateChange={(labState) => setLabMissionIndex(missionIndexOf(labState))}
+              onStateChange={(labState) => setLabMissionIndex(missionIndexOf(labState), earnedMissionIndex(labState))}
               qaId={qaId}
             />
           </div>

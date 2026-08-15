@@ -54,6 +54,12 @@ export type LabState = {
   /** 내 규칙대로 시켜서 받은 결과. 있으면 `npm test` 가 이것을 검사한다. */
   myOutputs: string[];
   /**
+   * 🚨 AI 비평을 **실제로 받았는가**. 명령을 쳤는가가 아니다 —
+   *    예전에는 `claude` 를 친 순간 기록해서, 호출이 실패해도 미션이 끝난 것으로 표시됐다
+   *    (2026-08-15 Codex 리뷰). 이 값은 서버 응답이 온 뒤에만 참이 된다.
+   */
+  reviewDone: boolean;
+  /**
    * 🚨 건너뛴 미션 번호(0-based). 막힌 학생이 수업에서 낙오하지 않게 열어 두되, **건너뛴 사실을 지운다고
    *    없어지지 않게** 상태에 남긴다 — 과정 점수는 0 이고 산출물 점수는 살린다(§5 골격 5).
    *    null 이면 안 건너뛴 것이다.
@@ -71,6 +77,7 @@ export const INITIAL_LAB_STATE: LabState = {
   seenAbout: false,
   rules: '',
   myOutputs: [],
+  reviewDone: false,
   jumpedTo: null,
   lastKey: null,
   env: { widthPx: 0, canPaste: false },
@@ -114,8 +121,34 @@ const NOT_YET: Record<string, string> = {
 
 // ─────────────────────────── 파일 나무 ───────────────────────────
 
-function nodeAt(segments: string[]): LabFileNode | null {
-  let node: LabFileNode = LAB_TREE;
+/**
+ * 지금 상태에서 본 파일 나무.
+ *
+ * 🚨 스냅샷은 상수지만, **학생이 만든 것은 상태에 있다.** 이 둘을 안 합치면
+ *    저장한 규칙을 `cat CLAUDE.md` 로 열었을 때 「아직 비어 있습니다」가 나온다 —
+ *    게다가 화면은 「cat 으로 내 답을 열어 보세요」라고 안내한다(2026-08-15 Codex 리뷰).
+ *    **화면이 하라고 한 일은 실제로 할 수 있어야 한다.**
+ */
+function treeOf(state: LabState): LabFileNode {
+  const runs = LAB_TREE.kind === 'dir' ? LAB_TREE.children.runs : undefined;
+  const runChildren = runs && runs.kind === 'dir' ? runs.children : {};
+  const mine: Record<string, LabFileNode> = {};
+  state.myOutputs.forEach((text, index) => {
+    mine[`my-${index + 1}.txt`] = { kind: 'file', text: `${text}\n` };
+  });
+  return {
+    kind: 'dir',
+    children: {
+      ...(LAB_TREE.kind === 'dir' ? LAB_TREE.children : {}),
+      // 🔑 저장했으면 저장한 것이 보인다. 안 했으면 스냅샷의 빈 문서가 그대로 보인다.
+      ...(state.rules.trim() !== '' ? { 'CLAUDE.md': { kind: 'file' as const, text: state.rules } } : {}),
+      runs: { kind: 'dir', children: { ...runChildren, ...mine } },
+    },
+  };
+}
+
+function nodeAt(segments: string[], state: LabState): LabFileNode | null {
+  let node: LabFileNode = treeOf(state);
   for (const seg of segments) {
     if (node.kind !== 'dir') return null;
     const next = node.children[seg];
@@ -178,9 +211,17 @@ export function earnedMissionIndex(state: LabState): number {
   //    낱말로 채점하면 그 낱말만 적는 것이 최적 전략이 된다(굿하트). 채점은 검사기가 결과로 한다.
   if (state.rules.trim() === '') return 3;
   if (state.rules.trim().length < MIN_RULES_CHARS) return 4;
-  if (!state.ranCommands.includes('claude')) return 5;
-  // 🚨 7번(제출)은 이 PR 에서 판정하지 않는다. «다 끝났다»가 아니라 «여기서 멈춘다»로 세운다.
+  // 🚨 «비평을 받았고, 내 규칙으로 다시 시켜 봤는가». 둘 다 봐야 한다 —
+  //    예전에는 `claude` 를 친 것만 봐서, 호출이 실패해도·검증을 한 번도 안 해도
+  //    미션이 전부 끝난 것으로 표시됐다(2026-08-15 Codex 리뷰).
+  if (!state.reviewDone || state.myOutputs.length === 0) return 5;
+  // 🚨 7번(제출)은 아직 판정하지 않는다. «다 끝났다»가 아니라 «여기서 멈춘다»로 세운다.
   return 6;
+}
+
+/** 🚨 AI 비평을 **실제로 받았을 때만** 부른다. 명령을 친 시점이 아니다. */
+export function markReviewDone(state: LabState): LabState {
+  return { ...state, reviewDone: true };
 }
 
 /** 규칙 문서가 «한 번 써 본 것»으로 인정되는 최소 길이. 🔑 내용이 아니라 길이만 본다. */
@@ -256,9 +297,9 @@ function missionLines(state: LabState): LabEvent[] {
  *    학생은 「AI 가 매번 다르게 답한다」를 **말로 듣는 게 아니라 터지는 것으로** 겪는다.
  * 🚨 판정을 빨강/초록으로만 말하지 않는다 — `PASS`/`FAIL` 문자를 같이 적는다(접근성, Codex).
  */
-function npmTestLines(): LabEvent[] {
+function npmTestLines(state: LabState): LabEvent[] {
   const files = LAB_RUN_FILES.map((path) => {
-    const node = nodeAt(path.split('/'));
+    const node = nodeAt(path.split('/'), state);
     return { name: path.split('/').pop() ?? path, text: node && node.kind === 'file' ? node.text : '' };
   });
   const rows = checkAll(files);
@@ -288,7 +329,10 @@ function versionLines(): LabEvent[] {
     line(`  재생본 만든 날    ${LAB_VERSION.fixturesCreatedAt}`, 'dim'),
     line(`  재생본 만든 모델  ${LAB_VERSION.fixturesModel}`, 'dim'),
     line(`  검사기 규칙 판    ${LAB_VERSION.checkerRevision}`, 'dim'),
-    line('  실시간 AI 호출    해당 없음 — 이 미션까지는 AI 를 부르지 않습니다.', 'dim'),
+    // 🚨 PR3 에서는 «해당 없음»이 맞았지만 PR4 에서 AI 가 붙었다. 문구를 안 고쳐 두면
+    //    화면이 「AI 를 안 부른다」고 거짓말한다(2026-08-15 Codex 리뷰).
+    line(`  실시간 AI 호출    claude review · npm test(내 규칙) 는 실제로 부릅니다.`, 'dim'),
+    line(`  실시간 AI 모델    ${LAB_VERSION.liveModel}`, 'dim'),
   ];
 }
 
@@ -413,7 +457,7 @@ export function execute(command: string, state: LabState, idempotencyKey: string
         ? []
         : [line('  (아직 안 연 결과가 있습니다. cat 으로 셋 다 열어 보면 왜 터지는지 보입니다.)', 'dim')];
       return {
-        events: [echo, line('  검사 대상 — runs/ 의 사전 생성 결과 3개', 'dim'), ...head, ...npmTestLines()],
+        events: [echo, line('  검사 대상 — runs/ 의 사전 생성 결과 3개', 'dim'), ...head, ...npmTestLines(base)],
         nextState: remember('npm'),
       };
     }
@@ -448,7 +492,9 @@ export function execute(command: string, state: LabState, idempotencyKey: string
           line('내가 쓴 것을 AI 에게 보여 주고 비평을 받습니다. (AI 를 실제로 부릅니다)', 'warn'),
           { kind: 'ai', mode: 'review', text: base.rules },
         ],
-        nextState: remember('claude'),
+        // 🚨 여기서 «했다»고 적지 않는다. 실제 응답이 온 뒤 `markReviewDone` 이 적는다 —
+        //    명령을 친 것과 비평을 받은 것은 다르다(2026-08-15 Codex 리뷰).
+        nextState: base,
       };
     }
 
@@ -515,7 +561,7 @@ export function execute(command: string, state: LabState, idempotencyKey: string
 
     case 'ls': {
       const target = resolvePath(rest[0] ?? '', base.cwd);
-      const node = target ? nodeAt(target) : null;
+      const node = target ? nodeAt(target, base) : null;
       if (!node) {
         return { events: [echo, line(`${rest[0] ?? ''} 라는 폴더가 없습니다.`, 'bad')], nextState: base };
       }
@@ -532,7 +578,7 @@ export function execute(command: string, state: LabState, idempotencyKey: string
       if (!target) {
         return { events: [echo, line('여기가 실습실의 가장 바깥입니다. 더 나갈 수 없어요.', 'bad')], nextState: base };
       }
-      const node = nodeAt(target);
+      const node = nodeAt(target, base);
       if (!node) return { events: [echo, line(`${rest[0]} 라는 폴더가 없습니다.`, 'bad')], nextState: base };
       if (node.kind === 'file') {
         return { events: [echo, line(`${rest[0]} 은 파일입니다. cat 으로 열어 보세요.`, 'bad')], nextState: base };
@@ -543,7 +589,7 @@ export function execute(command: string, state: LabState, idempotencyKey: string
     case 'cat': {
       if (rest.length === 0) return { events: [echo, line('무엇을 열지 적어 주세요. 예) cat parse.js', 'bad')], nextState: base };
       const target = resolvePath(rest[0]!, base.cwd);
-      const node = target ? nodeAt(target) : null;
+      const node = target ? nodeAt(target, base) : null;
       if (!node) return { events: [echo, line(`${rest[0]} 라는 파일이 없습니다. ls 로 확인해 보세요.`, 'bad')], nextState: base };
       if (node.kind === 'dir') {
         return { events: [echo, line(`${rest[0]} 은 폴더입니다. ls ${rest[0]} 로 안을 보세요.`, 'bad')], nextState: base };

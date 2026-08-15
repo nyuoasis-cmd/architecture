@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { resolveActorId } from '../lib/actor-id';
 import {
   askQuestion,
+  LabAbortedError,
   LabBudgetError,
   LabQuotaError,
   LabRateLimitError,
@@ -26,6 +27,15 @@ import {
  */
 const router = Router();
 
+/**
+ * 요청이 끊겼는지 알려 주는 신호.
+ * 🚨 학생이 페이지를 닫아도 대기열에 남아 슬롯과 돈을 쓰던 자리다(2026-08-15 Codex 리뷰).
+ * 🔑 Express 5 는 `req.signal` 을 준다. 없는 환경(테스트 등)에서도 죽지 않게 옵셔널로 읽는다.
+ */
+function abortSignalOf(req: import('express').Request): AbortSignal | undefined {
+  return (req as { signal?: AbortSignal }).signal;
+}
+
 const reviewSchema = z.object({ draft: z.string().min(1).max(8000) });
 const verifySchema = z.object({ rules: z.string().min(1).max(8000) });
 const askSchema = z.object({ question: z.string().min(1).max(500) });
@@ -36,6 +46,9 @@ function withRemaining<T extends object>(actorId: string, payload: T) {
 }
 
 function handle(actorId: string, caught: unknown, res: import('express').Response, tag: string): void {
+  // 🔑 학생이 화면을 닫은 것은 «고장»이 아니다. 로그를 시끄럽게 만들지 않고, 답도 보내지 않는다
+  //    (받을 사람이 없다). 이걸 502 로 세면 수업 중 오류 로그가 이탈로 가득 찬다.
+  if (caught instanceof LabAbortedError) return;
   if (caught instanceof LabBudgetError) {
     res.status(402).json(withRemaining(actorId, { error: 'budget_exceeded' }));
     return;
@@ -72,7 +85,7 @@ router.post('/review', async (req, res) => {
     return;
   }
   try {
-    const review = await reviewDraft(actorId, parsed.data.draft);
+    const review = await reviewDraft(actorId, parsed.data.draft, abortSignalOf(req));
     res.json(withRemaining(actorId, { review }));
   } catch (caught) {
     handle(actorId, caught, res, 'review');
@@ -89,7 +102,7 @@ router.post('/verify', async (req, res) => {
     return;
   }
   try {
-    const outputs = await verifyWithRules(actorId, parsed.data.rules);
+    const outputs = await verifyWithRules(actorId, parsed.data.rules, abortSignalOf(req));
     res.json(withRemaining(actorId, { outputs }));
   } catch (caught) {
     handle(actorId, caught, res, 'verify');
@@ -105,7 +118,7 @@ router.post('/ask', async (req, res) => {
     return;
   }
   try {
-    const answer = await askQuestion(actorId, parsed.data.question);
+    const answer = await askQuestion(actorId, parsed.data.question, abortSignalOf(req));
     res.json(withRemaining(actorId, { answer }));
   } catch (caught) {
     handle(actorId, caught, res, 'ask');

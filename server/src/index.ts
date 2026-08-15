@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { env } from './env';
 import { buildCopyrightIndex } from './lib/copyright-index';
 import chatRouter from './routes/chat';
+import { initSpendLedger, spendSnapshot } from './lib/ai-spend';
 import labRouter from './routes/lab';
 import vibeRouter from './routes/vibe';
 import joinRouter from './routes/join';
@@ -33,7 +34,15 @@ app.use(express.json());
 //   나가는 것은 키 해시 앞 8자뿐이고 비밀 원문·env 전체는 없다. 이 예외를 넓히지 말 것.
 app.get('/api/health', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
-  res.json({ status: 'ok', ts: Date.now(), classCheck: classCheckBlock() });
+  // 💸 지출 장부를 밖에서 볼 수 있게 붙인다. 🚨 «얼마 썼다»만이 아니라 **`persisted`** 를 같이 낸다 —
+  //    그 값이 거짓이면 지금 세고 있는 것은 «프로세스가 뜬 뒤로»뿐이고, 그러면 «월 상한»이 아니다.
+  //    안 내보내면 장부가 조용히 메모리로 떨어져도 아무도 모른다(밤샘 감시가 이 줄을 본다).
+  res.json({
+    status: 'ok',
+    ts: Date.now(),
+    classCheck: classCheckBlock(),
+    aiSpend: { chat: spendSnapshot('chat'), lab: spendSnapshot('lab') },
+  });
 });
 
 // QA test-only 인증·컨텍스트 — QA_AUTH_ENABLED==='true' 일 때만 mount (prod 기본 OFF).
@@ -71,6 +80,10 @@ if (env.NODE_ENV === 'production') {
     console.warn(`[startup] client dist not found at ${clientDistPath}; SPA fallback disabled`);
   }
 }
+
+// 💸 이 달 AI 지출 누계를 DB 에서 읽어 온다. 🚨 실패해도 서버는 뜬다(수업이 먼저다) —
+//    대신 /health 의 `persisted:false` 가 «지금은 프로세스 기준으로만 세고 있다»고 말한다.
+initSpendLedger();
 
 const server = app.listen(env.PORT, () => {
   if (copyrightIndex.corpusEmpty) {

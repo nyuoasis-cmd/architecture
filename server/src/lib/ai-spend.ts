@@ -1,4 +1,6 @@
+import { randomUUID } from 'node:crypto';
 import type Anthropic from '@anthropic-ai/sdk';
+import { getSupabaseAdminClient } from './supabase';
 import { env } from '../env';
 
 /**
@@ -12,11 +14,16 @@ import { env } from '../env';
  * 🚨 **주머니를 나눈다**(`chat` / `lab`). 하나로 합치면 챗봇이 많이 쓴 달에 실습이 막히고,
  *    반대도 마찬가지다 — 어느 쪽이 왜 막혔는지도 알 수 없다.
  *
- * 🚨 **이 장부는 프로세스 안에만 있다.** 서버가 다시 뜨면 0 부터 다시 센다(Render 는 배포·유휴
- *    복귀 때마다 다시 뜬다). 그래서 이것은 «한 달 동안 절대 이 금액을 못 넘는다»는 보증이 아니라
- *    **«한 번 뜬 동안 폭주하면 끊는다»는 차단기**다. 진짜 월 상한은 DB 에 적어야 한다 —
- *    그건 이 PR 에서 하지 않는다(결정 대기, docs 참조).
- *    🔑 그 대신 이름이 거짓말하지 않게 `spendSnapshot()` 이 «언제부터 센 것인가»를 같이 말한다.
+ * 🔑 **누계는 DB(`architecture_ai_spend`)에 적는다**(2026-08-15). 그 전에는 프로세스 메모리에만 있어서
+ *    서버가 다시 뜰 때마다 0 부터 다시 셌다 — Render 는 배포·유휴 복귀마다 뜨므로,
+ *    「월 지출 상한」이라 부르던 것이 실제로는 「한 번 뜬 동안 폭주하면 끊는 차단기」였다.
+ *
+ * 🚨 **DB 가 없거나 안 되면 메모리로 떨어진다. 그리고 그 사실을 말한다** — `spendSnapshot().persisted`.
+ *    조용히 떨어지면 「월 상한이 있다」고 믿는 쪽이 속는다. 못 적는 것보다 **못 적는 줄 모르는 것**이 나쁘다.
+ * 🚨 DB 쓰기가 느려도 **AI 호출을 막지 않는다.** 메모리에 먼저 더하고 뒤에서 흘려 보낸다 —
+ *    수업 중에 장부 때문에 학생이 기다리면 안 된다.
+ * 🔑 여러 인스턴스가 동시에 더해도 어긋나지 않게 **증분**만 보낸다(`architecture_ai_spend_add`).
+ *    「읽고 → 계산해서 → 덮어쓰기」를 하면 동시에 뜬 두 인스턴스가 서로의 지출을 지운다.
  * 🔑 달이 바뀌면 0 으로 되돌린다 — 예전 코드에는 이것도 없어서 「월 예산」이 **영원히 누적**됐다.
  */
 
@@ -80,18 +87,109 @@ export function estimateCostUsd(
   );
 }
 
-type Ledger = { monthKey: string; usd: number; warned: boolean };
-
-const ledgers: Record<SpendBucket, Ledger> = {
-  chat: { monthKey: '', usd: 0, warned: false },
-  lab: { monthKey: '', usd: 0, warned: false },
+type Ledger = {
+  monthKey: string;
+  /** 이 달의 누계(DB 에서 읽어 온 값 + 그 뒤로 우리가 더한 값). */
+  usd: number;
+  warned: boolean;
+  /** 아직 DB 로 못 보낸 증분. 🔑 보낸 뒤에만 0 으로 만든다 — 실패하면 다음 번에 같이 간다. */
+  pendingUsd: number;
+  /** 이 달 값을 DB 에서 한 번이라도 읽어 왔는가. */
+  loaded: boolean;
+  /** 🔑 못 보낸 증분에 붙은 연산 식별자. 재전송 때 **같은 키**로 보내야 두 번 안 세어진다. */
+  pendingOpId: string | null;
 };
+
+const emptyLedger = (): Ledger => ({ monthKey: '', usd: 0, warned: false, pendingUsd: 0, loaded: false, pendingOpId: null });
+
+const ledgers: Record<SpendBucket, Ledger> = { chat: emptyLedger(), lab: emptyLedger() };
+
+/** DB 에 마지막으로 성공적으로 적은 시각. null 이면 «아직 한 번도 못 적었다». */
+let lastPersistedAt: string | null = null;
+/**
+ * 🚨 **주머니별로** 센다. 공용 깃발로 두면 chat 쓰기 성공이 lab 실패 상태를 지워,
+ *    lab 에 미전송 금액이 남아 있는데도 `/health` 가 `persisted:true` 라고 말한다
+ *    (2026-08-15 Codex 리뷰). 장부의 정직함을 지키는 것이 이 값의 존재 이유다.
+ */
+const persistBroken: Record<SpendBucket, boolean> = { chat: false, lab: false };
 
 /** 서버가 뜬 시각. 「언제부터 센 것인가」를 정직하게 말하려고 들고 있는다. */
 const countingSince = new Date().toISOString();
 
 function monthKeyOf(at: Date): string {
   return `${at.getUTCFullYear()}-${String(at.getUTCMonth() + 1).padStart(2, '0')}`;
+}
+
+/**
+ * DB 에서 이 달의 누계를 읽어 온다.
+ * 🚨 실패해도 던지지 않는다 — 장부를 못 읽었다고 수업이 멈추면 안 된다. 대신 `persisted:false` 로 말한다.
+ * 🔑 읽어 온 값에 **우리가 이미 더한 것을 다시 더하지 않는다**(`pendingUsd` 만 얹는다) —
+ *    안 그러면 서버가 뜬 직후의 호출이 두 번 세어진다.
+ */
+async function hydrate(bucket: SpendBucket, monthKey: string): Promise<void> {
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    persistBroken[bucket] = true;
+    return;
+  }
+  try {
+    const { data, error } = await supabase
+      .from('architecture_ai_spend')
+      .select('usd')
+      .eq('bucket', bucket)
+      .eq('month_key', monthKey)
+      .maybeSingle();
+    if (error) throw error;
+    const ledger = ledgers[bucket];
+    if (ledger.monthKey !== monthKey) return; // 읽는 사이에 달이 바뀌었다 — 버린다.
+    ledger.usd = Number(data?.usd ?? 0) + ledger.pendingUsd;
+    ledger.loaded = true;
+    persistBroken[bucket] = false;
+  } catch (caught) {
+    // 🚨 조용히 넘어가지 않는다. 이 줄이 없으면 «월 상한이 있다»고 믿는 채로 메모리로만 돈다.
+    persistBroken[bucket] = true;
+    console.error(`[ai-spend] hydrate failed (${bucket}/${monthKey})`, caught instanceof Error ? caught.message : caught);
+  }
+}
+
+/**
+ * 아직 못 보낸 증분을 DB 로 흘려 보낸다.
+ * 🔑 **증분만** 보낸다 — 여러 인스턴스가 동시에 더해도 서로를 지우지 않게(SQL 의 `..._add` 함수).
+ * 🔑 보내기 전에 `pendingUsd` 를 0 으로 만들고, 실패하면 **되돌려 놓는다** — 잃어버리지 않게.
+ */
+async function flush(bucket: SpendBucket): Promise<void> {
+  const ledger = ledgers[bucket];
+  const delta = ledger.pendingUsd;
+  if (delta <= 0) return;
+  const supabase = getSupabaseAdminClient();
+  if (!supabase) {
+    persistBroken[bucket] = true;
+    return;
+  }
+  const monthKey = ledger.monthKey;
+  ledger.pendingUsd = 0;
+  // 🚨 연산 식별자. DB 는 커밋됐는데 응답만 유실되면 아래 catch 가 delta 를 되돌리고
+  //    다음 flush 가 **같은 지출을 또** 더한다 — 멀쩡한데 예산이 조기 차단된다(2026-08-15 Codex 리뷰).
+  //    같은 키를 다시 보내면 DB 쪽이 한 번만 적용한다.
+  const opId = ledger.pendingOpId ?? randomUUID();
+  ledger.pendingOpId = opId;
+  try {
+    const { error } = await supabase.rpc('architecture_ai_spend_add', {
+      p_bucket: bucket,
+      p_month_key: monthKey,
+      p_delta: delta,
+      p_op_id: opId,
+    });
+    if (error) throw error;
+    lastPersistedAt = new Date().toISOString();
+    persistBroken[bucket] = false;
+    ledger.pendingOpId = null;
+  } catch (caught) {
+    // 🚨 못 보냈으면 되돌려 놓는다. 안 그러면 지출이 조용히 사라지고 천장이 늦게 선다.
+    ledger.pendingUsd += delta;
+    persistBroken[bucket] = true;
+    console.error(`[ai-spend] flush failed (${bucket})`, caught instanceof Error ? caught.message : caught);
+  }
 }
 
 function ledgerFor(bucket: SpendBucket, at: Date): Ledger {
@@ -102,6 +200,11 @@ function ledgerFor(bucket: SpendBucket, at: Date): Ledger {
     ledger.monthKey = key;
     ledger.usd = 0;
     ledger.warned = false;
+    ledger.pendingUsd = 0;
+    ledger.pendingOpId = null;
+    ledger.loaded = false;
+    // 🔑 달이 바뀌면 그 달의 누계를 다시 읽어 온다(다른 인스턴스가 이미 쓰고 있을 수 있다).
+    void hydrate(bucket, key);
   }
   return ledger;
 }
@@ -129,6 +232,9 @@ export function registerUsageCost(bucket: SpendBucket, costUsd: number, at: Date
   if (!Number.isFinite(costUsd) || costUsd <= 0) return;
   const ledger = ledgerFor(bucket, at);
   ledger.usd += costUsd;
+  ledger.pendingUsd += costUsd;
+  // 🚨 기다리지 않는다. 장부 쓰기가 느리다고 학생이 기다리면 안 된다 — 뒤에서 흘려 보낸다.
+  void flush(bucket);
 
   const budgetUsd = budgetUsdFor(bucket);
   if (!ledger.warned && ledger.usd >= budgetUsd * WARN_RATIO) {
@@ -158,14 +264,35 @@ export function spendSnapshot(bucket: SpendBucket, at: Date = new Date()) {
     budgetUsd: budgetUsdFor(bucket),
     verdict: budgetVerdict(bucket, at),
     countingSince,
-    /** 🚨 프로세스 안에만 있는 장부다. 이 값이 false 가 되는 날 «월 상한»이라 불러도 된다. */
-    persisted: false,
+    /**
+     * 🚨 **이 값이 참일 때만 «월 상한»이라 부를 수 있다.**
+     *    DB 에서 이 달 값을 읽어 왔고, 쓰기가 깨져 있지 않아야 참이다.
+     *    거짓이면 지금 세고 있는 것은 «프로세스가 뜬 뒤로»뿐이다 — 읽는 쪽이 그걸 알아야 한다.
+     */
+    persisted: ledger.loaded && !persistBroken[bucket],
+    /** 아직 DB 로 못 보낸 금액. 0 이 아니면 장부가 뒤처져 있다는 뜻이다. */
+    pendingUsd: Number(ledger.pendingUsd.toFixed(4)),
+    lastPersistedAt,
   };
+}
+
+/** 서버가 뜰 때 한 번 — 이 달 누계를 읽어 온다. 🚨 실패해도 서버는 뜬다(수업이 먼저다). */
+export function initSpendLedger(at: Date = new Date()): void {
+  const key = monthKeyOf(at);
+  for (const bucket of Object.keys(ledgers) as SpendBucket[]) {
+    ledgers[bucket].monthKey = key;
+    void hydrate(bucket, key);
+  }
+}
+
+/** 테스트 전용 — DB 를 안 쓰는 상태로 둔다. */
+export function __markPersistBrokenForTest(broken: boolean, bucket: SpendBucket = 'lab'): void {
+  persistBroken[bucket] = broken;
 }
 
 /** 테스트 전용 — 장부를 비운다. 🚨 운영 코드에서 부르지 말 것. */
 export function __resetSpendForTest(): void {
   for (const bucket of Object.keys(ledgers) as SpendBucket[]) {
-    ledgers[bucket] = { monthKey: '', usd: 0, warned: false };
+    ledgers[bucket] = emptyLedger();
   }
 }
