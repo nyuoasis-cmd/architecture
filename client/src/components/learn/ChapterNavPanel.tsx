@@ -210,13 +210,20 @@ export default function ChapterNavPanel({
  */
 function LabMissionList() {
   const missionIndex = useLearnStore((state) => state.labMissionIndex);
+  /**
+   * 🚨 **스스로 도달한 자리**만 «끝»으로 센다. `jump` 로 건너뛰면 지나온 미션이
+   *    전부 `✓` 로 보여, 안 한 것을 한 것처럼 보였다(2026-08-15 Codex 리뷰).
+   *    건너뛴 구간은 «건너뜀»으로 따로 적는다 — 지운다고 없어지지 않아야 정직하다.
+   */
+  const earned = useLearnStore((state) => state.labEarnedIndex);
   const current = LAB_MISSIONS[missionIndex];
 
   return (
     <div className="mb-1 ml-[26px] mt-0.5 border-l-2 border-[var(--color-accent)] pl-2.5">
       <ol className="space-y-[3px]">
         {LAB_MISSIONS.map((mission, index) => {
-          const done = index < missionIndex;
+          const done = index < earned;
+          const skipped = index >= earned && index < missionIndex;
           const now = index === missionIndex;
           return (
             <li
@@ -230,12 +237,13 @@ function LabMissionList() {
               }`}
             >
               <span aria-hidden className="w-[13px] shrink-0 text-center font-mono text-[10px]">
-                {done ? '✓' : mission.live ? index + 1 : '·'}
+                {done ? '✓' : skipped ? '↷' : mission.live ? index + 1 : '·'}
               </span>
               <span className="min-w-0 flex-1">
                 {mission.label}
-                {/* 🚨 색만으로 «잠김»을 말하지 않는다 — 문자를 같이 적는다(접근성). */}
+                {/* 🚨 색만으로 «잠김»·«건너뜀»을 말하지 않는다 — 문자를 같이 적는다(접근성). */}
                 {!mission.live ? <span className="ml-1 text-[10px] text-[var(--color-text-faint)]">(잠김)</span> : null}
+                {skipped ? <span className="ml-1 text-[10px] text-[var(--color-text-faint)]">(건너뜀)</span> : null}
               </span>
             </li>
           );
@@ -259,18 +267,27 @@ function LabQuotaRow() {
   const remaining = useLearnStore((state) => state.labRemaining);
   return (
     <div className="mt-3 space-y-1 rounded-lg border border-[var(--color-border)] px-3 py-2 font-mono text-[11px] text-[var(--color-text-faint)]">
+      {/*
+        🚨 자습(참여 코드 없이 들어온 경우)은 **학생당 횟수를 안 센다.** 그런데도 숫자를 적으면
+           그건 실제 잔량이 아니다(2026-08-15 Codex 리뷰). 숫자 대신 «따로 잽니다»라고 말한다.
+      */}
       <div className="flex items-center justify-between">
         <span>AI 남은 횟수</span>
         <span className="font-semibold text-[var(--color-text-muted)]">
-          {remaining ? `${remaining.mission}회` : '확인 중'}
+          {!remaining ? '확인 중' : remaining.perStudent ? `${remaining.mission}회` : '따로 잽니다'}
         </span>
       </div>
       <div className="flex items-center justify-between">
         <span>질문 (따로)</span>
         <span className="font-semibold text-[var(--color-text-muted)]">
-          {remaining ? `${remaining.ask}회` : '확인 중'}
+          {!remaining ? '확인 중' : remaining.perStudent ? `${remaining.ask}회` : '따로 잽니다'}
         </span>
       </div>
+      {remaining && !remaining.perStudent ? (
+        <p className="pt-1 text-[10px] leading-[1.4] text-[var(--color-text-faint)]">
+          수업 코드로 들어오면 내 몫으로 셉니다.
+        </p>
+      ) : null}
     </div>
   );
 }

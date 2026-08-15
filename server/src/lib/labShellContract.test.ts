@@ -278,7 +278,7 @@ test('25) lab version 이 «무엇으로 만든 재생본인가»를 말한다 �
   const out = textOf(run(['lab version']).events)
   assert.ok(/2026-08-15/.test(out), '재생본을 만든 날짜가 없다')
   assert.ok(/claude-haiku/.test(out), '재생본을 만든 모델이 없다')
-  assert.ok(/해당 없음/.test(out), '지금 AI 를 안 부른다는 사실을 안 말한다 — 있는 것처럼 보인다')
+  assert.ok(/실시간 AI/.test(out), '지금 AI 를 부르는지 여부를 안 말한다')
 })
 
 test('26) 이 PR 까지 AI 를 부르는 명령이 하나도 없다 — 실패 체험은 돈 0원으로 겪는다', () => {
@@ -292,5 +292,75 @@ test('26) 이 PR 까지 AI 를 부르는 명령이 하나도 없다 — 실패 �
       false,
       `셸이 ${forbidden} 를 쓰고 있다 — 이 PR 은 AI 비용 0원이어야 한다`,
     )
+  }
+})
+
+// ─── PR6 — Codex 리뷰(2026-08-15)가 잡은 것들의 재발 가드 ───
+
+test('27) 저장한 규칙이 cat 으로 실제로 열린다 — 화면이 하라고 한 일은 할 수 있어야 한다', () => {
+  // 🚨 예전에는 저장이 상태만 바꾸고 파일 나무는 상수라 「아직 비어 있습니다」가 계속 나왔다.
+  //    게다가 실패 안내가 「cat 으로 내 답을 열어 보세요」였다 — 할 수 없는 일을 시켰다.
+  const saved = shell.saveRules(INITIAL_LAB_STATE, '할인율: N%\n최종가: N 으로만 적는다.').nextState
+  const out = textOf(execute('cat CLAUDE.md', saved, 'c1').events)
+  assert.ok(out.includes('할인율: N%'), `저장한 규칙이 cat 에 안 나온다:\n${out}`)
+  assert.equal(out.includes('아직 비어 있습니다'), false, '저장했는데 빈 문서가 나온다')
+
+  // 저장 전에는 스냅샷의 빈 문서가 그대로 나와야 한다(없는 것을 있다고 하지 않게).
+  const before = textOf(execute('cat CLAUDE.md', INITIAL_LAB_STATE, 'c0').events)
+  assert.ok(before.includes('아직 비어 있습니다'), '저장도 안 했는데 무언가 들어 있다')
+})
+
+test('28) 내 결과도 cat 으로 열린다 — 실패 안내가 「cat 으로 내 답을 열어 보라」고 말한다', () => {
+  const withOutputs = shell.applyMyOutputs(INITIAL_LAB_STATE, ['할인율: 10%\n최종가: 9000', '10% 할인입니다'])
+  const listed = textOf(execute('ls runs', withOutputs, 'l1').events)
+  assert.ok(listed.includes('my-1.txt'), `내 결과가 ls 에 안 보인다:\n${listed}`)
+  const opened = textOf(execute('cat runs/my-2.txt', withOutputs, 'o1').events)
+  assert.ok(opened.includes('10% 할인입니다'), '내 결과를 cat 으로 못 연다')
+})
+
+test('29) 비평은 «명령을 친 것»이 아니라 «받은 것»으로 센다 — 실패해도 끝난 것으로 표시되면 안 된다', () => {
+  const ready = run([
+    'ls',
+    'pwd',
+    ...data.LAB_RUN_FILES.map((f) => `cat ${f}`),
+    'npm test',
+  ]).state
+  const withRules = shell.saveRules(ready, 'x'.repeat(60)).nextState
+
+  // 명령만 쳤을 때 — 아직 안 끝났다.
+  const typed = execute('claude review', withRules, 'r1').nextState
+  assert.equal(typed.reviewDone, false, 'claude 를 친 것만으로 «비평을 받았다»가 된다')
+  assert.equal(missionIndexOf(typed), 5, '비평을 못 받았는데 다음 미션으로 넘어갔다')
+
+  // 실제로 받았고 검증도 했을 때 — 그제야 끝난다.
+  const reviewed = shell.markReviewDone(typed)
+  assert.equal(missionIndexOf(reviewed), 5, '검증(myOutputs)을 안 했는데 넘어갔다')
+  const verified = shell.applyMyOutputs(reviewed, ['할인율: 10%\n최종가: 9000'])
+  assert.equal(missionIndexOf(verified), 6, '비평도 받고 검증도 했는데 안 넘어간다')
+})
+
+test('30) lab version 이 «지금 AI 를 부르는가»를 사실대로 말한다', () => {
+  const out = textOf(run(['lab version']).events)
+  assert.equal(out.includes('해당 없음'), false, 'AI 를 부르는데 «해당 없음»이라고 말한다')
+  assert.ok(/claude review/.test(out), '무엇이 실제로 AI 를 부르는지 안 말한다')
+})
+
+test('31) 화면이 시키는 명령은 전부 실제로 도는 명령이다 — 없는 것을 시키면 학생이 막힌다', () => {
+  // 🔑 이번 사고의 형태 = 「cat 으로 내 답을 열어 보세요」인데 열 수 없었던 것.
+  //    안내 문구에 등장하는 명령이 실제로 도는지 기계로 대조한다.
+  const shellSource = readFileSync(
+    resolve(__dirname, '..', '..', '..', 'client', 'src', 'lib', 'lab-shell.ts'),
+    'utf8',
+  )
+  const suggested = new Set<string>()
+  for (const match of shellSource.matchAll(/(?:예\)|으로|로)\s*([a-z]+(?: [a-z]+)?)\s*(?:로|를|으로|하세요|해 보세요)/g)) {
+    const candidate = match[1]?.trim()
+    if (candidate) suggested.add(candidate)
+  }
+  for (const command of suggested) {
+    const head = command.split(' ')[0]!
+    if (!shell.LAB_COMMAND_NAMES.some((name) => name.split(' ')[0] === head)) continue
+    const reply = textOf(run([command === 'cat' || command === 'cd' ? `${command} runs` : command]).events)
+    assert.equal(reply.includes('모르는 명령'), false, `안내에 나오는 «${command}» 가 실제로는 안 돈다`)
   }
 })

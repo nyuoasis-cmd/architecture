@@ -141,7 +141,7 @@ export default function MyTurnTab({ qaId, config }: MyTurnTabProps) {
       ) : null}
       {status === 'budget' ? (
         <p className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-[13px] text-amber-800">
-          오늘은 AI 판정을 더 쓸 수 없어요. 선생님께 알려 주세요. (다시 눌러도 열리지 않습니다.)
+          이번 달 AI 예산을 다 썼어요. 선생님께 알려 주세요. (다시 눌러도 열리지 않습니다.)
         </p>
       ) : null}
       {status === 'error' ? (

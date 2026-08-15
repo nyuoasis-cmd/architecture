@@ -16,6 +16,7 @@ import {
   LabRateLimitError,
   __refundForTest,
   __resetLabAiForTest,
+  __queueDepthForTest,
   __takeTokenForTest,
   remainingFor,
 } from './lab-ai'
@@ -194,4 +195,84 @@ test('16) 남은 횟수가 JSON 으로 나갈 수 있는 값이다 — Infinity 
   const parsed = JSON.parse(JSON.stringify(remainingFor(SHARED))) as { mission: unknown; ask: unknown }
   assert.equal(typeof parsed.mission, 'number', '공유 통의 남은 횟수가 JSON 으로 숫자가 아니다')
   assert.equal(typeof parsed.ask, 'number')
+})
+
+// ─── PR6 — Codex 리뷰(2026-08-15) 재발 가드 ───
+
+test('17) 검증 2회를 한꺼번에 잡는다 — 1회 남은 학생이 첫 호출에 돈만 쓰고 막히면 안 된다', () => {
+  __resetLabAiForTest()
+  // 3회 중 2회를 이미 썼다 → 1회만 남음.
+  __takeTokenForTest(STUDENT, 'mission', 2)
+  assert.equal(remainingFor(STUDENT).mission, 1)
+  assert.throws(
+    () => __takeTokenForTest(STUDENT, 'mission', 2),
+    LabQuotaError,
+    '2회가 필요한데 1회만 남았는데도 잡혔다 — 첫 호출이 돈을 쓰고 두 번째에서 막힌다',
+  )
+  // 🔑 막혔으면 **아무것도 안 써야** 한다.
+  assert.equal(remainingFor(STUDENT).mission, 1, '실패한 예약이 횟수를 갉아먹었다')
+})
+
+test('18) 부분 실패는 «못 쓴 만큼만» 되돌린다 — 이미 나간 호출은 돈이 들었다', () => {
+  __resetLabAiForTest()
+  __takeTokenForTest(STUDENT, 'mission', 2)
+  assert.equal(remainingFor(STUDENT).mission, 1)
+  __refundForTest(STUDENT, 'mission', 1) // 둘 중 하나만 성공한 상황
+  assert.equal(remainingFor(STUDENT).mission, 2, '못 쓴 몫이 안 돌아왔다')
+})
+
+test('19) 파싱 실패가 환불 안쪽에서 일어난다 — 밖이면 횟수만 닳고 화면은 «돌려드렸다»고 거짓말한다', () => {
+  const source = read('lab-ai.ts')
+  // 🔑 `callHaiku` 가 파서를 **인자로 받아** 자기 try 안에서 돌려야 한다.
+  assert.ok(/parse: \(text: string\) => T/.test(source), 'callHaiku 가 파싱을 안쪽으로 안 받는다')
+  assert.ok(/return parse\(text\)/.test(source), '파싱이 callHaiku 의 try 안에서 안 일어난다')
+  const review = source.slice(source.indexOf('export async function reviewDraft'))
+  const parseAt = review.indexOf('JSON.parse')
+  const callAt = review.indexOf('callHaiku')
+  assert.ok(parseAt > callAt, 'reviewDraft 가 callHaiku 밖에서 파싱한다 — 실패해도 환불이 안 된다')
+})
+
+test('20) 입력 길이 상한이 system 에도 걸린다 — user 만 자르면 검증 경로에서 상한이 무력해진다', () => {
+  const source = read('lab-ai.ts')
+  assert.ok(
+    /system: system\.slice\(0, LAB_AI_LIMITS\.maxInputChars\)/.test(source),
+    'system 메시지를 안 자른다 — 검증은 규칙을 system 에 통째로 넣는다',
+  )
+  assert.ok(/content: user\.slice\(0, LAB_AI_LIMITS\.maxInputChars\)/.test(source), 'user 메시지를 안 자른다')
+})
+
+test('21) 큐에 길이·대기시간·취소가 있다 — 없으면 마지막 학생이 6분을 기다리고, 나간 학생 몫으로 돈이 나간다', () => {
+  assert.ok(LAB_AI_LIMITS.maxQueued > 0, '대기열 길이 상한이 없다 — 무한정 쌓인다')
+  assert.ok(LAB_AI_LIMITS.maxWaitMs > 0 && LAB_AI_LIMITS.maxWaitMs <= 60_000, '대기 시간 상한이 없거나 너무 길다')
+  const source = read('lab-ai.ts')
+  assert.ok(/signal\?\.addEventListener\(\s*'abort'/.test(source), '요청이 끊겨도 큐에서 안 빠진다')
+  assert.ok(/if \(signal\?\.aborted\) throw new LabAbortedError/.test(source), '슬롯을 잡은 뒤 이탈을 안 본다')
+  // 대기열이 꽉 차면 «기다려라»가 아니라 «몇 초 뒤»로 바로 답해야 한다.
+  assert.ok(/waiting\.length >= LAB_AI_LIMITS\.maxQueued/.test(source), '대기열 상한을 안 본다')
+})
+
+test('22) 슬롯이 새지 않는다 — 성공·실패·취소 어느 쪽이든 반납된다', () => {
+  const source = read('lab-ai.ts')
+  const withSlot = source.slice(source.indexOf('async function withSlot'), source.indexOf('/** 테스트 전용 — 큐 상태'))
+  assert.ok(/finally \{[\s\S]*active -= 1;[\s\S]*wakeNext\(\)/.test(withSlot), '슬롯 반납이 finally 밖에 있다')
+  const depth = __queueDepthForTest()
+  assert.equal(depth.active, 0, `슬롯이 샜다: active=${depth.active}`)
+  assert.equal(depth.waiting, 0, `대기열이 남았다: waiting=${depth.waiting}`)
+})
+
+test('23) 이탈은 «고장»으로 세지 않는다 — 수업 중 오류 로그가 이탈로 가득 차면 진짜 고장을 못 본다', () => {
+  const source = read('..', 'routes', 'lab.ts')
+  assert.ok(/if \(caught instanceof LabAbortedError\) return;/.test(source), '이탈을 502 로 센다')
+})
+
+test('24) 공유 통은 «횟수»가 아니라 «따로 잰다»고 말한다 — 999 는 실제 잔량이 아니다', () => {
+  __resetLabAiForTest()
+  assert.equal(remainingFor(SHARED).perStudent, false, '공유 통인데 학생당 횟수가 걸린다고 말한다')
+  assert.equal(remainingFor(STUDENT).perStudent, true, '학생 한 명인데 안 센다고 말한다')
+  const nav = readFileSync(
+    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'ChapterNavPanel.tsx'),
+    'utf8',
+  )
+  assert.ok(/remaining\.perStudent \?/.test(nav), '화면이 공유 통과 학생 한 명을 안 가른다')
+  assert.ok(/따로 잽니다/.test(nav), '공유 통일 때 «따로 잽니다»라고 안 적는다 — 999 가 잔량처럼 보인다')
 })

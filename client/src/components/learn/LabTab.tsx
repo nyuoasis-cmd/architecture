@@ -3,6 +3,7 @@ import {
   INITIAL_LAB_STATE,
   applyMyOutputs,
   execute,
+  markReviewDone,
   openingEvents,
   saveRules,
   type LabEvent,
@@ -36,8 +37,31 @@ type LabTabProps = {
  *    태블릿에서 Ctrl·Esc 가 없어도 쓸 수 있다(2026-08-15 정정).
  */
 export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
-  const [state, setState] = useState<LabState>(INITIAL_LAB_STATE);
-  const [lines, setLines] = useState<LabEvent[]>(() => openingEvents());
+  /**
+   * 🚨 실습 작업은 **컴포넌트 밖(스토어)에** 산다. 우측 탭이 조건부 렌더라, 여기 두면
+   *    학생이 📖 읽기 탭에 한 번 들렀다 오는 것만으로 90분 작업이 통째로 사라진다
+   *    (2026-08-15 Codex 리뷰). 되돌리지 말 것 — 계약 `labSurvivesTabSwitch` 가 잡는다.
+   */
+  const session = useLearnStore((store) => store.labSession);
+  const setSession = useLearnStore((store) => store.setLabSession);
+  const live = session && session.qaId === qaId ? session : null;
+  const state = live?.state ?? INITIAL_LAB_STATE;
+  const lines = live?.lines ?? EMPTY_LINES;
+  const history = live?.history ?? EMPTY_HISTORY;
+
+  const commit = (next: Partial<{ state: LabState; lines: LabEvent[]; history: string[] }>) => {
+    setSession({ qaId, state, lines, history, ...next });
+  };
+  const setState = (updater: LabState | ((prev: LabState) => LabState)) => {
+    commit({ state: typeof updater === 'function' ? updater(state) : updater });
+  };
+  const setLines = (updater: LabEvent[] | ((prev: LabEvent[]) => LabEvent[])) => {
+    commit({ lines: typeof updater === 'function' ? updater(lines) : updater });
+  };
+  const setHistory = (updater: string[] | ((prev: string[]) => string[])) => {
+    commit({ history: typeof updater === 'function' ? updater(history) : updater });
+  };
+
   const [draft, setDraft] = useState('');
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorText, setEditorText] = useState('');
@@ -45,23 +69,23 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
   // 🔑 남은 횟수는 좌측 목차도 읽으므로 스토어에 둔다 — 두 곳이 따로 세면 서로 다른 숫자를 보인다.
   const setRemaining = useLearnStore((store) => store.setLabRemaining);
   /** 위/아래로 되돌려 쓰는 지난 명령. 터미널에서 가장 먼저 기대하는 동작이다. */
-  const [history, setHistory] = useState<string[]>([]);
   const [historyAt, setHistoryAt] = useState<number | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const seq = useRef(0);
 
-  // 문항이 바뀌면 실습실을 처음 상태로. 🚨 남은 화면을 이어 붙이면 다른 문항의 출력이 섞인다.
+  // 🔑 이 문항의 세션이 아직 없을 때만 새로 만든다. **이미 있으면 그대로 이어 쓴다** —
+  //    탭을 옮겼다 돌아온 것뿐이라면 아무것도 지우지 않는다.
+  //    🚨 문항이 바뀌었으면 통째로 새로 만든다. 남은 화면을 이어 붙이면 다른 문항의 출력이 섞인다.
   useEffect(() => {
-    setState(INITIAL_LAB_STATE);
-    setLines(openingEvents());
+    if (session?.qaId === qaId) return;
+    setSession({ qaId, state: INITIAL_LAB_STATE, lines: openingEvents(), history: [] });
     setDraft('');
-    setHistory([]);
     setHistoryAt(null);
     setEditorOpen(false);
     setEditorText('');
     seq.current = 0;
-  }, [qaId]);
+  }, [qaId, session?.qaId, setSession]);
 
   // 남은 횟수는 서버만 안다. 화면이 열릴 때 한 번 물어본다.
   useEffect(() => {
@@ -169,6 +193,8 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
           });
           rows.push({ text: '  고치는 것은 여러분 몫입니다 — edit 로 다시 여세요.', tone: 'dim' });
         }
+        // 🚨 «비평을 받았다»는 여기서만 기록한다 — 명령을 친 시점이 아니다.
+        setState((prev) => markReviewDone(prev));
         say(rows);
         return;
       }
@@ -203,7 +229,9 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
         said.push({
           text: differ
             ? '  두 답은 서로 달랐는데 둘 다 읽혔습니다 — 글자가 같아서가 아니라 형식을 지켜서입니다.'
-            : '  이번엔 두 답이 똑같이 나왔습니다. 규칙이 그만큼 좁았다는 뜻이에요 — 그래도 통과의 이유는 «형식»입니다.',
+            // 🚨 «규칙이 좁아서 같아졌다»고 단정하지 않는다 — 같은 답이 나온 이유는 알 수 없다.
+            //    확실한 것은 «둘 다 형식을 지켰다»는 것뿐이다(2026-08-15 Codex 리뷰).
+            : '  이번엔 두 답이 똑같이 나왔습니다. 왜 같았는지는 알 수 없지만, 둘 다 형식을 지켰습니다.',
           tone: 'plain',
         });
       } else {
@@ -353,6 +381,10 @@ const EDITOR_PLACEHOLDER = `여기에 규칙을 적어 보세요.
 - 숫자는 어떤 모양으로 적을 것인가
 
 (이 안내는 저장되지 않습니다.)`;
+
+/** 🔑 매 렌더마다 새 배열을 만들면 useEffect 가 헛돈다. */
+const EMPTY_LINES: LabEvent[] = [];
+const EMPTY_HISTORY: string[] = [];
 
 const TONE_CLASS: Record<LabTone, string> = {
   input: 'text-white font-semibold',

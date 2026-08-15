@@ -45,6 +45,10 @@ export const LAB_AI_LIMITS = {
   maxOutputTokens: envInt('LAB_MAX_OUTPUT_TOKENS', 900),
   /** 🚨 동시에 몇 개까지 부르는가. 넘치면 큐에서 기다린다(거절하지 않는다 — 수업 중이니까). */
   maxConcurrent: envInt('LAB_MAX_CONCURRENT', 4),
+  /** 🚨 대기열 길이 상한. 넘치면 기다리게 하지 말고 «몇 초 뒤»라고 바로 답한다. */
+  maxQueued: envInt('LAB_MAX_QUEUED', 24),
+  /** 🚨 대기 시간 상한. 이보다 오래 기다릴 바에는 정직하게 돌려보낸다. */
+  maxWaitMs: envInt('LAB_MAX_WAIT_MS', 20000),
   /** 입력 길이 상한(문자). 규칙 문서 한 장이면 충분하고, 넘으면 잘라서 보낸다. */
   maxInputChars: envInt('LAB_MAX_INPUT_CHARS', 4000),
 } as const;
@@ -65,6 +69,8 @@ export class LabQuotaError extends Error {
 }
 export class LabBudgetError extends Error {}
 export class LabUnavailableError extends Error {}
+/** 학생이 화면을 닫았다. 🔑 «고장»이 아니라 «안 부름»이다 — 로그를 시끄럽게 만들지 않는다. */
+export class LabAbortedError extends Error {}
 
 // ── 세는 통 ────────────────────────────────────────────────────────────────
 type Bucket = { count: number; resetAt: number };
@@ -78,9 +84,9 @@ const usedCalls = new Map<string, { mission: number; ask: number }>();
 let globalMinute: Bucket = { count: 0, resetAt: 0 };
 let globalDay: Bucket = { count: 0, resetAt: 0 };
 
-function bump(bucket: Bucket | undefined, now: number, window: number): Bucket {
-  if (!bucket || bucket.resetAt <= now) return { count: 1, resetAt: now + window };
-  return { count: bucket.count + 1, resetAt: bucket.resetAt };
+function bump(bucket: Bucket | undefined, now: number, window: number, count = 1): Bucket {
+  if (!bucket || bucket.resetAt <= now) return { count, resetAt: now + window };
+  return { count: bucket.count + count, resetAt: bucket.resetAt };
 }
 
 function usedOf(actorId: string) {
@@ -102,98 +108,175 @@ export type LabCallKind = 'mission' | 'ask';
  */
 const SHARED_UNCAPPED = 999;
 
-export function remainingFor(actorId: string): { mission: number; ask: number } {
+export type LabRemaining = {
+  mission: number;
+  ask: number;
+  /**
+   * 🚨 학생당 횟수가 걸리는 경우인가. 공유 통(자습)은 **개인 횟수를 안 센다** —
+   *    그런데도 화면이 「999회 남음」이라고 적으면 그건 실제 잔량이 아니다(2026-08-15 Codex 리뷰).
+   *    화면은 이 값이 거짓이면 숫자 대신 «따로 잽니다»라고 말한다.
+   */
+  perStudent: boolean;
+};
+
+export function remainingFor(actorId: string): LabRemaining {
   const used = usedOf(actorId);
   if (!isParticipantKey(actorId)) {
-    return { mission: SHARED_UNCAPPED, ask: SHARED_UNCAPPED };
+    return { mission: SHARED_UNCAPPED, ask: SHARED_UNCAPPED, perStudent: false };
   }
   return {
     mission: Math.max(0, LAB_AI_LIMITS.missionCalls - used.mission),
     ask: Math.max(0, LAB_AI_LIMITS.askCalls - used.ask),
+    perStudent: true,
   };
 }
 
-/** 한도를 하나 집는다. 통과하면 «썼다»고 적고, 막히면 던진다. */
-function takeToken(actorId: string, kind: LabCallKind): void {
+/**
+ * 한도를 **n 개 한꺼번에** 집는다.
+ * 🚨 검증은 AI 를 두 번 부른다. 한 개씩 집으면 «1회 남은 학생»이 첫 호출에 돈과 마지막 횟수를 쓰고
+ *    두 번째에서 막힌다 — 첫 결과는 버려지고 재시도할 횟수도 안 남는다(2026-08-15 Codex 리뷰).
+ *    그래서 **다 잡히거나 하나도 안 잡히거나** 둘 중 하나여야 한다.
+ */
+function takeToken(actorId: string, kind: LabCallKind, count = 1): void {
   if (!labGuardEnabled()) return;
   const now = Date.now();
 
   // 🚨 학생당 횟수는 «학생 한 명»에게만. 공유 통은 remainingFor 가 큰 수를 돌려주므로 여기서 안 막힌다 —
   //    막는 것은 아래의 분당·일일·전역 한도와 돈 천장이다.
   const remaining = remainingFor(actorId);
-  if (remaining[kind] <= 0) throw new LabQuotaError(kind);
+  if (remaining[kind] < count) throw new LabQuotaError(kind);
 
   const isOne = isParticipantKey(actorId);
   const minuteLimit = isOne ? LAB_AI_LIMITS.actorPerMin : LAB_AI_LIMITS.sharedPerMin;
   const minute = minuteBuckets.get(actorId);
-  if (minute && minute.resetAt > now && minute.count >= minuteLimit) {
+  if (minute && minute.resetAt > now && minute.count + count > minuteLimit) {
     throw new LabRateLimitError(Math.ceil((minute.resetAt - now) / 1000));
   }
   if (!isOne) {
     const day = dayBuckets.get(actorId);
-    if (day && day.resetAt > now && day.count >= LAB_AI_LIMITS.sharedDaily) {
+    if (day && day.resetAt > now && day.count + count > LAB_AI_LIMITS.sharedDaily) {
       throw new LabRateLimitError(Math.ceil((day.resetAt - now) / 1000));
     }
   }
-  if (globalMinute.resetAt > now && globalMinute.count >= LAB_AI_LIMITS.globalPerMin) {
+  if (globalMinute.resetAt > now && globalMinute.count + count > LAB_AI_LIMITS.globalPerMin) {
     throw new LabRateLimitError(Math.ceil((globalMinute.resetAt - now) / 1000));
   }
-  if (globalDay.resetAt > now && globalDay.count >= LAB_AI_LIMITS.globalDaily) {
+  if (globalDay.resetAt > now && globalDay.count + count > LAB_AI_LIMITS.globalDaily) {
     throw new LabRateLimitError(Math.ceil((globalDay.resetAt - now) / 1000));
   }
 
-  minuteBuckets.set(actorId, bump(minute, now, MINUTE));
-  dayBuckets.set(actorId, bump(dayBuckets.get(actorId), now, DAY));
-  globalMinute = bump(globalMinute, now, MINUTE);
-  globalDay = bump(globalDay, now, DAY);
+  minuteBuckets.set(actorId, bump(minute, now, MINUTE, count));
+  dayBuckets.set(actorId, bump(dayBuckets.get(actorId), now, DAY, count));
+  globalMinute = bump(globalMinute, now, MINUTE, count);
+  globalDay = bump(globalDay, now, DAY, count);
 
   const used = usedOf(actorId);
-  usedCalls.set(actorId, { ...used, [kind]: used[kind] + 1 });
+  usedCalls.set(actorId, { ...used, [kind]: used[kind] + count });
 }
 
 /**
  * 🔑 기술 실패 환불 — **우리 잘못으로 실패한 것만** 되돌린다.
  * 🚨 학생이 낸 글이 나빠서 나온 결과는 환불하지 않는다. 그건 실패가 아니라 **학습**이다.
  */
-function refund(actorId: string, kind: LabCallKind): void {
+function refund(actorId: string, kind: LabCallKind, count = 1): void {
   const used = usedOf(actorId);
-  usedCalls.set(actorId, { ...used, [kind]: Math.max(0, used[kind] - 1) });
+  usedCalls.set(actorId, { ...used, [kind]: Math.max(0, used[kind] - count) });
 }
 
 // ── 동시성 큐 ──────────────────────────────────────────────────────────────
+//
+// 🚨 예전 큐에는 **길이도 대기 시간 상한도 취소도 없었다**(2026-08-15 Codex 리뷰).
+//    4슬롯에 60회가 몰리면 마지막 학생은 6분 넘게 화면이 잠긴 채 기다렸고, 페이지를 닫고
+//    나간 요청도 큐에 그대로 남아 슬롯과 돈을 썼다. 수업 중에 그건 «고장»으로 읽힌다.
+// 🔑 그래서 셋을 둔다: 길이 상한(넘치면 «몇 초 뒤»라고 정직하게 돌려보낸다) ·
+//    대기 시간 상한 · 요청이 끊기면 취소.
 let active = 0;
-const waiting: (() => void)[] = [];
+type Waiter = { resolve: () => void; reject: (error: Error) => void; timer: NodeJS.Timeout };
+const waiting: Waiter[] = [];
 
-async function withSlot<T>(run: () => Promise<T>): Promise<T> {
+function wakeNext(): void {
+  const next = waiting.shift();
+  if (!next) return;
+  clearTimeout(next.timer);
+  next.resolve();
+}
+
+async function withSlot<T>(run: () => Promise<T>, signal?: AbortSignal): Promise<T> {
   if (active >= LAB_AI_LIMITS.maxConcurrent) {
-    // 🚨 거절하지 않고 **기다린다.** 수업 중에 «지금 붐빕니다»는 학생에게 «고장»으로 읽힌다.
-    await new Promise<void>((resolve) => waiting.push(resolve));
+    // 🚨 무한정 쌓지 않는다. 대기열이 꽉 차면 «지금은 붐빈다, 몇 초 뒤»라고 **바로** 말한다 —
+    //    6분을 기다리게 하는 것보다 낫다. 횟수는 아직 안 썼으므로 손해가 없다.
+    if (waiting.length >= LAB_AI_LIMITS.maxQueued) {
+      throw new LabRateLimitError(Math.ceil(LAB_AI_LIMITS.maxWaitMs / 1000));
+    }
+    await new Promise<void>((resolve, reject) => {
+      const waiter: Waiter = {
+        resolve,
+        reject,
+        timer: setTimeout(() => {
+          const at = waiting.indexOf(waiter);
+          if (at >= 0) waiting.splice(at, 1);
+          reject(new LabRateLimitError(Math.ceil(LAB_AI_LIMITS.maxWaitMs / 1000)));
+        }, LAB_AI_LIMITS.maxWaitMs),
+      };
+      // 🔑 학생이 화면을 닫으면 큐에서 빠진다. 안 빼면 없는 사람 몫으로 돈이 나간다.
+      signal?.addEventListener(
+        'abort',
+        () => {
+          const at = waiting.indexOf(waiter);
+          if (at >= 0) {
+            waiting.splice(at, 1);
+            clearTimeout(waiter.timer);
+            reject(new LabAbortedError('client_gone'));
+          }
+        },
+        { once: true },
+      );
+      waiting.push(waiter);
+    });
   }
+  // 🚨 슬롯을 잡은 뒤에도 이미 나간 사람이면 부르지 않는다.
+  if (signal?.aborted) throw new LabAbortedError('client_gone');
   active += 1;
   try {
     return await run();
   } finally {
     active -= 1;
-    waiting.shift()?.();
+    wakeNext();
   }
+}
+
+/** 테스트 전용 — 큐 상태. */
+export function __queueDepthForTest(): { active: number; waiting: number } {
+  return { active, waiting: waiting.length };
 }
 
 const anthropic = env.ANTHROPIC_API_KEY ? new Anthropic({ apiKey: env.ANTHROPIC_API_KEY }) : null;
 
 type CallResult = { text: string };
 
-/** AI 한 번 부르기 — 한도·예산·시간·환불이 전부 여기 한 자리에 모여 있다. */
-async function callHaiku(
+/**
+ * AI 한 번 부르기 — 한도·예산·시간·환불이 전부 여기 한 자리에 모여 있다.
+ *
+ * 🚨 `parse` 를 **인자로 받는다.** 예전에는 부른 쪽에서 JSON 을 파싱했는데, 그 실패가 환불 catch
+ *    **밖**이라 모델이 깨진 JSON 을 주면 학생 횟수만 닳고 화면은 「돌려드렸습니다」라고 반대로 말했다
+ *    (2026-08-15 Codex 리뷰). 파싱까지 이 안에서 해야 «우리 쪽 사정»이 하나로 묶인다.
+ * 🚨 입력 길이 상한은 **system 과 user 양쪽**에 건다. user 만 자르면 검증처럼 규칙을 system 에
+ *    넣는 경로에서 상한이 통째로 무력해진다.
+ */
+async function callHaiku<T>(
   actorId: string,
   kind: LabCallKind,
   system: string,
   user: string,
-): Promise<CallResult> {
+  parse: (text: string) => T,
+  options: { signal?: AbortSignal; reserved?: boolean } = {},
+): Promise<T> {
   if (!anthropic) throw new LabUnavailableError('no_api_key');
   // 🔑 돈을 먼저 본다 — 쓰고 나서 세면 천장을 넘긴 뒤에야 알게 된다.
   if (budgetVerdict('lab') !== 'ok') throw new LabBudgetError('budget_exceeded');
 
-  takeToken(actorId, kind);
+  // 🔑 이미 여러 회를 한꺼번에 잡아 둔 경로(검증)는 여기서 또 잡지 않는다.
+  if (!options.reserved) takeToken(actorId, kind);
 
   try {
     return await withSlot(async () => {
@@ -201,7 +284,7 @@ async function callHaiku(
         {
           model: HAIKU_MODEL,
           max_tokens: LAB_AI_LIMITS.maxOutputTokens,
-          system,
+          system: system.slice(0, LAB_AI_LIMITS.maxInputChars),
           messages: [{ role: 'user', content: user.slice(0, LAB_AI_LIMITS.maxInputChars) }],
         },
         { timeout: LAB_AI_LIMITS.timeoutMs },
@@ -213,11 +296,13 @@ async function callHaiku(
         .map((block) => block.text)
         .join('\n')
         .trim();
-      return { text };
-    });
+      // 🔑 파싱 실패도 이 안에서 터져야 아래 catch 가 환불한다.
+      return parse(text);
+    }, options.signal);
   } catch (caught) {
     // 🔑 여기 온 것은 «부르다 실패했다» = 우리 쪽 사정이다. 학생 횟수를 되돌려 준다.
-    refund(actorId, kind);
+    //    🚨 예약분(검증)은 부른 쪽이 남은 몫까지 한꺼번에 되돌린다 — 여기서 1 만 빼면 나머지가 샌다.
+    if (!options.reserved) refund(actorId, kind);
     throw caught;
   }
 }
@@ -243,29 +328,33 @@ const REVIEW_SYSTEM = `너는 글쓰기 코치다. 학생이 쓴 "규칙 문서"
 
 export type LabReview = { good: string; issues: { where: string; why: string }[] };
 
-export async function reviewDraft(actorId: string, draft: string): Promise<LabReview> {
+export async function reviewDraft(actorId: string, draft: string, signal?: AbortSignal): Promise<LabReview> {
   const trimmed = draft.trim();
   if (trimmed.length < 10) throw new LabUnavailableError('draft_too_short');
 
-  const { text } = await callHaiku(
+  return callHaiku(
     actorId,
     'mission',
     REVIEW_SYSTEM,
     `학생이 쓴 규칙 문서다. 애매한 곳을 지적해라.\n\n---\n${trimmed}\n---`,
+    // 🔑 파싱을 여기 넣는 이유 = 실패해도 환불되게(위 주석). 밖에서 하면 횟수만 닳는다.
+    (text) => {
+      const match = text.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('review_no_json');
+      const parsed = JSON.parse(match[0]) as Partial<LabReview>;
+      return {
+        good: typeof parsed.good === 'string' ? parsed.good : '',
+        issues: Array.isArray(parsed.issues)
+          ? parsed.issues
+              .filter((issue): issue is { where: string; why: string } =>
+                Boolean(issue && typeof issue.where === 'string' && typeof issue.why === 'string'),
+              )
+              .slice(0, 3)
+          : [],
+      };
+    },
+    { signal },
   );
-  const match = text.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error('review_no_json');
-  const parsed = JSON.parse(match[0]) as Partial<LabReview>;
-  return {
-    good: typeof parsed.good === 'string' ? parsed.good : '',
-    issues: Array.isArray(parsed.issues)
-      ? parsed.issues
-          .filter((issue): issue is { where: string; why: string } =>
-            Boolean(issue && typeof issue.where === 'string' && typeof issue.why === 'string'),
-          )
-          .slice(0, 3)
-      : [],
-  };
 }
 
 // ── 2) 검증 — 「내 규칙대로 두 번 시켜 보기」 ───────────────────────────────
@@ -281,22 +370,36 @@ const VERIFY_TASK = `원가 10,000원짜리 물건을 1,000원 깎아 판다. �
 
 export const LAB_VERIFY_RUNS = 2;
 
-export async function verifyWithRules(actorId: string, rules: string): Promise<string[]> {
+export async function verifyWithRules(actorId: string, rules: string, signal?: AbortSignal): Promise<string[]> {
   const trimmed = rules.trim();
   if (trimmed.length < 10) throw new LabUnavailableError('rules_too_short');
 
+  // 🚨 **두 번을 한꺼번에 잡는다.** 하나씩 잡으면 «1회 남은 학생»이 첫 호출에 돈과 마지막 횟수를 쓰고
+  //    두 번째에서 막힌다 — 첫 결과는 버려지고 재시도할 횟수도 안 남는다(2026-08-15 Codex 리뷰).
+  if (budgetVerdict('lab') !== 'ok') throw new LabBudgetError('budget_exceeded');
+  takeToken(actorId, 'mission', LAB_VERIFY_RUNS);
+
   const outputs: string[] = [];
-  for (let i = 0; i < LAB_VERIFY_RUNS; i += 1) {
-    const { text } = await callHaiku(
-      actorId,
-      'mission',
-      `너는 계산 결과를 보고하는 도구다. 아래 "규칙"을 그대로 지켜서 답해라.\n\n규칙:\n${trimmed}`,
-      VERIFY_TASK,
-    );
-    outputs.push(text);
+  try {
+    for (let i = 0; i < LAB_VERIFY_RUNS; i += 1) {
+      const text = await callHaiku(
+        actorId,
+        'mission',
+        `너는 계산 결과를 보고하는 도구다. 아래 "규칙"을 그대로 지켜서 답해라.\n\n규칙:\n${trimmed}`,
+        VERIFY_TASK,
+        (raw) => raw,
+        { signal, reserved: true },
+      );
+      outputs.push(text);
+    }
+  } catch (caught) {
+    // 🔑 잡아 둔 것 중 **못 쓴 만큼만** 되돌린다. 이미 나간 호출은 돈이 들었으므로 환불하지 않는다.
+    refund(actorId, 'mission', LAB_VERIFY_RUNS - outputs.length);
+    throw caught;
   }
   return outputs;
 }
+
 
 // ── 3) 질문 — 「모르는 걸 물어본다」 ────────────────────────────────────────
 
@@ -306,11 +409,10 @@ const ASK_SYSTEM = `너는 IT 수업의 조교다. 학생이 터미널 실습 �
 - 학생의 과제(규칙 문서)를 대신 써 주지 마라. 방법만 알려 준다.
 - 이 실습실이 아는 명령: help ls cat cd pwd clear npm test edit claude review ask reset jump lab exit`;
 
-export async function askQuestion(actorId: string, question: string): Promise<string> {
+export async function askQuestion(actorId: string, question: string, signal?: AbortSignal): Promise<string> {
   const trimmed = question.trim();
   if (trimmed.length < 2) throw new LabUnavailableError('question_too_short');
-  const { text } = await callHaiku(actorId, 'ask', ASK_SYSTEM, trimmed);
-  return text;
+  return callHaiku(actorId, 'ask', ASK_SYSTEM, trimmed, (text) => text, { signal });
 }
 
 /** 테스트 전용 — 통을 비운다. 🚨 운영 코드에서 부르지 말 것. */

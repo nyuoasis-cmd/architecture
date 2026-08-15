@@ -232,3 +232,26 @@ test('17) /health 가 지출과 «저장됐는가»를 같이 낸다 — 안 내
   assert.ok(/spendSnapshot\('lab'\)/.test(source), '/health 가 실습 주머니를 안 낸다')
   assert.ok(/initSpendLedger\(\)/.test(source), '서버가 뜰 때 이 달 누계를 안 읽어 온다 — 늘 0 부터 센다')
 })
+
+test('18) 같은 증분을 두 번 보내도 한 번만 적용된다 — 응답 유실 → 재전송이 예산을 조기에 막는다', () => {
+  // 🚨 2026-08-15 Codex 리뷰: DB 는 커밋됐는데 응답만 유실되면 catch 가 delta 를 되돌리고
+  //    다음 flush 가 같은 지출을 또 더했다. 연산 식별자로 한 번만 적용한다.
+  const sql = readFileSync(resolve(__dirname, '..', '..', '..', 'sql', '008_ai_spend.sql'), 'utf8')
+  assert.ok(/architecture_ai_spend_ops/.test(sql), '적용한 연산을 기록하는 표가 없다')
+  assert.ok(/p_op_id UUID/.test(sql), '증분 함수가 연산 식별자를 안 받는다')
+  assert.ok(/ON CONFLICT \(op_id\) DO NOTHING/.test(sql), '같은 연산이 두 번 와도 막지 않는다')
+
+  const source = readFileSync(resolve(__dirname, 'ai-spend.ts'), 'utf8')
+  assert.ok(/p_op_id: opId/.test(source), '코드가 연산 식별자를 안 보낸다')
+  assert.ok(
+    /ledger\.pendingOpId \?\? randomUUID\(\)/.test(source),
+    '재전송 때 **같은** 키를 안 쓴다 — 새 키를 만들면 중복 방지가 헛돈다',
+  )
+})
+
+test('19) 「저장됐는가」를 주머니별로 센다 — 공용이면 chat 성공이 lab 실패를 지운다', () => {
+  __resetSpendForTest()
+  __markPersistBrokenForTest(true, 'lab')
+  __markPersistBrokenForTest(false, 'chat')
+  assert.equal(spendSnapshot('lab').persisted, false, 'chat 성공이 lab 실패 상태를 지웠다')
+})
