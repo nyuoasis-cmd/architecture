@@ -40,11 +40,14 @@ type LearnStoreState = {
   contentTab: ContentTab;
   /** 🧪 실습에서 지금 몇 번째 미션인가(0-based). 좌측 목차가 이것을 읽어 진도를 세운다. */
   labMissionIndex: number;
+  /** 🚨 서버가 말해 준 남은 AI 횟수. null 이면 아직 안 물어봤다 — «0» 과 갈라 둔다. */
+  labRemaining: { mission: number; ask: number } | null;
   setCurrentQaId: (qaId: string) => void;
   setScenarioId: (scenarioId: string) => void;
   setMobileTab: (mobileTab: MobileTab) => void;
   setContentTab: (contentTab: ContentTab) => void;
   setLabMissionIndex: (labMissionIndex: number) => void;
+  setLabRemaining: (labRemaining: { mission: number; ask: number } | null) => void;
   resetForQa: (qaId: string, scenarioId: string) => void;
 };
 
@@ -56,11 +59,13 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
   mobileTab: 'content',
   contentTab: 'read',
   labMissionIndex: 0,
+  labRemaining: null,
   setCurrentQaId: (currentQaId) => set({ currentQaId }),
   setScenarioId: (scenarioId) => set({ scenarioId }),
   setMobileTab: (mobileTab) => set({ mobileTab }),
   setContentTab: (contentTab) => set({ contentTab }),
   setLabMissionIndex: (labMissionIndex) => set({ labMissionIndex }),
+  setLabRemaining: (labRemaining) => set({ labRemaining }),
   // 🔑 문항을 바꿔도 **탭 상태는 유지한다**(읽기 → 읽기). 매번 첫 탭으로 튕기면
   //    «견학만 몰아서 보는» 동선이 끊긴다. 새 문항에 그 탭이 없으면 ContentPanel 이 접는다.
   resetForQa: (currentQaId, scenarioId) => set({ currentQaId, scenarioId }),

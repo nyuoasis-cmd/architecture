@@ -6,6 +6,7 @@ import { resolve } from 'node:path';
 import { env } from './env';
 import { buildCopyrightIndex } from './lib/copyright-index';
 import chatRouter from './routes/chat';
+import labRouter from './routes/lab';
 import vibeRouter from './routes/vibe';
 import joinRouter from './routes/join';
 import progressRouter from './routes/progress';
@@ -49,6 +50,7 @@ app.use('/api/join', joinRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/quiz', quizRouter);
 app.use('/api/vibe', vibeRouter);
+app.use('/api/lab', labRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/teacher-explain', teacherExplainRouter);
 

@@ -1,12 +1,17 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   INITIAL_LAB_STATE,
+  applyMyOutputs,
   execute,
   openingEvents,
+  saveRules,
   type LabEvent,
   type LabState,
   type LabTone,
 } from '../../lib/lab-shell';
+import { checkAll, passCount } from '../../lib/lab-checker';
+import { failureLines, labAsk, labQuota, labReview, labVerify } from '../../lib/lab-api';
+import { useLearnStore } from '../../store/learn-store';
 
 type LabTabProps = {
   qaId: string;
@@ -34,6 +39,11 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
   const [state, setState] = useState<LabState>(INITIAL_LAB_STATE);
   const [lines, setLines] = useState<LabEvent[]>(() => openingEvents());
   const [draft, setDraft] = useState('');
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorText, setEditorText] = useState('');
+  const [busy, setBusy] = useState(false);
+  // 🔑 남은 횟수는 좌측 목차도 읽으므로 스토어에 둔다 — 두 곳이 따로 세면 서로 다른 숫자를 보인다.
+  const setRemaining = useLearnStore((store) => store.setLabRemaining);
   /** 위/아래로 되돌려 쓰는 지난 명령. 터미널에서 가장 먼저 기대하는 동작이다. */
   const [history, setHistory] = useState<string[]>([]);
   const [historyAt, setHistoryAt] = useState<number | null>(null);
@@ -48,7 +58,20 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
     setDraft('');
     setHistory([]);
     setHistoryAt(null);
+    setEditorOpen(false);
+    setEditorText('');
     seq.current = 0;
+  }, [qaId]);
+
+  // 남은 횟수는 서버만 안다. 화면이 열릴 때 한 번 물어본다.
+  useEffect(() => {
+    let cancelled = false;
+    labQuota().then((value) => {
+      if (!cancelled && value) setRemaining(value);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, [qaId]);
 
   // 화면 폭·붙여넣기 가능 여부는 화면만 알 수 있다 — 재서 셸에 넣어 준다(`lab doctor` 가 이걸 읽는다).
@@ -91,6 +114,113 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
       setLines((prev) => [...prev, ...events]);
     }
     if (events.some((event) => event.kind === 'exit')) onExit?.();
+    if (events.some((event) => event.kind === 'editor')) {
+      setEditorText(nextState.rules);
+      setEditorOpen(true);
+    }
+
+    const intent = events.find((event): event is Extract<LabEvent, { kind: 'ai' }> => event.kind === 'ai');
+    if (intent) void runAi(intent, nextState);
+  };
+
+  const say = (rows: { text: string; tone: LabTone }[]) => {
+    setLines((prev) => [...prev, ...rows.map((row) => ({ kind: 'line' as const, text: row.text, tone: row.tone }))]);
+  };
+
+  /**
+   * 🚨 AI 를 부르는 **유일한 자리**. 셸은 순수 함수라 의도만 내보내고, 실제 호출은 여기서만 일어난다.
+   * 🚨 막힌 이유를 뭉치지 않는다 — 돈 천장 · 내 횟수 소진 · 너무 자주 · 고장은 학생이 할 일이 다르다.
+   */
+  const runAi = async (intent: Extract<LabEvent, { kind: 'ai' }>, from: LabState) => {
+    if (busy) {
+      say([{ text: '  앞의 요청이 아직 돌고 있습니다. 잠깐만요.', tone: 'dim' }]);
+      return;
+    }
+    setBusy(true);
+    say([{ text: '  … 부르는 중', tone: 'dim' }]);
+    try {
+      if (intent.mode === 'ask') {
+        const result = await labAsk(intent.text);
+        if (result.remaining) setRemaining(result.remaining);
+        if (!result.ok) {
+          say(failureLines(result.failure));
+          return;
+        }
+        say([{ text: result.data.answer, tone: 'plain' }]);
+        return;
+      }
+
+      if (intent.mode === 'review') {
+        const result = await labReview(intent.text);
+        if (result.remaining) setRemaining(result.remaining);
+        if (!result.ok) {
+          say(failureLines(result.failure));
+          return;
+        }
+        const { good, issues } = result.data.review;
+        const rows: { text: string; tone: LabTone }[] = [];
+        if (good) rows.push({ text: `  좋은 점 — ${good}`, tone: 'ok' });
+        if (issues.length === 0) {
+          rows.push({ text: '  애매한 곳을 못 찾았습니다. npm test 로 실제로 시켜 보세요.', tone: 'warn' });
+        } else {
+          issues.forEach((issue, index) => {
+            rows.push({ text: `  ${index + 1}. ${issue.where}`, tone: 'warn' });
+            rows.push({ text: `     ${issue.why}`, tone: 'dim' });
+          });
+          rows.push({ text: '  고치는 것은 여러분 몫입니다 — edit 로 다시 여세요.', tone: 'dim' });
+        }
+        say(rows);
+        return;
+      }
+
+      // verify — 내 규칙대로 두 번 시켜 보고, **결정적 검사기**로 판정한다.
+      const result = await labVerify(intent.text);
+      if (result.remaining) setRemaining(result.remaining);
+      if (!result.ok) {
+        say(failureLines(result.failure));
+        return;
+      }
+      const outputs = result.data.outputs;
+      setState((prev) => applyMyOutputs(prev, outputs));
+      const rows = checkAll(outputs.map((text, index) => ({ name: `my-${index + 1}`, text })));
+      const said: { text: string; tone: LabTone }[] = [];
+      rows.forEach((row, index) => {
+        said.push({
+          text: row.outcome.ok
+            ? `  PASS  my-${index + 1}       할인율 ${row.outcome.discountPercent}%`
+            : `  FAIL  my-${index + 1}       터짐: ${row.outcome.reason}`,
+          tone: row.outcome.ok ? 'ok' : 'bad',
+        });
+      });
+      const passed = passCount(rows);
+      said.push({ text: '', tone: 'plain' });
+      if (passed === rows.length) {
+        // 🚨 «서로 달랐는데 둘 다 읽혔다»를 **실제로 다를 때만** 말한다. 규칙을 아주 빡빡하게 쓰면
+        //    두 답이 같아지기도 하는데(2026-08-15 실측), 그때 «달랐다»고 적으면 화면이 거짓말을 한다.
+        //    수업이 「정직함」을 가르치는 자리라 더더욱 안 된다.
+        const differ = outputs.length > 1 && new Set(outputs.map((text) => text.trim())).size > 1;
+        said.push({ text: `  ${passed} 통과 · 0 실패`, tone: 'ok' });
+        said.push({
+          text: differ
+            ? '  두 답은 서로 달랐는데 둘 다 읽혔습니다 — 글자가 같아서가 아니라 형식을 지켜서입니다.'
+            : '  이번엔 두 답이 똑같이 나왔습니다. 규칙이 그만큼 좁았다는 뜻이에요 — 그래도 통과의 이유는 «형식»입니다.',
+          tone: 'plain',
+        });
+      } else {
+        said.push({ text: `  ${passed} 통과 · ${rows.length - passed} 실패`, tone: 'warn' });
+        said.push({ text: '  규칙이 아직 애매합니다. cat 으로 내 답을 열어 보고 edit 로 고쳐 보세요.', tone: 'dim' });
+      }
+      say(said);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const saveEditor = () => {
+    const { events, nextState } = saveRules(state, editorText);
+    setState(nextState);
+    setLines((prev) => [...prev, ...events]);
+    setEditorOpen(false);
   };
 
   const recall = (direction: -1 | 1) => {
@@ -116,7 +246,8 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
   );
 
   return (
-    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-[#272b22] bg-[#0e100d]">
+    <div className="flex h-full min-h-0 gap-3">
+    <div className="flex h-full min-h-0 flex-1 flex-col overflow-hidden rounded-lg border border-[#272b22] bg-[#0e100d]">
       <div
         ref={scrollRef}
         className="min-h-0 flex-1 overflow-y-auto px-3.5 py-3 font-mono text-[12.6px] leading-[1.7] text-[#dce0d3]"
@@ -162,15 +293,66 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
           value={draft}
         />
         <button
-          className="flex-none rounded-md border border-[#384030] bg-[#20251c] px-3 py-1 font-mono text-[11.5px] text-[#dce0d3]"
+          className="flex-none rounded-md border border-[#384030] bg-[#20251c] px-3 py-1 font-mono text-[11.5px] text-[#dce0d3] disabled:opacity-50"
+          disabled={busy}
           type="submit"
         >
-          실행
+          {busy ? '…' : '실행'}
         </button>
       </form>
     </div>
+
+    {/*
+      🚨 편집기는 **옆 패널**이다. 터미널 안에서 nano·heredoc 을 흉내 내지 않는다 —
+         태블릿엔 Ctrl·Esc 가 없어서 «저장하고 나오는 법»을 아무도 모른다.
+         5단계(규칙 쓰기)는 90분 중 가장 오래 걸리는 단계라, 여기서 막히면 수업이 통째로 막힌다.
+      🔑 평범한 `<textarea>` 다 — 한글 입력도, 붙여넣기도, 확대도 브라우저가 알아서 한다.
+    */}
+    {editorOpen ? (
+      <aside className="flex h-full min-h-0 w-[38%] min-w-[280px] flex-col overflow-hidden rounded-lg border border-[var(--color-border)] bg-white">
+        <div className="flex flex-none items-center gap-2 border-b border-[var(--color-border)] px-3 py-2">
+          <span className="font-mono text-[11.5px] font-semibold text-[var(--color-text-primary)]">CLAUDE.md</span>
+          <span className="font-mono text-[10.5px] text-[var(--color-text-faint)]">{editorText.trim().length}자</span>
+          <button
+            className="ml-auto rounded-md px-2 py-1 text-[11.5px] text-[var(--color-text-muted)]"
+            onClick={() => setEditorOpen(false)}
+            type="button"
+          >
+            닫기
+          </button>
+          <button
+            className="rounded-md bg-[var(--color-accent)] px-3 py-1 text-[11.5px] font-semibold text-white"
+            onClick={saveEditor}
+            type="button"
+          >
+            저장
+          </button>
+        </div>
+        <textarea
+          aria-label="규칙 문서"
+          className="min-h-0 flex-1 resize-none px-3 py-2.5 font-mono text-[12.4px] leading-[1.7] text-[var(--color-text-primary)] outline-none"
+          onChange={(changeEvent) => setEditorText(changeEvent.target.value)}
+          placeholder={EDITOR_PLACEHOLDER}
+          value={editorText}
+        />
+        <p className="flex-none border-t border-[var(--color-border)] px-3 py-2 text-[11px] leading-[1.5] text-[var(--color-text-faint)]">
+          AI 는 여러분이 쓴 것을 <b>비평</b>합니다 — 대신 써 주지 않습니다.
+        </p>
+      </aside>
+    ) : null}
+    </div>
   );
 }
+
+/** 🚨 빈 화면을 주지 않는다. 다만 **답을 주지도 않는다** — 무엇을 적어야 하는지의 «모양»만 보여 준다. */
+const EDITOR_PLACEHOLDER = `여기에 규칙을 적어 보세요.
+
+예를 들면 이런 것들을 정해야 합니다:
+- 무엇을 적을 것인가
+- 어느 자리에 적을 것인가
+- 숫자는 어떤 모양으로 적을 것인가
+
+(이 안내는 저장되지 않습니다.)`;
 
 const TONE_CLASS: Record<LabTone, string> = {
   input: 'text-white font-semibold',

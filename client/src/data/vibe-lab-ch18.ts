@@ -66,9 +66,21 @@ export const LAB_MISSIONS: LabMission[] = [
     goal: 'npm test 로 세 결과를 파서에 넣어 보세요. 2개가 터집니다 — 왜 터지는지 읽어 보세요.',
     live: true,
   },
-  { label: '무엇이 다른지 적기', goal: '아직 안 열린 미션입니다.', live: false },
-  { label: '규칙 문서 쓰기', goal: '아직 안 열린 미션입니다.', live: false },
-  { label: 'AI 비평 받기', goal: '아직 안 열린 미션입니다.', live: false },
+  {
+    label: '무엇이 다른지 적기',
+    goal: 'edit 로 편집기를 열고, 세 결과가 어떻게 달랐는지 적어 보세요.',
+    live: true,
+  },
+  {
+    label: '규칙 문서 쓰기',
+    goal: '다음 사람이 지킬 수 있게 규칙으로 다듬어 보세요. 무엇을 어느 자리에 적을지까지.',
+    live: true,
+  },
+  {
+    label: 'AI 비평 받기',
+    goal: 'claude review 로 어디가 애매한지 들어 보세요. AI 는 대신 써 주지 않습니다.',
+    live: true,
+  },
   { label: '제출', goal: '아직 안 열린 미션입니다.', live: false },
 ];
 
