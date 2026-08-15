@@ -12,6 +12,7 @@
  *    아직 안 만든 명령은 «모른다»가 아니라 **«아직 안 열렸다»**로 갈라 답한다 — 둘은 학생이 할 일이 다르다.
  */
 
+import { LAB_VERSION, checkAll, passCount } from './lab-checker';
 import {
   LAB_ABOUT,
   LAB_HOME_LABEL,
@@ -44,6 +45,12 @@ export type LabState = {
   ranCommands: string[];
   /** 고지를 한 번이라도 봤는가. */
   seenAbout: boolean;
+  /**
+   * 🚨 건너뛴 미션 번호(0-based). 막힌 학생이 수업에서 낙오하지 않게 열어 두되, **건너뛴 사실을 지운다고
+   *    없어지지 않게** 상태에 남긴다 — 과정 점수는 0 이고 산출물 점수는 살린다(§5 골격 5).
+   *    null 이면 안 건너뛴 것이다.
+   */
+  jumpedTo: number | null;
   /** 🚨 같은 키가 두 번 들어오면 두 번 실행하지 않는다 — 되돌리기·재전송이 진행을 두 칸 밀지 않게. */
   lastKey: string | null;
   env: LabEnv;
@@ -54,6 +61,7 @@ export const INITIAL_LAB_STATE: LabState = {
   openedFiles: [],
   ranCommands: [],
   seenAbout: false,
+  jumpedTo: null,
   lastKey: null,
   env: { widthPx: 0, canPaste: false },
 };
@@ -65,7 +73,11 @@ const COMMANDS: { name: string; args: string; what: string; group: '둘러보기
   { name: 'cd', args: '<폴더>', what: '폴더 안으로 들어간다 (cd .. 로 나온다)', group: '둘러보기' },
   { name: 'pwd', args: '', what: '지금 어느 폴더인지 본다', group: '둘러보기' },
   { name: 'clear', args: '', what: '화면을 지운다', group: '둘러보기' },
+  { name: 'npm test', args: '', what: '세 결과를 파서에 넣어 본다', group: '확인하기' },
   { name: 'lab missions', args: '', what: '미션 목록과 지금 할 일을 본다', group: '확인하기' },
+  { name: 'lab version', args: '', what: '재생본을 만든 모델·날짜를 본다', group: '확인하기' },
+  { name: 'reset', args: '', what: '실습실을 처음으로 되돌린다', group: '나가기' },
+  { name: 'jump', args: '<번호>', what: '막혔을 때 그 미션으로 건너뛴다', group: '나가기' },
   { name: 'lab about', args: '', what: '이 실습실이 무엇인지 다시 읽는다', group: '확인하기' },
   { name: 'lab doctor', args: '', what: '내 화면·입력이 실습에 맞는지 검사한다', group: '확인하기' },
   { name: 'exit', args: '', what: '실습실에서 나간다', group: '나가기' },
@@ -76,16 +88,12 @@ const COMMANDS: { name: string; args: string; what: string; group: '둘러보기
  *    무엇이 없는지, 왜 없는지를 말한다.
  */
 const NOT_YET: Record<string, string> = {
-  npm: '검사(npm test)는 아직 안 열렸습니다. 지금은 파일을 여는 것까지 할 수 있어요.',
-  node: '검사(npm test)는 아직 안 열렸습니다. 지금은 파일을 여는 것까지 할 수 있어요.',
   git: '이 실습실에는 git 이 없습니다. 22강에서 다시 만나요.',
   claude: 'AI 비평은 아직 안 열렸습니다.',
   ask: 'AI 에게 묻기는 아직 안 열렸습니다.',
   edit: '편집기는 아직 안 열렸습니다. 지금은 파일을 읽기만 할 수 있어요.',
   nano: '편집기는 아직 안 열렸습니다. 지금은 파일을 읽기만 할 수 있어요.',
   vi: '편집기는 아직 안 열렸습니다. 지금은 파일을 읽기만 할 수 있어요.',
-  reset: '되돌리기는 아직 안 열렸습니다.',
-  jump: '건너뛰기는 아직 안 열렸습니다.',
   check: '제출은 아직 안 열렸습니다.',
   rm: '이 실습실은 읽기 전용입니다. 파일을 지우거나 고칠 수 없어요.',
   mv: '이 실습실은 읽기 전용입니다. 파일을 지우거나 고칠 수 없어요.',
@@ -142,12 +150,22 @@ function pathLabel(segments: string[]): string {
  * 🔑 상태에서 **계산한다** — 따로 저장하면 화면과 진행이 어긋나는 자리가 하나 더 생긴다.
  */
 export function missionIndexOf(state: LabState): number {
+  const earned = earnedMissionIndex(state);
+  // 🚨 건너뛴 자리가 «번 자리»보다 앞서면 건너뛴 쪽을 쓴다. 뒤로 끌어내리지는 않는다 —
+  //    건너뛴 뒤에 스스로 더 나아간 학생을 되돌리면, 건너뛴 것이 벌이 된다.
+  if (state.jumpedTo !== null && state.jumpedTo > earned) return state.jumpedTo;
+  return earned;
+}
+
+/** 학생이 **스스로** 도달한 자리. 🔑 건너뛰기와 갈라 둔다 — 과정 점수는 이쪽을 본다. */
+export function earnedMissionIndex(state: LabState): number {
   const lookedAround = state.ranCommands.includes('ls') && state.ranCommands.includes('pwd');
   if (!lookedAround) return 0;
   const openedAllRuns = LAB_RUN_FILES.every((file) => state.openedFiles.includes(file));
   if (!openedAllRuns) return 1;
-  // 🚨 3번부터는 이 PR 에서 판정하지 않는다. «다 끝났다»가 아니라 «여기서 멈춘다»로 세운다.
-  return 2;
+  if (!state.ranCommands.includes('npm')) return 2;
+  // 🚨 4번부터는 이 PR 에서 판정하지 않는다. «다 끝났다»가 아니라 «여기서 멈춘다»로 세운다.
+  return 3;
 }
 
 // ─────────────────────────── 출력 조각 ───────────────────────────
@@ -190,6 +208,49 @@ function missionLines(state: LabState): LabEvent[] {
   const current = LAB_MISSIONS[now];
   if (current) out.push(line(`지금 할 일 — ${current.goal}`, current.live ? 'plain' : 'dim'));
   return out;
+}
+
+/**
+ * `npm test` — 세 결과를 파서에 넣어 본다.
+ *
+ * 🚨 여기가 12강이 실제로 가르치는 자리다. 세 답은 **뜻이 같은데 형식이 달라서** 2개가 터진다.
+ *    학생은 「AI 가 매번 다르게 답한다」를 **말로 듣는 게 아니라 터지는 것으로** 겪는다.
+ * 🚨 판정을 빨강/초록으로만 말하지 않는다 — `PASS`/`FAIL` 문자를 같이 적는다(접근성, Codex).
+ */
+function npmTestLines(): LabEvent[] {
+  const files = LAB_RUN_FILES.map((path) => {
+    const node = nodeAt(path.split('/'));
+    return { name: path.split('/').pop() ?? path, text: node && node.kind === 'file' ? node.text : '' };
+  });
+  const rows = checkAll(files);
+  const out: LabEvent[] = [];
+  for (const row of rows) {
+    if (row.outcome.ok) {
+      out.push(line(`  PASS  ${row.name.padEnd(11)} 할인율 ${row.outcome.discountPercent}%`, 'ok'));
+    } else {
+      out.push(line(`  FAIL  ${row.name.padEnd(11)} 터짐: ${row.outcome.reason}`, 'bad'));
+    }
+  }
+  const passed = passCount(rows);
+  out.push(line(''));
+  out.push(
+    line(
+      `  ${passed} 통과 · ${rows.length - passed} 실패 — 세 답이 뜻은 같은데 형식이 다르다.`,
+      passed === rows.length ? 'ok' : 'warn',
+    ),
+  );
+  return out;
+}
+
+/** `lab version` — 무엇으로 만든 재생본인가. 🚨 이게 없으면 「달라진 게 규칙 때문인지 모델 때문인지」를 못 가른다. */
+function versionLines(): LabEvent[] {
+  return [
+    line('이 실습실이 쓰는 것', 'warn'),
+    line(`  재생본 만든 날    ${LAB_VERSION.fixturesCreatedAt}`, 'dim'),
+    line(`  재생본 만든 모델  ${LAB_VERSION.fixturesModel}`, 'dim'),
+    line(`  검사기 규칙 판    ${LAB_VERSION.checkerRevision}`, 'dim'),
+    line('  실시간 AI 호출    해당 없음 — 이 미션까지는 AI 를 부르지 않습니다.', 'dim'),
+  ];
 }
 
 /**
@@ -254,8 +315,12 @@ export function execute(command: string, state: LabState, idempotencyKey: string
     }
     if (sub === 'missions') return { events: [echo, ...missionLines(base)], nextState: remember('lab') };
     if (sub === 'doctor') return { events: [echo, ...doctorLines(base)], nextState: remember('lab') };
+    if (sub === 'version') return { events: [echo, ...versionLines()], nextState: remember('lab') };
     return {
-      events: [echo, line(`lab ${sub} 은 없습니다. lab about · lab missions · lab doctor 중에서 골라 주세요.`, 'bad')],
+      events: [
+        echo,
+        line(`lab ${sub} 은 없습니다. lab about · lab missions · lab doctor · lab version 중에서 골라 주세요.`, 'bad'),
+      ],
       nextState: base,
     };
   }
@@ -272,6 +337,63 @@ export function execute(command: string, state: LabState, idempotencyKey: string
 
     case 'exit':
       return { events: [echo, line('실습실에서 나갑니다.', 'dim'), { kind: 'exit' }], nextState: remember('exit') };
+
+    case 'npm': {
+      if (rest[0] !== 'test') {
+        return { events: [echo, line('이 실습실이 아는 npm 명령은 npm test 하나입니다.', 'bad')], nextState: base };
+      }
+      // 🚨 순서를 강제하지 않는다 — 세 결과를 안 열고 쳐도 돈다. 다만 «무엇을 보고 있는지» 한 줄 알려 준다.
+      const openedAll = LAB_RUN_FILES.every((file) => base.openedFiles.includes(file));
+      const head: LabEvent[] = openedAll
+        ? []
+        : [line('  (아직 안 연 결과가 있습니다. cat 으로 셋 다 열어 보면 왜 터지는지 보입니다.)', 'dim')];
+      return { events: [echo, ...head, ...npmTestLines()], nextState: remember('npm') };
+    }
+
+    case 'reset': {
+      // 🚨 되돌리기는 «지운다»가 아니라 «처음부터 다시»다. 무엇이 사라지는지 말하고 되돌린다.
+      return {
+        events: [
+          { kind: 'clear' },
+          ...openingEvents(),
+          line(''),
+          line('실습실을 처음으로 되돌렸습니다. 지금까지의 진행이 사라졌습니다.', 'warn'),
+        ],
+        nextState: { ...INITIAL_LAB_STATE, env: base.env, lastKey: idempotencyKey },
+      };
+    }
+
+    case 'jump': {
+      const asked = Number(rest[0]);
+      if (!Number.isInteger(asked) || asked < 1 || asked > LAB_MISSIONS.length) {
+        return {
+          events: [echo, line(`어느 미션으로 갈지 1~${LAB_MISSIONS.length} 중에서 적어 주세요. 예) jump 3`, 'bad')],
+          nextState: base,
+        };
+      }
+      const target = asked - 1;
+      const mission = LAB_MISSIONS[target]!;
+      if (!mission.live) {
+        return { events: [echo, line(`미션 ${asked} 은 아직 안 열렸습니다.`, 'warn')], nextState: base };
+      }
+      if (target <= earnedMissionIndex(base)) {
+        return {
+          events: [echo, line(`미션 ${asked} 은 이미 지나온 자리입니다. 건너뛸 것이 없어요.`, 'dim')],
+          nextState: base,
+        };
+      }
+      // 🚨 건너뛴 사실을 상태에 남긴다. 지운다고 없어지지 않아야 «과정 점수 0 · 산출물 점수 생존»을
+      //    나중에 정직하게 계산할 수 있다(§5 골격 5).
+      return {
+        events: [
+          echo,
+          line(`미션 ${asked} 로 건너뜁니다 — ${mission.label}`, 'warn'),
+          line('  건너뛴 구간은 과정 점수에 안 들어갑니다. 만든 것에 대한 점수는 그대로 살아 있어요.', 'dim'),
+          line(`  지금 할 일 — ${mission.goal}`),
+        ],
+        nextState: { ...remember('jump'), jumpedTo: target },
+      };
+    }
 
     case 'ls': {
       const target = resolvePath(rest[0] ?? '', base.cwd);

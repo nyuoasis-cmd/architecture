@@ -47,7 +47,7 @@ export const LAB_ABOUT: { title: string; lines: string[] } = {
 
 /**
  * 미션 7단계.
- * 🚨 PR1 에서 실제로 판정되는 것은 1~2 뿐이다. 나머지를 «곧 열림»이 아니라 **«아직 안 열림»**으로
+ * 🚨 지금 실제로 판정되는 것은 1~3 뿐이다(4번부터는 편집기·AI 가 있어야 한다). 나머지를 «곧 열림»이 아니라 **«아직 안 열림»**으로
  *    적는 이유 = 앱이 못 하는 일을 할 수 있는 것처럼 적으면 학생이 그 앞에서 기다린다.
  */
 export const LAB_MISSIONS: LabMission[] = [
@@ -61,7 +61,11 @@ export const LAB_MISSIONS: LabMission[] = [
     goal: 'runs/ 안에 답이 셋 있습니다. cat 으로 셋 다 열어 무엇이 다른지 보세요.',
     live: true,
   },
-  { label: '파서에 넣어 보기', goal: '아직 안 열린 미션입니다.', live: false },
+  {
+    label: '파서에 넣어 보기',
+    goal: 'npm test 로 세 결과를 파서에 넣어 보세요. 2개가 터집니다 — 왜 터지는지 읽어 보세요.',
+    live: true,
+  },
   { label: '무엇이 다른지 적기', goal: '아직 안 열린 미션입니다.', live: false },
   { label: '규칙 문서 쓰기', goal: '아직 안 열린 미션입니다.', live: false },
   { label: 'AI 비평 받기', goal: '아직 안 열린 미션입니다.', live: false },
