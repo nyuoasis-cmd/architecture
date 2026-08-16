@@ -267,7 +267,10 @@ function line(text: string, tone: LabTone = 'plain'): LabEvent {
 }
 
 function helpLines(): LabEvent[] {
-  const out: LabEvent[] = [];
+  const out: LabEvent[] = [
+    line('지금 할 일 → lab missions', 'ok'),
+    line('아래는 사전입니다. 순서표가 아니라 낱말 뜻풀이예요.', 'dim'),
+  ];
   for (const group of ['둘러보기', '만들기', '확인하기', '나가기'] as const) {
     const rows = COMMANDS.filter((c) => c.group === group);
     if (rows.length === 0) continue;
@@ -288,6 +291,17 @@ export function aboutLines(): LabEvent[] {
   return out;
 }
 
+/**
+ * 「지금 할 일」 한 줄. 🔑 `lab missions` 와 처음 화면이 **같은 자리에서** 만든다 —
+ *    처음 화면이 미션 목록의 «마지막 줄»을 집어 오면, 목록 끝에 무엇이 하나 붙는 날
+ *    처음 화면이 조용히 엉뚱한 줄을 보여 준다.
+ */
+function goalLine(state: LabState): LabEvent | null {
+  const current = LAB_MISSIONS[missionIndexOf(state)];
+  if (!current) return null;
+  return line(`지금 할 일 — ${current.goal}`, current.live ? 'plain' : 'dim');
+}
+
 function missionLines(state: LabState): LabEvent[] {
   const now = missionIndexOf(state);
   const out: LabEvent[] = [line('미션', 'warn')];
@@ -297,8 +311,8 @@ function missionLines(state: LabState): LabEvent[] {
     out.push(line(`${mark} ${index + 1}. ${mission.label}`, tone));
   });
   out.push(line(''));
-  const current = LAB_MISSIONS[now];
-  if (current) out.push(line(`지금 할 일 — ${current.goal}`, current.live ? 'plain' : 'dim'));
+  const goal = goalLine(state);
+  if (goal) out.push(goal);
   return out;
 }
 
@@ -642,14 +656,28 @@ export function execute(command: string, state: LabState, idempotencyKey: string
   if (notYet) return { events: [echo, line(notYet, 'warn'), line('help 로 지금 할 수 있는 것을 볼 수 있어요.', 'dim')], nextState: base };
 
   return {
-    events: [echo, line(`${head} 은 이 실습실이 모르는 명령입니다.`, 'bad'), line('help 로 쓸 수 있는 명령을 볼 수 있어요.', 'dim')],
+    events: [
+      echo,
+      // 🔑 조사를 고르지 않는다. 학생이 무엇을 칠지 모르므로 받침을 알 수 없다 —
+      //    「뭐하지 은」도 「'뭐하지' 이라는」도 깨진다. 줄표로 끊으면 어느 낱말이 와도 성립한다.
+      line(`'${head}' — 이 실습실이 모르는 명령입니다.`, 'bad'),
+      line('지금 할 일은 위에 적혀 있어요. 전체 목록은 help.', 'dim'),
+    ],
     nextState: base,
   };
 }
 
 /** 화면이 처음 열릴 때 그리는 줄. 🚨 고지를 **먼저** 보여 준다(§2 「당연히 가짜임을 알려줘야지」). */
 export function openingEvents(): LabEvent[] {
-  return [...aboutLines(), line(''), line('help 를 치면 쓸 수 있는 명령이 나옵니다.', 'dim')];
+  const goal = goalLine(INITIAL_LAB_STATE);
+  return [
+    ...aboutLines(),
+    line(''),
+    ...(goal ? [goal] : []),
+    line(''),
+    line('먼저 ls 를 쳐 보세요.', 'ok'),
+    line('전체 명령은 help · 미션 목록은 lab missions 로 볼 수 있습니다.', 'dim'),
+  ];
 }
 
 export const LAB_COMMAND_NAMES = COMMANDS.map((c) => c.name);

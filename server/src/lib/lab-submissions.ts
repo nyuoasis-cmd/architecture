@@ -1,3 +1,5 @@
+import type { SupabaseClient } from '@supabase/supabase-js';
+
 import { getSupabaseAdminClient } from './supabase';
 import { buildVerdict, type LabVerdict } from './lab-checker';
 
@@ -13,6 +15,24 @@ import { buildVerdict, type LabVerdict } from './lab-checker';
 export type LabActor = { participantId: string } | { ownerToken: string };
 
 export class LabSubmitUnavailableError extends Error {}
+
+/**
+ * DB 손잡이를 여기 한 줄로 모은다.
+ *
+ * 🚨 사고(2026-08-15): 「DB 가 없으면 실패로 말한다」는 계약이 **주변 환경에 기대고** 있었다.
+ *    시험이 «이 환경에는 DB 가 없다»를 전제했는데, 개발 기계의 레포 루트 `.env` 에는
+ *    운영 자격증명이 들어 있다. 그래서 CI 는 초록인데 로컬은 빨갛고, 더 나쁘게는
+ *    로컬에서 `npm test` 를 돌릴 때마다 **운영 테이블에 제출물이 한 판씩 쌓였다.**
+ * 🔑 그래서 «DB 가 없다»를 시험이 **직접** 만들 수 있게 한다 — `runRules` 를 주입받는 이유와 같다.
+ *    운영 경로는 아무것도 달라지지 않는다.
+ */
+const defaultDb = (): SupabaseClient | null => getSupabaseAdminClient();
+let resolveDb: () => SupabaseClient | null = defaultDb;
+
+/** 🔑 시험 전용. `null` 을 주면 기본(운영 경로)으로 되돌린다. */
+export function setLabDbResolverForTest(next: (() => SupabaseClient | null) | null): void {
+  resolveDb = next ?? defaultDb;
+}
 
 /** `pt:<uuid>` / `ip:<...>` 형태의 신원을 저장용으로 바꾼다. */
 export function toLabActor(actorId: string): LabActor {
@@ -36,7 +56,7 @@ export type LabSubmission = {
 
 /** 이 학생이 이 문항에 낸 마지막 판. 없으면 null. */
 export async function latestSubmission(actor: LabActor, qaId: string): Promise<LabSubmission | null> {
-  const supabase = getSupabaseAdminClient();
+  const supabase = resolveDb();
   if (!supabase) throw new LabSubmitUnavailableError('no_database');
   const where = whereOf(actor);
 
@@ -73,7 +93,7 @@ export async function submit(
   rules: string,
   runRules: (rules: string) => Promise<string[]>,
 ): Promise<{ revision: number; verdict: LabVerdict }> {
-  const supabase = getSupabaseAdminClient();
+  const supabase = resolveDb();
   if (!supabase) throw new LabSubmitUnavailableError('no_database');
   const where = whereOf(actor);
   const trimmed = rules.trim();
@@ -127,7 +147,7 @@ export type LabClassStatus = {
 };
 
 export async function classStatus(sessionId: string, qaId: string): Promise<LabClassStatus> {
-  const supabase = getSupabaseAdminClient();
+  const supabase = resolveDb();
   if (!supabase) throw new LabSubmitUnavailableError('no_database');
 
   const { data: participants, error: pErr } = await supabase
