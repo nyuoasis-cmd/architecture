@@ -41,6 +41,7 @@ type LabShell = {
   LAB_COMMAND_NAMES: string[]
 }
 type LabData = {
+  LAB_ABOUT: { title: string; lines: string[] }
   LAB_MISSIONS: { label: string; goal: string; live: boolean }[]
   LAB_RUN_FILES: readonly string[]
   LAB_QA_ID: string
@@ -101,10 +102,16 @@ test('3) 세 결과는 뜻이 같고 형식이 다르다 — 같으면 12강이 
   }
 })
 
-test('4) 모르는 명령과 «아직 안 열린» 명령을 갈라 답한다 — 학생이 할 일이 다르다', () => {
-  const unknown = textOf(run(['ㅁㄴㅇㄹ']).events)
-  assert.ok(unknown.includes('모르는 명령'), '모르는 명령에 그렇다고 말하지 않는다')
+test('4) 모르는 명령은 조사를 붙이지 않고 다음 행동을 말하며, «아직 안 열린» 명령과도 가른다', () => {
+  const unknown = textOf(run(['뭐하지']).events)
+  assert.ok(unknown.includes('이 실습실이 모릅니다'), '모르는 명령에 그렇다고 말하지 않는다')
   assert.ok(unknown.includes('help'), '모르는 명령에 다음 행동(help)을 안 준다 — 학생이 멈춘다')
+  assert.equal(/뭐하지\s+[은는]/.test(unknown), false, '학생 명령 뒤에 은/는을 바로 붙여 조사가 깨진다')
+  assert.ok(unknown.includes("'뭐하지' 이라는 명령은 이 실습실이 모릅니다."), '명령을 따옴표로 가르지 않는다')
+  assert.ok(
+    unknown.includes('지금 할 일은 위에 적혀 있어요. 전체 목록은 help.'),
+    '모르는 명령 뒤에 지금 할 일과 전체 목록을 함께 안내하지 않는다',
+  )
 
   const notYet = textOf(run(['npm test']).events)
   assert.ok(notYet.includes('아직'), 'npm test 를 «모르는 명령»으로 답하면 학생이 오타를 의심하며 다시 친다')
@@ -162,15 +169,40 @@ test('9) 같은 열쇠로 두 번 부르면 두 번째는 아무 일도 안 한�
   assert.ok(third.events.length > 0, '다른 열쇠인데 아무 일도 안 한다 — idempotency 가 모든 것을 삼킨다')
 })
 
-test('10) 처음 화면이 축소판 고지로 시작한다 — 무엇이 진짜인지까지 말한다', () => {
-  const out = textOf(openingEvents())
+test('10) 처음 화면이 축소판 고지와 지금 할 일을 함께 보여 준다', () => {
+  const opening = openingEvents()
+  const out = textOf(opening)
+  for (const notice of [data.LAB_ABOUT.title, ...data.LAB_ABOUT.lines]) {
+    assert.ok(out.includes(notice), `처음 화면에서 고지문 한 줄이 빠졌다: ${notice}`)
+  }
   assert.ok(out.includes('줄인'), '무엇을 줄였는지 안 말한다(jery: 「당연히 가짜임을 알려줘야지」)')
   assert.ok(out.includes('진짜'), '무엇이 진짜인지 안 말한다 — 「가짜」만 말하면 실습 전체를 흉내로 여긴다')
   assert.ok(out.includes('REPLAY'), '사전 생성분이 있다는 것을 처음 화면에서 안 말한다')
+  assert.ok(out.includes(data.LAB_MISSIONS[0]!.goal), '첫 미션의 지금 할 일이 처음 화면에 없다')
+  assert.ok(
+    opening.some((event) => event.kind === 'line' && event.tone === 'ok' && /(^|\s)ls(\s|$)/.test(event.text)),
+    '처음 따라 칠 명령 ls 를 ok 줄로 권하지 않는다',
+  )
+  assert.ok(
+    opening.some((event) => event.kind === 'line' && event.text.includes('help') && event.text.includes('lab missions')),
+    '전체 명령과 미션 목록을 찾는 법이 한 줄에 없다',
+  )
 })
 
-test('11) help 가 실제로 도는 명령에서 나온다 — 손으로 적은 목록은 곧 어긋난다', () => {
-  const out = textOf(run(['help']).events)
+test('11) help 는 미션 순서를 먼저 가리키고, 실제로 도는 명령에서 사전을 만든다', () => {
+  const events = run(['help']).events
+  const replies = events.filter(
+    (event): event is Extract<LabEvent, { kind: 'line' }> => event.kind === 'line' && event.tone !== 'input',
+  )
+  assert.deepEqual(
+    replies.slice(0, 2).map(({ text, tone }) => ({ text, tone })),
+    [
+      { text: '지금 할 일 → lab missions', tone: 'ok' },
+      { text: '아래는 사전입니다. 순서표가 아니라 낱말 뜻풀이예요.', tone: 'dim' },
+    ],
+    'help 머리가 명령 사전과 미션 순서를 가르지 않는다',
+  )
+  const out = textOf(events)
   for (const name of shell.LAB_COMMAND_NAMES) {
     assert.ok(out.includes(name), `help 에 ${name} 이 없다`)
   }

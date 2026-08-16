@@ -267,7 +267,10 @@ function line(text: string, tone: LabTone = 'plain'): LabEvent {
 }
 
 function helpLines(): LabEvent[] {
-  const out: LabEvent[] = [];
+  const out: LabEvent[] = [
+    line('지금 할 일 → lab missions', 'ok'),
+    line('아래는 사전입니다. 순서표가 아니라 낱말 뜻풀이예요.', 'dim'),
+  ];
   for (const group of ['둘러보기', '만들기', '확인하기', '나가기'] as const) {
     const rows = COMMANDS.filter((c) => c.group === group);
     if (rows.length === 0) continue;
@@ -642,14 +645,27 @@ export function execute(command: string, state: LabState, idempotencyKey: string
   if (notYet) return { events: [echo, line(notYet, 'warn'), line('help 로 지금 할 수 있는 것을 볼 수 있어요.', 'dim')], nextState: base };
 
   return {
-    events: [echo, line(`${head} 은 이 실습실이 모르는 명령입니다.`, 'bad'), line('help 로 쓸 수 있는 명령을 볼 수 있어요.', 'dim')],
+    events: [
+      echo,
+      line(`'${head}' 이라는 명령은 이 실습실이 모릅니다.`, 'bad'),
+      line('지금 할 일은 위에 적혀 있어요. 전체 목록은 help.', 'dim'),
+    ],
     nextState: base,
   };
 }
 
 /** 화면이 처음 열릴 때 그리는 줄. 🚨 고지를 **먼저** 보여 준다(§2 「당연히 가짜임을 알려줘야지」). */
 export function openingEvents(): LabEvent[] {
-  return [...aboutLines(), line(''), line('help 를 치면 쓸 수 있는 명령이 나옵니다.', 'dim')];
+  const missions = missionLines(INITIAL_LAB_STATE);
+  const currentMission = missions[missions.length - 1];
+  return [
+    ...aboutLines(),
+    line(''),
+    ...(currentMission ? [currentMission] : []),
+    line(''),
+    line('먼저 ls 를 쳐 보세요.', 'ok'),
+    line('전체 명령은 help · 미션 목록은 lab missions 로 볼 수 있습니다.', 'dim'),
+  ];
 }
 
 export const LAB_COMMAND_NAMES = COMMANDS.map((c) => c.name);

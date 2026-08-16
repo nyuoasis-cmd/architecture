@@ -50,17 +50,22 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
   const lines = live?.lines ?? EMPTY_LINES;
   const history = live?.history ?? EMPTY_HISTORY;
 
-  const commit = (next: Partial<{ state: LabState; lines: LabEvent[]; history: string[] }>) => {
-    setSession({ qaId, state, lines, history, ...next });
+  type LabWork = { state: LabState; lines: LabEvent[]; history: string[] };
+  const commit = (update: (current: LabWork) => Partial<LabWork>) => {
+    setSession((current) => {
+      // 늦게 온 effect 는 지금 열린 문항만 고친다. 예전 문항의 콜백이 새 작업을 되살리면 안 된다.
+      if (!current || current.qaId !== qaId) return current;
+      return { ...current, ...update(current) };
+    });
   };
   const setState = (updater: LabState | ((prev: LabState) => LabState)) => {
-    commit({ state: typeof updater === 'function' ? updater(state) : updater });
+    commit((current) => ({ state: typeof updater === 'function' ? updater(current.state) : updater }));
   };
   const setLines = (updater: LabEvent[] | ((prev: LabEvent[]) => LabEvent[])) => {
-    commit({ lines: typeof updater === 'function' ? updater(lines) : updater });
+    commit((current) => ({ lines: typeof updater === 'function' ? updater(current.lines) : updater }));
   };
   const setHistory = (updater: string[] | ((prev: string[]) => string[])) => {
-    commit({ history: typeof updater === 'function' ? updater(history) : updater });
+    commit((current) => ({ history: typeof updater === 'function' ? updater(current.history) : updater }));
   };
 
   const [draft, setDraft] = useState('');
@@ -363,7 +368,7 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
               recall(1);
             }
           }}
-          placeholder="명령을 입력하세요 — help"
+          placeholder="ls"
           spellCheck={false}
           value={draft}
         />

@@ -17,6 +17,16 @@ const read = (...parts: string[]) => readFileSync(CLIENT(...parts), 'utf8')
 const LAB_TAB = ['components', 'learn', 'LabTab.tsx']
 const STORE = ['store', 'learn-store.ts']
 
+type LabState = { env: { widthPx: number; canPaste: boolean }; [key: string]: unknown }
+type LabSession = { qaId: string; state: LabState; lines: unknown[]; history: string[] }
+type LabSessionUpdate = LabSession | null | ((current: LabSession | null) => LabSession | null)
+type LearnStoreApi = {
+  getState: () => {
+    labSession: LabSession | null
+    setLabSession: (update: LabSessionUpdate) => void
+  }
+}
+
 test('1) 실습 작업이 스토어에 산다 — 컴포넌트가 사라져도 남아 있어야 한다', () => {
   const store = read(...STORE)
   assert.ok(/labSession:/.test(store), '스토어에 실습 세션이 없다 — 작업이 컴포넌트와 함께 죽는다')
@@ -60,4 +70,52 @@ test('4) 우측 탭은 여전히 조건부 렌더다 — 이 계약이 그것을
   //    그때는 이 파일을 지우는 게 아니라 **왜 바꿨는지**를 여기 적어야 한다.
   const panel = read('components', 'learn', 'ContentPanel.tsx')
   assert.ok(/activeTab === 'lab' \?/.test(panel), 'ContentPanel 의 실습 탭 렌더 방식이 바뀌었다 — 이 계약을 다시 읽을 것')
+})
+
+test('5) 첫 출력 뒤 늦은 커밋이 와도 state·lines·history 를 서로 덮지 않는다', () => {
+  const { useLearnStore } = require(CLIENT(...STORE)) as { useLearnStore: LearnStoreApi }
+  const shell = require(CLIENT('lib', 'lab-shell')) as {
+    INITIAL_LAB_STATE: LabState
+    openingEvents: () => unknown[]
+  }
+  const setSession = useLearnStore.getState().setLabSession
+  const qaId = 'ch18_q04'
+  const opening = shell.openingEvents()
+
+  try {
+    // 마운트 초기화 다음에 폭 측정이 늦게 오는 실제 순서다.
+    setSession({ qaId, state: shell.INITIAL_LAB_STATE, lines: opening, history: [] })
+    setSession((current) =>
+      current?.qaId === qaId
+        ? { ...current, state: { ...current.state, env: { widthPx: 390, canPaste: false } } }
+        : current,
+    )
+
+    const measured = useLearnStore.getState().labSession
+    assert.ok(measured && typeof measured !== 'function', 'updater 가 최신 세션에 적용되지 않고 세션 값이 되어 버렸다')
+    assert.deepEqual(measured.lines, opening, '폭 측정 커밋이 처음 출력 lines 를 지웠다')
+    assert.deepEqual(measured.history, [], 'state 커밋이 history 를 바꿨다')
+    assert.equal(measured.state.env.widthPx, 390, '폭 측정 state 가 저장되지 않았다')
+
+    setSession((current) => (current?.qaId === qaId ? { ...current, history: ['ls'] } : current))
+    setSession((current) =>
+      current?.qaId === qaId ? { ...current, lines: [...current.lines, { kind: 'line', text: 'late' }] } : current,
+    )
+    const finished = useLearnStore.getState().labSession
+    assert.ok(finished)
+    assert.equal(finished.state.env.widthPx, 390, 'lines 커밋이 최신 state 를 되돌렸다')
+    assert.deepEqual(finished.history, ['ls'], 'lines 커밋이 최신 history 를 되돌렸다')
+    assert.equal(finished.lines.length, opening.length + 1, '늦은 lines 커밋이 처음 출력을 이어 붙이지 않았다')
+
+    // React effect 자체는 Node 에서 못 돌리므로, 화면이 실제 updater 경로를 쓰는지만 텍스트로 잇는다.
+    const source = read(...LAB_TAB)
+    assert.ok(/setSession\(\(current\) =>/.test(source), 'LabTab 커밋이 스토어의 최신 세션을 읽지 않는다')
+    assert.equal(
+      /setSession\(\{ qaId, state, lines, history, \.\.\.next \}\)/.test(source),
+      false,
+      'LabTab 커밋이 렌더 시점의 state·lines·history 를 다시 저장한다',
+    )
+  } finally {
+    setSession(null)
+  }
 })

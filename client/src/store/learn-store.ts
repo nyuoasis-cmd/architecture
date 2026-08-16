@@ -34,6 +34,9 @@ export function tabHidesChat(contentTab: ContentTab): boolean {
   return contentTab === 'lab';
 }
 
+type LabSession = { qaId: string; state: LabState; lines: LabEvent[]; history: string[] };
+type LabSessionUpdate = LabSession | null | ((current: LabSession | null) => LabSession | null);
+
 type LearnStoreState = {
   currentQaId: string;
   scenarioId: string;
@@ -56,7 +59,7 @@ type LearnStoreState = {
   setMobileTab: (mobileTab: MobileTab) => void;
   setContentTab: (contentTab: ContentTab) => void;
   setLabMissionIndex: (labMissionIndex: number, labEarnedIndex: number) => void;
-  setLabSession: (labSession: { qaId: string; state: LabState; lines: LabEvent[]; history: string[] } | null) => void;
+  setLabSession: (update: LabSessionUpdate) => void;
   resetForQa: (qaId: string, scenarioId: string) => void;
 };
 
@@ -75,7 +78,8 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
   setMobileTab: (mobileTab) => set({ mobileTab }),
   setContentTab: (contentTab) => set({ contentTab }),
   setLabMissionIndex: (labMissionIndex, labEarnedIndex) => set({ labMissionIndex, labEarnedIndex }),
-  setLabSession: (labSession) => set({ labSession }),
+  setLabSession: (update) =>
+    set((store) => ({ labSession: typeof update === 'function' ? update(store.labSession) : update })),
   // 🔑 문항을 바꿔도 **탭 상태는 유지한다**(읽기 → 읽기). 매번 첫 탭으로 튕기면
   //    «견학만 몰아서 보는» 동선이 끊긴다. 새 문항에 그 탭이 없으면 ContentPanel 이 접는다.
   resetForQa: (currentQaId, scenarioId) => set({ currentQaId, scenarioId }),
