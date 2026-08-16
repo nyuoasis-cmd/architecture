@@ -12,7 +12,7 @@ import path from 'node:path'
 import { test } from 'node:test'
 
 import { buildVerdict, parseResult } from './lab-checker'
-import { submit, toLabActor, type LabActor } from './lab-submissions'
+import { setLabDbResolverForTest, submit, toLabActor, type LabActor } from './lab-submissions'
 
 const read = (...parts: string[]) => readFileSync(path.resolve(__dirname, ...parts), 'utf8')
 
@@ -94,16 +94,40 @@ test('5) 두 탭에서 동시에 내도 학생에게 「다시 눌러 주세요�
 
 test('6) 제출은 조용히 성공한 척하지 않는다 — DB 가 없으면 실패로 말한다', async () => {
   // 🚨 성공한 척하면 학생은 냈다고 믿고 교사는 아무것도 못 본다.
-  //    이 환경에는 DB 가 없으므로 여기서 실제로 던져야 한다.
+  // 🚨 «DB 없음»을 **주변 환경에 기대지 않고** 여기서 직접 만든다.
+  //    2026-08-15 까지 이 시험은 「이 환경에는 DB 가 없다」를 전제했는데, 개발 기계의 레포 루트
+  //    `.env` 에는 운영 자격증명이 있다. 그래서 CI 는 초록·로컬은 빨강이었고, 그보다 나쁘게
+  //    로컬에서 `npm test` 를 돌릴 때마다 **운영 테이블에 제출물이 한 판씩 쌓였다.**
   const actor: LabActor = { ownerToken: 'ip:test' }
-  await assert.rejects(
-    () => submit(actor, 'ch18_q04', 'x'.repeat(50), async () => ['할인율: 10%\n최종가: 9000']),
-    /no_database|fetch failed|Invalid URL|TypeError/,
-    'DB 없이도 제출이 «성공»했다',
-  )
+  setLabDbResolverForTest(() => null)
+  try {
+    await assert.rejects(
+      () => submit(actor, 'ch18_q04', 'x'.repeat(50), async () => ['할인율: 10%\n최종가: 9000']),
+      /no_database/,
+      'DB 없이도 제출이 «성공»했다',
+    )
+  } finally {
+    setLabDbResolverForTest(null)
+  }
 
   const route = read('..', 'routes', 'lab.ts')
   assert.ok(/LabSubmitUnavailableError/.test(route), '라우트가 제출 실패를 갈라 답하지 않는다')
+})
+
+test('6-a) 시험이 만든 «DB 없음»이 우회되지 않는다 — DB 를 읽는 자리가 손잡이 하나뿐이다', () => {
+  // 🔑 6) 이 다시 환경 의존으로 돌아가는 유일한 길 = 어떤 함수가 손잡이를 건너뛰고
+  //    `getSupabaseAdminClient()` 를 직접 부르는 것. 그러면 그 경로만 조용히 운영 DB 로 나간다.
+  const store = read('lab-submissions.ts')
+  assert.equal(
+    (store.match(/getSupabaseAdminClient/g) ?? []).length,
+    2,
+    'DB 손잡이(defaultDb)를 건너뛰고 직접 부르는 자리가 생겼다 — 그 경로는 시험에서 운영 DB 로 나간다',
+  )
+  assert.equal(
+    (store.match(/const supabase = resolveDb\(\)/g) ?? []).length,
+    3,
+    'DB 를 읽는 함수가 손잡이를 안 쓴다',
+  )
 })
 
 test('7) 신원이 수업 참여자와 자습을 가른다 — IP 로 학생을 세면 교실 전체가 한 명이 된다', () => {
