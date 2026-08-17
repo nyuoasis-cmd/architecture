@@ -6,10 +6,30 @@ import { test } from 'node:test'
 const ROOT = path.resolve(__dirname, '..', '..', '..')
 const loadClient = (rel: string) => require(path.resolve(ROOT, 'client', 'src', rel))
 
-const engine = loadClient('lib/mini-lab') as typeof import('../../../client/src/lib/mini-lab')
-const { MINI_LABS } = loadClient('data/mini-labs') as {
-  MINI_LABS: Record<number, import('../../../client/src/lib/mini-lab').MiniLab>
+// 🚨 typeof import(클라)는 서버 tsc 를 TS6059 로 죽인다(CI 사고 2026-08-18) — 모양만 손으로 적는다.
+type ProbeState = { ran: Record<string, number>; flags: Record<string, string | number | boolean> }
+type ProbeEffect = { kind: string; artifactKind?: string }
+type ProbeEvent = { kind: string; tone?: string; text?: string }
+type ProbeLab = {
+  chapterId: number
+  commands: Array<{ name: string; run: (args: string, state: ProbeState) => { lines: ProbeEvent[]; effect?: ProbeEffect } }>
+  missions: Array<{ label: string; goal: string; nextCommand: (state: ProbeState) => string | null }>
+  qaMissionSpans: Record<string, { from: number; to: number }>
+  partialNote?: string
+  askFallbacks: string[]
 }
+const engine = loadClient('lib/mini-lab') as {
+  INITIAL_MINI_STATE: ProbeState
+  missionIndexOfMini: (lab: ProbeLab, state: ProbeState) => number
+  nextStepOfMini: (lab: ProbeLab, state: ProbeState) => string | null
+  executeMini: (
+    lab: ProbeLab,
+    command: string,
+    state: ProbeState,
+    key: string,
+  ) => { events: ProbeEvent[]; nextState: ProbeState; effect?: ProbeEffect }
+}
+const { MINI_LABS } = loadClient('data/mini-labs') as { MINI_LABS: Record<number, ProbeLab> }
 const { EXPERIENCE_KIND_BY_CHAPTER } = loadClient('data/experience') as {
   EXPERIENCE_KIND_BY_CHAPTER: Record<number, string>
 }
@@ -113,7 +133,7 @@ test('7) 편집기 산출물이 계보의 kind 를 쓴다 — 13강 스킬 = ski
   const skillCommand = lab.commands.find((command) => command.name === 'skill')!
   const result = skillCommand.run('', engine.INITIAL_MINI_STATE)
   assert.equal(result.effect?.kind, 'editor')
-  const effect = result.effect as Extract<import('../../../client/src/lib/mini-lab').MiniEffect, { kind: 'editor' }>
+  const effect = result.effect as { kind: string; artifactKind?: string }
   assert.equal(effect.artifactKind, 'skill', '스킬이 계보 skill 칸으로 안 간다 — 23강 묶음의 2번째 칸이 빈다')
   assert.ok(
     (ARTIFACT_KINDS as readonly string[]).includes(effect.artifactKind!),
