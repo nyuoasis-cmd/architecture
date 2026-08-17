@@ -178,12 +178,25 @@ export default function TeacherSessionPage() {
           </div>
         </div>
 
-        {!hasParticipants && !isEnded ? (
+        {/*
+          🚨 2026-08-16 신입샘 t2(sev 3): 여기가 「학생을 받은 뒤 **수업을 시작하세요**」라고 적혀 있었는데,
+             학생이 들어온 뒤 교사가 누를 «시작»은 이 화면에 없다(있는 것은 시연하기·QR·종료 셋뿐).
+             초임 교사는 「학생이 들어왔어요! 근데 수업을 어떻게 시작하지?」에서 멈췄다.
+          🚨 **없는 버튼을 만들지 않는다.** 이 앱에서 학생은 코드로 들어오는 순간 각자 진행한다 —
+             교사가 눌러야 열리는 문이 애초에 없다. 그러니 고칠 것은 화면이 아니라 **약속한 문구**다.
+          🔑 그래서 학생이 들어온 뒤에도 한 줄을 남긴다. 「없다」를 말해 주지 않으면 교사는 계속 찾는다.
+        */}
+        {isEnded ? null : !hasParticipants ? (
           <p className="mt-5 rounded-xl bg-stone-50 px-4 py-3 text-sm text-stone-700">
-            <span className="font-medium text-stone-900">아직 학생이 없어요.</span> QR을 교실 화면에 띄워 학생을 받은 뒤
-            수업을 시작하세요.
+            <span className="font-medium text-stone-900">아직 학생이 없어요.</span> QR을 교실 화면에 띄우면 학생이 코드로
+            들어옵니다.
           </p>
-        ) : null}
+        ) : (
+          <p className="mt-5 rounded-xl bg-stone-50 px-4 py-3 text-sm text-stone-700">
+            <span className="font-medium text-stone-900">학생이 들어오면 각자 진행합니다.</span> 따로 누를 «시작»은
+            없어요 — 교사는 아래 현황만 보면 됩니다.
+          </p>
+        )}
 
         <div className="mt-5 flex flex-wrap gap-2">
           {/*
