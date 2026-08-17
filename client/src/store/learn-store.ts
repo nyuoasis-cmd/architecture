@@ -32,6 +32,15 @@ export type ContentTab = 'read' | 'demo' | 'exp' | 'quiz' | 'explain';
 type LabSession = { qaId: string; state: LabState; lines: LabEvent[]; history: string[] };
 type LabSessionUpdate = LabSession | null | ((current: LabSession | null) => LabSession | null);
 
+/**
+ * 가짜 GitHub 대본 진행 — 저장하는 것은 «몇 번째 칸 + 입력들»뿐이다. 화면 상태는
+ * gh-sim 의 foldGhState 가 결정적으로 되살린다(실습실 labSession 과 같은 이유 —
+ * 우측 탭이 조건부 렌더라, 컴포넌트 안에 두면 읽기 탭 한 번에 진행이 날아간다).
+ * 🔑 강이 바뀌면(scopeId) 통째로 버린다 — 다른 강의 대본이 섞이면 안 된다.
+ */
+type GhSession = { scopeId: string; stepIndex: number; inputs: Record<string, string> };
+type GhSessionUpdate = GhSession | null | ((current: GhSession | null) => GhSession | null);
+
 type LearnStoreState = {
   currentQaId: string;
   scenarioId: string;
@@ -49,12 +58,14 @@ type LearnStoreState = {
    * 🔑 문항이 바뀌면 통째로 버린다(`qaId` 로 판별) — 다른 문항의 출력이 섞이면 안 된다.
    */
   labSession: { qaId: string; state: LabState; lines: LabEvent[]; history: string[] } | null;
+  ghSession: GhSession | null;
   setCurrentQaId: (qaId: string) => void;
   setScenarioId: (scenarioId: string) => void;
   setMobileTab: (mobileTab: MobileTab) => void;
   setContentTab: (contentTab: ContentTab) => void;
   setLabMissionIndex: (labMissionIndex: number, labEarnedIndex: number) => void;
   setLabSession: (update: LabSessionUpdate) => void;
+  setGhSession: (update: GhSessionUpdate) => void;
   resetForQa: (qaId: string, scenarioId: string) => void;
 };
 
@@ -68,6 +79,7 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
   labMissionIndex: 0,
   labEarnedIndex: 0,
   labSession: null,
+  ghSession: null,
   setCurrentQaId: (currentQaId) => set({ currentQaId }),
   setScenarioId: (scenarioId) => set({ scenarioId }),
   setMobileTab: (mobileTab) => set({ mobileTab }),
@@ -75,6 +87,8 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
   setLabMissionIndex: (labMissionIndex, labEarnedIndex) => set({ labMissionIndex, labEarnedIndex }),
   setLabSession: (update) =>
     set((store) => ({ labSession: typeof update === 'function' ? update(store.labSession) : update })),
+  setGhSession: (update) =>
+    set((store) => ({ ghSession: typeof update === 'function' ? update(store.ghSession) : update })),
   // 🔑 문항을 바꿔도 **탭 상태는 유지한다**(읽기 → 읽기). 매번 첫 탭으로 튕기면
   //    «견학만 몰아서 보는» 동선이 끊긴다. 새 문항에 그 탭이 없으면 ContentPanel 이 접는다.
   resetForQa: (currentQaId, scenarioId) => set({ currentQaId, scenarioId }),
