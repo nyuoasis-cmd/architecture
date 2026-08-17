@@ -5,15 +5,25 @@ import QrFullscreen from '../common/QrFullscreen';
 import type { DemoMeta } from '../../data/demos';
 import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getExtras } from '../../data/learn-extras';
-import { LAB_QA_ID } from '../../data/vibe-lab-ch18';
+import { getGhScript } from '../../data/gh-scripts';
+import { getMiniLab } from '../../data/mini-labs';
+import { PHISHING_QA_ID } from '../../data/phishing-check';
+import { getTourKit } from '../../data/tour-kits';
+import { LAB_CHAPTER_ID, LAB_QA_ID, LAB_QA_MISSION_SPANS } from '../../data/vibe-lab-ch18';
+import { labSaveArtifact } from '../../lib/lab-api';
 import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
 import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
 import { earnedMissionIndex, missionIndexOf } from '../../lib/lab-shell';
 import { reportLabMission } from '../../lib/progress';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
+import GhSimTab from './GhSimTab';
+import GraduationExhibit from './GraduationExhibit';
 import LabTab from './LabTab';
+import MiniLabTab from './MiniLabTab';
 import NextQuestionDoor from './NextQuestionDoor';
+import PhishingCheck from './PhishingCheck';
+import TourKit from './TourKit';
 import { getNextQuestionDoorTarget } from './next-question-door';
 import QuizTab from './QuizTab';
 import ReadTab from './ReadTab';
@@ -327,23 +337,90 @@ export default function ContentPanel({
           강별 배정(MAP-experience-23lessons)대로 부품을 채운다.
         */}
         {activeTab === 'exp' ? (
-          qaId === LAB_QA_ID ? (
-            <div className="h-full p-3 lg:p-4">
-              <LabTab
-                onExit={() => setContentTab('read')}
-                onStateChange={(labState) => {
-                  const at = missionIndexOf(labState);
-                  const earned = earnedMissionIndex(labState);
-                  setLabMissionIndex(at, earned);
-                  // 🔑 교사 화면이 「실습 N/7」을 그리는 근거. 값이 달라졌을 때만 실제로 보낸다(t1).
-                  // 🚨 교사가 자기 화면에서 시연할 때는 보내지 않는다 — 교사가 학생 줄에 섞인다.
-                  if (!teacherPanel) reportLabMission(qaId, at, earned);
+          chapter.id === LAB_CHAPTER_ID ? (
+            <div className="flex h-full flex-col p-3 lg:p-4">
+              {/* 🔑 전 문항이 같은 실습실을 이어 쓴다(SDD 결정 21) — 그래서 아래 LabTab 에는
+                  지금 문항이 아니라 **대표 이름표(LAB_QA_ID)** 를 준다. 제출·진도·상태가 한 줄에 쌓인다. */}
+              <p className="mb-2 flex-shrink-0 text-[12px] text-[var(--color-text-muted)]">
+                💻 이 강의 문항들은 실습실 하나를 이어 써요 — 1번에서 만진 파일이 끝까지 남습니다.
+                {LAB_QA_MISSION_SPANS[qaId]
+                  ? ` 이 문항의 미션: ${LAB_QA_MISSION_SPANS[qaId]!.from}~${LAB_QA_MISSION_SPANS[qaId]!.to}`
+                  : ''}
+              </p>
+              <div className="min-h-0 flex-1">
+                <LabTab
+                  onExit={() => setContentTab('read')}
+                  onStateChange={(labState) => {
+                    const at = missionIndexOf(labState);
+                    const earned = earnedMissionIndex(labState);
+                    setLabMissionIndex(at, earned);
+                    // 🔑 교사 화면이 「실습 N/7」을 그리는 근거. 값이 달라졌을 때만 실제로 보낸다(t1).
+                    // 🚨 교사가 자기 화면에서 시연할 때는 보내지 않는다 — 교사가 학생 줄에 섞인다.
+                    // 🚨 보고도 대표 이름표로 — 문항별로 가르면 교사 통계가 네 줄로 흩어진다.
+                    if (!teacherPanel) reportLabMission(LAB_QA_ID, at, earned);
+                  }}
+                  qaId={LAB_QA_ID}
+                />
+              </div>
+            </div>
+          ) : getMiniLab(chapter.id)?.qaMissionSpans[qaId] ? (
+            // 터미널형·복합 강 — 공용 미니 실습실. 강 전체가 실습실 하나를 이어 쓴다(결정 21).
+            // 🔑 구간표에 없는 문항(카드가 견학 유지로 확정한 것)은 아래 견학 갈래로 내려간다.
+            <div className="flex h-full min-h-0 flex-col overflow-y-auto">
+              <div className="min-h-[420px] flex-1">
+                <MiniLabTab lab={getMiniLab(chapter.id)!} qaId={qaId} />
+              </div>
+              {/* 23강 복합 — 묶음이 완성되면(서버 판정) 졸업 전시가 터미널 아래에 열린다. */}
+              <ExhibitSlot chapterId={chapter.id} />
+            </div>
+          ) : qaId === PHISHING_QA_ID ? (
+            // 22강 q3 — 진짜/가짜 로그인 화면 판별 미니 체험 (SDD 결정 20, 부품 신설 없음)
+            <PhishingCheck />
+          ) : getGhScript(chapter.id) ? (
+            <div className="flex flex-col">
+              {/* 1단계 — 진짜 먼저 보기(짝 링크, SDD 결정 3). 키트(관찰 미션)가 있으면 키트가 선다. */}
+              {getTourKit(qaId) ? <TourKit kit={getTourKit(qaId)!} /> : null}
+              {(() => {
+                if (getTourKit(qaId)) return null;
+                const pair = extras?.tour?.find((mission) => mission.link);
+                return pair?.link ? (
+                  <div className="mx-auto mt-4 flex w-full max-w-[860px] flex-wrap items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-4 py-3 lg:px-5">
+                    <span className="text-[20px]">🚌</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12px] font-bold tracking-wide text-[var(--color-text-faint)]">
+                        1단계 — 진짜 먼저 보기
+                      </p>
+                      <p className="truncate text-[13.5px] font-semibold text-[var(--color-text-primary)]">
+                        {pair.title}
+                      </p>
+                    </div>
+                    <a
+                      className="rounded-lg bg-[var(--color-text-primary)] px-3.5 py-2 text-[12.5px] font-bold text-white"
+                      href={pair.link.url}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      {pair.link.label} ↗
+                    </a>
+                  </div>
+                ) : null;
+              })()}
+              {/* 2단계 — 유사 페이지에서 진행. 산출물은 계보로(실패해도 체험은 계속 — 23강이 빈 칸을 알려 준다). */}
+              <GhSimTab
+                onArtifact={(kind, content) => {
+                  void labSaveArtifact(kind, content).then((result) => {
+                    if (!result.ok) console.warn('[exp] artifact_save_failed', kind, result.failure);
+                  });
                 }}
-                qaId={qaId}
+                script={getGhScript(chapter.id)!}
               />
             </div>
           ) : extras?.tour?.length ? (
-            <TourTab missions={extras.tour} qaId={qaId} />
+            <div className="flex flex-col">
+              {/* 견학 키트(링크 카드 + 고르기 체크포인트) — 있는 문항에만 얹는다. 기존 견학 미션은 그대로 산다. */}
+              {getTourKit(qaId) ? <TourKit kit={getTourKit(qaId)!} /> : null}
+              <TourTab missions={extras.tour} qaId={qaId} />
+            </div>
           ) : (
             <div className="mx-auto w-full max-w-[720px] px-5 py-7 text-sm text-[var(--color-text-muted)]">
               이 문항의 체험은 준비 중이에요. 📖 읽기와 📝 퀴즈를 먼저 진행해 주세요.
@@ -438,4 +515,17 @@ function ScenarioPicker({
       </p>
     </div>
   );
+}
+
+
+/**
+ * 졸업 전시 자리 — 23강에서만, 그리고 **서버가 묶음을 승인했을 때만**(exhibitOpen) 열린다.
+ * 🔑 잠금 해제 연출의 열쇠는 산출물 5종이다(MAP 23강) — 화면이 미리 열어 두지 않는다.
+ */
+function ExhibitSlot({ chapterId }: { chapterId: number }) {
+  const open = useLearnStore(
+    (state) => chapterId === 23 && state.miniSession?.scopeId === 'ch23' && Boolean(state.miniSession.state.flags.exhibitOpen),
+  );
+  if (!open) return null;
+  return <GraduationExhibit />;
 }

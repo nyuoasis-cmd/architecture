@@ -59,6 +59,27 @@ export function labAsk(question: string) {
 }
 
 /**
+ * AI 목소리 2단 — 로컬이 못 알아들은 자유 문장 해석 (SDD 결정 6).
+ * 🚨 suggestedCommand 는 제안이다. 받는 쪽은 절대 대신 실행하지 않는다 — 표시까지만.
+ */
+export function labVoice(payload: { text: string; missionGoal: string; nextCommand: string }) {
+  return post<{ reply: string[]; suggestedCommand: string | null }>('/api/lab/voice', payload);
+}
+
+/** 체험 산출물 한 장을 계보에 쌓는다(SDD 결정 15). 'rules' 는 제출 경로가 따로 쌓는다. */
+export function labSaveArtifact(kind: string, content: string) {
+  return post<{ revision: number }>('/api/lab/artifact', { kind, content });
+}
+
+/**
+ * 23강 졸업 묶음 — 🚨 내용은 보내지 않는다. 서버가 저장된 계보로 직접 조립·판정한다.
+ * 빠진 칸(missing)은 오류가 아니라 «돌아갈 문»의 목록이다.
+ */
+export function labBundle() {
+  return post<{ missing: string[]; revision?: number }>('/api/lab/bundle', {});
+}
+
+/**
  * 막힌 이유를 학생이 읽을 문장으로. 🚨 **다음에 무엇을 할지**까지 적는다 —
  *    「실패했습니다」만 쓰면 학생은 그저 다시 누른다.
  */

@@ -240,7 +240,7 @@ export const CH13_EXTRAS: Record<string, VibeExtras> = {
         reveals: [
           { label: '내 이름은?', answer: '세션에 참여할 때 쓴 이름만 — 수업 세션 안에서만 쓰여' },
           { label: '내가 뭘 읽었는지는?', answer: '읽음 표시와 퀴즈 점수 — 선생님 화면의 진행률에 쓰여' },
-          { label: '챗봇과 나눈 대화는?', answer: '수업 질문 답변에만 쓰이고, 네 프로필 같은 건 만들지 않아' },
+          { label: '실습에서 낸 것은?', answer: '네가 낸 규칙과 판정 결과만 — 선생님이 수업 화면에서 보는 데 쓰여' },
         ],
         observationPlaceholder: '저장 안 하는 게 더 좋은 정보를 하나 떠올려 적어 봐',
         feedback: '적게 저장하는 건 게으름이 아니라 설계야. «없어도 되는 건 저장하지 않는다»가 데이터 칸의 첫 문장이야.',

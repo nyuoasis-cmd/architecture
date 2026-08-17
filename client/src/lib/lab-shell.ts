@@ -22,7 +22,19 @@ import {
   type LabFileNode,
 } from '../data/vibe-lab-ch18';
 
-export type LabTone = 'input' | 'plain' | 'dim' | 'ok' | 'bad' | 'warn';
+export type LabTone = 'input' | 'plain' | 'dim' | 'ok' | 'bad' | 'warn' | 'ai';
+
+/**
+ * «한 터미널, 두 목소리»(SDD 결정 6·7) — AI 가 말하는 줄의 프리픽스.
+ * 🚨 셸 출력(사실)과 AI 의 말이 눈으로 갈라져야 한다. AI 목소리는 **이 프리픽스+전용 색으로만** 말한다.
+ * 🔑 여기 한 곳이 정본이다 — 화면·폴백·서버 응답 표시가 전부 이 상수를 쓴다.
+ */
+export const AI_PREFIX = 'ai▸';
+
+/** AI 목소리 한 줄. */
+export function aiSay(text: string): LabEvent {
+  return { kind: 'line', text: `${AI_PREFIX} ${text}`, tone: 'ai' };
+}
 
 export type LabEvent =
   | { kind: 'line'; text: string; tone: LabTone }
@@ -31,7 +43,7 @@ export type LabEvent =
   /** 옆 패널 편집기를 연다. 🚨 터미널 안에서 nano·heredoc 을 흉내 내지 않는다 — 태블릿엔 Ctrl·Esc 가 없다. */
   | { kind: 'editor' }
   /** 🚨 셸은 순수 함수라 AI 를 못 부른다. **의도만** 내보내고 화면이 부른다. */
-  | { kind: 'ai'; mode: 'review' | 'verify' | 'ask'; text: string }
+  | { kind: 'ai'; mode: 'review' | 'verify' | 'ask' | 'voice'; text: string }
   /** 🚨 제출. 판정은 **서버가 저장된 본문으로** 낸다 — 화면이 판정해서 보내지 않는다. */
   | { kind: 'submit'; rules: string };
 
@@ -796,6 +808,28 @@ function executeCore(command: string, state: LabState, idempotencyKey: string): 
   const notYet = NOT_YET[head];
   if (notYet) return { events: [echo, line(notYet, 'warn'), line('help 로 지금 할 수 있는 것을 볼 수 있어요.', 'dim')], nextState: base };
 
+  // ── AI 목소리, 1단 (로컬) — 뻔한 오타는 호출 없이 즉시 잡는다 (SDD 결정 6) ──
+  // 🚨 자동 실행하지 않는다. 「혹시 …를 치려던 건가요?」까지만 — 손은 학생이 다시 친다.
+  //    수업 목표가 «직접 쳐 본다»이므로, 고쳐 주는 것은 배울 기회를 지우는 일이다.
+  // 🔑 30명이 동시에 쳐도 수업이 안 끊긴다 — 이 단은 서버를 부르지 않는다.
+  const guess = nearestCommand(head);
+  if (guess) {
+    return {
+      events: [
+        echo,
+        aiSay(`혹시 ${guess} 를 치려던 건가요?`),
+        aiSay('철자가 조금 달랐어요. 다시 쳐 보세요 — 자동으로 실행하지는 않아요.'),
+      ],
+      nextState: base,
+    };
+  }
+
+  // ── AI 목소리, 2단 (Haiku) — 로컬이 못 알아듣는 자유 문장만 의도로 내보낸다 ──
+  // 🚨 셸은 순수 함수라 AI 를 못 부른다. 의도만 내보내고 화면(LabTab)이 부른다.
+  if (isFreeText(raw)) {
+    return { events: [echo, { kind: 'ai', mode: 'voice', text: raw }], nextState: base };
+  }
+
   return {
     events: [
       echo,
@@ -806,6 +840,65 @@ function executeCore(command: string, state: LabState, idempotencyKey: string): 
     ],
     nextState: base,
   };
+}
+
+/**
+ * 오타 교정 후보 — 아는 명령과의 편집 거리(레벤슈타인)가 가까우면 그 이름을 돌려준다.
+ * 🔑 후보 목록은 COMMANDS 에서 나온다(손으로 적으면 곧 어긋난다). 두 낱말 명령은 첫 낱말로 잰다.
+ */
+export function nearestCommand(word: string): string | null {
+  if (word.length < 2 || /[가-힣]/.test(word)) return null;
+  let best: { name: string; distance: number } | null = null;
+  const names = [...new Set(['help', ...COMMANDS.map((c) => c.name)])];
+  for (const name of names) {
+    const headWord = name.split(' ')[0]!;
+    if (headWord === word) return null; // 아는 명령은 오타가 아니다 — 각자 핸들러가 답한다.
+    const distance = editDistance(word, headWord);
+    if (distance > 0 && distance <= 2 && distance < headWord.length && (!best || distance < best.distance)) {
+      best = { name, distance };
+    }
+  }
+  return best ? best.name : null;
+}
+
+/** 자유 문장인가 — 한글이 섞였거나 낱말이 셋 이상이면 명령이 아니라 «말»로 본다. */
+export function isFreeText(raw: string): boolean {
+  return /[가-힣]/.test(raw) || raw.split(/\s+/).length >= 3;
+}
+
+function editDistance(a: string, b: string): number {
+  const rows = Array.from({ length: a.length + 1 }, (_, i) => {
+    const row = new Array<number>(b.length + 1).fill(0);
+    row[0] = i;
+    return row;
+  });
+  for (let j = 0; j <= b.length; j += 1) rows[0]![j] = j;
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      rows[i]![j] = Math.min(
+        rows[i - 1]![j]! + 1,
+        rows[i]![j - 1]! + 1,
+        rows[i - 1]![j - 1]! + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+  }
+  return rows[a.length]![b.length]!;
+}
+
+/**
+ * AI 목소리의 대체 응답 — Haiku 장애 시에도 안내가 멈추지 않는다 (SDD 결정 14 · AI 의존도 0).
+ * 🚨 «(대체 응답)» 라벨을 절대 떼지 않는다 — REPLAY 계열 진실성 장치다.
+ * 🔑 내용은 지어내지 않는다. 판정과 같은 자리(nextStepOf·LAB_MISSIONS)에서 «지금 할 일»만 읽어 준다.
+ */
+export function voiceFallbackLines(state: LabState): LabEvent[] {
+  const out: LabEvent[] = [
+    { kind: 'line', text: `${AI_PREFIX} (대체 응답) 지금 AI 연결이 어려워, 검수된 안내로 대신해요.`, tone: 'ai' },
+  ];
+  const current = LAB_MISSIONS[missionIndexOf(state)];
+  if (current) out.push(aiSay(`지금은 미션 ${missionIndexOf(state) + 1} — ${current.goal}`));
+  const step = nextStepOf(state);
+  if (step.command) out.push(aiSay(`다음 — ${step.command} 를 쳐 보세요.`));
+  return out;
 }
 
 /** 화면이 처음 열릴 때 그리는 줄. 🚨 고지를 **먼저** 보여 준다(§2 「당연히 가짜임을 알려줘야지」). */

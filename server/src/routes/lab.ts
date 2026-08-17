@@ -2,14 +2,17 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { resolveActorId } from '../lib/actor-id';
 import { classStatus, LabSubmitUnavailableError, latestSubmission, submit, toLabActor } from '../lib/lab-submissions';
+import { LabArtifactsUnavailableError, latestArtifacts, saveArtifact } from '../lib/lab-artifacts';
 import { getRequestUser } from '../lib/auth';
 import { getSupabaseAdminClient } from '../lib/supabase';
 import {
   askQuestion,
+  interpretVoice,
   LabAbortedError,
   LabRateLimitError,
   LabUnavailableError,
   reviewDraft,
+  takeVoiceToken,
   verifyWithRules,
 } from '../lib/lab-ai';
 
@@ -37,7 +40,18 @@ function abortSignalOf(req: import('express').Request): AbortSignal | undefined 
 const reviewSchema = z.object({ draft: z.string().min(1).max(8000) });
 const verifySchema = z.object({ rules: z.string().min(1).max(8000) });
 const askSchema = z.object({ question: z.string().min(1).max(500) });
+const voiceSchema = z.object({
+  text: z.string().min(2).max(300),
+  // 🔑 미션 문맥은 안내 품질을 위한 «표시용» 힌트다 — 권한·판정에 안 쓰인다. 길이만 자른다.
+  missionGoal: z.string().max(200).default(''),
+  nextCommand: z.string().max(40).default(''),
+});
 const submitSchema = z.object({ qaId: z.string().min(1).max(32), rules: z.string().min(1).max(8000) });
+// 🔑 화면이 직접 쌓을 수 있는 계보 칸 — 'rules' 는 제출(/submit) 경로가, 'bundle' 은 23강 묶음 경로가 쓴다.
+const artifactSchema = z.object({
+  kind: z.enum(['skill', 'ac', 'promise', 'handoff']),
+  content: z.string().min(1).max(8000),
+});
 
 function handle(caught: unknown, res: import('express').Response, tag: string): void {
   // 🔑 학생이 화면을 닫은 것은 «고장»이 아니다. 로그를 시끄럽게 만들지 않고, 답도 보내지 않는다
@@ -109,6 +123,28 @@ router.post('/ask', async (req, res) => {
   }
 });
 
+// POST /api/lab/voice — 터미널 AI 목소리 2단: 로컬이 못 알아들은 자유 문장만 온다 (SDD 결정 6).
+// 🚨 자동 실행 금지 — suggest 는 제안일 뿐이고, 화면은 절대 대신 실행하지 않는다.
+// 🔑 연타 방지(takeVoiceToken)는 돈이 아니라 폭주를 막는다 — 1분 지나면 그냥 다시 된다.
+router.post('/voice', async (req, res) => {
+  const parsed = voiceSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'invalid_request' });
+    return;
+  }
+  const throttled = takeVoiceToken(resolveActorId(req));
+  if (!throttled.ok) {
+    res.status(429).json({ error: 'rate_limited', retryAfterSeconds: throttled.retryAfterSeconds });
+    return;
+  }
+  try {
+    const voice = await interpretVoice(parsed.data, abortSignalOf(req));
+    res.json({ reply: voice.reply, suggestedCommand: voice.suggest });
+  } catch (caught) {
+    handle(caught, res, 'voice');
+  }
+});
+
 // POST /api/lab/submit — 낸다. 🚨 판정은 **저장된 본문으로 서버가** 낸다.
 //    화면이 보낸 판정은 받지도 저장하지도 않는다 — 그건 근거가 아니다.
 router.post('/submit', async (req, res) => {
@@ -122,9 +158,86 @@ router.post('/submit', async (req, res) => {
     const result = await submit(actor, parsed.data.qaId, parsed.data.rules, (rules) =>
       verifyWithRules(rules, abortSignalOf(req)),
     );
+    // 🔑 계보 사본(규칙 한 장) — SDD 결정 15. 🚨 **비치명**: 계보 테이블이 아직 없어도
+    //    제출은 성공해야 한다(5f6ed39 선례 — 배포 순서가 수업을 멈추지 않게). 로그만 남긴다.
+    try {
+      await saveArtifact(actor, 'rules', parsed.data.rules);
+    } catch (artifactError) {
+      console.error(
+        '[lab/submit] artifact_save_skipped',
+        artifactError instanceof Error ? artifactError.message : artifactError,
+      );
+    }
     res.json(result);
   } catch (caught) {
     handle(caught, res, 'submit');
+  }
+});
+
+// POST /api/lab/artifact — 체험이 만든 산출물 한 장을 계보에 쌓는다 (SDD 결정 15).
+router.post('/artifact', async (req, res) => {
+  const parsed = artifactSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'invalid_request' });
+    return;
+  }
+  try {
+    const revision = await saveArtifact(toLabActor(resolveActorId(req)), parsed.data.kind, parsed.data.content);
+    res.json({ revision });
+  } catch (caught) {
+    if (caught instanceof LabArtifactsUnavailableError) {
+      res.status(503).json({ error: 'unavailable', reason: 'artifacts_unavailable' });
+      return;
+    }
+    handle(caught, res, 'artifact');
+  }
+});
+
+// POST /api/lab/bundle — 23강 졸업 묶음. 🚨 내용은 받지 않는다 — 서버가 저장된 계보로 조립·판정한다.
+//    빠진 칸(missing)은 오류가 아니라 «돌아갈 문»의 목록이라 200 으로 답한다.
+router.post('/bundle', async (req, res) => {
+  try {
+    const actor = toLabActor(resolveActorId(req));
+    const artifacts = await latestArtifacts(actor);
+    const required: Array<[string, string]> = [
+      ['rules', '우리 반 규칙 (12강)'],
+      ['skill', '스킬 (13강)'],
+      ['ac', '완료 조건 (16강)'],
+      ['promise', '약속 문장 (19강)'],
+      ['handoff', '넘김 쪽지 (22강)'],
+    ];
+    const missing = required.filter(([kind]) => !artifacts[kind]).map(([kind]) => kind);
+    if (missing.length > 0) {
+      res.json({ missing });
+      return;
+    }
+    const bundleText = required
+      .map(([kind, label]) => `# ${label}\n\n${artifacts[kind]!.content}`)
+      .join('\n\n---\n\n')
+      .slice(0, 8000);
+    const revision = await saveArtifact(actor, 'bundle', bundleText);
+    res.json({ missing: [], revision });
+  } catch (caught) {
+    if (caught instanceof LabArtifactsUnavailableError) {
+      res.status(503).json({ error: 'unavailable', reason: 'artifacts_unavailable' });
+      return;
+    }
+    handle(caught, res, 'bundle');
+  }
+});
+
+// GET /api/lab/artifacts — 이 학생의 산출물 계보 지금 (23강 bundle 이 읽는다).
+// 🚨 테이블 부재·DB 없음은 빈 결과가 아니라 503 이다 — 빈 200 으로 답하면
+//    «아직 안 만들었네요»라는 거짓말이 화면에 나간다.
+router.get('/artifacts', async (req, res) => {
+  try {
+    res.json({ artifacts: await latestArtifacts(toLabActor(resolveActorId(req))) });
+  } catch (caught) {
+    if (caught instanceof LabArtifactsUnavailableError) {
+      res.status(503).json({ error: 'unavailable', reason: 'artifacts_unavailable' });
+      return;
+    }
+    handle(caught, res, 'artifacts');
   }
 });
 

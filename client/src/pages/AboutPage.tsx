@@ -4,7 +4,7 @@ const policyItems = [
   {
     title: 'AI 운영 정책',
     description:
-      '학생 챗봇은 Claude Haiku 4.5를 기본으로 사용하고, Anthropic prompt caching과 답변 캐시를 함께 적용해 지연과 비용을 관리합니다.',
+      '체험 속 AI(실습실의 비평·판정·질문)는 Claude Haiku 4.5를 기본으로 사용하고, Anthropic prompt caching을 적용해 지연과 비용을 관리합니다.',
   },
   {
     title: '콘텐츠 정책',
@@ -38,7 +38,7 @@ export default function AboutPage() {
           <h2 className="text-xl font-medium text-stone-950">서비스 정체성</h2>
           <div className="mt-5 space-y-4 text-sm leading-7 text-stone-600">
             <p>
-              학생 화면은 본문, 시연, AI 챗봇을 같은 흐름으로 묶어 비전공자도 개념을 단번에 연결하도록
+              학생 화면은 읽기, 체험, 퀴즈를 한 흐름으로 묶어 비전공자도 개념을 단번에 연결하도록
               구성했습니다. 교사는 수업을 만들고, 학생은 수업 코드로 들어와 같은 챕터를 함께 따라갑니다.
             </p>
             <p>
@@ -78,7 +78,7 @@ export default function AboutPage() {
         <h2 className="text-xl font-medium text-stone-950">운영 원칙</h2>
         <div className="mt-5 grid gap-4 text-sm leading-7 text-stone-600 md:grid-cols-2">
           <p>
-            챗봇은 rate limit과 캐시 정책을 함께 사용합니다. 같은 질문은 서버 캐시를 먼저 조회하고,
+            체험 속 AI 호출은 rate limit·동시성 큐·시간 제한으로 수업이 끊기지 않게 지키고,
             챕터 단위 프롬프트는 prompt caching으로 반복 비용을 낮춥니다.
           </p>
           <p>
