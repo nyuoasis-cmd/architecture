@@ -8,10 +8,12 @@ const ROOT = path.resolve(__dirname, '..', '..', '..')
 const read = (...rel: string[]) => readFileSync(path.join(ROOT, ...rel), 'utf8')
 const loadClient = (rel: string) => require(path.resolve(ROOT, 'client', 'src', rel))
 
-const engine = loadClient('lib/mini-lab') as typeof import('../../../client/src/lib/mini-lab')
-const { MINI_LABS } = loadClient('data/mini-labs') as {
-  MINI_LABS: Record<number, import('../../../client/src/lib/mini-lab').MiniLab>
-}
+// 🚨 typeof import(클라)는 서버 tsc 를 TS6059 로 죽인다(CI 사고 2026-08-18) — 모양만 손으로 적는다.
+type ProbeState = { flags: Record<string, string | number | boolean> }
+type ProbeRun = { effect?: { kind: string; artifactKind?: string }; flags?: Record<string, unknown> }
+type ProbeLab = { commands: Array<{ name: string; run: (args: string, state: ProbeState) => ProbeRun }> }
+const engine = loadClient('lib/mini-lab') as { INITIAL_MINI_STATE: ProbeState }
+const { MINI_LABS } = loadClient('data/mini-labs') as { MINI_LABS: Record<number, ProbeLab> }
 
 test('1) 19강 — 약속 문장이 계보 promise 로 가고, 순서(채점표 먼저 → 빨강 → 만들기 → 초록)가 지켜진다', () => {
   const lab = MINI_LABS[21]

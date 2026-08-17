@@ -11,10 +11,30 @@ const ROOT = path.resolve(__dirname, '..', '..', '..')
 const read = (...rel: string[]) => readFileSync(path.join(ROOT, ...rel), 'utf8')
 const loadClient = (rel: string) => require(path.resolve(ROOT, 'client', 'src', rel))
 
-const sim = loadClient('lib/gh-sim') as typeof import('../../../client/src/lib/gh-sim')
-const { GH_SCRIPTS } = loadClient('data/gh-scripts') as {
-  GH_SCRIPTS: Record<number, import('../../../client/src/lib/gh-sim').GhScript>
+// 🚨 typeof import(클라)는 서버 tsc 를 클라 소스까지 끌고 가 TS6059 로 죽인다(CI 사고 2026-08-18).
+//    이 계약이 쓰는 모양만 손으로 적는다 — 런타임 require 는 그대로다.
+type ProbeStep = {
+  id: string
+  docent: string
+  screen: string
+  bridgeStage?: number
+  action: { kind: string; label?: string; minChars?: number; artifactKind?: string }
 }
+type ProbeScript = {
+  scopeId: string
+  repoName: string
+  bridge: { name: string; stages: string[] }
+  newTerms: string[]
+  initial: { repo: string; [key: string]: unknown }
+  steps: ProbeStep[]
+  outro: string
+}
+const sim = loadClient('lib/gh-sim') as {
+  GH_PRACTICE_BADGE: string
+  foldGhState: (script: ProbeScript, stepIndex: number, inputs: Record<string, string>) => { repo: string }
+  outOfScriptReason: (screen: string, script: ProbeScript, stepIndex: number) => string
+}
+const { GH_SCRIPTS } = loadClient('data/gh-scripts') as { GH_SCRIPTS: Record<number, ProbeScript> }
 const { EXPERIENCE_KIND_BY_CHAPTER } = loadClient('data/experience') as {
   EXPERIENCE_KIND_BY_CHAPTER: Record<number, string>
 }

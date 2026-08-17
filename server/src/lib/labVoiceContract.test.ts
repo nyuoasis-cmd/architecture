@@ -12,8 +12,16 @@ import { test } from 'node:test'
 const ROOT = path.resolve(__dirname, '..', '..', '..')
 const read = (...rel: string[]) => readFileSync(path.join(ROOT, ...rel), 'utf8')
 
-const shell = require(path.resolve(ROOT, 'client', 'src', 'lib', 'lab-shell')) as
-  typeof import('../../../client/src/lib/lab-shell')
+// 🚨 typeof import 로 클라 파일을 참조하면 서버 tsc(rootDir=src)가 클라 소스까지 컴파일하려다
+//    TS6059 로 죽는다(CI 사고 2026-08-18). 그래서 이 계약이 실제로 쓰는 모양만 손으로 적는다 —
+//    런타임 require 는 그대로라 검사 내용은 달라지지 않는다.
+type ProbeEvent = { kind: string; mode?: string; text: string; tone?: string }
+const shell = require(path.resolve(ROOT, 'client', 'src', 'lib', 'lab-shell')) as {
+  execute: (command: string, state: unknown, key: string) => { events: ProbeEvent[]; nextState: unknown }
+  INITIAL_LAB_STATE: unknown
+  AI_PREFIX: string
+  voiceFallbackLines: (state: unknown) => ProbeEvent[]
+}
 
 test('1) 뻔한 오타는 로컬(1단)이 잡는다 — 서버 의도가 나가지 않고, ai▸ 목소리로만 제안한다', () => {
   for (const typo of ['sl', 'claer', 'pwe']) {
@@ -37,7 +45,7 @@ test('1) 뻔한 오타는 로컬(1단)이 잡는다 — 서버 의도가 나가�
 
 test('2) 자유 문장은 2단 의도로만 나간다 — 셸이 답을 지어내지 않는다', () => {
   const { events } = shell.execute('이제 뭘 하면 돼?', shell.INITIAL_LAB_STATE, 'k:free')
-  const intents = events.filter((event): event is Extract<typeof events[number], { kind: 'ai' }> => event.kind === 'ai')
+  const intents = events.filter((event) => event.kind === 'ai')
   assert.equal(intents.length, 1, '자유 문장이 voice 의도 하나로 나가지 않는다')
   assert.equal(intents[0]!.mode, 'voice')
   // 셸이 자기 말을 덧붙이면 «꾸며낸 대사 금지» 골격이 깨진다 — echo 밖의 출력은 없어야 한다.
