@@ -52,12 +52,12 @@ test('2) 키트 미션 — 고르기뿐, 정답은 하나, 오답 힌트와 정�
     for (const choice of kit.mission.choices) {
       assert.ok(/[가-힣]/.test(choice.label), `${qaId}: 선택지 «${choice.label}» 가 우리말이 아니다`)
     }
-    // 키트는 견학형 강에만 얹는다(터미널·유사 페이지 강은 각자 부품이 있다).
+    // 키트는 견학형 강(본체)과 유사 페이지형 강(짝 링크의 «진짜 먼저 보기», SDD 결정 3)에 얹는다.
+    //    터미널형 강에는 안 얹는다 — 그 강의 체험은 터미널이 본체다.
     const chapterId = Number(qaId.slice(2, 4))
-    assert.equal(
-      EXPERIENCE_KIND_BY_CHAPTER[chapterId],
-      'tour',
-      `${qaId}: 견학형이 아닌 강(ch${chapterId})에 키트가 얹혔다`,
+    assert.ok(
+      ['tour', 'github', 'composite'].includes(EXPERIENCE_KIND_BY_CHAPTER[chapterId] ?? ''),
+      `${qaId}: 터미널형 강(ch${chapterId})에 키트가 얹혔다`,
     )
   }
 })

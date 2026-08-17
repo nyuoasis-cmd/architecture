@@ -25,6 +25,37 @@ export type RegisteredLink = {
 };
 
 export const LINK_REGISTRY: Record<string, RegisteredLink> = {
+  // 3강(ch03) — 짝 링크(MAP 확정 소재): 우리 GitHub Pages(안 죽는다) + 공식 quickstart(후보).
+  'ch03-ai-school': {
+    id: 'ch03-ai-school',
+    url: 'https://ai.teachermate.co.kr',
+    label: '진짜 페이지 열기',
+    status: 'confirmed',
+    noLogin: true,
+  },
+  'ch03-pages-quickstart': {
+    id: 'ch03-pages-quickstart',
+    url: 'https://docs.github.com/en/pages/quickstart',
+    label: '공식 안내 열기',
+    status: 'candidate',
+    noLogin: true,
+  },
+  // 16강(ch20) — github/docs 공개 Issues 목록 (후보).
+  'ch20-github-issues': {
+    id: 'ch20-github-issues',
+    url: 'https://github.com/github/docs/issues',
+    label: '진짜 이슈 목록 열기',
+    status: 'candidate',
+    noLogin: true,
+  },
+  // 22강(ch22) — 합쳐진 PR 구경 (후보 — 특정 PR 대신 merged 목록: 링크가 안 낡는다).
+  'ch22-merged-prs': {
+    id: 'ch22-merged-prs',
+    url: 'https://github.com/github/docs/pulls?q=is%3Apr+is%3Amerged',
+    label: '진짜 PR 구경하기',
+    status: 'candidate',
+    noLogin: true,
+  },
   // 10강(ch10) — 지도 확정 링크(MAP): Google Cloud 위치 지도. 시범 적용(목업 3).
   'ch10-gcp-locations': {
     id: 'ch10-gcp-locations',

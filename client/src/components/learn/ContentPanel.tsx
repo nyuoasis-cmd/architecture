@@ -371,8 +371,10 @@ export default function ContentPanel({
             <PhishingCheck />
           ) : getGhScript(chapter.id) ? (
             <div className="flex flex-col">
-              {/* 1단계 — 진짜 먼저 보기(짝 링크, SDD 결정 3). 견학 키트(체크포인트)는 E4-3 이 확장한다. */}
+              {/* 1단계 — 진짜 먼저 보기(짝 링크, SDD 결정 3). 키트(관찰 미션)가 있으면 키트가 선다. */}
+              {getTourKit(qaId) ? <TourKit kit={getTourKit(qaId)!} /> : null}
               {(() => {
+                if (getTourKit(qaId)) return null;
                 const pair = extras?.tour?.find((mission) => mission.link);
                 return pair?.link ? (
                   <div className="mx-auto mt-4 flex w-full max-w-[860px] flex-wrap items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-4 py-3 lg:px-5">
