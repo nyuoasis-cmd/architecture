@@ -8,10 +8,18 @@ const ROOT = path.resolve(__dirname, '..', '..', '..')
 const read = (...rel: string[]) => readFileSync(path.join(ROOT, ...rel), 'utf8')
 const loadClient = (rel: string) => require(path.resolve(ROOT, 'client', 'src', rel))
 
-const { GH_SCRIPTS } = loadClient('data/gh-scripts') as {
-  GH_SCRIPTS: Record<number, import('../../../client/src/lib/gh-sim').GhScript>
+// 🚨 typeof import(클라)는 서버 tsc 를 TS6059 로 죽인다(CI 사고 2026-08-18) — 모양만 손으로 적는다.
+type ProbeStep = {
+  id: string
+  action: { kind: string; artifactKind?: string }
+  artifactOf?: (state: ProbeState, input: string) => string
 }
-const sim = loadClient('lib/gh-sim') as typeof import('../../../client/src/lib/gh-sim')
+type ProbeState = { pr: { state: string; body: string } | null }
+type ProbeScript = { steps: ProbeStep[] }
+const { GH_SCRIPTS } = loadClient('data/gh-scripts') as { GH_SCRIPTS: Record<number, ProbeScript> }
+const sim = loadClient('lib/gh-sim') as {
+  foldGhState: (script: ProbeScript, stepIndex: number, inputs: Record<string, string>) => ProbeState
+}
 const { PHISHING_CARDS, PHISHING_QA_ID } = loadClient('data/phishing-check') as {
   PHISHING_CARDS: Array<{ id: string; url: string; https: boolean; real: boolean; tells: string[] }>
   PHISHING_QA_ID: string
