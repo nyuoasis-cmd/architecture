@@ -98,10 +98,13 @@ export const manifest: CrawlManifest = {
     /\/api\/qa(\/|$)/,          // QA 제어 엔드포인트
     /method=DELETE/i,           // DELETE 계열
     /\/sessions\/[^/]+\/end/,   // POST /api/sessions/:id/end (세션 종료 — 상태 변경)
-    // 🚨 앱 AI 라우트 2개 — 크롤러는 모든 버튼을 누르므로 여기를 막지 않으면 실제 과금이 난다.
-    // 「내 차례」(/api/vibe/my-turn)는 CHAT_MONTHLY_BUDGET_USD 가 세지 않아 돈 천장 자체가 없다.
-    /\/api\/chat(\/|$)/,          // 학생 챗봇
-    /\/api\/vibe\/my-turn(\/|$)/, // ✋ 「내 차례」 판정
+    // 🚨 앱 AI 라우트 — 크롤러는 모든 버튼을 누르므로 여기를 막지 않으면 실제 과금이 난다.
+    /\/api\/chat(\/|$)/,          // 학생 챗봇 (2026-08-18 철거 — 부활 대비로 남긴다)
+    /\/api\/vibe\/my-turn(\/|$)/, // ✋ 「내 차례」 판정 (탭 철거 — 라우트는 존치라 계속 막는다)
+    // 🚨 2026-08-18 체험 재구조화 — AI 호출이 전부 실습실(/api/lab/*)로 옮겨왔다(PR #211 과 같은 유형).
+    //    voice(자유 문장 해석)·ask(질문)·review(비평)·verify(재검증)·submit(제출 시 서버가 AI 2회) 전부 과금.
+    //    artifact·bundle 은 AI 는 아니지만 학생 계보에 쓰기가 남는 L4 write 라 같이 막는다.
+    /\/api\/lab\/(voice|ask|review|verify|submit|artifact|bundle)(\/|$)/,
   ],
 
   dynamicRouteFactories: {
