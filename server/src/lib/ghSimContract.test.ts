@@ -25,7 +25,7 @@ type ProbeScript = {
   repoName: string
   bridge: { name: string; stages: string[] }
   newTerms: string[]
-  initial: { repo: string }
+  initial: { repo: string; [key: string]: unknown }
   steps: ProbeStep[]
   outro: string
 }
