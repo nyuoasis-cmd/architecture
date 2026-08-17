@@ -219,6 +219,14 @@ function LabMissionList() {
 
   return (
     <div className="mb-1 ml-[26px] mt-0.5 border-l-2 border-[var(--color-accent)] pl-2.5">
+      {/*
+        🚨 2026-08-16 새내기 f6(sev 2): 학생이 「터미널을 배우는 건지, 규칙 문서 제출 과정의 일부인지
+           헷갈려요」 라고 했다. 길을 잃은 게 아니라 **도착지를 모르는 것**이라, 미션판 머리에 한 줄만 둔다.
+        🚨 미션마다 이유를 붙이지 말 것 — 7줄이 7문단이 되면 아무도 안 읽는다. 도착지는 **여기 한 줄뿐**이다.
+      */}
+      <p className="mb-1.5 text-[11.5px] leading-[1.4] text-[var(--color-text-faint)]">
+        도착지 — 규칙 한 장을 파일로 써서 낸다
+      </p>
       <ol className="space-y-[3px]">
         {LAB_MISSIONS.map((mission, index) => {
           const done = index < earned;
