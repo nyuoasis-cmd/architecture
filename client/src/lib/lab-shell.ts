@@ -226,6 +226,56 @@ export function earnedMissionIndex(state: LabState): number {
   return 7;
 }
 
+/**
+ * 「지금 이 순간 무엇을 치면 되는가」.
+ *
+ * 🚨 **이 규칙을 두 곳에 적지 않는다.** 터미널 안내와 입력칸의 회색 예시가 각자 규칙을 갖는 순간
+ *    학생은 서로 다른 두 지시를 동시에 받는다 — 2026-08-16 새내기 관찰 f7·f8 이 정확히 그 모양이었다
+ *    (안내는 「ls 를 쳐 보세요」인데 `ls` 를 이미 쳤고, 입력칸은 영원히 `ls` 를 제안했다).
+ * 🔑 미션이 요구하는 것을 **이름으로** 돌려준다. `cat` 이 아니라 `cat runs/run-1.txt` —
+ *    미션 2 의 goal 에는 열어야 할 파일 이름이 없어서, 학생이 무엇을 열지 알 방법이 화면에 없었다.
+ * 🔑 «남은 개수»는 판정과 **같은 자리**(`earnedMissionIndex`)에서 세야 한다. 따로 세면 갈라진다.
+ */
+export type LabNextStep = {
+  /** 지금 치면 되는 명령. 미션을 다 끝냈으면 null. */
+  command: string | null;
+  /** 한 미션이 여럿을 요구할 때 «몇 개 중 몇 개». 요구가 하나뿐이면 null. */
+  progress: { done: number; total: number } | null;
+};
+
+const LOOK_AROUND_COMMANDS = ['ls', 'pwd'] as const;
+
+export function nextStepOf(state: LabState): LabNextStep {
+  switch (missionIndexOf(state)) {
+    case 0: {
+      const done = LOOK_AROUND_COMMANDS.filter((name) => state.ranCommands.includes(name));
+      const next = LOOK_AROUND_COMMANDS.find((name) => !state.ranCommands.includes(name)) ?? null;
+      return { command: next, progress: { done: done.length, total: LOOK_AROUND_COMMANDS.length } };
+    }
+    case 1: {
+      const opened = LAB_RUN_FILES.filter((file) => state.openedFiles.includes(file));
+      const next = LAB_RUN_FILES.find((file) => !state.openedFiles.includes(file));
+      return {
+        command: next ? `cat ${next}` : null,
+        progress: { done: opened.length, total: LAB_RUN_FILES.length },
+      };
+    }
+    case 2:
+      return { command: 'npm test', progress: null };
+    // 🔑 3(안 씀)과 4(썼는데 짧음)는 학생이 할 일이 같다 — 편집기를 다시 연다.
+    case 3:
+    case 4:
+      return { command: 'edit', progress: null };
+    // 🚨 미션 6 은 «비평을 받았고, 내 규칙으로 다시 시켜 봤는가» 둘이다. 안 받았으면 비평부터.
+    case 5:
+      return { command: state.reviewDone ? 'npm test' : 'claude review', progress: null };
+    case 6:
+      return { command: 'lab check', progress: null };
+    default:
+      return { command: null, progress: null };
+  }
+}
+
 /** 🚨 **서버가 받아 준 뒤에만** 부른다. 보낸 시점이 아니다. */
 export function markSubmitted(state: LabState, revision: number): LabState {
   return { ...state, submittedRevision: revision };
@@ -252,7 +302,10 @@ export function saveRules(state: LabState, rules: string): LabResult {
   if (cleaned.trim().length > 0 && cleaned.trim().length < MIN_RULES_CHARS) {
     events.push(line(`  (아직 짧습니다. ${MIN_RULES_CHARS}자는 넘어야 «써 봤다»로 셉니다.)`, 'warn'));
   }
-  return { events, nextState: { ...state, rules: cleaned } };
+  // 🚨 편집기 저장은 `execute` 를 거치지 않는다 — 진행 알림을 여기에도 붙여야 «저장했는데 아무 말이
+  //    없다»가 안 생긴다. 미션 4·5 가 이 경로에서만 넘어간다.
+  const nextState: LabState = { ...state, rules: cleaned };
+  return { events: [...events, ...progressLines(state, nextState)], nextState };
 }
 
 /** 내 규칙으로 받은 결과를 상태에 담는다. 🔑 판정은 화면이 결정적 검사기로 한다. */
@@ -266,10 +319,16 @@ function line(text: string, tone: LabTone = 'plain'): LabEvent {
   return { kind: 'line', text, tone };
 }
 
-function helpLines(): LabEvent[] {
+/**
+ * 🚨 2026-08-16 새내기 f9(sev 2): 사전이 화면을 채워 방금 친 명령의 결과를 밀어냈고, 맨 위 안내가
+ *    「지금 할 일 → lab missions」라 **또 한 번 쳐야** 답이 나왔다. 학생은 「뜻은 알겠는데 실제로
+ *    뭘 해야 하는지는 여전히 모르겠어」로 끝났다. 그래서 사전 **맨 끝**에 지금 할 일을 붙인다 —
+ *    스크롤이 멈추는 자리가 거기다.
+ * 🚨 사전 자체는 줄이지 않는다. 학생이 이 실습실에서 유일하게 «이해했다»고 말한 부분이다.
+ */
+function helpLines(state: LabState): LabEvent[] {
   const out: LabEvent[] = [
-    line('지금 할 일 → lab missions', 'ok'),
-    line('아래는 사전입니다. 순서표가 아니라 낱말 뜻풀이예요.', 'dim'),
+    line('아래는 사전입니다. 순서표가 아니라 낱말 뜻풀이예요. 지금 할 일은 맨 아래에 있습니다.', 'dim'),
   ];
   for (const group of ['둘러보기', '만들기', '확인하기', '나가기'] as const) {
     const rows = COMMANDS.filter((c) => c.group === group);
@@ -282,6 +341,12 @@ function helpLines(): LabEvent[] {
     out.push(line(''));
   }
   out.push(line('이 목록 밖의 명령은 이 실습실이 모릅니다.', 'dim'));
+  out.push(line(''));
+  const goal = goalLine(state);
+  if (goal) out.push(goal);
+  const step = nextStepLine(state);
+  if (step) out.push(step);
+  out.push(line('  미션 전체를 보려면 lab missions.', 'dim'));
   return out;
 }
 
@@ -302,6 +367,64 @@ function goalLine(state: LabState): LabEvent | null {
   return line(`지금 할 일 — ${current.goal}`, current.live ? 'plain' : 'dim');
 }
 
+/**
+ * 「다음 — cat runs/run-1.txt」 한 줄. 🔑 `nextStepOf` 한 자리에서만 만든다.
+ */
+function nextStepLine(state: LabState): LabEvent | null {
+  const step = nextStepOf(state);
+  if (!step.command) return null;
+  return line(`  다음 — ${step.command}`, 'ok');
+}
+
+/**
+ * 명령 하나가 미션의 «일부»를 채웠을 때, **그 자리에서** 남은 것을 말한다.
+ *
+ * 🚨 2026-08-16 새내기 f7(sev 3): 미션 1 은 `ls` 와 `pwd` 둘을 요구하는데 `ls` 를 쳐도 화면이 그대로였다.
+ *    성공 표지도 남은 것도 없어서 학생이 「드디어 뭔가 됐다! 근데 그 다음엔?」 하고 거기서 멈췄다.
+ *    부분 성공은 반드시 그 자리에서 말한다 — 왼쪽 미션판만 보고 알아채기를 기대하지 않는다.
+ * 🔑 아무것도 안 달라졌으면 **아무 말도 안 한다.** 같은 명령을 두 번 친 학생에게 잔소리하지 않는다.
+ * 🔑 판정은 색이 아니라 «문자»로도 읽혀야 한다 — `[끝]`·`[지금]` 은 `lab missions` 와 같은 낱말이다.
+ */
+function progressLines(before: LabState, after: LabState): LabEvent[] {
+  // 🚨 건너뛰기는 «끝냈다»가 아니다. `jump` 는 자기 자리에서 이미 안내를 하므로 여기서 잠자코 있는다 —
+  //    안 그러면 건너뛴 학생에게 「[끝] 미션 3」이라고 거짓으로 말한다.
+  if (before.jumpedTo !== after.jumpedTo) return [];
+  const wasAt = missionIndexOf(before);
+  const nowAt = missionIndexOf(after);
+
+  if (nowAt > wasAt) {
+    const finished = LAB_MISSIONS[wasAt];
+    const current = LAB_MISSIONS[nowAt];
+    const out: LabEvent[] = [line('')];
+    if (finished) out.push(line(`  [끝] 미션 ${wasAt + 1} — ${finished.label}`, 'ok'));
+    if (!current) {
+      out.push(line('  미션을 전부 끝냈습니다. 낸 뒤에도 몇 번이고 고쳐서 다시 낼 수 있어요.', 'ok'));
+      return out;
+    }
+    out.push(line(`  [지금] 미션 ${nowAt + 1} — ${current.label}`, 'warn'));
+    const goal = goalLine(after);
+    if (goal) out.push(goal);
+    const step = nextStepLine(after);
+    if (step) out.push(step);
+    return out;
+  }
+
+  // 미션은 그대로인데 그 안에서 한 칸 나아갔는가.
+  const step = nextStepOf(after);
+  const wasStep = nextStepOf(before);
+  if (!step.command || !step.progress || !wasStep.progress) return [];
+  if (step.progress.done <= wasStep.progress.done) return [];
+  // 🔑 「이제 pwd 를」처럼 명령 뒤에 조사를 붙이지 않는다 — 명령이 어떤 글자로 끝날지 알 수 없다
+  //    (`pwd` · `cat runs/run-2.txt` · `npm test`). 미션이 넘어갈 때와 **같은 형태**(「다음 — 」)로 적는다.
+  return [
+    line(
+      `  좋아요 — ${step.progress.done}/${step.progress.total} 했습니다. ${step.progress.total}개를 다 하면 다음 미션으로 넘어갑니다.`,
+      'ok',
+    ),
+    nextStepLine(after)!,
+  ];
+}
+
 function missionLines(state: LabState): LabEvent[] {
   const now = missionIndexOf(state);
   const out: LabEvent[] = [line('미션', 'warn')];
@@ -313,6 +436,8 @@ function missionLines(state: LabState): LabEvent[] {
   out.push(line(''));
   const goal = goalLine(state);
   if (goal) out.push(goal);
+  const step = nextStepLine(state);
+  if (step) out.push(step);
   return out;
 }
 
@@ -412,10 +537,26 @@ export function normalizeInput(raw: string): string {
     .replace(/\u00A0/g, ' ');
 }
 
+/**
+ * 명령 하나를 실행한다.
+ *
+ * 🚨 진행 알림(`progressLines`)을 붙이는 자리는 **여기 한 곳뿐이다.** 명령 핸들러마다 각자
+ *    「잘했어요」를 적으면, 새 명령을 만드는 날 그 명령만 조용히 아무 말도 안 하게 된다.
+ */
 export function execute(command: string, state: LabState, idempotencyKey: string): LabResult {
   if (idempotencyKey !== '' && idempotencyKey === state.lastKey) {
     return { events: [], nextState: state };
   }
+  const result = executeCore(command, state, idempotencyKey);
+  // 🔑 화면을 지우거나 나가는 명령 뒤에는 붙이지 않는다 — 지운 화면에 한 줄만 남거나,
+  //    이미 떠난 학생에게 다음 할 일을 말하는 셈이 된다.
+  if (result.events.some((event) => event.kind === 'clear' || event.kind === 'exit')) return result;
+  const progress = progressLines(state, result.nextState);
+  if (progress.length === 0) return result;
+  return { events: [...result.events, ...progress], nextState: result.nextState };
+}
+
+function executeCore(command: string, state: LabState, idempotencyKey: string): LabResult {
   const base: LabState = { ...state, lastKey: idempotencyKey };
   const raw = normalizeInput(command).trim();
   const echo = line(`${pathLabel(state.cwd)}$ ${raw}`, 'input');
@@ -470,7 +611,7 @@ export function execute(command: string, state: LabState, idempotencyKey: string
 
   switch (head) {
     case 'help':
-      return { events: [echo, ...helpLines()], nextState: remember('help') };
+      return { events: [echo, ...helpLines(base)], nextState: remember('help') };
 
     case 'pwd':
       return { events: [echo, line(pathLabel(base.cwd))], nextState: remember('pwd') };

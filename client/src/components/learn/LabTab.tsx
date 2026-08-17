@@ -5,6 +5,7 @@ import {
   execute,
   markReviewDone,
   markSubmitted,
+  nextStepOf,
   openingEvents,
   saveRules,
   type LabEvent,
@@ -69,6 +70,16 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
   };
 
   const [draft, setDraft] = useState('');
+  /**
+   * 입력칸의 회색 예시 = **지금 미션이 요구하는 다음 명령**.
+   *
+   * 🚨 2026-08-16 새내기 f8(sev 3): 여기에 ls 가 글자로 박혀 있어서, `ls` 결과가 이미 나온
+   *    화면에서도 계속 `ls` 를 제안했다 — 방금 한 것을 또 하라고 말하는 셈이었고, 학생은
+   *    「ls 를 쳐보세요라고 했는데, 내가 뭘 입력해야 하는지 몰라」로 끝났다.
+   * 🚨 규칙을 여기 새로 적지 않는다. 터미널 안내와 **같은 함수**(`nextStepOf`)를 쓴다 —
+   *    두 곳에 각자 적으면 그 순간 갈라진다.
+   */
+  const nextCommand = nextStepOf(state).command ?? 'lab missions';
   const [editorOpen, setEditorOpen] = useState(false);
   const [editorText, setEditorText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -368,7 +379,7 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
               recall(1);
             }
           }}
-          placeholder="ls"
+          placeholder={nextCommand}
           spellCheck={false}
           value={draft}
         />
