@@ -7,6 +7,13 @@ export type SessionParticipant = {
   nickname: string;
   joined_at: string;
   progress_count: number;
+  /**
+   * 실습실에서 지금 서 있는 미션(0-based). 🚨 **실습에 들어온 학생에게만 온다** —
+   * 없는 것을 0 으로 채우면 「실습 0/7」이 되고, 그건 실습을 안 연 학생에게 거짓이다(t1).
+   */
+  lab_mission_index?: number;
+  /** 스스로 도달한 미션. `lab_mission_index` 보다 작으면 건너뛴 구간이 있다. */
+  lab_earned_index?: number;
 };
 
 export type SessionProgressEntry = {

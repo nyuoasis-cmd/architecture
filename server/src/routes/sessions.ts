@@ -5,7 +5,7 @@ import { getRequestUser } from '../lib/auth';
 import { getParticipantTokenFromRequest, verifyParticipantToken } from '../lib/participant-token';
 import { generateSessionCode } from '../lib/session-code';
 import { summarizeSessionActivity, type ActivityProgressRow } from '../lib/session-activity';
-import { tallyProgressRows } from '../lib/session-progress';
+import { tallyLabMissions, tallyProgressRows } from '../lib/session-progress';
 import { getSupabaseAdminClient } from '../lib/supabase';
 import { qaTagFields } from '../lib/qa-context';
 import { ALL_CHAPTER_IDS, getChapterContexts, getQaContextById } from '../data/chapter-content';
@@ -125,7 +125,8 @@ async function listParticipantsWithProgress(sessionId: string) {
 
   const { data: progressRows, error: progressError } = await supabase
     .from('architecture_progress')
-    .select('participant_id, qa_id')
+    // 🔑 실습 미션 칸을 같은 쿼리에서 가져온다 — 교사 화면 때문에 쿼리를 늘리지 않는다(t1).
+    .select('participant_id, qa_id, lab_mission_index, lab_earned_index')
     .in('participant_id', participantIds);
 
   if (progressError) {
@@ -134,6 +135,7 @@ async function listParticipantsWithProgress(sessionId: string) {
 
   // 같은 행을 참여자별·문항별 두 축으로 센다(session-progress.ts) — 쿼리는 늘지 않는다.
   const { countsByParticipant: counts, qaCompletion } = tallyProgressRows(progressRows ?? []);
+  const labByParticipant = tallyLabMissions(progressRows ?? []);
 
   return {
     participants: typedParticipants.map((participant) => ({
@@ -141,6 +143,9 @@ async function listParticipantsWithProgress(sessionId: string) {
       nickname: participant.nickname,
       joined_at: participant.joined_at,
       progress_count: counts.get(participant.id) ?? 0,
+      // 🔑 실습에 아직 안 들어온 학생에게는 아예 안 붙인다 — 「실습 0/7」은 «시작했는데 못 하고 있다»로
+      //    읽히고, 그건 실습 문항을 안 연 학생에게 거짓이다.
+      ...(labByParticipant.get(participant.id) ?? {}),
     })),
     qaCompletion,
   };

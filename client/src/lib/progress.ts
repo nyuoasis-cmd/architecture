@@ -116,7 +116,10 @@ export function enableProgressSync() {
   remoteSyncDisabled = false;
 }
 
-async function syncProgressRemote(qaId: string, payload: { readAt?: string; quizScore?: number }) {
+async function syncProgressRemote(
+  qaId: string,
+  payload: { readAt?: string; quizScore?: number; labMissionIndex?: number; labEarnedIndex?: number },
+) {
   if (import.meta.env.DEV) {
     return;
   }
@@ -133,6 +136,8 @@ async function syncProgressRemote(qaId: string, payload: { readAt?: string; quiz
         qa_id: qaId,
         read_at: payload.readAt,
         quiz_score: payload.quizScore,
+        lab_mission_index: payload.labMissionIndex,
+        lab_earned_index: payload.labEarnedIndex,
       }),
     });
     if (response.status === 401 || response.status === 403) {
@@ -142,6 +147,25 @@ async function syncProgressRemote(qaId: string, payload: { readAt?: string; quiz
   } catch {
     // local cache 유지, 다음 호출에서 재시도
   }
+}
+
+/**
+ * 실습실 미션 자리를 서버에 보고한다 (2026-08-16 신입샘 t1 — 교사 화면이 이걸 읽는다).
+ *
+ * 🚨 **값이 달라졌을 때만** 부른다. 셸이 상태를 갱신할 때마다 부르면 학생 한 명이 90분에
+ *    수백 번을 보낸다 — 25명이면 수업 중 쓸데없는 트래픽이 그만큼 된다.
+ * 🔑 미션은 90분에 7번 움직인다. 그래서 실제 호출은 학생당 최대 7번이다.
+ * 🚨 실패해도 **아무것도 안 한다.** 이건 교사 화면의 «보기»용 값이고, 학생 실습은 이것과
+ *    무관하게 굴러가야 한다 — 진도 보고가 학생을 막는 자리가 되면 안 된다.
+ */
+let lastLabReport: { qaId: string; at: number } | null = null;
+
+export function reportLabMission(qaId: string, missionIndex: number, earnedIndex: number) {
+  if (lastLabReport && lastLabReport.qaId === qaId && lastLabReport.at === missionIndex) {
+    return;
+  }
+  lastLabReport = { qaId, at: missionIndex };
+  void syncProgressRemote(qaId, { labMissionIndex: missionIndex, labEarnedIndex: earnedIndex });
 }
 
 export function markRead(qaId: string) {
