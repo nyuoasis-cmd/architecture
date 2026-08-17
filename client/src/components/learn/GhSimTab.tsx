@@ -65,7 +65,9 @@ export default function GhSimTab({ script, onArtifact }: GhSimTabProps) {
     if (step.action.kind !== 'input') return;
     const text = draft.trim();
     if (text.length < step.action.minChars) return;
-    if (step.action.artifactKind) onArtifact?.(step.action.artifactKind, text);
+    if (step.action.artifactKind) {
+      onArtifact?.(step.action.artifactKind, step.artifactOf ? step.artifactOf(state, text) : text);
+    }
     advance(text);
   };
 

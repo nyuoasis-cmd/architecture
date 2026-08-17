@@ -69,6 +69,11 @@ export type GhScriptStep = {
   action: GhAction;
   /** 행동이 끝났을 때의 상태 변화. input 이면 학생 글이 들어온다. */
   apply?: (state: GhSimState, input?: string) => GhSimState;
+  /**
+   * 계보에 저장할 내용 — 기본은 입력 그대로. 고침 단계처럼 «이전 본문 + 덧붙임»이 산출물일 때만 쓴다.
+   * 🚨 부분(덧붙임)만 저장하면 23강 bundle 이 반쪽 쪽지를 꺼낸다.
+   */
+  artifactOf?: (state: GhSimState, input: string) => string;
 };
 
 export type GhScript = {

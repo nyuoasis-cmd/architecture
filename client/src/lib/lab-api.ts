@@ -66,6 +66,11 @@ export function labVoice(payload: { text: string; missionGoal: string; nextComma
   return post<{ reply: string[]; suggestedCommand: string | null }>('/api/lab/voice', payload);
 }
 
+/** 체험 산출물 한 장을 계보에 쌓는다(SDD 결정 15). 'rules' 는 제출 경로가 따로 쌓는다. */
+export function labSaveArtifact(kind: string, content: string) {
+  return post<{ revision: number }>('/api/lab/artifact', { kind, content });
+}
+
 /**
  * 막힌 이유를 학생이 읽을 문장으로. 🚨 **다음에 무엇을 할지**까지 적는다 —
  *    「실패했습니다」만 쓰면 학생은 그저 다시 누른다.

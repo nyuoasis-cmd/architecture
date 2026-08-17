@@ -5,15 +5,20 @@ import QrFullscreen from '../common/QrFullscreen';
 import type { DemoMeta } from '../../data/demos';
 import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getExtras } from '../../data/learn-extras';
+import { getGhScript } from '../../data/gh-scripts';
+import { PHISHING_QA_ID } from '../../data/phishing-check';
 import { LAB_CHAPTER_ID, LAB_QA_ID, LAB_QA_MISSION_SPANS } from '../../data/vibe-lab-ch18';
+import { labSaveArtifact } from '../../lib/lab-api';
 import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
 import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
 import { earnedMissionIndex, missionIndexOf } from '../../lib/lab-shell';
 import { reportLabMission } from '../../lib/progress';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
+import GhSimTab from './GhSimTab';
 import LabTab from './LabTab';
 import NextQuestionDoor from './NextQuestionDoor';
+import PhishingCheck from './PhishingCheck';
 import { getNextQuestionDoorTarget } from './next-question-door';
 import QuizTab from './QuizTab';
 import ReadTab from './ReadTab';
@@ -352,6 +357,46 @@ export default function ContentPanel({
                   qaId={LAB_QA_ID}
                 />
               </div>
+            </div>
+          ) : qaId === PHISHING_QA_ID ? (
+            // 22강 q3 — 진짜/가짜 로그인 화면 판별 미니 체험 (SDD 결정 20, 부품 신설 없음)
+            <PhishingCheck />
+          ) : getGhScript(chapter.id) ? (
+            <div className="flex flex-col">
+              {/* 1단계 — 진짜 먼저 보기(짝 링크, SDD 결정 3). 견학 키트(체크포인트)는 E4-3 이 확장한다. */}
+              {(() => {
+                const pair = extras?.tour?.find((mission) => mission.link);
+                return pair?.link ? (
+                  <div className="mx-auto mt-4 flex w-full max-w-[860px] flex-wrap items-center gap-3 rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-subtle)] px-4 py-3 lg:px-5">
+                    <span className="text-[20px]">🚌</span>
+                    <div className="min-w-0 flex-1">
+                      <p className="text-[12px] font-bold tracking-wide text-[var(--color-text-faint)]">
+                        1단계 — 진짜 먼저 보기
+                      </p>
+                      <p className="truncate text-[13.5px] font-semibold text-[var(--color-text-primary)]">
+                        {pair.title}
+                      </p>
+                    </div>
+                    <a
+                      className="rounded-lg bg-[var(--color-text-primary)] px-3.5 py-2 text-[12.5px] font-bold text-white"
+                      href={pair.link.url}
+                      rel="noopener noreferrer"
+                      target="_blank"
+                    >
+                      {pair.link.label} ↗
+                    </a>
+                  </div>
+                ) : null;
+              })()}
+              {/* 2단계 — 유사 페이지에서 진행. 산출물은 계보로(실패해도 체험은 계속 — 23강이 빈 칸을 알려 준다). */}
+              <GhSimTab
+                onArtifact={(kind, content) => {
+                  void labSaveArtifact(kind, content).then((result) => {
+                    if (!result.ok) console.warn('[exp] artifact_save_failed', kind, result.failure);
+                  });
+                }}
+                script={getGhScript(chapter.id)!}
+              />
             </div>
           ) : extras?.tour?.length ? (
             <TourTab missions={extras.tour} qaId={qaId} />

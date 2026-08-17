@@ -47,6 +47,11 @@ const voiceSchema = z.object({
   nextCommand: z.string().max(40).default(''),
 });
 const submitSchema = z.object({ qaId: z.string().min(1).max(32), rules: z.string().min(1).max(8000) });
+// 🔑 화면이 직접 쌓을 수 있는 계보 칸 — 'rules' 는 제출(/submit) 경로가, 'bundle' 은 23강 묶음 경로가 쓴다.
+const artifactSchema = z.object({
+  kind: z.enum(['skill', 'ac', 'promise', 'handoff']),
+  content: z.string().min(1).max(8000),
+});
 
 function handle(caught: unknown, res: import('express').Response, tag: string): void {
   // 🔑 학생이 화면을 닫은 것은 «고장»이 아니다. 로그를 시끄럽게 만들지 않고, 답도 보내지 않는다
@@ -166,6 +171,25 @@ router.post('/submit', async (req, res) => {
     res.json(result);
   } catch (caught) {
     handle(caught, res, 'submit');
+  }
+});
+
+// POST /api/lab/artifact — 체험이 만든 산출물 한 장을 계보에 쌓는다 (SDD 결정 15).
+router.post('/artifact', async (req, res) => {
+  const parsed = artifactSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'invalid_request' });
+    return;
+  }
+  try {
+    const revision = await saveArtifact(toLabActor(resolveActorId(req)), parsed.data.kind, parsed.data.content);
+    res.json({ revision });
+  } catch (caught) {
+    if (caught instanceof LabArtifactsUnavailableError) {
+      res.status(503).json({ error: 'unavailable', reason: 'artifacts_unavailable' });
+      return;
+    }
+    handle(caught, res, 'artifact');
   }
 });
 
