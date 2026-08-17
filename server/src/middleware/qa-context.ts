@@ -6,7 +6,6 @@
 //   (A) 인증 QA teacher 요청  — Bearer 가 화이트리스트 QA teacher 계정(+is_qa)일 때만 헤더 신뢰.
 //   (B) QA 세션 스코프 상속(anon 학생) — 요청이 가리키는 세션이 created_by_qa 면 그 세션의 qa_run_id 사용.
 //        architecture 는 세션 식별 경로가 둘: ① join body.code(6자리) ② progress arch_pt 참가자 토큰→session_id.
-//        (채팅 /api/chat 은 세션 무관 전역 Q&A 라 path B 로 해석 불가 → QA teacher authed(A) 일 때만 컨텍스트.)
 //
 // 성능/안전: X-QA-Run-Id 헤더가 없으면 즉시 통과(실유저 트래픽은 이 헤더를 보내지 않으므로 DB 조회 0).
 //   실유저가 헤더를 위조해도 자기 세션은 비-QA 라 컨텍스트 미설정 → 데이터 절대 미태깅.

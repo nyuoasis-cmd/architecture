@@ -40,9 +40,9 @@ export default function ChapterNavPanel({
   const localProgressMap = useProgressMap();
   const progressMap = progressMapOverride ?? localProgressMap;
   const categoryMeaning = getCategoryMeaning(chapter.category);
-  // 🔑 미션은 «실습 탭을 보고 있을 때만» 편다. 다른 탭에서 목차가 미션으로 채워지면
-  //    학생이 이 장의 문항 목록을 잃는다.
-  const isLabTab = useLearnStore((state) => state.contentTab) === 'lab';
+  // 🔑 미션은 «체험 탭에서 실습실을 보고 있을 때만» 편다. 다른 탭에서 목차가 미션으로
+  //    채워지면 학생이 이 장의 문항 목록을 잃는다.
+  const isLabTab = useLearnStore((state) => state.contentTab) === 'exp';
 
   const chapterIndex = availableChapters.findIndex((item) => item.id === chapter.id);
   const previousChapter = chapterIndex > 0 ? availableChapters[chapterIndex - 1] : undefined;

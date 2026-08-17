@@ -1,15 +1,17 @@
 // 학습 화면이 **한 종류뿐인가**에 대한 계약.
 //
 // 🚨 왜 있는가(2026-08-11, 에픽 2/6): 화면 골격이 «이 장에 extras 가 있는가»로 갈려 있었다.
-//    3컬럼(문항 목록 · AI 챗봇 · 콘텐츠)이 승인된 골격인데, 견학 데이터가 107/107 문항에 붙자
-//    그 조건이 17/17 장을 참으로 만들어 **3컬럼이 도달 불가 죽은 코드**가 됐다.
-//    좌측 문항 목록과 챗봇 컬럼이 통째로 안 그려졌고, 몇 주 동안 아무도 안 알려 줬다.
-//    콘텐츠를 채우는 일이 화면 골격을 조용히 뒤집은 것이다.
+//    승인된 골격이 있는데, 견학 데이터가 107/107 문항에 붙자 그 조건이 17/17 장을 참으로
+//    만들어 **승인된 골격이 도달 불가 죽은 코드**가 됐다. 좌측 문항 목록 컬럼이 통째로
+//    안 그려졌고, 몇 주 동안 아무도 안 알려 줬다. 콘텐츠를 채우는 일이 화면 골격을
+//    조용히 뒤집은 것이다.
 //
-// 🔑 그래서 여기서 막는 것은 «3컬럼이 예쁜가»가 아니라 **«분기가 다시 생겼는가»**이다.
-//    데이터의 많고 적음은 우측 탭 개수로만 나타나야 한다.
+// 🔑 2026-08-17 체험 재구조화(SDD-experience-first-restructure) 개정: 골격은 이제
+//    **2컬럼(문항 목록 · 콘텐츠) + 학생 탭 «읽기 → 체험 → 퀴즈»** 다. 철거된 것 —
+//    좌측 AI 챗봇 컬럼 · ✋ 내 차례 탭 · 🧪 실습 현황 탭 · 🚌 견학 탭(체험으로 흡수).
+//    여기서 막는 것은 «화면이 예쁜가»가 아니라 **«분기·철거물이 되살아났는가»**이다.
 import assert from 'node:assert/strict'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { test } from 'node:test'
 
@@ -21,15 +23,11 @@ const CONTENT_PANEL = 'client/src/components/learn/ContentPanel.tsx'
 const NAV_PANEL = 'client/src/components/learn/ChapterNavPanel.tsx'
 const LEARN_STORE = 'client/src/store/learn-store.ts'
 
-test('① 학습 화면에 세 컬럼이 전부 살아 있다 — 하나라도 빠지면 학생이 못 보는 기능이 생긴다', () => {
-  // 🔑 2026-08-15 개정: 🧪 실습 탭에서만 챗봇 칸이 접힌다(학생이 묻는 일이 터미널 안으로 옮겨간다).
-  //    ① 이 지키는 것은 그대로다 — **세 컬럼이 코드에 살아 있는가**. 접히는 조건이 «실습 탭 하나»인지는
-  //    8) 이 따로 본다. 여기서 <ChatPanel> 이 사라지면 나머지 125개 문항에서도 챗봇이 없어진다.
+test('1) 학습 화면에 두 컬럼이 전부 살아 있다 — 하나라도 빠지면 학생이 못 보는 기능이 생긴다', () => {
   const source = read(LEARN_PAGE)
   for (const [component, why] of [
     ['ChapterNavPanel', '좌측 문항 목록이 없으면 학생이 이 장의 어디쯤인지 모른다'],
-    ['ChatPanel', 'AI 챗봇은 학생이 막혔을 때 물어볼 유일한 통로다'],
-    ['ContentPanel', '읽기·시연·견학·내 차례·퀴즈가 전부 여기 있다'],
+    ['ContentPanel', '읽기·체험·퀴즈가 전부 여기 있다'],
   ]) {
     assert.ok(
       new RegExp(`<${component}\\b`).test(source),
@@ -37,11 +35,11 @@ test('① 학습 화면에 세 컬럼이 전부 살아 있다 — 하나라도 �
     )
   }
 
-  // 음성 대조군 — 정규식이 무엇이든 통과시키면 위 셋은 공짜다.
+  // 음성 대조군 — 정규식이 무엇이든 통과시키면 위 둘은 공짜다.
   assert.equal(/<NotARealPanel\b/.test(source), false, '없는 컴포넌트가 «있다»고 나오면 탐지가 헛돈다')
 })
 
-test('② 형판을 가르는 분기가 없다 — 죽은 컬럼을 만든 그 조건이 되살아나지 않게', () => {
+test('2) 형판을 가르는 분기가 없다 — 죽은 컬럼을 만든 그 조건이 되살아나지 않게', () => {
   const source = read(LEARN_PAGE)
   // 🚨 «데이터가 있으면 다른 화면»이 이 사고의 형태였다. 이름이 무엇으로 바뀌든,
   //    LearnPage 가 두 번째 형판 컴포넌트를 들고 있으면 같은 사고가 다시 난다.
@@ -55,41 +53,54 @@ test('② 형판을 가르는 분기가 없다 — 죽은 컬럼을 만든 그 �
   assert.equal(
     /chapterUsesExtrasLayout|EXTRAS_CHAPTER_IDS/.test(source),
     false,
-    'LearnPage 가 extras 유무로 무언가를 가르고 있다 — extras 는 탭 개수만 정해야 한다',
+    'LearnPage 가 extras 유무로 무언가를 가르고 있다 — extras 는 탭 안의 부품만 정해야 한다',
   )
 
   // 음성 대조군 — 탐지식이 실제로 그런 import 를 잡는지.
   assert.equal(
     /import\s+(\w*(?:Layout|Learn\w*Layout))\s+from/.test("import VibeLearnLayout from './x'"),
     true,
-    '탐지 정규식이 형판 import 를 못 잡으면 ② 는 실패할 수 없는 계측이다',
+    '탐지 정규식이 형판 import 를 못 잡으면 2) 는 실패할 수 없는 계측이다',
   )
 })
 
-test('③ 우측 탭은 데이터가 있을 때만 켜진다 — 빈 탭도, 안 켜지는 콘텐츠도 막는다', () => {
+test('3) 🧭 체험 탭은 전 문항에 있다 — 강마다 탭이 출렁이지 않는다 (SDD 결정 4)', () => {
   const source = read(CONTENT_PANEL)
-  assert.ok(/getExtras\(/.test(source), `${CONTENT_PANEL} 이 extras 를 안 읽으면 견학·내 차례가 영영 안 뜬다`)
-  for (const [guard, tab] of [
-    ['extras\\?\\.tour\\?\\.length', '🚌 견학'],
-    ['extras\\?\\.myTurn', '✋ 내 차례'],
-  ]) {
-    assert.ok(
-      new RegExp(guard).test(source),
-      `${CONTENT_PANEL} 이 ${tab} 탭을 데이터 없이 켜거나 데이터가 있어도 안 켠다`,
-    )
-  }
+  // 체험 탭은 조건 없이 켜진다. 조건이 붙는 순간 «어떤 문항엔 체험이 없는» 화면이 된다.
+  const pushes = [...source.matchAll(/list\.push\('exp'\)/g)]
+  assert.equal(pushes.length, 1, `체험 탭을 켜는 자리가 ${pushes.length} 곳이다 — 한 곳이어야 한다`)
+  const guard = source.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
+  assert.ok(guard, `${CONTENT_PANEL} 에 «if (teacherPanel)» 블록이 없다`)
+  assert.equal(
+    guard![1].includes("list.push('exp')"),
+    false,
+    '체험 탭이 교사 전용 블록 안에서 켜지고 있다 — 학생 화면에 체험이 안 뜬다',
+  )
+  // 체험 탭을 켜는 줄 앞뒤로 if 조건이 붙어 있지 않은지 — 줄 단위로 본다.
+  const lines = source.split('\n')
+  const expLine = lines.findIndex((line) => line.includes("list.push('exp')"))
+  assert.ok(expLine >= 0)
+  const before = lines.slice(Math.max(0, expLine - 2), expLine).join('\n')
+  assert.equal(
+    /if\s*\(/.test(before.replace(/\/\/.*$/gm, '')),
+    false,
+    "list.push('exp') 바로 앞에 조건이 붙었다 — 체험 탭은 전 문항에 무조건 있어야 한다",
+  )
+
+  // 🎮 시연은 여전히 데이터가 있을 때만.
+  assert.ok(/if \(inlineMeta\)/.test(source), '🎮 시연 탭이 데이터 유무와 무관하게 켜지거나 사라졌다')
 })
 
-test('④ 폭 예외가 코드에 살아 있다 — 3컬럼은 1440px 로 연다', () => {
-  // 🚨 DESIGN-POLICY §9.D-5 의 기본 폭(1184)으로 줄이면 3컬럼에서 콘텐츠가 584px 밖에 안 남아
-  //    코드 블록이 있는 장이 답답해진다. 그래서 이 화면만 예외다(정책 본문에 명문화됨, 2026-08-11).
+test('4) 폭 예외가 코드에 살아 있다 — 이 화면은 1440px 로 연다', () => {
+  // 🚨 DESIGN-POLICY §9.D-5 의 기본 폭(1184)으로 줄이면 콘텐츠 컬럼에 코드 블록·터미널이
+  //    답답해진다. 그래서 이 화면만 예외다(정책 본문에 명문화됨, 2026-08-11).
   assert.ok(
     /max-w-\[1440px\]/.test(read(LEARN_PAGE)),
     `${LEARN_PAGE} 의 폭 예외가 사라졌다 — 정책 본문(§9.D-5)과 코드가 어긋난다`,
   )
 })
 
-test('⑤ 좌측은 «이 장의 문항»만 세운다 — 전 장을 늘어놓으면 지금 위치가 묻힌다', () => {
+test('5) 좌측은 «이 장의 문항»만 세운다 — 전 장을 늘어놓으면 지금 위치가 묻힌다', () => {
   const source = read(NAV_PANEL)
   assert.ok(
     /chapterQas\.map\(/.test(source),
@@ -102,14 +113,12 @@ test('⑤ 좌측은 «이 장의 문항»만 세운다 — 전 장을 늘어놓�
   )
 })
 
-test('⑦ 교사 전용 탭은 교사에게만 켜진다 — 학생 화면에 교사 대본이 새지 않게', () => {
+test('7) 교사 전용 탭은 교사에게만 켜진다 — 학생 화면에 교사 대본이 새지 않게', () => {
   // 🚨 왜 있는가(2026-08-12, 에픽 6/6): 교사 전용 탭이 교사 세션 화면에서 학생과 **같은 화면**의
   //    탭으로 들어왔다(§9.H-14 = 교사 화면은 학생 화면의 상위집합). 같은 화면을 쓴다는 것은
   //    한 줄만 어긋나도 학생이 교사 대본을 읽게 된다는 뜻이다 — 그리고 그건 학생 계정으로
   //    열어 보기 전까지 아무도 안 알려 준다.
-  // 🔑 2026-08-12 「📋 교안」이 철거되면서 교사 전용 탭은 「📋 설명 노트」 하나만 남았다.
-  //    **계약은 지운 게 아니라 대상이 준 것이다** — 노트가 이 게이트를 그대로 쓴다.
-  // 🔑 그래서 검사하는 것은 «탭이 예쁜가»가 아니라 **«교사 전용 탭을 미는 자리가 한 곳인가»**이다.
+  // 🔑 교사 전용 탭은 「📋 설명 노트」 하나다. **계약은 지운 게 아니라 대상이 준 것이다.**
   const source = read(CONTENT_PANEL)
 
   const guard = source.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
@@ -144,72 +153,67 @@ test('⑦ 교사 전용 탭은 교사에게만 켜진다 — 학생 화면에 �
   assert.equal(
     probeGuard![1].includes("list.push('explain')"),
     false,
-    '추출식이 블록 밖의 push 를 블록 안으로 세면 ⑦ 은 실패할 수 없는 계측이다',
+    '추출식이 블록 밖의 push 를 블록 안으로 세면 7) 은 실패할 수 없는 계측이다',
   )
 })
 
-test('8) 챗봇 칸이 접히는 조건은 «실습 탭» 하나뿐이다 — 조건이 늘면 나머지 문항에서도 챗봇이 사라진다', () => {
-  // 🚨 왜 있는가(2026-08-15): 12강 실습실이 2칸 배치라 챗봇 칸을 접는다. 학생이 묻는 일은
-  //    터미널 안(`ask`)으로 옮겨간다 — 그래서 「다른 탭 챗봇에 물어보라」고 안내하지 않는다(jery).
-  //    문제는 이 «접기»가 조용히 넓어지는 것이다. 조건이 `extras` 나 장 번호로 바뀌는 순간
-  //    나머지 125개 문항에서도 챗봇이 사라지고, 학생은 막혔을 때 물어볼 곳을 잃는다.
-  //    그건 실습 아닌 문항을 열어 보기 전까지 아무도 안 알려 준다.
-  const store = read(LEARN_STORE)
+test('8) 철거된 것이 되살아나지 않는다 — 챗봇 컬럼 · 내 차례 탭 · 실습 현황 탭 · 견학 탭', () => {
+  // 🚨 왜 있는가(2026-08-17 체험 재구조화): 화면 골격에서 넷을 철거했다.
+  //    · 좌측 AI 챗봇 컬럼 — AI 보조는 체험(실습실 ai▸ 목소리) 안에 산다 (SDD 결정 5)
+  //    · ✋ 내 차례 탭 — 역할(짧게 써서 AI 피드백)은 체험 안 미션으로 흡수
+  //    · 🧪 실습 현황 탭 — 필요분만 «수업 현황» 대시보드로 이관
+  //    · 🚌 견학 탭 — 체험 탭 앞부분으로 흡수(탭으로서만 철거, 데이터·화면은 체험 안에 산다)
+  //    철거물이 탭 하나로 슬쩍 돌아오면 «학생 세 걸음» 골격이 다시 여섯 탭으로 불어난다.
   const page = read(LEARN_PAGE)
+  const panel = read(CONTENT_PANEL)
+  const store = read(LEARN_STORE)
 
-  const rule = store.match(/export function tabHidesChat\([\s\S]*?\n\}/)
-  assert.ok(rule, `${LEARN_STORE} 에 tabHidesChat 이 없다 — 접기 조건이 한 곳에 모여 있지 않다`)
-  assert.ok(
-    /contentTab === 'lab'/.test(rule![0]),
-    'tabHidesChat 이 실습 탭 말고 다른 것으로 판정한다',
-  )
-  const otherTabs = ["'read'", "'demo'", "'tour'", "'myturn'", "'quiz'", "'explain'"]
-  for (const tab of otherTabs) {
+  assert.equal(/ChatPanel|chat-client|tabHidesChat/.test(page), false, `${LEARN_PAGE} 에 챗봇 컬럼이 되살아났다`)
+  for (const gone of ["'myturn'", "'labclass'", "'tour'", "'lab'"]) {
     assert.equal(
-      rule![0].includes(tab),
+      new RegExp(`list\\.push\\(${gone}\\)`).test(panel),
       false,
-      `tabHidesChat 이 ${tab} 탭에서도 챗봇을 접고 있다 — 그 탭 문항의 학생은 물어볼 통로를 잃는다`,
+      `${CONTENT_PANEL} 이 철거된 탭 ${gone} 을 다시 켜고 있다`,
     )
   }
+  assert.equal(/MyTurnTab|LabClassTab/.test(panel), false, `${CONTENT_PANEL} 이 철거된 컴포넌트를 들고 있다`)
 
-  // 🚨 «데이터가 있으면 다른 화면»으로 되돌아가는 것도 여기서 잡는다(② 와 같은 사고의 형태).
-  assert.equal(
-    /extras|EXTRAS_CHAPTER_IDS|chapterHasExtras/.test(rule![0]),
-    false,
-    'tabHidesChat 이 extras 로 판정한다 — 2026-08-11 에 3컬럼을 죽인 그 조건이다',
+  // 스토어의 탭 enum 도 세 걸음 + 시연 + 교사 노트뿐이다.
+  const enumLine = store.match(/export type ContentTab = ([^\n]+)/)
+  assert.ok(enumLine, `${LEARN_STORE} 에 ContentTab 이 없다`)
+  assert.deepEqual(
+    [...enumLine![1].matchAll(/'(\w+)'/g)].map((m) => m[1]).sort(),
+    ['demo', 'exp', 'explain', 'quiz', 'read'],
+    'ContentTab 에 철거된 탭이 남아 있거나 새 탭이 몰래 늘었다',
   )
 
-  // 화면 쪽은 그 판정만 쓴다. 자기가 따로 조건을 지어내면 위 검사가 헛돈다.
-  assert.ok(/tabHidesChat\(/.test(page), `${LEARN_PAGE} 이 tabHidesChat 을 안 쓴다 — 접기 조건이 둘로 갈렸다`)
-  assert.ok(
-    /\{hideChat \? null : \(/.test(page),
-    `${LEARN_PAGE} 에서 챗봇 칸이 hideChat 뒤에 있지 않다 — 접기가 다른 방식으로 일어나고 있다`,
-  )
-
-  // 음성 대조군 — 추출식이 실제로 함수 몸통을 잡는지.
-  const probe = "export function tabHidesChat(t: ContentTab): boolean {\n  return t === 'read'\n}"
-  const probeRule = probe.match(/export function tabHidesChat\([\s\S]*?\n\}/)
-  assert.equal(
-    /contentTab === 'lab'/.test(probeRule![0]),
-    false,
-    '추출식이 아무 몸통이나 통과시키면 8) 은 실패할 수 없는 계측이다',
-  )
+  // 철거된 컴포넌트 파일 자체가 없다 — import 없이 파일만 남으면 다음 사람이 «있는 기능»으로 읽는다.
+  for (const rel of [
+    'client/src/components/learn/ChatPanel.tsx',
+    'client/src/components/learn/MyTurnTab.tsx',
+    'client/src/components/learn/LabClassTab.tsx',
+    'client/src/lib/chat-client.ts',
+    'server/src/routes/chat.ts',
+    'server/src/lib/chat-service.ts',
+  ]) {
+    assert.equal(existsSync(path.join(ROOT, rel)), false, `철거된 파일이 남아 있다: ${rel}`)
+  }
 })
 
-test('9) 🧪 실습 탭은 학생 탭이다 — 교사 블록 안으로 들어가면 학생이 실습을 못 한다', () => {
+test('9) 체험 탭은 학생 탭이다 — 교사 블록 안으로 들어가면 학생이 실습을 못 한다', () => {
   const source = read(CONTENT_PANEL)
   const guard = source.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
   assert.ok(guard, `${CONTENT_PANEL} 에 «if (teacherPanel)» 블록이 없다`)
   assert.equal(
-    guard![1].includes("list.push('lab')"),
+    guard![1].includes("list.push('exp')"),
     false,
-    '🧪 실습이 교사 전용 블록 안에서 켜지고 있다 — 학생 화면에 실습 탭이 안 뜬다',
+    '🧭 체험이 교사 전용 블록 안에서 켜지고 있다 — 학생 화면에 체험 탭이 안 뜬다',
   )
-  const pushes = [...source.matchAll(/list\.push\('lab'\)/g)].length
-  assert.equal(pushes, 1, `🧪 실습 탭을 ${pushes} 곳에서 켜고 있다 — 켜는 자리는 하나여야 한다`)
+  // 실습실(LabTab)은 체험 탭 안에서 그려진다 — 렌더 자리가 사라지면 12강 실습이 통째로 죽는다.
+  assert.ok(/<LabTab\b/.test(source), `${CONTENT_PANEL} 이 실습실(LabTab)을 그리지 않는다`)
 })
 
-test('⑥ 가드가 실패할 수 있는 계측인지 — 대조 대상 파일이 비어 있지 않다', () => {
+test('6) 가드가 실패할 수 있는 계측인지 — 대조 대상 파일이 비어 있지 않다', () => {
   for (const rel of [LEARN_PAGE, CONTENT_PANEL, NAV_PANEL]) {
     assert.ok(read(rel).length > 500, `${rel} 이 비어 있으면 위 검사들이 공짜로 통과한다`)
   }
