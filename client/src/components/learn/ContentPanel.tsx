@@ -7,6 +7,7 @@ import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getExtras } from '../../data/learn-extras';
 import { getGhScript } from '../../data/gh-scripts';
 import { PHISHING_QA_ID } from '../../data/phishing-check';
+import { getTourKit } from '../../data/tour-kits';
 import { LAB_CHAPTER_ID, LAB_QA_ID, LAB_QA_MISSION_SPANS } from '../../data/vibe-lab-ch18';
 import { labSaveArtifact } from '../../lib/lab-api';
 import { getDemoComponent } from '../../demos/registry';
@@ -19,6 +20,7 @@ import GhSimTab from './GhSimTab';
 import LabTab from './LabTab';
 import NextQuestionDoor from './NextQuestionDoor';
 import PhishingCheck from './PhishingCheck';
+import TourKit from './TourKit';
 import { getNextQuestionDoorTarget } from './next-question-door';
 import QuizTab from './QuizTab';
 import ReadTab from './ReadTab';
@@ -399,7 +401,11 @@ export default function ContentPanel({
               />
             </div>
           ) : extras?.tour?.length ? (
-            <TourTab missions={extras.tour} qaId={qaId} />
+            <div className="flex flex-col">
+              {/* 견학 키트(링크 카드 + 고르기 체크포인트) — 있는 문항에만 얹는다. 기존 견학 미션은 그대로 산다. */}
+              {getTourKit(qaId) ? <TourKit kit={getTourKit(qaId)!} /> : null}
+              <TourTab missions={extras.tour} qaId={qaId} />
+            </div>
           ) : (
             <div className="mx-auto w-full max-w-[720px] px-5 py-7 text-sm text-[var(--color-text-muted)]">
               이 문항의 체험은 준비 중이에요. 📖 읽기와 📝 퀴즈를 먼저 진행해 주세요.
