@@ -10,6 +10,7 @@ import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
 import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
 import { earnedMissionIndex, missionIndexOf } from '../../lib/lab-shell';
+import { reportLabMission } from '../../lib/progress';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
 import LabClassTab from './LabClassTab';
 import LabTab from './LabTab';
@@ -346,7 +347,14 @@ export default function ContentPanel({
           <div className="h-full p-3 lg:p-4">
             <LabTab
               onExit={() => setContentTab('read')}
-              onStateChange={(labState) => setLabMissionIndex(missionIndexOf(labState), earnedMissionIndex(labState))}
+              onStateChange={(labState) => {
+                const at = missionIndexOf(labState);
+                const earned = earnedMissionIndex(labState);
+                setLabMissionIndex(at, earned);
+                // 🔑 교사 화면이 「실습 N/7」을 그리는 근거. 값이 달라졌을 때만 실제로 보낸다(t1).
+                // 🚨 교사가 자기 화면에서 시연할 때는 보내지 않는다 — 교사가 학생 줄에 섞인다.
+                if (!teacherPanel) reportLabMission(qaId, at, earned);
+              }}
               qaId={qaId}
             />
           </div>

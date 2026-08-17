@@ -12,7 +12,7 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
 
-import { tallyProgressRows } from './session-progress'
+import { tallyLabMissions, tallyProgressRows } from './session-progress'
 
 test('① 같은 행이 두 축에 똑같이 반영된다 — 합계가 어긋나지 않는다', () => {
   const rows = [
@@ -63,4 +63,46 @@ test('⑤ 이 계측이 실패할 수 있는가 — ① 이 실제로 숫자를 
   // 🚨 ① 은 «합계가 같다»를 본다. 두 축이 동시에 0 이면 그 단언은 아무것도 안 보고도 참이다.
   const { countsByParticipant, qaCompletion } = tallyProgressRows([{ participant_id: 'p1', qa_id: 'ch01_q01' }])
   assert.ok(countsByParticipant.size > 0 && Object.keys(qaCompletion).length > 0, '집계가 아무것도 세지 못한다')
+})
+
+// ─── 2026-08-16 신입샘 t1 — 실습실 미션 자리 ───
+// 90분이 흘러가는 곳은 4번 문항 «안»의 미션 7단계인데, 교사 화면의 단위는 문항뿐이었다.
+
+test('4) 실습에 안 들어온 학생은 키가 아예 없다 — 「실습 0/7」은 거짓이다', () => {
+  const out = tallyLabMissions([
+    { participant_id: 'p1', qa_id: 'ch18_q01' },
+    { participant_id: 'p2', qa_id: 'ch18_q04', lab_mission_index: 0, lab_earned_index: 0 },
+  ])
+  assert.equal(out.has('p1'), false, '실습 문항을 안 연 학생에게 미션 자리가 붙었다 — 없는 문제를 교사에게 보고한다')
+  // 🚨 «담긴 적 없음»과 «미션 0 에 서 있음»을 가른다. 0 을 걸러내면 방금 들어온 학생이 사라진다.
+  assert.deepEqual(out.get('p2'), { lab_mission_index: 0, lab_earned_index: 0 }, '미션 0 인 학생이 사라졌다')
+})
+
+test('5) 건너뛴 구간을 삼키지 않는다 — 안 한 것을 한 것으로 보고하지 않는다', () => {
+  const out = tallyLabMissions([
+    { participant_id: 'p1', qa_id: 'ch18_q04', lab_mission_index: 5, lab_earned_index: 1 },
+  ])
+  assert.deepEqual(out.get('p1'), { lab_mission_index: 5, lab_earned_index: 1 })
+
+  // earned 가 안 왔으면 «건너뛴 적 없다»로 본다(둘이 같다). 0 으로 채우면 전원이 건너뛴 것이 된다.
+  const legacy = tallyLabMissions([{ participant_id: 'p1', qa_id: 'ch18_q04', lab_mission_index: 3 }])
+  assert.deepEqual(legacy.get('p1'), { lab_mission_index: 3, lab_earned_index: 3 })
+
+  // earned 가 지금 자리보다 크게 오는 것은 성립하지 않는다 — 잘라서 담는다.
+  const bogus = tallyLabMissions([
+    { participant_id: 'p1', qa_id: 'ch18_q04', lab_mission_index: 2, lab_earned_index: 6 },
+  ])
+  assert.deepEqual(bogus.get('p1'), { lab_mission_index: 2, lab_earned_index: 2 })
+})
+
+test('6) 실습 문항이 둘 이상이어도 가장 멀리 간 자리를 쓴다', () => {
+  const out = tallyLabMissions([
+    { participant_id: 'p1', qa_id: 'ch18_q04', lab_mission_index: 4, lab_earned_index: 4 },
+    { participant_id: 'p1', qa_id: 'ch19_q01', lab_mission_index: 2, lab_earned_index: 2 },
+  ])
+  assert.equal(out.get('p1')?.lab_mission_index, 4, '나중에 읽은 행이 더 앞선 자리를 덮어썼다')
+
+  // 🚨 음성 대조군 — 주인 없는 행은 어느 축에도 안 들어간다(다른 축과 같은 규칙).
+  const orphan = tallyLabMissions([{ participant_id: null, qa_id: 'ch18_q04', lab_mission_index: 6 }])
+  assert.equal(orphan.size, 0, '주인 없는 행이 집계에 들어갔다')
 })

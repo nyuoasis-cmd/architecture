@@ -5,7 +5,10 @@ import { getRequestUser } from '../lib/auth';
 import { getParticipantTokenFromRequest, verifyParticipantToken } from '../lib/participant-token';
 import { generateSessionCode } from '../lib/session-code';
 import { summarizeSessionActivity, type ActivityProgressRow } from '../lib/session-activity';
-import { tallyProgressRows } from '../lib/session-progress';
+import { tallyLabMissions, tallyProgressRows, type ProgressRow } from '../lib/session-progress';
+
+/** Postgres `undefined_column`. 🔑 «칸이 아직 없다»와 «DB 가 고장났다»는 조치가 다르다. */
+const UNDEFINED_COLUMN = '42703';
 import { getSupabaseAdminClient } from '../lib/supabase';
 import { qaTagFields } from '../lib/qa-context';
 import { ALL_CHAPTER_IDS, getChapterContexts, getQaContextById } from '../data/chapter-content';
@@ -123,17 +126,34 @@ async function listParticipantsWithProgress(sessionId: string) {
     return { participants: [], qaCompletion: {} };
   }
 
-  const { data: progressRows, error: progressError } = await supabase
+  // 🔑 실습 미션 칸을 같은 쿼리에서 가져온다 — 교사 화면 때문에 쿼리를 늘리지 않는다(t1).
+  // 🚨 **칸이 아직 없어도 화면이 죽지 않는다.** 마이그레이션(sql/009)을 안 올린 채 이 코드가 뜨면
+  //    예전에는 여기가 `progress_lookup_failed` 로 터져 **교사 화면 전체가 500** 이 됐다 —
+  //    배포 순서 하나가 수업을 멈추는 자리였다. 칸이 없으면 실습 표기만 접고 문항 단위로 돌아간다.
+  //    (2026-08-17: 「스키마부터 올려야 머지 가능」이라는 제약을 코드에서 없앴다.)
+  let progressRows: ProgressRow[] | null = null;
+  const withLab = await supabase
     .from('architecture_progress')
-    .select('participant_id, qa_id')
+    .select('participant_id, qa_id, lab_mission_index, lab_earned_index')
     .in('participant_id', participantIds);
-
-  if (progressError) {
+  if (withLab.error && withLab.error.code === UNDEFINED_COLUMN) {
+    const withoutLab = await supabase
+      .from('architecture_progress')
+      .select('participant_id, qa_id')
+      .in('participant_id', participantIds);
+    if (withoutLab.error) {
+      throw new Error('progress_lookup_failed');
+    }
+    progressRows = withoutLab.data as ProgressRow[];
+  } else if (withLab.error) {
     throw new Error('progress_lookup_failed');
+  } else {
+    progressRows = withLab.data as ProgressRow[];
   }
 
   // 같은 행을 참여자별·문항별 두 축으로 센다(session-progress.ts) — 쿼리는 늘지 않는다.
   const { countsByParticipant: counts, qaCompletion } = tallyProgressRows(progressRows ?? []);
+  const labByParticipant = tallyLabMissions(progressRows ?? []);
 
   return {
     participants: typedParticipants.map((participant) => ({
@@ -141,6 +161,9 @@ async function listParticipantsWithProgress(sessionId: string) {
       nickname: participant.nickname,
       joined_at: participant.joined_at,
       progress_count: counts.get(participant.id) ?? 0,
+      // 🔑 실습에 아직 안 들어온 학생에게는 아예 안 붙인다 — 「실습 0/7」은 «시작했는데 못 하고 있다»로
+      //    읽히고, 그건 실습 문항을 안 연 학생에게 거짓이다.
+      ...(labByParticipant.get(participant.id) ?? {}),
     })),
     qaCompletion,
   };
