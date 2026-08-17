@@ -31,6 +31,8 @@ type LabState = {
 type LabShell = {
   execute: (command: string, state: LabState, key: string) => { events: LabEvent[]; nextState: LabState }
   missionIndexOf: (state: LabState) => number
+  /** 「지금 무엇을 치는가」 한 자리. 터미널 안내와 입력칸 예시가 **여기 하나**를 쓴다(f7·f8). */
+  nextStepOf: (state: LabState) => { command: string | null; progress: { done: number; total: number } | null }
   openingEvents: () => LabEvent[]
   earnedMissionIndex: (state: LabState) => number
   saveRules: (state: LabState, rules: string) => { events: LabEvent[]; nextState: LabState }
@@ -191,20 +193,28 @@ test('10) 처음 화면이 축소판 고지와 지금 할 일을 함께 보여 �
   )
 })
 
-test('11) help 는 미션 순서를 먼저 가리키고, 실제로 도는 명령에서 사전을 만든다', () => {
+test('11) help 는 사전임을 밝히고 **맨 끝에** 지금 할 일을 주며, 실제로 도는 명령에서 사전을 만든다', () => {
   const events = run(['help']).events
   const replies = events.filter(
     (event): event is Extract<LabEvent, { kind: 'line' }> => event.kind === 'line' && event.tone !== 'input',
   )
-  assert.deepEqual(
-    replies.slice(0, 2).map(({ text, tone }) => ({ text, tone })),
-    [
-      { text: '지금 할 일 → lab missions', tone: 'ok' },
-      { text: '아래는 사전입니다. 순서표가 아니라 낱말 뜻풀이예요.', tone: 'dim' },
-    ],
-    'help 머리가 명령 사전과 미션 순서를 가르지 않는다',
+  assert.ok(
+    replies[0]!.text.includes('사전') && replies[0]!.tone === 'dim',
+    'help 머리가 «이건 순서표가 아니라 사전이다»를 안 밝힌다 — 학생이 순서표로 읽는다',
   )
+  // 🚨 f9: 예전에는 머리에 「지금 할 일 → lab missions」만 있어서, 답을 보려면 **또 한 번 쳐야** 했다.
+  //    사전이 화면을 채우고 나면 스크롤이 멈추는 자리는 «맨 끝»이다 — 지금 할 일이 거기 있어야 한다.
+  const tail = replies.slice(-4).map((row) => row.text).join('\n')
+  assert.ok(tail.includes('지금 할 일 —'), 'help 맨 끝에 지금 할 일이 없다 — 사전만 보고 학생이 멈춘다')
+  assert.ok(tail.includes('다음 — ls'), 'help 맨 끝에 지금 칠 명령이 없다')
   const out = textOf(events)
+  assert.equal(
+    out.includes('지금 할 일 → lab missions'),
+    false,
+    '지금 할 일을 보려고 명령을 또 치게 만드는 안내가 남아 있다',
+  )
+  // 사전 자체는 줄이지 않는다 — 학생이 유일하게 «이해했다»고 말한 부분이다.
+  assert.ok(replies.length > 20, 'help 사전이 줄었다 — 낱말 뜻풀이는 이 실습실에서 가장 잘 먹힌 부분이다')
   for (const name of shell.LAB_COMMAND_NAMES) {
     assert.ok(out.includes(name), `help 에 ${name} 이 없다`)
   }
@@ -438,4 +448,99 @@ test('31) 화면이 시키는 명령은 전부 실제로 도는 명령이다 —
     const reply = textOf(run([command === 'cat' || command === 'cd' ? `${command} runs` : command]).events)
     assert.equal(reply.includes('모르는 명령'), false, `안내에 나오는 «${command}» 가 실제로는 안 돈다`)
   }
+})
+
+// ─── 2026-08-16 새내기 관찰 f7·f8·f9 의 회귀 계약 ───
+// 세 발견은 전부 같은 질문 하나였다: **「지금 이 순간 무엇을 치는가」를 화면이 말해 주는가.**
+// 그래서 규칙은 `nextStepOf` 한 자리에 있고, 아래 검사는 «두 곳이 갈라지지 않는가»까지 본다.
+
+test('32) 미션의 «일부»를 채우면 그 자리에서 남은 것을 이름으로 말한다 (f7)', () => {
+  // 미션 1 은 ls + pwd 둘을 요구한다. 예전에는 ls 를 쳐도 화면이 그대로여서 학생이 여기서 멈췄다.
+  const afterLs = run(['ls'])
+  const out = textOf(afterLs.events)
+  assert.ok(out.includes('1/2'), 'ls 를 쳤는데 «2개 중 1개»라는 진행 표시가 없다 — 성공 표지가 없으면 멈춘다')
+  assert.ok(out.includes('pwd'), 'ls 를 쳤는데 남은 명령(pwd)을 안 알려준다 — f7 이 그대로 살아 있다')
+  assert.equal(missionIndexOf(afterLs.state), 0, 'ls 하나로 미션이 넘어가 버렸다')
+
+  // 🚨 음성 대조군 — 같은 명령을 또 치면 잠자코 있어야 한다. 아무 때나 떠들면 잔소리가 된다.
+  const twice = execute('ls', afterLs.state, 'again')
+  assert.equal(textOf(twice.events).includes('1/2'), false, '같은 명령을 두 번 쳤는데 진행 표시가 또 나온다')
+})
+
+test('33) 미션이 넘어가면 끝난 것과 다음 할 일을 함께 말한다 (f7)', () => {
+  const { state, events } = run(['ls', 'pwd'])
+  assert.equal(missionIndexOf(state), 1, 'ls 와 pwd 를 다 했는데 미션이 안 넘어간다')
+  const out = textOf(events)
+  // 색이 아니라 «문자»로도 읽혀야 한다 — lab missions 와 같은 낱말을 쓴다.
+  assert.ok(out.includes('[끝]'), '미션을 끝냈는데 끝났다고 문자로 말하지 않는다')
+  assert.ok(out.includes(data.LAB_MISSIONS[1]!.goal), '다음 미션의 지금 할 일이 그 자리에 안 나온다')
+  // 🔑 미션 2 의 goal 에는 열어야 할 **파일 이름이 없다.** 다음 명령이 이름을 준다.
+  assert.ok(out.includes('cat runs/run-1.txt'), '무엇을 열어야 하는지 파일 이름을 끝까지 말해 주지 않는다')
+})
+
+test('34) 건너뛰기는 «끝냈다»로 적지 않는다 — 거짓 칭찬 금지', () => {
+  const out = textOf(run(['jump 3']).events)
+  assert.equal(out.includes('[끝]'), false, '건너뛴 미션을 «끝»이라고 말한다 — 안 한 일을 했다고 적는 셈이다')
+  assert.ok(out.includes('지금 할 일'), '건너뛴 뒤 무엇을 할지 안 말한다')
+})
+
+test('35) 세 결과를 하나씩 열 때마다 남은 개수와 다음 파일 이름을 준다 (f7)', () => {
+  const first = run(['ls', 'pwd', 'cat runs/run-1.txt'])
+  const out = textOf(first.events)
+  assert.ok(out.includes('1/3'), '세 결과 중 하나를 열었는데 진행이 안 보인다')
+  assert.ok(out.includes('cat runs/run-2.txt'), '다음에 열 파일 이름을 안 준다 — 화면 어디에도 이름이 없다')
+
+  const done = run([...data.LAB_RUN_FILES.slice(1).map((f) => `cat ${f}`)], first.state)
+  assert.equal(missionIndexOf(done.state), 2, '셋 다 열었는데 미션이 안 넘어간다')
+  assert.ok(textOf(done.events).includes('npm test'), '다음 미션의 명령(npm test)을 안 준다')
+})
+
+test('36) nextStepOf 가 미션마다 «실제로 도는» 명령 하나를 준다', () => {
+  const step = (state: LabState) => shell.nextStepOf(state)
+
+  assert.equal(step(INITIAL_LAB_STATE).command, 'ls', '처음에 칠 명령이 ls 가 아니다')
+  const looked = run(['ls', 'pwd']).state
+  assert.equal(step(looked).command, 'cat runs/run-1.txt', '미션 2 에서 파일 이름이 붙은 명령을 안 준다')
+  const opened = run(data.LAB_RUN_FILES.map((f) => `cat ${f}`), looked).state
+  assert.equal(step(opened).command, 'npm test')
+  const tested = run(['npm test'], opened).state
+  assert.equal(step(tested).command, 'edit')
+  const short = shell.saveRules(tested, 'x'.repeat(5)).nextState
+  assert.equal(step(short).command, 'edit', '짧게 쓴 학생에게 편집기로 돌아가라고 안 한다')
+  const written = shell.saveRules(tested, 'x'.repeat(60)).nextState
+  assert.equal(step(written).command, 'claude review', '규칙을 쓴 뒤 비평받기를 안 시킨다')
+  const reviewed = shell.markReviewDone(written)
+  assert.equal(step(reviewed).command, 'npm test', '비평받은 뒤 내 규칙으로 시켜 보기를 안 시킨다')
+  const verified = shell.applyMyOutputs(reviewed, ['할인율: 10%\n최종가: 9000'])
+  assert.equal(step(verified).command, 'lab check', '다 한 학생에게 제출을 안 시킨다')
+  assert.equal(step(shell.markSubmitted(verified, 1)).command, null, '전부 끝났는데 시킬 것이 남아 있다')
+
+  // 🚨 시키는 명령은 전부 실제로 도는 명령이어야 한다. 하나라도 «모르는 명령»이면 학생이 막힌다.
+  for (const state of [INITIAL_LAB_STATE, looked, opened, tested, written, reviewed, verified]) {
+    const command = step(state).command
+    if (!command) continue
+    assert.equal(
+      textOf(execute(command, state, `probe:${command}`).events).includes('모르는 명령'),
+      false,
+      `nextStepOf 가 시키는 «${command}» 가 실제로는 안 돈다`,
+    )
+  }
+})
+
+test('37) 입력칸의 회색 예시가 «지금 칠 명령»을 따라 움직인다 — ls 로 박혀 있지 않다 (f8)', () => {
+  // 🚨 화면 파일을 글자로 본다. 여기가 갈라지는 순간 학생은 서로 다른 두 지시를 동시에 받는다:
+  //    터미널은 「이제 pwd」인데 입력칸은 영원히 `ls` 를 제안하던 것이 f8 이었다.
+  const tab = readFileSync(
+    resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'LabTab.tsx'),
+    'utf8',
+  )
+  assert.equal(
+    /placeholder="ls"/.test(tab),
+    false,
+    '입력칸 예시가 ls 로 박혀 있다 — 방금 한 것을 또 하라고 말하는 셈이다(f8)',
+  )
+  assert.ok(
+    /nextStepOf\(state\)/.test(tab),
+    '입력칸이 nextStepOf 를 안 쓴다 — 규칙을 두 곳에 적으면 그 순간 갈라진다',
+  )
 })
