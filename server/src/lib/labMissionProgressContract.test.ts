@@ -72,6 +72,29 @@ test('5) 교사가 시연할 때는 학생 줄에 섞이지 않는다', () => {
   assert.ok(/teacherPanel/.test(around), '교사 시연분을 가르는 조건이 보고 자리에 없다')
 })
 
+test('5-a) 칸이 아직 없어도 죽지 않는다 — 배포 순서 하나가 수업을 멈추지 않게', () => {
+  // 🚨 2026-08-17: 원래 이 PR 은 «마이그레이션을 먼저 올려야 머지 가능»이었다. 안 올린 채 뜨면
+  //    교사 화면은 500(progress_lookup_failed) 이고 **학생의 모든 진도 저장이 깨졌다** — 수업 중에.
+  //    배포 순서 하나가 수업을 멈추는 자리를 남기지 않는다. 칸이 없으면 실습 표기만 접고 물러난다.
+  // 🔑 «칸이 없다»(42703)와 «DB 가 고장났다»는 조치가 다르다 — 뭉쳐서 잡으면 진짜 장애를 삼킨다.
+  for (const rel of ['server/src/routes/sessions.ts', 'server/src/routes/progress.ts']) {
+    const body = stripComments(read(rel))
+    assert.ok(
+      body.includes('UNDEFINED_COLUMN'),
+      `${rel} 이 «칸이 아직 없다»를 가려내지 않는다 — 마이그레이션 전에 뜨면 수업이 멈춘다`,
+    )
+    assert.ok(/'42703'/.test(body), `${rel} 의 42703 판별 상수가 사라졌다`)
+    // 🚨 모든 에러를 삼키면 진짜 장애가 조용해진다. 42703 이 아닌 오류는 여전히 던져야 한다.
+    assert.ok(
+      /throw new Error\('progress_(lookup|update|insert)_failed'\)/.test(body),
+      `${rel} 이 DB 오류를 전부 삼킨다 — 42703 만 물러나야 한다`,
+    )
+  }
+  // 학생 진도(read_at·quiz_score)는 실습 칸을 떼고도 저장돼야 한다.
+  const progress = stripComments(read('server/src/routes/progress.ts'))
+  assert.ok(/withoutLab/.test(progress), '실습 칸만 떼고 다시 쓰는 길이 없다 — 진도 전체가 버려진다')
+})
+
 test('6) 서버가 미션 개수를 알고 있지 않다 — 알면 미션을 늘리는 날 수업 중에 400 이 뜬다', () => {
   const route = stripComments(read('server/src/routes/progress.ts'))
   assert.ok(/lab_mission_index/.test(route), '라우트가 미션 자리를 받지 않는다')
