@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { resolveActorId } from '../lib/actor-id';
 import { classStatus, LabSubmitUnavailableError, latestSubmission, submit, toLabActor } from '../lib/lab-submissions';
+import { LabArtifactsUnavailableError, latestArtifacts, saveArtifact } from '../lib/lab-artifacts';
 import { getRequestUser } from '../lib/auth';
 import { getSupabaseAdminClient } from '../lib/supabase';
 import {
@@ -152,9 +153,34 @@ router.post('/submit', async (req, res) => {
     const result = await submit(actor, parsed.data.qaId, parsed.data.rules, (rules) =>
       verifyWithRules(rules, abortSignalOf(req)),
     );
+    // 🔑 계보 사본(규칙 한 장) — SDD 결정 15. 🚨 **비치명**: 계보 테이블이 아직 없어도
+    //    제출은 성공해야 한다(5f6ed39 선례 — 배포 순서가 수업을 멈추지 않게). 로그만 남긴다.
+    try {
+      await saveArtifact(actor, 'rules', parsed.data.rules);
+    } catch (artifactError) {
+      console.error(
+        '[lab/submit] artifact_save_skipped',
+        artifactError instanceof Error ? artifactError.message : artifactError,
+      );
+    }
     res.json(result);
   } catch (caught) {
     handle(caught, res, 'submit');
+  }
+});
+
+// GET /api/lab/artifacts — 이 학생의 산출물 계보 지금 (23강 bundle 이 읽는다).
+// 🚨 테이블 부재·DB 없음은 빈 결과가 아니라 503 이다 — 빈 200 으로 답하면
+//    «아직 안 만들었네요»라는 거짓말이 화면에 나간다.
+router.get('/artifacts', async (req, res) => {
+  try {
+    res.json({ artifacts: await latestArtifacts(toLabActor(resolveActorId(req))) });
+  } catch (caught) {
+    if (caught instanceof LabArtifactsUnavailableError) {
+      res.status(503).json({ error: 'unavailable', reason: 'artifacts_unavailable' });
+      return;
+    }
+    handle(caught, res, 'artifacts');
   }
 });
 

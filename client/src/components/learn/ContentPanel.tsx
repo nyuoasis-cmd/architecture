@@ -5,7 +5,7 @@ import QrFullscreen from '../common/QrFullscreen';
 import type { DemoMeta } from '../../data/demos';
 import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getExtras } from '../../data/learn-extras';
-import { LAB_QA_ID } from '../../data/vibe-lab-ch18';
+import { LAB_CHAPTER_ID, LAB_QA_ID, LAB_QA_MISSION_SPANS } from '../../data/vibe-lab-ch18';
 import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
 import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock } from '../../lib/teacher-explain-fetch';
@@ -327,20 +327,31 @@ export default function ContentPanel({
           강별 배정(MAP-experience-23lessons)대로 부품을 채운다.
         */}
         {activeTab === 'exp' ? (
-          qaId === LAB_QA_ID ? (
-            <div className="h-full p-3 lg:p-4">
-              <LabTab
-                onExit={() => setContentTab('read')}
-                onStateChange={(labState) => {
-                  const at = missionIndexOf(labState);
-                  const earned = earnedMissionIndex(labState);
-                  setLabMissionIndex(at, earned);
-                  // 🔑 교사 화면이 「실습 N/7」을 그리는 근거. 값이 달라졌을 때만 실제로 보낸다(t1).
-                  // 🚨 교사가 자기 화면에서 시연할 때는 보내지 않는다 — 교사가 학생 줄에 섞인다.
-                  if (!teacherPanel) reportLabMission(qaId, at, earned);
-                }}
-                qaId={qaId}
-              />
+          chapter.id === LAB_CHAPTER_ID ? (
+            <div className="flex h-full flex-col p-3 lg:p-4">
+              {/* 🔑 전 문항이 같은 실습실을 이어 쓴다(SDD 결정 21) — 그래서 아래 LabTab 에는
+                  지금 문항이 아니라 **대표 이름표(LAB_QA_ID)** 를 준다. 제출·진도·상태가 한 줄에 쌓인다. */}
+              <p className="mb-2 flex-shrink-0 text-[12px] text-[var(--color-text-muted)]">
+                💻 이 강의 문항들은 실습실 하나를 이어 써요 — 1번에서 만진 파일이 끝까지 남습니다.
+                {LAB_QA_MISSION_SPANS[qaId]
+                  ? ` 이 문항의 미션: ${LAB_QA_MISSION_SPANS[qaId]!.from}~${LAB_QA_MISSION_SPANS[qaId]!.to}`
+                  : ''}
+              </p>
+              <div className="min-h-0 flex-1">
+                <LabTab
+                  onExit={() => setContentTab('read')}
+                  onStateChange={(labState) => {
+                    const at = missionIndexOf(labState);
+                    const earned = earnedMissionIndex(labState);
+                    setLabMissionIndex(at, earned);
+                    // 🔑 교사 화면이 「실습 N/7」을 그리는 근거. 값이 달라졌을 때만 실제로 보낸다(t1).
+                    // 🚨 교사가 자기 화면에서 시연할 때는 보내지 않는다 — 교사가 학생 줄에 섞인다.
+                    // 🚨 보고도 대표 이름표로 — 문항별로 가르면 교사 통계가 네 줄로 흩어진다.
+                    if (!teacherPanel) reportLabMission(LAB_QA_ID, at, earned);
+                  }}
+                  qaId={LAB_QA_ID}
+                />
+              </div>
             </div>
           ) : extras?.tour?.length ? (
             <TourTab missions={extras.tour} qaId={qaId} />

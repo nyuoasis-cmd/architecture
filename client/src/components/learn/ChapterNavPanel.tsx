@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getCategoryMeaning } from '../../data/category-meanings';
-import { LAB_MISSIONS, LAB_QA_ID } from '../../data/vibe-lab-ch18';
+import { LAB_CHAPTER_ID, LAB_MISSIONS } from '../../data/vibe-lab-ch18';
 import { useProgressMap } from '../../lib/progress';
 import { useLearnStore } from '../../store/learn-store';
 
@@ -144,7 +144,8 @@ export default function ChapterNavPanel({
                      답하므로, 화면에 진도 표시를 둘 두지 않는다(2026-08-15 jery: 미션판 컬럼 폐지).
                   🔑 장 밖의 문항을 세우는 것이 아니라 이 문항 안을 펴는 것이라 계약 5) 를 안 깬다.
                 */}
-                {isCurrent && item.id === LAB_QA_ID && isLabTab ? <LabMissionList /> : null}
+                {/* 🔑 실습 강은 전 문항이 실습실 하나를 이어 쓴다(SDD 결정 21) — 어느 문항에서 열든 편다. */}
+                {isCurrent && chapter.id === LAB_CHAPTER_ID && isLabTab ? <LabMissionList /> : null}
               </li>
             );
           })}
