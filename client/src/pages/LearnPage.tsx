@@ -4,6 +4,7 @@ import QrFullscreenModal from '../components/common/QrFullscreenModal';
 import { StudentExitGuard } from '../components/StudentExitGuard';
 import ChapterNavPanel from '../components/learn/ChapterNavPanel';
 import ContentPanel from '../components/learn/ContentPanel';
+import ReadyCheck, { readyCheckSeen } from '../components/learn/ReadyCheck';
 import { CHAPTERS, getChapterById, getQaById, getQasByChapterId, type QaStub } from '../data/qa-stubs';
 import { getDemoByQaId } from '../data/demos';
 import { markRead } from '../lib/progress';
@@ -132,6 +133,10 @@ export default function LearnPage({ mode }: LearnPageProps) {
   const updateViewerProgress = useSessionStore((state) => state.updateViewerProgress);
   const [sessionStatus, setSessionStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>(
     mode === 'session' ? 'loading' : 'idle',
+  );
+  // 준비 점검(SDD 결정 19) — 학생이 이 수업에 처음 들어왔을 때 한 번. 교사 시연에는 안 띄운다.
+  const [readyCheckOpen, setReadyCheckOpen] = useState(
+    () => mode === 'session' && Boolean(params.sessionId) && !readyCheckSeen(params.sessionId ?? ''),
   );
   const [sessionError, setSessionError] = useState<{ status?: number; message: string } | null>(null);
 
@@ -271,6 +276,10 @@ export default function LearnPage({ mode }: LearnPageProps) {
     return (
       <>
         <StudentExitGuard when={!isTeacherPreview} />
+        {/* 🔑 목차 밖 1화면 — «0강»이 아니다. 건너뛰기가 항상 있어 수업을 막지 않는다. */}
+        {readyCheckOpen && !isTeacherPreview ? (
+          <ReadyCheck onDone={() => setReadyCheckOpen(false)} sessionId={params.sessionId!} />
+        ) : null}
         <LearnLayout
         allSessionQas={sessionQas}
         availableChapters={sessionChapters}
