@@ -18,6 +18,7 @@ import { earnedMissionIndex, missionIndexOf } from '../../lib/lab-shell';
 import { reportLabMission } from '../../lib/progress';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
 import GhSimTab from './GhSimTab';
+import GraduationExhibit from './GraduationExhibit';
 import LabTab from './LabTab';
 import MiniLabTab from './MiniLabTab';
 import NextQuestionDoor from './NextQuestionDoor';
@@ -363,9 +364,15 @@ export default function ContentPanel({
               </div>
             </div>
           ) : getMiniLab(chapter.id)?.qaMissionSpans[qaId] ? (
-            // 터미널형 강 — 공용 미니 실습실. 강 전체가 실습실 하나를 이어 쓴다(결정 21).
+            // 터미널형·복합 강 — 공용 미니 실습실. 강 전체가 실습실 하나를 이어 쓴다(결정 21).
             // 🔑 구간표에 없는 문항(카드가 견학 유지로 확정한 것)은 아래 견학 갈래로 내려간다.
-            <MiniLabTab lab={getMiniLab(chapter.id)!} qaId={qaId} />
+            <div className="flex h-full min-h-0 flex-col overflow-y-auto">
+              <div className="min-h-[420px] flex-1">
+                <MiniLabTab lab={getMiniLab(chapter.id)!} qaId={qaId} />
+              </div>
+              {/* 23강 복합 — 묶음이 완성되면(서버 판정) 졸업 전시가 터미널 아래에 열린다. */}
+              <ExhibitSlot chapterId={chapter.id} />
+            </div>
           ) : qaId === PHISHING_QA_ID ? (
             // 22강 q3 — 진짜/가짜 로그인 화면 판별 미니 체험 (SDD 결정 20, 부품 신설 없음)
             <PhishingCheck />
@@ -508,4 +515,17 @@ function ScenarioPicker({
       </p>
     </div>
   );
+}
+
+
+/**
+ * 졸업 전시 자리 — 23강에서만, 그리고 **서버가 묶음을 승인했을 때만**(exhibitOpen) 열린다.
+ * 🔑 잠금 해제 연출의 열쇠는 산출물 5종이다(MAP 23강) — 화면이 미리 열어 두지 않는다.
+ */
+function ExhibitSlot({ chapterId }: { chapterId: number }) {
+  const open = useLearnStore(
+    (state) => chapterId === 23 && state.miniSession?.scopeId === 'ch23' && Boolean(state.miniSession.state.flags.exhibitOpen),
+  );
+  if (!open) return null;
+  return <GraduationExhibit />;
 }

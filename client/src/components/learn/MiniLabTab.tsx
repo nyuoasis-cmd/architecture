@@ -10,7 +10,7 @@ import {
   type MiniEffect,
   type MiniLab,
 } from '../../lib/mini-lab';
-import { failureLines, labAsk, labSaveArtifact, labVoice } from '../../lib/lab-api';
+import { labAsk, labBundle, labSaveArtifact, labVoice } from '../../lib/lab-api';
 import { useLearnStore } from '../../store/learn-store';
 
 type MiniLabTabProps = {
@@ -66,6 +66,68 @@ export default function MiniLabTab({ lab, qaId }: MiniLabTabProps) {
   const runEffect = async (effect: MiniEffect) => {
     if (effect.kind === 'editor') {
       setEditor({ open: true, effect, text: String(state.flags[effect.flag] ?? '') });
+      return;
+    }
+    if (effect.kind === 'bundle') {
+      if (busy) return;
+      setBusy(true);
+      try {
+        const result = await labBundle();
+        if (!result.ok) {
+          // 🚨 «못 읽음»을 «빈 것»으로 말하지 않는다 — 빠진 칸 목록도 진행 표식도 남기지 않는다.
+          say([
+            { kind: 'line', text: '지금 서버에서 산출물을 불러올 수 없어요 — 잠시 뒤 다시 해 주세요.', tone: 'bad' },
+            { kind: 'line', text: '  (여러분 것이 «없는» 게 아니라, 지금 «못 읽는» 거예요.)', tone: 'dim' },
+          ]);
+          return;
+        }
+        const doors: Record<string, string> = {
+          rules: '우리 반 규칙 한 장  ← 12강',
+          skill: '스킬 한 개         ← 13강',
+          ac: '완료 조건 한 벌     ← 16강',
+          promise: '약속 문장 한 개     ← 19강',
+          handoff: '넘김 쪽지 한 장     ← 22강',
+        };
+        const missing = result.data.missing;
+        const rows: LabEvent[] = Object.entries(doors).map(([kind, label]) => ({
+          kind: 'line' as const,
+          text: missing.includes(kind) ? `  빠짐  ${label} — 그 강의 체험에서 만들면 채워져요` : `  있음  ${label}`,
+          tone: missing.includes(kind) ? ('warn' as LabTone) : ('ok' as LabTone),
+        }));
+        if (missing.length === 0) {
+          rows.push({ kind: 'line', text: '', tone: 'plain' });
+          rows.push({
+            kind: 'line',
+            text: `🎓 다섯 장이 다 모였습니다 — 묶음 ${result.data.revision ?? 1}판으로 저장했어요. exhibit 로 전시를 여세요.`,
+            tone: 'ok',
+          });
+        } else {
+          rows.push({ kind: 'line', text: '', tone: 'plain' });
+          rows.push({
+            kind: 'line',
+            text: `  ${missing.length}칸이 비어 있어요 — 빠진 강을 다녀와서 다시 bundle. 지금까지 만든 것은 그대로 있어요.`,
+            tone: 'dim',
+          });
+        }
+        say(rows);
+        setSession((current) => {
+          if (!current || current.scopeId !== lab.scopeId) return current;
+          return {
+            ...current,
+            state: {
+              ...current.state,
+              flags: {
+                ...current.state.flags,
+                bundleTried: true,
+                // 🚨 잠금 해제는 서버 판정(missing 0)일 때만 — 화면이 지어내지 않는다.
+                ...(missing.length === 0 ? { exhibitOpen: true } : {}),
+              },
+            },
+          };
+        });
+      } finally {
+        setBusy(false);
+      }
       return;
     }
     if (busy) {

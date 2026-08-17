@@ -72,6 +72,14 @@ export function labSaveArtifact(kind: string, content: string) {
 }
 
 /**
+ * 23강 졸업 묶음 — 🚨 내용은 보내지 않는다. 서버가 저장된 계보로 직접 조립·판정한다.
+ * 빠진 칸(missing)은 오류가 아니라 «돌아갈 문»의 목록이다.
+ */
+export function labBundle() {
+  return post<{ missing: string[]; revision?: number }>('/api/lab/bundle', {});
+}
+
+/**
  * 막힌 이유를 학생이 읽을 문장으로. 🚨 **다음에 무엇을 할지**까지 적는다 —
  *    「실패했습니다」만 쓰면 학생은 그저 다시 누른다.
  */

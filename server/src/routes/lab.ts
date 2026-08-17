@@ -193,6 +193,39 @@ router.post('/artifact', async (req, res) => {
   }
 });
 
+// POST /api/lab/bundle — 23강 졸업 묶음. 🚨 내용은 받지 않는다 — 서버가 저장된 계보로 조립·판정한다.
+//    빠진 칸(missing)은 오류가 아니라 «돌아갈 문»의 목록이라 200 으로 답한다.
+router.post('/bundle', async (req, res) => {
+  try {
+    const actor = toLabActor(resolveActorId(req));
+    const artifacts = await latestArtifacts(actor);
+    const required: Array<[string, string]> = [
+      ['rules', '우리 반 규칙 (12강)'],
+      ['skill', '스킬 (13강)'],
+      ['ac', '완료 조건 (16강)'],
+      ['promise', '약속 문장 (19강)'],
+      ['handoff', '넘김 쪽지 (22강)'],
+    ];
+    const missing = required.filter(([kind]) => !artifacts[kind]).map(([kind]) => kind);
+    if (missing.length > 0) {
+      res.json({ missing });
+      return;
+    }
+    const bundleText = required
+      .map(([kind, label]) => `# ${label}\n\n${artifacts[kind]!.content}`)
+      .join('\n\n---\n\n')
+      .slice(0, 8000);
+    const revision = await saveArtifact(actor, 'bundle', bundleText);
+    res.json({ missing: [], revision });
+  } catch (caught) {
+    if (caught instanceof LabArtifactsUnavailableError) {
+      res.status(503).json({ error: 'unavailable', reason: 'artifacts_unavailable' });
+      return;
+    }
+    handle(caught, res, 'bundle');
+  }
+});
+
 // GET /api/lab/artifacts — 이 학생의 산출물 계보 지금 (23강 bundle 이 읽는다).
 // 🚨 테이블 부재·DB 없음은 빈 결과가 아니라 503 이다 — 빈 200 으로 답하면
 //    «아직 안 만들었네요»라는 거짓말이 화면에 나간다.

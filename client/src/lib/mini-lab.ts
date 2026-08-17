@@ -25,7 +25,9 @@ export const INITIAL_MINI_STATE: MiniState = { ran: {}, flags: {}, lastKey: null
 export type MiniEffect =
   | { kind: 'ask'; text: string }
   | { kind: 'voice'; text: string }
-  | { kind: 'editor'; flag: string; fileLabel: string; minChars: number; artifactKind?: string };
+  | { kind: 'editor'; flag: string; fileLabel: string; minChars: number; artifactKind?: string }
+  /** 23강 — 서버 계보에서 산출물 5종을 불러와 묶는다. 판정은 서버가 한다. */
+  | { kind: 'bundle' };
 
 export type MiniRunResult = {
   lines: LabEvent[];

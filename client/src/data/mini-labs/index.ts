@@ -4,6 +4,8 @@ import { CH05_MINI_LAB } from './ch05';
 import { CH08_MINI_LAB } from './ch08';
 import { CH11_MINI_LAB } from './ch11';
 import { CH19_MINI_LAB } from './ch19';
+import { CH21_MINI_LAB } from './ch21';
+import { CH23_MINI_LAB } from './ch23';
 
 /**
  * 미니 실습실 등록부 — 키는 속 이름표(chapter.id).
@@ -16,6 +18,8 @@ export const MINI_LABS: Record<number, MiniLab> = {
   8: CH08_MINI_LAB,
   11: CH11_MINI_LAB,
   19: CH19_MINI_LAB,
+  21: CH21_MINI_LAB,
+  23: CH23_MINI_LAB,
 };
 
 export function getMiniLab(chapterId: number): MiniLab | undefined {
