@@ -12,9 +12,7 @@ import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock 
 import { earnedMissionIndex, missionIndexOf } from '../../lib/lab-shell';
 import { reportLabMission } from '../../lib/progress';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
-import LabClassTab from './LabClassTab';
 import LabTab from './LabTab';
-import MyTurnTab from './MyTurnTab';
 import NextQuestionDoor from './NextQuestionDoor';
 import { getNextQuestionDoorTarget } from './next-question-door';
 import QuizTab from './QuizTab';
@@ -40,12 +38,9 @@ type ContentPanelProps = {
 const TAB_LABELS: Record<ContentTab, string> = {
   read: '📖 읽기',
   demo: '🎮 시연',
-  tour: '🚌 견학',
-  myturn: '✋ 내 차례',
-  lab: '🧪 실습',
+  exp: '🧭 체험',
   quiz: '📝 퀴즈',
   explain: '📋 설명 노트',
-  labclass: '🧪 실습 현황',
 };
 
 const QA_ID_PATTERN = /^ch\d{2}_q\d{2}$/;
@@ -54,9 +49,9 @@ const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3
 /**
  * 우측 컬럼 — 이 문항의 내용 전부를 탭으로 담는다.
  *
- * 🚨 탭은 **데이터가 있을 때만** 켜진다(시연·견학·내 차례). 없는 탭을 띄워 두면 학생이
- *    빈 화면을 열게 된다. 반대로 데이터가 생겼는데 탭이 안 켜지면 만든 콘텐츠가 영영 안 보인다 —
- *    그래서 판정은 «데이터가 있는가» 하나뿐이고, 화면 종류를 가르는 데는 쓰지 않는다.
+ * 🚨 학생 탭은 «읽기 → 체험 → 퀴즈» 세 걸음이다(SDD 체험 재구조화 결정 5). 🧭 체험은 전 문항에
+ *    있고(결정 4), 시연(🎮)만 데이터가 있을 때 켜진다. 체험 안에 무엇이 사는지(터미널·유사
+ *    페이지·견학)는 탭이 아니라 체험 탭 **안**에서 갈린다 — 강마다 탭이 출렁이지 않는다.
  * 🚨 탭은 **줄바꿈**으로 접는다(가로 스크롤 금지). 390px 학생 화면에서 탭이 6개가 되면
  *    스크롤된다는 표시 없이 💬·📝 가 화면 밖으로 나갔다(2026-08-11 prod QA, 새내기 f1).
  */
@@ -92,30 +87,19 @@ export default function ContentPanel({
     if (inlineMeta) {
       list.push('demo');
     }
-    if (extras?.tour?.length) {
-      list.push('tour');
-    }
-    if (extras?.myTurn) {
-      list.push('myturn');
-    }
-    // 🔑 실습실은 12강 마지막 문항 하나에만 붙는다. 조건은 다른 탭과 **같은 모양**이다 —
-    //    «이 문항에 그 데이터가 있는가» 하나뿐이고, 화면 종류를 가르는 데는 쓰지 않는다.
-    if (qaId === LAB_QA_ID) {
-      list.push('lab');
-    }
+    // 🧭 체험은 **전 문항에 있다**(SDD 체험 재구조화 결정 4) — 터미널·유사 페이지가 없는
+    //    문항은 견학(tour)이 곧 그 문항의 체험이다. 강마다 탭이 출렁이지 않는다.
+    //    «데이터가 있는가»는 탭 유무가 아니라 체험 탭 **안의 부품**이 정한다(ExperienceTab).
+    list.push('exp');
     list.push('quiz');
     // 🚨 여기가 «교사에게만»의 **유일한** 자리다. 교사 전용 탭을 이 블록 밖에서 밀어 넣으면
     //    학생 화면에 교사용 대본이 새고, 그건 화면을 열어 보기 전까지 아무도 안 알려 준다.
     //    (learnLayoutContract ⑦ 이 이 블록 밖의 explain 을 빨갛게 잡는다.)
     if (teacherPanel) {
       list.push('explain');
-      // 🔑 실습이 있는 문항에서만. 없는 문항에 빈 현황판을 띄우지 않는다.
-      if (qaId === LAB_QA_ID) {
-        list.push('labclass');
-      }
     }
     return list;
-  }, [chapter.id, extras, inlineMeta, qaId, teacherPanel]);
+  }, [inlineMeta, teacherPanel]);
 
   // 🔑 탭 상태는 문항을 바꿔도 유지한다(읽기 → 읽기). 새 문항에 그 탭이 없을 때만 첫 탭으로 접는다 —
   //    없는 탭에 머무르면 화면이 통째로 비고, 학생은 «고장»으로 읽는다.
@@ -337,27 +321,34 @@ export default function ContentPanel({
           </div>
         ) : null}
 
-        {activeTab === 'tour' && extras?.tour?.length ? <TourTab missions={extras.tour} qaId={qaId} /> : null}
-
-        {activeTab === 'myturn' && extras?.myTurn ? <MyTurnTab config={extras.myTurn} qaId={qaId} /> : null}
-
-        {activeTab === 'labclass' && teacherPanel ? <LabClassTab qaId={qaId} sessionId={sessionId} /> : null}
-
-        {activeTab === 'lab' ? (
-          <div className="h-full p-3 lg:p-4">
-            <LabTab
-              onExit={() => setContentTab('read')}
-              onStateChange={(labState) => {
-                const at = missionIndexOf(labState);
-                const earned = earnedMissionIndex(labState);
-                setLabMissionIndex(at, earned);
-                // 🔑 교사 화면이 「실습 N/7」을 그리는 근거. 값이 달라졌을 때만 실제로 보낸다(t1).
-                // 🚨 교사가 자기 화면에서 시연할 때는 보내지 않는다 — 교사가 학생 줄에 섞인다.
-                if (!teacherPanel) reportLabMission(qaId, at, earned);
-              }}
-              qaId={qaId}
-            />
-          </div>
+        {/*
+          🧭 체험 탭 — 부품 3종(터미널형·유사 페이지형·견학형, SDD 결정 2)이 전부 이 안에 산다.
+          지금(골격 재편)은 12강 실습실 문항 = 터미널, 나머지 = 견학이다. 에픽 3~5 가
+          강별 배정(MAP-experience-23lessons)대로 부품을 채운다.
+        */}
+        {activeTab === 'exp' ? (
+          qaId === LAB_QA_ID ? (
+            <div className="h-full p-3 lg:p-4">
+              <LabTab
+                onExit={() => setContentTab('read')}
+                onStateChange={(labState) => {
+                  const at = missionIndexOf(labState);
+                  const earned = earnedMissionIndex(labState);
+                  setLabMissionIndex(at, earned);
+                  // 🔑 교사 화면이 「실습 N/7」을 그리는 근거. 값이 달라졌을 때만 실제로 보낸다(t1).
+                  // 🚨 교사가 자기 화면에서 시연할 때는 보내지 않는다 — 교사가 학생 줄에 섞인다.
+                  if (!teacherPanel) reportLabMission(qaId, at, earned);
+                }}
+                qaId={qaId}
+              />
+            </div>
+          ) : extras?.tour?.length ? (
+            <TourTab missions={extras.tour} qaId={qaId} />
+          ) : (
+            <div className="mx-auto w-full max-w-[720px] px-5 py-7 text-sm text-[var(--color-text-muted)]">
+              이 문항의 체험은 준비 중이에요. 📖 읽기와 📝 퀴즈를 먼저 진행해 주세요.
+            </div>
+          )
         ) : null}
 
         {activeTab === 'quiz' ? (

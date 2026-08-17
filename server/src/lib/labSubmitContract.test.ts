@@ -168,24 +168,10 @@ test('9) 낸 뒤에도 몇 번이고 고쳐 낼 수 있다고 말한다 — 한 
 })
 
 // ─── 5b — 교사 실습 현황 ───
-
-test('10) 실습 현황은 교사 전용이다 — 학생 화면에 반 전체 작업물이 새면 안 된다', () => {
-  const panel = readFileSync(
-    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'ContentPanel.tsx'),
-    'utf8',
-  )
-  // 🚨 «if (teacherPanel)» 블록 **안에서만** 켜져야 한다(learnLayoutContract ⑦ 과 같은 이유).
-  const guard = panel.match(/if \(teacherPanel\) \{([\s\S]*?)\n {4}\}/)
-  assert.ok(guard, 'ContentPanel 에 «if (teacherPanel)» 블록이 없다')
-  assert.ok(guard![1].includes("list.push('labclass')"), '🧪 실습 현황이 교사 블록 밖에서 켜진다')
-  const pushes = [...panel.matchAll(/list\.push\('labclass'\)/g)].length
-  assert.equal(pushes, 1, `🧪 실습 현황을 ${pushes} 곳에서 켜고 있다 — 켜는 자리는 하나여야 한다`)
-  // 그리는 자리에서도 한 번 더 본다 — 탭 목록만 막으면 URL 로 열릴 수 있다.
-  assert.ok(
-    /activeTab === 'labclass' && teacherPanel \?/.test(panel),
-    '실습 현황을 그릴 때 교사인지 다시 안 본다',
-  )
-})
+//
+// 🔑 2026-08-17 체험 재구조화: 학습 화면의 «🧪 실습 현황» 탭은 철거됐다(learnLayoutContract 8) 이
+//    부활을 감시한다). 서버 라우트 /api/lab/class 는 남는다 — 필요분을 «수업 현황» 대시보드로
+//    이관하는 결정이 뒤에 있다. 라우트가 남는 한 교사 게이트 계약(11)도 그대로 선다.
 
 test('11) 서버가 «이 수업의 교사인가»까지 본다 — 로그인만 보면 남의 수업을 들여다본다', () => {
   const route = read('..', 'routes', 'lab.ts')
@@ -205,30 +191,10 @@ test('12) 안 낸 학생도 줄에 세운다 — 낸 학생만 보이면 교사�
   assert.ok(/revision: mine\?\.revision \?\? 0/.test(classFn), '안 낸 학생의 자리가 없다')
 })
 
-test('13) 「N분째 진전 없음」 알림을 만들지 않는다 — 멀쩡히 쓰는 학생을 쫓아가게 만든다', () => {
-  // 🚨 CLAUDE.md 의 «앱은 수업 진행 시간을 말하지 않는다»와 같은 이유다. 우리가 아는 것은
-  //    «낸 시각»뿐이고, 안 낸 것이 막힌 것인지 쓰는 중인지는 이 데이터로 알 수 없다.
-  const tab = readFileSync(
-    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'LabClassTab.tsx'),
-    'utf8',
-  )
-  assert.equal(
-    /분째|진전 없음|정체|막힘 알림/.test(visibleText(tab)),
-    false,
-    '「N분째 진전 없음」이 되살아났다',
-  )
-  // 대신 «모르는 것»을 화면이 말해야 한다.
-  assert.ok(/막혔다는 뜻이 아니라/.test(tab), '「안 냄」이 「막혔다」로 읽히는 것을 막는 문장이 없다')
-})
-
-test('14) 상대 시간은 «마지막으로 낸 뒤»다 — 수업이 몇 분째인지가 아니다', () => {
-  const tab = readFileSync(
-    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'LabClassTab.tsx'),
-    'utf8',
-  )
-  assert.ok(/lastSubmittedAt/.test(tab), '무엇을 기준으로 재는지가 없다')
-  assert.ok(/아직 안 냄/.test(tab), '낸 적 없는 학생의 시간을 지어내고 있다')
-})
+// 🔑 13)·14) 는 «🧪 실습 현황» 화면(LabClassTab)의 문구 계약이었다 — 화면이 2026-08-17
+//    체험 재구조화로 철거되면서 대상이 사라졌다(learnLayoutContract 8) 이 부활을 감시한다).
+//    지키던 원칙 — 「N분째 진전 없음」 금지 · 상대 시간은 «마지막으로 낸 뒤» — 은 실습 현황을
+//    «수업 현황» 대시보드로 이관하는 PR 에서 그 화면을 대상으로 되살릴 것.
 
 test('15) 오류 상위는 «여럿이 같은 데서 터진 것»만 모은다 — 통과한 줄을 세면 신호가 아니다', () => {
   const store = read('lab-submissions.ts')

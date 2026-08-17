@@ -69,7 +69,8 @@ test('4) 우측 탭은 여전히 조건부 렌더다 — 이 계약이 그것을
   // 🔑 렌더 방식을 바꿔 «항상 mount» 로 만들면 위 계약들의 이유가 사라진다.
   //    그때는 이 파일을 지우는 게 아니라 **왜 바꿨는지**를 여기 적어야 한다.
   const panel = read('components', 'learn', 'ContentPanel.tsx')
-  assert.ok(/activeTab === 'lab' \?/.test(panel), 'ContentPanel 의 실습 탭 렌더 방식이 바뀌었다 — 이 계약을 다시 읽을 것')
+  // 🔑 2026-08-17 체험 재구조화: 실습실은 🧭 체험 탭 안에서 그려진다. 조건부 렌더라는 전제는 그대로다.
+  assert.ok(/activeTab === 'exp' \?/.test(panel), 'ContentPanel 의 체험 탭 렌더 방식이 바뀌었다 — 이 계약을 다시 읽을 것')
 })
 
 test('5) 첫 출력 뒤 늦은 커밋이 와도 state·lines·history 를 서로 덮지 않는다', () => {

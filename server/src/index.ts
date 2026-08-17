@@ -5,7 +5,6 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { env } from './env';
 import { buildCopyrightIndex } from './lib/copyright-index';
-import chatRouter from './routes/chat';
 import labRouter from './routes/lab';
 import vibeRouter from './routes/vibe';
 import joinRouter from './routes/join';
@@ -45,7 +44,6 @@ if (process.env.QA_AUTH_ENABLED === 'true') {
   console.warn('[QA] QA_AUTH_ENABLED=true — test-only 인증/컨텍스트 활성 (prod 운영 시 OFF 확인)');
 }
 
-app.use('/api/chat', chatRouter);
 app.use('/api/join', joinRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/quiz', quizRouter);
