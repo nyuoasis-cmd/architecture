@@ -59,6 +59,14 @@ export function labAsk(question: string) {
 }
 
 /**
+ * AI 목소리 2단 — 로컬이 못 알아들은 자유 문장 해석 (SDD 결정 6).
+ * 🚨 suggestedCommand 는 제안이다. 받는 쪽은 절대 대신 실행하지 않는다 — 표시까지만.
+ */
+export function labVoice(payload: { text: string; missionGoal: string; nextCommand: string }) {
+  return post<{ reply: string[]; suggestedCommand: string | null }>('/api/lab/voice', payload);
+}
+
+/**
  * 막힌 이유를 학생이 읽을 문장으로. 🚨 **다음에 무엇을 할지**까지 적는다 —
  *    「실패했습니다」만 쓰면 학생은 그저 다시 누른다.
  */

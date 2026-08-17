@@ -1,19 +1,23 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import {
+  AI_PREFIX,
   INITIAL_LAB_STATE,
   applyMyOutputs,
   execute,
   markReviewDone,
   markSubmitted,
+  missionIndexOf,
   nextStepOf,
   openingEvents,
   saveRules,
+  voiceFallbackLines,
   type LabEvent,
   type LabState,
   type LabTone,
 } from '../../lib/lab-shell';
+import { LAB_MISSIONS } from '../../data/vibe-lab-ch18';
 import { checkAll, passCount } from '../../lib/lab-checker';
-import { failureLines, labAsk, labLatestSubmission, labReview, labSubmit, labVerify } from '../../lib/lab-api';
+import { failureLines, labAsk, labLatestSubmission, labReview, labSubmit, labVerify, labVoice } from '../../lib/lab-api';
 import { useLearnStore } from '../../store/learn-store';
 
 type LabTabProps = {
@@ -188,6 +192,35 @@ export default function LabTab({ qaId, onStateChange, onExit }: LabTabProps) {
     setBusy(true);
     say([{ text: '  … 부르는 중', tone: 'dim' }]);
     try {
+      if (intent.mode === 'voice') {
+        // 🚨 자유 문장 해석 — 제안까지만 한다. suggestedCommand 를 **절대 대신 실행하지 않는다**
+        //    (SDD 결정 6: 손은 학생이 다시 친다). 실패하면 검수된 대체 응답으로 안내를 잇는다
+        //    (AI 의존도 0 — 라벨 «(대체 응답)»은 떼지 않는다).
+        const mission = LAB_MISSIONS[missionIndexOf(from)];
+        const step = nextStepOf(from);
+        const result = await labVoice({
+          text: intent.text,
+          missionGoal: mission?.goal ?? '',
+          nextCommand: step.command ?? '',
+        });
+        if (!result.ok) {
+          setLines((prev) => [...prev, ...voiceFallbackLines(from)]);
+          return;
+        }
+        const said: { text: string; tone: LabTone }[] = result.data.reply.map((row) => ({
+          text: `${AI_PREFIX} ${row}`,
+          tone: 'ai' as const,
+        }));
+        if (result.data.suggestedCommand) {
+          said.push({
+            text: `${AI_PREFIX} 이럴 땐 ${result.data.suggestedCommand} — 실행은 여러분 손으로.`,
+            tone: 'ai' as const,
+          });
+        }
+        say(said);
+        return;
+      }
+
       if (intent.mode === 'ask') {
         const result = await labAsk(intent.text);
         if (!result.ok) {
@@ -456,4 +489,6 @@ const TONE_CLASS: Record<LabTone, string> = {
   ok: 'text-[#96c97e]',
   bad: 'text-[#ef7159]',
   warn: 'text-[#e4b264]',
+  // «한 터미널, 두 목소리» — AI 목소리 전용 보라 (목업 1 확정색)
+  ai: 'text-[#c4b5fd]',
 };

@@ -235,6 +235,73 @@ export async function verifyWithRules(rules: string, signal?: AbortSignal): Prom
 }
 
 
+// ── 2b) 목소리 — 「로컬이 못 알아듣는 자유 문장 해석」 (SDD 결정 6, 2단) ──────────
+//
+// 🚨 자동 실행 금지 — 제안만 한다. suggest 는 화면이 «쳐 보세요»로 보여 줄 뿐, 실행은 학생 손이다.
+// 🚨 학생별 상한·중지 스위치 없음(앱 안 한도 금지 철학). 아래 perMin 은 돈이 아니라 **연타 방지**다
+//    (「내 차례」 MYTURN_* 과 같은 결 — 한 학생이 실수로 오토리핏을 눌러도 수업이 안 흔들리게).
+const VOICE_SYSTEM = `너는 수업용 터미널 실습실의 안내 목소리다. 학생이 명령 대신 자유 문장을 쳤다.
+학생이 무엇을 하려던 건지 해석해, 지금 미션으로 되돌리는 안내를 한다.
+
+절대 지키기:
+- 최대 2문장. 존댓말. 비전공자 중학생도 알아듣게.
+- 과제(규칙 문서)를 대신 써 주지 마라. 답을 불러 주지 마라.
+- 명령을 대신 실행할 수 없다 — 「~를 쳐 보세요」까지만.
+- suggest 에는 이 실습실이 아는 명령만 넣어라: help ls cat cd pwd clear npm test edit claude review ask reset jump lab exit. 없으면 null.
+
+출력은 아래 JSON 하나만. 다른 말 금지.
+{"reply":["문장1","문장2(없으면 생략)"],"suggest":"명령 또는 null"}`;
+
+export type LabVoice = { reply: string[]; suggest: string | null };
+
+export const VOICE_ACTOR_PER_MIN = envInt('LAB_VOICE_ACTOR_PER_MIN', 10);
+const voiceWindow = new Map<string, number[]>();
+
+/** 연타 방지 — 학생 한 명이 분당 몇 번까지. 🚨 횟수 «소진»이 아니다. 1분이 지나면 그냥 다시 된다. */
+export function takeVoiceToken(actorId: string, now = Date.now()): { ok: true } | { ok: false; retryAfterSeconds: number } {
+  const cutoff = now - 60_000;
+  const stamps = (voiceWindow.get(actorId) ?? []).filter((at) => at > cutoff);
+  if (stamps.length >= VOICE_ACTOR_PER_MIN) {
+    return { ok: false, retryAfterSeconds: Math.max(1, Math.ceil((stamps[0]! + 60_000 - now) / 1000)) };
+  }
+  stamps.push(now);
+  voiceWindow.set(actorId, stamps);
+  return { ok: true };
+}
+
+export async function interpretVoice(
+  input: { text: string; missionGoal: string; nextCommand: string },
+  signal?: AbortSignal,
+): Promise<LabVoice> {
+  const trimmed = input.text.trim();
+  if (trimmed.length < 2) throw new LabUnavailableError('voice_too_short');
+  const user = [
+    `학생 입력: ${trimmed}`,
+    `지금 미션: ${input.missionGoal.slice(0, 200)}`,
+    `다음 명령: ${input.nextCommand.slice(0, 40)}`,
+  ].join('\n');
+  return callHaiku(
+    VOICE_SYSTEM,
+    user,
+    (text) => {
+      const match = text.match(/\{[\s\S]*\}/);
+      if (!match) throw new Error('voice_no_json');
+      const parsed = JSON.parse(match[0]) as Partial<{ reply: unknown; suggest: unknown }>;
+      const reply = Array.isArray(parsed.reply)
+        ? parsed.reply.filter((row): row is string => typeof row === 'string' && row.trim() !== '').slice(0, 2)
+        : [];
+      if (reply.length === 0) throw new Error('voice_empty_reply');
+      // 🚨 제안 명령은 모양을 검사한다 — 모델이 지어낸 이상한 문자열을 화면이 «쳐 보라»고 권하면 안 된다.
+      const suggest =
+        typeof parsed.suggest === 'string' && /^[a-z][a-z0-9 ./~_-]{0,30}$/.test(parsed.suggest.trim())
+          ? parsed.suggest.trim()
+          : null;
+      return { reply: reply.map((row) => row.slice(0, 160)), suggest };
+    },
+    { signal },
+  );
+}
+
 // ── 3) 질문 — 「모르는 걸 물어본다」 ────────────────────────────────────────
 
 const ASK_SYSTEM = `너는 IT 수업의 조교다. 학생이 터미널 실습 중에 물어본다.
@@ -253,4 +320,5 @@ export async function askQuestion(question: string, signal?: AbortSignal): Promi
 export function __resetLabAiForTest(): void {
   active = 0;
   waiting.length = 0;
+  voiceWindow.clear();
 }

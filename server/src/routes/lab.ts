@@ -6,10 +6,12 @@ import { getRequestUser } from '../lib/auth';
 import { getSupabaseAdminClient } from '../lib/supabase';
 import {
   askQuestion,
+  interpretVoice,
   LabAbortedError,
   LabRateLimitError,
   LabUnavailableError,
   reviewDraft,
+  takeVoiceToken,
   verifyWithRules,
 } from '../lib/lab-ai';
 
@@ -37,6 +39,12 @@ function abortSignalOf(req: import('express').Request): AbortSignal | undefined 
 const reviewSchema = z.object({ draft: z.string().min(1).max(8000) });
 const verifySchema = z.object({ rules: z.string().min(1).max(8000) });
 const askSchema = z.object({ question: z.string().min(1).max(500) });
+const voiceSchema = z.object({
+  text: z.string().min(2).max(300),
+  // 🔑 미션 문맥은 안내 품질을 위한 «표시용» 힌트다 — 권한·판정에 안 쓰인다. 길이만 자른다.
+  missionGoal: z.string().max(200).default(''),
+  nextCommand: z.string().max(40).default(''),
+});
 const submitSchema = z.object({ qaId: z.string().min(1).max(32), rules: z.string().min(1).max(8000) });
 
 function handle(caught: unknown, res: import('express').Response, tag: string): void {
@@ -106,6 +114,28 @@ router.post('/ask', async (req, res) => {
     res.json({ answer });
   } catch (caught) {
     handle(caught, res, 'ask');
+  }
+});
+
+// POST /api/lab/voice — 터미널 AI 목소리 2단: 로컬이 못 알아들은 자유 문장만 온다 (SDD 결정 6).
+// 🚨 자동 실행 금지 — suggest 는 제안일 뿐이고, 화면은 절대 대신 실행하지 않는다.
+// 🔑 연타 방지(takeVoiceToken)는 돈이 아니라 폭주를 막는다 — 1분 지나면 그냥 다시 된다.
+router.post('/voice', async (req, res) => {
+  const parsed = voiceSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'invalid_request' });
+    return;
+  }
+  const throttled = takeVoiceToken(resolveActorId(req));
+  if (!throttled.ok) {
+    res.status(429).json({ error: 'rate_limited', retryAfterSeconds: throttled.retryAfterSeconds });
+    return;
+  }
+  try {
+    const voice = await interpretVoice(parsed.data, abortSignalOf(req));
+    res.json({ reply: voice.reply, suggestedCommand: voice.suggest });
+  } catch (caught) {
+    handle(caught, res, 'voice');
   }
 });
 

@@ -105,13 +105,15 @@ test('3) 세 결과는 뜻이 같고 형식이 다르다 — 같으면 12강이 
 })
 
 test('4) 모르는 명령은 조사를 붙이지 않고 다음 행동을 말하며, «아직 안 열린» 명령과도 가른다', () => {
-  const unknown = textOf(run(['뭐하지']).events)
+  // 🔑 2026-08-17 AI 목소리(2단 판정): 한글·자유 문장(예: 「뭐하지」)은 이제 «모르는 명령»이 아니라
+  //    voice 의도로 나간다(labVoiceContract 2). «모르는 명령» 안내는 오타도 자유 문장도 아닌
+  //    입력에만 남는다 — 그 갈래가 살아 있는지 여기서 본다.
+  const unknown = textOf(run(['zqxv']).events)
   assert.ok(unknown.includes('이 실습실이 모르는 명령입니다'), '모르는 명령에 그렇다고 말하지 않는다')
   assert.ok(unknown.includes('help'), '모르는 명령에 다음 행동(help)을 안 준다 — 학생이 멈춘다')
-  assert.equal(/뭐하지\s+[은는]/.test(unknown), false, '학생 명령 뒤에 은/는을 바로 붙여 조사가 깨진다')
-  assert.ok(unknown.includes("'뭐하지' — 이 실습실이 모르는 명령입니다."), '명령을 따옴표로 가르지 않는다')
+  assert.ok(unknown.includes("'zqxv' — 이 실습실이 모르는 명령입니다."), '명령을 따옴표로 가르지 않는다')
   // 🚨 조사를 아예 붙이지 않는다 — 받침을 모르는 낱말에 은/는·이라는/라는 중 어느 쪽을 붙여도 깨진다.
-  assert.equal(/뭐하지'?\s*(이?라는|[은는])/.test(unknown), false, '학생이 친 낱말 뒤에 조사를 붙였다 — 받침에 따라 깨진다')
+  assert.equal(/zqxv'?\s*(이?라는|[은는])/.test(unknown), false, '학생이 친 낱말 뒤에 조사를 붙였다 — 받침에 따라 깨진다')
   assert.ok(
     unknown.includes('지금 할 일은 위에 적혀 있어요. 전체 목록은 help.'),
     '모르는 명령 뒤에 지금 할 일과 전체 목록을 함께 안내하지 않는다',
