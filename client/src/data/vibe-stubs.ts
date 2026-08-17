@@ -34,7 +34,7 @@ export type VibeIncident = {
 
 export type VibeTourMissionKind = 'daily' | 'self' | 'live' | 'archive';
 
-/** 견학 탭의 눌러서 여는 보조 장치 — 칩(가로 나열) 또는 스텝(세로 카드). */
+/** 견학(🧭 체험 탭의 기본 부품)의 눌러서 여는 보조 장치 — 칩(가로 나열) 또는 스텝(세로 카드). */
 export type VibeTourReveal = {
   label: string;
   answer: string;
@@ -58,7 +58,7 @@ export type VibeTourMission = {
   feedback: string;
 };
 
-/** «내 차례» — 학생이 직접 쓴 부탁문을 실제 AI가 실행·판정한다(서버 연동은 후속 PR). */
+/** «내 차례» — 2026-08-17 탭 철거. 데이터는 12강 터미널 미션 이식(에픽 3)까지 남는 원료다(myTurnContract 가 서버 과제와의 정합을 계속 지킨다). */
 export type VibeMyTurnSlot = {
   key: string;
   label: string;

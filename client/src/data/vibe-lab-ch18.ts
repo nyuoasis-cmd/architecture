@@ -26,8 +26,30 @@ export type LabMission = {
   live: boolean;
 };
 
-/** 실습실이 걸리는 문항. 12강(ch18)의 마지막 문항 하나뿐이다. */
+/**
+ * 실습실이 걸리는 강(속 이름표). 🔑 이 강의 **모든 문항**의 체험 탭이 실습실 하나를 이어 쓴다
+ * (SDD 결정 21 — 1번에서 만진 파일이 마지막 문항까지 남는다).
+ */
+export const LAB_CHAPTER_ID = 18;
+
+/**
+ * 실습실의 대표 문항 — 제출·진도·교사 현황이 전부 이 이름표 한 줄에 쌓인다.
+ * 🚨 네 문항이 같은 실습실을 쓰므로, 어느 문항에서 내든 저장은 이 이름표로 간다 —
+ *    문항별로 가르면 교사 화면의 「실습 N/7」이 네 줄로 흩어진다.
+ */
 export const LAB_QA_ID = 'ch18_q04';
+
+/**
+ * 문항 → 미션 구간(1-based, 양끝 포함). 좌측 목차와 체험 탭 머리말이 «이 문항의 미션»을 이걸로 말한다.
+ * 🔑 구간은 이어지고 겹치지 않는다 — labSharedScopeContract 가 «미션 1~7 을 빈틈없이 덮는가»를 잰다.
+ *    (카드: q1 = 세 결과 현상, q2 = 파서, q3 = 차이·규칙 쓰기, q4 = 비평·제출)
+ */
+export const LAB_QA_MISSION_SPANS: Record<string, { from: number; to: number }> = {
+  ch18_q01: { from: 1, to: 2 },
+  ch18_q02: { from: 3, to: 3 },
+  ch18_q03: { from: 4, to: 5 },
+  ch18_q04: { from: 6, to: 7 },
+};
 
 /** 처음 열었을 때 뜨는 축소판 고지. 🚨 「가짜」만 말하면 학생이 실습 전체를 흉내로 여긴다. */
 export const LAB_ABOUT: { title: string; lines: string[] } = {

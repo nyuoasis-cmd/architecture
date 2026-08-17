@@ -27,7 +27,7 @@ function isStudentRoute(pathname: string): boolean {
  * 학습 화면은 «문서가 아니라 작업대»다 — 세 컬럼이 각자 스크롤하고, 페이지 자체는 안 흐른다.
  * 🚨 그래서 이 라우트에서만 셸을 화면 높이에 **고정**한다(h-screen + overflow-hidden).
  *    예전에는 학습 화면이 «100dvh − 56px»로 제 높이를 손수 계산했는데, 공용 네비는 CDN 웹 컴포넌트라
- *    실제 높이가 103px 이었다. 47px 만큼 아래가 잘려 좌측 「이전 장/다음 장」과 챗봇 입력칸이
+ *    실제 높이가 103px 이었다. 47px 만큼 아래가 잘려 좌측 「이전 장/다음 장」과 하단 요소가
  *    화면 밖에 있었다. 셸이 높이를 정해 주면 헤더가 몇 px 이든 학습 화면은 알아서 남은 만큼 쓴다.
  */
 function isFixedHeightRoute(pathname: string): boolean {

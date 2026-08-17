@@ -3,19 +3,18 @@ import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-
 import QrFullscreenModal from '../components/common/QrFullscreenModal';
 import { StudentExitGuard } from '../components/StudentExitGuard';
 import ChapterNavPanel from '../components/learn/ChapterNavPanel';
-import ChatPanel from '../components/learn/ChatPanel';
 import ContentPanel from '../components/learn/ContentPanel';
+import ReadyCheck, { readyCheckSeen } from '../components/learn/ReadyCheck';
 import { CHAPTERS, getChapterById, getQaById, getQasByChapterId, type QaStub } from '../data/qa-stubs';
 import { getDemoByQaId } from '../data/demos';
 import { markRead } from '../lib/progress';
 import { endSession, getSession, patchProgress, SessionClientError } from '../lib/session-client';
 import { clearSessionTokenHint } from '../lib/session-token';
-import { tabHidesChat, useLearnStore } from '../store/learn-store';
+import { useLearnStore } from '../store/learn-store';
 import { useSessionStore } from '../store/session-store';
 
 const MOBILE_LABELS = {
   nav: '문항',
-  chat: '챗봇',
   content: '콘텐츠',
 } as const;
 
@@ -24,13 +23,15 @@ type LearnPageProps = {
 };
 
 /**
- * 학습 화면 — **3컬럼 하나뿐이다**(문항 목록 280 · AI 챗봇 320 · 콘텐츠).
+ * 학습 화면 — **2컬럼 하나뿐이다**(문항 목록 280 · 콘텐츠).
  *
- * 🚨 형판을 둘로 가르지 않는다. 2026-08-11 까지는 «이 장에 extras 가 있는가»로 3컬럼과
- *    5탭 단일 컬럼을 갈랐는데, 견학이 107/107 문항에 붙자 조건이 17/17 장을 참으로 만들어
- *    **3컬럼이 도달 불가 죽은 코드**가 됐다 — 좌측 문항 목록과 챗봇 컬럼이 통째로 안 그려졌고,
+ * 🚨 형판을 둘로 가르지 않는다. 2026-08-11 까지는 «이 장에 extras 가 있는가»로 두 형판을
+ *    갈랐는데, 견학이 107/107 문항에 붙자 조건이 17/17 장을 참으로 만들어 **한쪽 형판이
+ *    도달 불가 죽은 코드**가 됐다 — 좌측 문항 목록 컬럼이 통째로 안 그려졌고,
  *    «문제가 생기면 그 장 데이터만 되돌리면 된다»던 롤백 장치도 같이 무력화됐다.
  *    데이터의 많고 적음은 **탭의 개수**로만 나타난다(ContentPanel). 화면 종류는 안 바꾼다.
+ * 🔑 2026-08-17 체험 재구조화: 가운데 AI 챗봇 컬럼(320px)을 철거했다 — AI 보조는 체험 탭
+ *    안(터미널 ai▸ 목소리)에 산다. 좌측 챗봇 컬럼을 되살리지 말 것(learnLayoutContract).
  */
 function LearnLayout(props: {
   mode: 'self' | 'session';
@@ -53,17 +54,6 @@ function LearnLayout(props: {
   const scenarioId = useLearnStore((state) => state.scenarioId);
   const setMobileTab = useLearnStore((state) => state.setMobileTab);
   const setScenarioId = useLearnStore((state) => state.setScenarioId);
-  const contentTab = useLearnStore((state) => state.contentTab);
-  const hideChat = tabHidesChat(contentTab);
-
-  // 🚨 좁은 화면에서 «챗» 칸에 머문 채로 실습 탭을 켜면 그 칸이 사라져 **빈 화면**이 남는다.
-  //    학생은 «고장»으로 읽고 되돌아올 길을 못 찾는다 — 실습으로 데려다 놓는다.
-  useEffect(() => {
-    if (hideChat && mobileTab === 'chat') {
-      setMobileTab('content');
-    }
-  }, [hideChat, mobileTab, setMobileTab]);
-
   const goToQa = (qaId: string) => {
     navigate(props.makeQaHref(qaId));
     // 🔑 모바일에서 목록으로 골랐으면 바로 읽을 것을 보여 준다 — 고른 뒤 한 번 더 누르게 하지 않는다.
@@ -81,9 +71,7 @@ function LearnLayout(props: {
     */
     <div className="flex min-h-0 flex-1 flex-col">
       <nav className="flex flex-shrink-0 border-b border-[var(--color-border)] bg-white lg:hidden">
-        {(Object.keys(MOBILE_LABELS) as Array<keyof typeof MOBILE_LABELS>)
-          .filter((tab) => !(hideChat && tab === 'chat'))
-          .map((tab) => (
+        {(Object.keys(MOBILE_LABELS) as Array<keyof typeof MOBILE_LABELS>).map((tab) => (
           <button
             key={tab}
             className={`mtab flex-1 py-2.5 text-sm font-medium ${mobileTab === tab ? 'is-active' : ''}`}
@@ -116,21 +104,6 @@ function LearnLayout(props: {
           />
         </aside>
 
-        {/*
-          🚨 챗봇 칸은 **실습 탭에서만** 접힌다(`tabHidesChat`). 실습에서는 학생이 묻는 일이
-             터미널 안으로 옮겨가기 때문이다 — 다른 탭으로 보내면 최종 화면에 없는 길을 가르치게 된다
-             (2026-08-15 jery). 나머지 문항에서는 그대로 있어야 한다: 학생이 막혔을 때 물어볼 통로다.
-          🚨 판정을 «이 문항에 데이터가 있는가»로 바꾸지 말 것 — 2026-08-11 에 3컬럼을 통째로
-             죽인 사고가 정확히 그 형태였다(learnLayoutContract 2)).
-        */}
-        {hideChat ? null : (
-          <section
-            className={`${mobileTab === 'chat' ? 'flex' : 'hidden'} w-full flex-col border-r border-[var(--color-border)] lg:flex lg:w-[320px] lg:min-w-[280px] lg:flex-shrink-0`}
-          >
-            <ChatPanel qaId={props.qa.id} qaTitle={props.qa.title} />
-          </section>
-        )}
-
         <section className={`${mobileTab === 'content' ? 'flex' : 'hidden'} w-full min-w-0 flex-1 flex-col lg:flex`}>
           <ContentPanel
             availableQaIds={props.allSessionQas?.map((item) => item.id) ?? [props.qa.id]}
@@ -160,6 +133,10 @@ export default function LearnPage({ mode }: LearnPageProps) {
   const updateViewerProgress = useSessionStore((state) => state.updateViewerProgress);
   const [sessionStatus, setSessionStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>(
     mode === 'session' ? 'loading' : 'idle',
+  );
+  // 준비 점검(SDD 결정 19) — 학생이 이 수업에 처음 들어왔을 때 한 번. 교사 시연에는 안 띄운다.
+  const [readyCheckOpen, setReadyCheckOpen] = useState(
+    () => mode === 'session' && Boolean(params.sessionId) && !readyCheckSeen(params.sessionId ?? ''),
   );
   const [sessionError, setSessionError] = useState<{ status?: number; message: string } | null>(null);
 
@@ -299,6 +276,10 @@ export default function LearnPage({ mode }: LearnPageProps) {
     return (
       <>
         <StudentExitGuard when={!isTeacherPreview} />
+        {/* 🔑 목차 밖 1화면 — «0강»이 아니다. 건너뛰기가 항상 있어 수업을 막지 않는다. */}
+        {readyCheckOpen && !isTeacherPreview ? (
+          <ReadyCheck onDone={() => setReadyCheckOpen(false)} sessionId={params.sessionId!} />
+        ) : null}
         <LearnLayout
         allSessionQas={sessionQas}
         availableChapters={sessionChapters}

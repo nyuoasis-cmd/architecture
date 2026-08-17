@@ -14,7 +14,7 @@ const BADGE_STYLE: Record<string, string> = {
 };
 
 /**
- * 견학 탭 — 입문자 사다리(매일 쓰는 앱 → 방금 이 앱 → 진짜 서비스).
+ * 견학 — 🧭 체험 탭의 기본 부품. 입문자 사다리(매일 쓰는 앱 → 방금 이 앱 → 진짜 서비스).
  * 미션은 «미션 제시 → 다녀오기/눌러보기 → 관찰 한 줄 제출 → 피드백» 구조.
  */
 export default function TourTab({ qaId, missions }: TourTabProps) {
