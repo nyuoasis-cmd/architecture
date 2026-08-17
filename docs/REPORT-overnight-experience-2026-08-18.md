@@ -89,7 +89,7 @@ ai-school(3강) · gcp-locations(10강) · tools(14강 진열 12) · trip(15강)
 ## 6) 테스트·계약 현황 (정직 보고)
 
 - 서버 테스트 **245 → 280** (전부 초록, `cd server && npm test`). 클라이언트 tsc·vite build 초록.
-- CI: #237 `fast` **pass** 확인. 나머지는 push 순으로 진행 중이었음 — 아침에 `gh pr checks` 로 전체 확인 필요.
+- CI: **12개 PR 전부 `fast` pass 확인**(아래 7)의 TS6059 사고 수습 후 재실행분 기준).
 - 새 계약 9벌: `experienceTabContract`(6) · `labVoiceContract`(6) · `labArtifactsContract`(6) ·
   `ghSimContract`(6) · `ch22ExperienceContract`(5) · `tourKitContract`(3) · `miniLabContract`(7) ·
   `graduationContract`(4) · `readyCheckContract`(4). 개정: learnLayoutContract(전면) ·
@@ -109,3 +109,8 @@ ai-school(3강) · gcp-locations(10강) · tools(14강 진열 12) · trip(15강)
   기존 미션 7개가 이미 그 내용을 덮고 있어 실익이 없었다. 남은 처분(라우트·데이터 삭제)은 별도 소거 PR 로
   제안(지금 지우면 myTurnContract 도 함께 정리해야 함).
 - 워크트리 node_modules 가 낡아 있어(§0에서 테스트 전체 빨강) client/server `npm ci` 후 진행 — 환경 문제였고 코드 문제 아님.
+- **CI 사고 1건(수습 완료)**: 새 계약 5벌이 `typeof import('…client…')` 로 클라 타입을 참조해,
+  서버 tsc(rootDir=src)가 클라 소스를 컴파일하려다 TS6059 로 죽었다(#239~#247 첫 실행 빨강).
+  로컬 `npm test`(tsx)는 타입 검사를 안 해서 초록이었던 것 — **검증 방법의 구멍**이었다.
+  수습 = 계약 5벌을 구조 타입(Probe*)으로 바꾸고 각 도입 브랜치에 커밋 → 체인에 merge 로 전파.
+  이후 `npm run build`(CI 와 같은 명령)를 브랜치마다 돌려 0 에러 확인, 12개 PR 전부 재실행 pass.
