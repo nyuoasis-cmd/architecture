@@ -362,8 +362,9 @@ export default function ContentPanel({
                 />
               </div>
             </div>
-          ) : getMiniLab(chapter.id) ? (
-            // 터미널형 강(11·13강 등) — 공용 미니 실습실. 강 전체가 실습실 하나를 이어 쓴다(결정 21).
+          ) : getMiniLab(chapter.id)?.qaMissionSpans[qaId] ? (
+            // 터미널형 강 — 공용 미니 실습실. 강 전체가 실습실 하나를 이어 쓴다(결정 21).
+            // 🔑 구간표에 없는 문항(카드가 견학 유지로 확정한 것)은 아래 견학 갈래로 내려간다.
             <MiniLabTab lab={getMiniLab(chapter.id)!} qaId={qaId} />
           ) : qaId === PHISHING_QA_ID ? (
             // 22강 q3 — 진짜/가짜 로그인 화면 판별 미니 체험 (SDD 결정 20, 부품 신설 없음)

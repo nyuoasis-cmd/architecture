@@ -31,11 +31,20 @@ test('1) 등록 강은 지도의 터미널형이다 — 12강(ch18)은 큰 실�
   assert.equal(MINI_LABS[18], undefined, 'ch18 에 미니 실습실이 등록됐다 — 12강은 lab-shell 이 맡는다')
 })
 
-test('2) 미션 구간이 그 강의 전 문항을 1부터 빈틈없이 덮는다 (SDD 결정 21)', () => {
+test('2) 미션 구간이 그 강의 문항을 1부터 빈틈없이 덮는다 — 빠진 문항은 카드 근거(partialNote)가 필수다', () => {
   for (const [chapterId, lab] of Object.entries(MINI_LABS)) {
     const qas = QA_STUBS.filter((qa) => qa.chapterId === Number(chapterId)).map((qa) => qa.id)
     const missing = qas.filter((qaId) => !lab.qaMissionSpans[qaId])
-    assert.deepEqual(missing, [], `ch${chapterId}: 미션 구간이 없는 문항 — 체험 머리말이 빈다: ${missing.join(', ')}`)
+    // 🔑 SDD 결정 21(전 문항 터미널)이 기본이고, 카드가 «견학 유지»로 확정한 문항만 예외다.
+    //    예외는 partialNote 로 근거를 밝혀야 한다 — 조용한 부분 적용을 막는다.
+    if (missing.length > 0) {
+      assert.ok(
+        lab.partialNote && lab.partialNote.trim().length > 0,
+        `ch${chapterId}: 구간 없는 문항(${missing.join(', ')})이 있는데 partialNote(카드 근거)가 없다`,
+      )
+    }
+    const ghosts = Object.keys(lab.qaMissionSpans).filter((qaId) => !qas.includes(qaId))
+    assert.deepEqual(ghosts, [], `ch${chapterId}: 없는 문항에 구간이 배정됐다: ${ghosts.join(', ')}`)
     const ranges = Object.values(lab.qaMissionSpans).sort((a, b) => a.from - b.from)
     assert.equal(ranges[0]!.from, 1, `ch${chapterId}: 구간이 1에서 시작하지 않는다`)
     for (let i = 1; i < ranges.length; i += 1) {
@@ -90,6 +99,10 @@ test('5) 사전 생성 출력에는 REPLAY 라벨이 있다 — 떼면 실시간
   probe(11, 'tokens')
   probe(11, 'memory')
   probe(19, 'init')
+  probe(1, 'apps')
+  probe(1, 'trace')
+  probe(5, 'render')
+  probe(8, 'live')
 })
 
 test('6) AI 목소리 — 오타는 로컬, 자유 문장은 voice 의도, 같은 키는 두 번 실행되지 않는다', () => {

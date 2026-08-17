@@ -57,8 +57,14 @@ export type MiniLab = {
   aboutLines: string[];
   commands: MiniCommand[];
   missions: MiniMission[];
-  /** 문항 → 미션 구간(1-based, 양끝 포함). 전 문항을 빈틈없이 덮는다(miniLabContract). */
+  /**
+   * 문항 → 미션 구간(1-based, 양끝 포함). 등재된 구간은 빈틈없이 이어진다(miniLabContract).
+   * 🔑 구간에 없는 문항의 체험은 견학으로 선다 — 단, 그건 카드가 명시한 강에서만 허용되고
+   *    partialNote 에 그 근거를 적어야 한다(안 적으면 계약이 빨갛다).
+   */
   qaMissionSpans: Record<string, { from: number; to: number }>;
+  /** 일부 문항이 견학으로 남는 «카드 확정» 근거. 전 문항 터미널이면 비워 둔다. */
+  partialNote?: string;
   /**
    * `ask` 장애 시 대체 응답 풀 — 🚨 라벨 «(대체 응답)»은 화면이 붙인다. 떼지 말 것.
    * AI «필수»인 강(11강)일수록 이 풀이 검수돼 있어야 한다(SDD 결정 14).

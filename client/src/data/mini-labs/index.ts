@@ -1,4 +1,7 @@
 import type { MiniLab } from '../../lib/mini-lab';
+import { CH01_MINI_LAB } from './ch01';
+import { CH05_MINI_LAB } from './ch05';
+import { CH08_MINI_LAB } from './ch08';
 import { CH11_MINI_LAB } from './ch11';
 import { CH19_MINI_LAB } from './ch19';
 
@@ -8,6 +11,9 @@ import { CH19_MINI_LAB } from './ch19';
  *    12강(ch18)은 여기 없다 — 그 강은 큰 실습실(lab-shell/LabTab)을 그대로 쓴다.
  */
 export const MINI_LABS: Record<number, MiniLab> = {
+  1: CH01_MINI_LAB,
+  5: CH05_MINI_LAB,
+  8: CH08_MINI_LAB,
   11: CH11_MINI_LAB,
   19: CH19_MINI_LAB,
 };
