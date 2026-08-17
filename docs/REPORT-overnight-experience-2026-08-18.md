@@ -114,3 +114,26 @@ ai-school(3강) · gcp-locations(10강) · tools(14강 진열 12) · trip(15강)
   로컬 `npm test`(tsx)는 타입 검사를 안 해서 초록이었던 것 — **검증 방법의 구멍**이었다.
   수습 = 계약 5벌을 구조 타입(Probe*)으로 바꾸고 각 도입 브랜치에 커밋 → 체인에 merge 로 전파.
   이후 `npm run build`(CI 와 같은 명령)를 브랜치마다 돌려 0 에러 확인, 12개 PR 전부 재실행 pass.
+
+
+---
+
+## 후기 — 머지·배포·prod QA 결과 (2026-08-18, jery 승인 «머지하고 prod qa해»)
+
+- **main 배포 완료**: 통합 PR **#249** 머지(7fe60ff) → Render 자동배포 확인. 낡은 PR #230 은 main 에
+  이미 다른 구현으로 반영돼 있어 닫음(사유 코멘트, reopen 가능). 체인 PR 의 gh 자동 재타게팅이 꼬여
+  통합 브랜치에 #237 만 담겼던 것을 최종 트리(f16852a) 직접 머지로 복구 — 트리 diff 0 확인 후 진행.
+  잔여 exp/* 브랜치 전부 삭제(내용은 main 포함 검증 후).
+- **prod 스모크 8/8 통과**: health OK · /api/chat 404(철거 확인) · my-turn 400(존치) ·
+  **voice 실호출 성공**(Haiku 2문장 + suggest) · bundle/artifact 503(마이그레이션 전 정직 응답) ·
+  submission 이어쓰기 200 · SPA 200.
+- **prodqa 진단**: 1)코드검사 2)매일생존 3)실흐름 6)사람눈 🟢 · **nightly 시점 실행 = 통과**(S0~S5 실흐름).
+  🔴 2칸은 재구조화 이전부터: 4)전수 크롤 드리프트 · 5)용량 산정 공백(class disposition 에 실측 대기로 이미 등재).
+- **후속 수리 1건 배포(PR #250)**: 전수 크롤러 비용 게이트가 옛 AI 경로(chat·my-turn)만 막고 있었다 —
+  `/api/lab/{voice,ask,review,verify,submit,artifact,bundle}` 차단 추가(PR #211 유형 재발 방지).
+  등록부 class disposition 도 새 AI 경로 기준으로 갱신(마스터 repo).
+- **남은 것 2가지 (사용자)**:
+  1) 💾 `psql "$DATABASE_URL" -f sql/010_lab_artifacts.sql` — 이 기계에 DATABASE_URL 이 없어 직접 실행
+     필요. 적용 전까지 산출물 저장·23강 묶음은 «지금은 저장 안 됨»(503)으로 정직 동작.
+  2) 🔴 전수 크롤 재실행(드리프트 해소) — 새 UI 대상, local dev 에서(#250 게이트 선결 완료).
+     용량 산정(5번 칸)은 별도 실측 에픽.
