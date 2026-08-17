@@ -41,6 +41,15 @@ type LabSessionUpdate = LabSession | null | ((current: LabSession | null) => Lab
 type GhSession = { scopeId: string; stepIndex: number; inputs: Record<string, string> };
 type GhSessionUpdate = GhSession | null | ((current: GhSession | null) => GhSession | null);
 
+/** 미니 실습실(터미널형 강 공용 엔진) 작업 — labSession 과 같은 이유로 화면 밖에 산다. */
+type MiniSession = {
+  scopeId: string;
+  state: import('../lib/mini-lab').MiniState;
+  lines: LabEvent[];
+  history: string[];
+};
+type MiniSessionUpdate = MiniSession | null | ((current: MiniSession | null) => MiniSession | null);
+
 type LearnStoreState = {
   currentQaId: string;
   scenarioId: string;
@@ -59,6 +68,7 @@ type LearnStoreState = {
    */
   labSession: { qaId: string; state: LabState; lines: LabEvent[]; history: string[] } | null;
   ghSession: GhSession | null;
+  miniSession: MiniSession | null;
   setCurrentQaId: (qaId: string) => void;
   setScenarioId: (scenarioId: string) => void;
   setMobileTab: (mobileTab: MobileTab) => void;
@@ -66,6 +76,7 @@ type LearnStoreState = {
   setLabMissionIndex: (labMissionIndex: number, labEarnedIndex: number) => void;
   setLabSession: (update: LabSessionUpdate) => void;
   setGhSession: (update: GhSessionUpdate) => void;
+  setMiniSession: (update: MiniSessionUpdate) => void;
   resetForQa: (qaId: string, scenarioId: string) => void;
 };
 
@@ -80,6 +91,7 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
   labEarnedIndex: 0,
   labSession: null,
   ghSession: null,
+  miniSession: null,
   setCurrentQaId: (currentQaId) => set({ currentQaId }),
   setScenarioId: (scenarioId) => set({ scenarioId }),
   setMobileTab: (mobileTab) => set({ mobileTab }),
@@ -89,6 +101,8 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
     set((store) => ({ labSession: typeof update === 'function' ? update(store.labSession) : update })),
   setGhSession: (update) =>
     set((store) => ({ ghSession: typeof update === 'function' ? update(store.ghSession) : update })),
+  setMiniSession: (update) =>
+    set((store) => ({ miniSession: typeof update === 'function' ? update(store.miniSession) : update })),
   // 🔑 문항을 바꿔도 **탭 상태는 유지한다**(읽기 → 읽기). 매번 첫 탭으로 튕기면
   //    «견학만 몰아서 보는» 동선이 끊긴다. 새 문항에 그 탭이 없으면 ContentPanel 이 접는다.
   resetForQa: (currentQaId, scenarioId) => set({ currentQaId, scenarioId }),

@@ -6,6 +6,7 @@ import type { DemoMeta } from '../../data/demos';
 import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getExtras } from '../../data/learn-extras';
 import { getGhScript } from '../../data/gh-scripts';
+import { getMiniLab } from '../../data/mini-labs';
 import { PHISHING_QA_ID } from '../../data/phishing-check';
 import { getTourKit } from '../../data/tour-kits';
 import { LAB_CHAPTER_ID, LAB_QA_ID, LAB_QA_MISSION_SPANS } from '../../data/vibe-lab-ch18';
@@ -18,6 +19,7 @@ import { reportLabMission } from '../../lib/progress';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
 import GhSimTab from './GhSimTab';
 import LabTab from './LabTab';
+import MiniLabTab from './MiniLabTab';
 import NextQuestionDoor from './NextQuestionDoor';
 import PhishingCheck from './PhishingCheck';
 import TourKit from './TourKit';
@@ -360,6 +362,9 @@ export default function ContentPanel({
                 />
               </div>
             </div>
+          ) : getMiniLab(chapter.id) ? (
+            // 터미널형 강(11·13강 등) — 공용 미니 실습실. 강 전체가 실습실 하나를 이어 쓴다(결정 21).
+            <MiniLabTab lab={getMiniLab(chapter.id)!} qaId={qaId} />
           ) : qaId === PHISHING_QA_ID ? (
             // 22강 q3 — 진짜/가짜 로그인 화면 판별 미니 체험 (SDD 결정 20, 부품 신설 없음)
             <PhishingCheck />
