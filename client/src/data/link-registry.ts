@@ -3,8 +3,12 @@
  *
  * 🚨 **무로그인 공개 페이지만** 등재한다(SDD 결정 2 — 학생은 실계정을 만들지 않는다).
  * 🚨 전부 **새 탭**으로 연다(iframe 차단 전제) — 여는 쪽 컴포넌트(TourKit)가 지킨다.
- * 🔑 status: 'candidate' 는 후보다 — **최종 확정은 사용자 몫**(밤샘 핸드오프 §4·§6).
- *    확정되면 'confirmed' 로 바꾸고, 스냅샷(snapshotPath)이 준비되면 폴백이 자동으로 켜진다.
+ * 🔑 status 는 후보(candidate) → 사용자 확정(confirmed). 확정되면 값을 바꾸고,
+ *    스냅샷(snapshotPath)이 준비되면 폴백이 자동으로 켜진다.
+ * ✅ 2026-08-18 jery 확정 — 후보 전부 confirmed. 근거 = 전수 접속 확인(16/16 → HTTP 200,
+ *    로그인 리다이렉트 없음). 🚨 **확인된 것은 「바깥에서 열린다」까지다** — 학교망 차단은
+ *    재지 못했다. github.com 계열 3건(Actions·Issues·merged PR)은 교내망에서 막히는 사례가
+ *    있는 계열이라, 교실에서 안 열리면 blockedAtSchools 를 여기 적고 스냅샷을 채운다.
  * 🔑 링크 사망·학교망 차단 관측은 여기 적는다 — 흩어 두면 다음 학기에 아무도 못 찾는다.
  */
 export type RegisteredLink = {
@@ -25,40 +29,40 @@ export type RegisteredLink = {
 };
 
 export const LINK_REGISTRY: Record<string, RegisteredLink> = {
-  // ── 견학형 잔여 11강 (E5-5) — 우리 서비스는 confirmed, 바깥 것은 candidate(사용자 확정 대기) ──
+  // ── 견학형 잔여 11강 (E5-5) — 2026-08-18 확정 이후 전부 confirmed ──
   'ch02-blender': {
     id: 'ch02-blender',
     url: 'https://www.blender.org',
     label: '진짜 페이지 열기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   'ch04-datago': {
     id: 'ch04-datago',
     url: 'https://www.data.go.kr',
     label: '공공데이터포털 열기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   'ch06-wiki-cpu': {
     id: 'ch06-wiki-cpu',
     url: 'https://ko.wikipedia.org/wiki/%EC%A4%91%EC%95%99_%EC%B2%98%EB%A6%AC_%EC%9E%A5%EC%B9%98',
     label: 'CPU 문서 열기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   'ch07-wiki-db': {
     id: 'ch07-wiki-db',
     url: 'https://ko.wikipedia.org/wiki/%EB%8D%B0%EC%9D%B4%ED%84%B0%EB%B2%A0%EC%9D%B4%EC%8A%A4',
     label: '데이터베이스 문서 열기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   'ch09-wiki-arch': {
     id: 'ch09-wiki-arch',
     url: 'https://ko.wikipedia.org/wiki/%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4_%EC%95%84%ED%82%A4%ED%85%8D%EC%B2%98',
     label: '아키텍처 문서 열기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   'ch12-tools': {
@@ -87,14 +91,14 @@ export const LINK_REGISTRY: Record<string, RegisteredLink> = {
     id: 'ch15-wiki-test',
     url: 'https://ko.wikipedia.org/wiki/%EC%86%8C%ED%94%84%ED%8A%B8%EC%9B%A8%EC%96%B4_%ED%85%8C%EC%8A%A4%ED%8A%B8',
     label: '테스트 문서 열기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   'ch16-gh-actions': {
     id: 'ch16-gh-actions',
     url: 'https://github.com/github/docs/actions',
     label: '진짜 자동 검사 열기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   'ch17-githubstatus': {
@@ -117,7 +121,7 @@ export const LINK_REGISTRY: Record<string, RegisteredLink> = {
     id: 'ch03-pages-quickstart',
     url: 'https://docs.github.com/en/pages/quickstart',
     label: '공식 안내 열기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   // 16강(ch20) — github/docs 공개 Issues 목록 (후보).
@@ -125,7 +129,7 @@ export const LINK_REGISTRY: Record<string, RegisteredLink> = {
     id: 'ch20-github-issues',
     url: 'https://github.com/github/docs/issues',
     label: '진짜 이슈 목록 열기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   // 22강(ch22) — 합쳐진 PR 구경 (후보 — 특정 PR 대신 merged 목록: 링크가 안 낡는다).
@@ -133,7 +137,7 @@ export const LINK_REGISTRY: Record<string, RegisteredLink> = {
     id: 'ch22-merged-prs',
     url: 'https://github.com/github/docs/pulls?q=is%3Apr+is%3Amerged',
     label: '진짜 PR 구경하기',
-    status: 'candidate',
+    status: 'confirmed',
     noLogin: true,
   },
   // 10강(ch10) — 지도 확정 링크(MAP): Google Cloud 위치 지도. 시범 적용(목업 3).
