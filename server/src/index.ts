@@ -22,6 +22,12 @@ const copyrightIndex = buildCopyrightIndex();
 
 app.disable('x-powered-by');
 app.set('etag', false);
+// 🚨 Render 프록시 뒤에서는 이게 없으면 req.ip 가 **내부 홉 IP(10.x, 요청마다 다름)** 가 된다 —
+//    actor-id 의 ip: 갈래(자습 신원·«공유 통» 연타 한도)가 요청마다 새 통이 되어 전부 헛돌았다
+//    (2026-08-18 prod 실측: 계보 저장 직후 되읽기가 빈 것으로 발각. pt: 참여자 갈래는 무관).
+// 🔑 true 가 아니라 **홉 수(1)** 다 — true 는 클라이언트가 지어낸 X-Forwarded-For 맨 앞을 믿어
+//    남의 IP 통을 사칭해 읽는 문이 열린다. 숫자는 프록시가 붙인 항만 믿는다.
+app.set('trust proxy', 1);
 app.use(cors());
 app.use(express.json());
 
