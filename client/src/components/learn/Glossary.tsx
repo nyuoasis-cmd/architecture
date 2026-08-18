@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { GLOSSARY, type GlossaryEntry } from '../../data/teacher-glossary';
 
 type GlossaryProps = {
@@ -275,10 +276,14 @@ export default function Glossary({ text, seenTerms }: GlossaryProps) {
     sheetRef,
   } = useGlossaryMarkup(text, seenTerms);
 
+  // 🚨 시트는 반드시 document.body 로 포털한다 — 이 컴포넌트를 쓰는 쪽(TeacherExplainPanel)이
+  // <p> 안에서 부르기 때문에, 인라인으로 두면 <h3>/<p>/<div> 가 <p> 자손이 되어 브라우저가
+  // 마크업을 재부모화한다(React 19 hydration 경고 3종). 감싸는 쪽이 아니라 시트 쪽을 고쳐야
+  // 앞으로 <Glossary> 를 쓰는 모든 자리에서 같은 함정이 안 생긴다. (2026-08-18 QA soft 1 수리)
   return (
     <>
       {renderContent()}
-      {activeEntry ? (
+      {activeEntry ? createPortal((
         <div
           className="glossary-sheet-backdrop"
           onClick={closeSheet}
@@ -326,7 +331,7 @@ export default function Glossary({ text, seenTerms }: GlossaryProps) {
             <p className="glossary-sheet__body">{activeEntry.oneline}</p>
           </div>
         </div>
-      ) : null}
+      ), document.body) : null}
     </>
   );
 }
