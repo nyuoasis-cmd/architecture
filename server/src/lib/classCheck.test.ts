@@ -8,42 +8,40 @@ import { classCheckBlock, providerFingerprints } from './classCheck'
 // 빈 객체를 「캡 없음」으로 추론하게 두면 **버그로 빈 객체가 나온 경우와 구분되지 않는다.**
 // 그래서 capPolicy 로 «있음/없음»을 항상 명시한다.
 //
-// 🚨 2026-08-10 변경: «내 차례»(POST /api/vibe/my-turn)가 전역 일일 캡을 들여왔다.
-//    그 전까지 이 앱은 캡이 없어 'none' 이 참이었지만, 이제 'none' 은 거짓말이다.
-//    (롤백 스위치로 통제를 끄면 다시 실제로 캡이 없는 상태라 'none' 이 참이 된다 — 아래 둘 다 덮는다.)
+// 🚨 2026-08-18 변경: «내 차례»(POST /api/vibe/my-turn) 철거로 **앱 전역 캡이 실제로 사라졌다.**
+//    2026-08-10~08-18 사이에는 그 라우트가 전역 일일 캡을 들여와서 'none' 이 거짓말이었고,
+//    가드 스위치(MYTURN_GUARD_ENABLED)에 따라 갈리는 두 상태를 여기서 덮고 있었다.
+//    지금은 갈래가 없다 — 남은 통제는 전부 «신원별 창»(per-key)이라 학급 총량을 묶지 않는다.
+// 🚨 이 테스트가 지키는 것은 「캡이 없다」가 아니라 **「없으면 없다고 말한다」** 다.
+//    app 스코프 캡이 다시 들어오는데 여기가 그대로면, 캡을 보고 인원을 계산하는 쪽(축3 R6·R7)이
+//    없는 여유를 믿는다. 그래서 scope 까지 본다.
+test('classCheckBlock: 앱 전역 캡이 없으면 없다고 «명시»한다 — 침묵은 의미가 아니다', () => {
+  const block = classCheckBlock()
+  assert.equal(block.capPolicy, 'none', '앱 캡이 없으면 none 이 참이다 — 빈 객체로 추론하게 두지 않는다')
+  assert.equal(block.used, null, '셀 카운터가 아예 없다 ≠ 오늘 0회 썼다')
 
-// 🚨 2026-08-11 jery 결정: 「내 차례」 호출 통제의 **기본값을 껐다**(바이브코딩 수업 개방과 함께).
-//    그래서 env 를 안 주면 capPolicy = 'none' 이 **참**이다. 이 테스트는 그 «기본이 무엇인가»와
-//    «켰을 때 제대로 말하는가»를 둘 다 못 박는다 — 한쪽만 두면 기본값이 몰래 뒤집혀도 초록이다.
-test('classCheckBlock: 캡이 있으면 있다고, 없으면 없다고 «명시»한다', () => {
-  const saved = process.env.MYTURN_GUARD_ENABLED
-
-  // 🚨 2026-08-11 jery 2차 결정으로 기본값이 «켬» 이 됐다(「내 차례」를 넓히는 대신 상한을 건다).
-  //    그래서 «아무것도 설정하지 않은 서버»는 캡이 있다고 말해야 한다 — 없다고 말하면 상한이
-  //    걸려 있는데도 읽는 쪽이 무제한으로 계산한다.
-  delete process.env.MYTURN_GUARD_ENABLED
-  const byDefault = classCheckBlock()
-  assert.equal(byDefault.capPolicy, 'app-daily', '기본이 «통제 켬»인데 none 이라 말하면, 읽는 쪽이 없는 여유를 믿는다')
-  assert.ok(
-    Object.keys(byDefault.caps).length > 0,
-    '캡이 있다고 말해 놓고 값을 안 주면 읽는 쪽이 숫자를 지어내야 한다',
+  // 🚨 남은 캡이 전부 per-key 인지 본다. app 스코프가 하나라도 생기면 capPolicy 가 거짓이 된다.
+  const caps = block.caps as Record<string, { value: number; scope: string; audience: string }>
+  const appScoped = Object.entries(caps).filter(([, c]) => c.scope === 'app').map(([k]) => k)
+  assert.deepEqual(
+    appScoped,
+    [],
+    `app 스코프 캡이 생겼는데 capPolicy 가 none 이다 — 읽는 쪽이 없는 여유를 믿는다: ${appScoped.join(', ')}`,
   )
 
-  process.env.MYTURN_GUARD_ENABLED = '1'
-  const on = classCheckBlock()
-  assert.equal(on.capPolicy, 'app-daily', '전역 일일 캡이 있는데 none 이라 말하면 판정하는 쪽이 여유를 과대평가한다')
-  assert.ok(Object.keys(on.caps).length > 0, '정책이 app-daily 인데 caps 가 비면 읽는 쪽이 값을 지어내야 한다')
-  assert.equal(on.used, null, '셀 카운터가 아예 없다 ≠ 오늘 0회 썼다')
+  // 🔑 캡을 선언한 이상 값·스코프·대상이 전부 서 있어야 한다 — 하나라도 비면 읽는 쪽이 지어낸다.
+  for (const [k, c] of Object.entries(caps)) {
+    assert.ok(Number.isFinite(c.value) && c.value > 0, `${k}: value 가 숫자가 아니다`)
+    assert.ok(['app', 'per-key'].includes(c.scope), `${k}: scope 가 계약 밖이다`)
+    assert.ok(['all', 'verified', 'anon'].includes(c.audience), `${k}: audience 가 계약 밖이다`)
+  }
 
-  process.env.MYTURN_GUARD_ENABLED = '0'
-  const off = classCheckBlock()
-  assert.equal(off.capPolicy, 'none', '통제를 껐으면 캡이 있는 척하지 않는다')
-  // 🔑 2026-08-18: voice 연타 창은 가드 스위치 밖이라 롤백 상태에서도 말한다 — MYTURN_* 만 사라진다.
-  assert.deepEqual(Object.keys(off.caps), ['LAB_VOICE_ACTOR_PER_MIN'])
-  assert.equal(Object.keys(off.caps).some((k) => k.startsWith('MYTURN_')), false, '껐는데 내 차례 캡이 남아 있다')
-
-  if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED
-  else process.env.MYTURN_GUARD_ENABLED = saved
+  // 🚨 철거분이 되살아나면 여기서 잡는다 — MYTURN_* 은 더 이상 존재하지 않는 라우트의 캡이다.
+  assert.equal(
+    Object.keys(caps).some((k) => k.startsWith('MYTURN_')),
+    false,
+    '철거한 «내 차례» 캡이 선언에 남아 있다 — 라우트가 없는데 캡만 말하면 원장이 유령을 잰다',
+  )
 })
 
 test('classCheckBlock: 폐쇄 목록 — 키를 늘리려면 이 테스트도 같이 고쳐야 한다', () => {
@@ -52,9 +50,10 @@ test('classCheckBlock: 폐쇄 목록 — 키를 늘리려면 이 테스트도 �
     Object.keys(classCheckBlock()).sort(),
     ['capPolicy', 'caps', 'providerFingerprint', 'tokenCaps', 'used']
   )
-  // 출력 상한 두 키가 항상 숫자로 선다 — 스모크가 «숫자만 중계» 하므로 비면 조용히 빠진다.
+  // 출력 상한이 항상 숫자로 선다 — 스모크가 «숫자만 중계» 하므로 비면 조용히 빠진다.
+  // 🔑 2026-08-18 「내 차례」 철거로 MYTURN_MAX_OUTPUT_TOKENS 는 잰 대상 자체가 없어졌다.
   const caps = (classCheckBlock() as { tokenCaps: Record<string, number> }).tokenCaps
-  assert.deepEqual(Object.keys(caps).sort(), ['LAB_MAX_OUTPUT_TOKENS', 'MYTURN_MAX_OUTPUT_TOKENS'])
+  assert.deepEqual(Object.keys(caps).sort(), ['LAB_MAX_OUTPUT_TOKENS'])
   for (const [k, v] of Object.entries(caps)) assert.ok(Number.isFinite(v) && v > 0, `${k} 가 숫자가 아니다`)
 })
 

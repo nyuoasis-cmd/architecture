@@ -163,13 +163,14 @@ async function api(path, { method = 'GET', body, bearer, cookie } = {}) {
 //    기본 모드는 **한 번도** 이 목록을 치지 않는다(S5). AI 모드는 각 정확히 1회 친다.
 //    새 AI 라우트가 생기면 여기 추가할 것 — 목록에 없으면 «안 쳤다» 를 주장할 근거도 없다.
 //    🔑 2026-08-18 체험 재구조화: /api/chat 철거 → 목록에서 제거. 실습실 5종(voice 포함) 추가.
+//    🔑 2026-08-18 「내 차례」 철거: /api/vibe/my-turn 도 라우트째 사라져 목록에서 제거(6→5).
+//       🚨 지워도 S5 는 약해지지 않는다 — 없는 라우트를 «안 쳤다» 고 말해 봐야 세는 것이 없다.
 const AI_ROUTES = [
   '/api/lab/review',
   '/api/lab/verify',
   '/api/lab/ask',
   '/api/lab/submit',
   '/api/lab/voice',
-  '/api/vibe/my-turn',
 ];
 
 async function teardown() {
@@ -219,7 +220,7 @@ let participantId = '';
  * 🚨 반환 문자열에서 `aiusage=` 가 `ai=` **앞** 이어야 한다 — 공용 파서의 `fail:(.*)$` 가
  *    줄 끝까지 삼키기 때문(axis2b.mjs parseAiField).
  * 🔑 이 앱은 토큰 사용량을 **어디에도 적재하지 않는다**(2026-08-18 실측: lib/lab-ai.ts ·
- *    lib/vibe-my-turn.ts 에 supabase/usage 적재 코드 0건). 그래서 tokRows/tokIn/tokOut 은
+ *    lib/lab-ai.ts 에 supabase/usage 적재 코드 0건). 그래서 tokRows/tokIn/tokOut 은
  *    «0 이 측정됐다» 가 아니라 «셀 원장이 없다» 는 뜻으로 0 을 적는다(brand 선례).
  *    출력 상계는 매니페스트의 max_tokens 상수로 러너가 잡는다.
  */
@@ -264,9 +265,6 @@ async function runAiRoutes(ptCookie) {
     nextCommand: 'ls',
   });
   if (r) mark('lab-voice', r.status === 200 && Array.isArray(r.body?.reply) && r.body.reply.length > 0, r.status !== 200 ? `HTTP ${r.status}` : '응답에 reply 없음');
-
-  r = await call('vibe-my-turn', '/api/vibe/my-turn', { qaId: 'ch18_q04', prompt: draft });
-  if (r) mark('vibe-my-turn', r.status === 200 && Array.isArray(r.body?.covered), r.status !== 200 ? `HTTP ${r.status}` : '응답에 covered 없음');
 
   const spanSec = ((Date.now() - startedAt) / 1000).toFixed(1);
   console.log(`[ai] 폐쇄 목록 ${ok.length}/${ok.length + fail.length} 성공${fail.length ? ` — 실패: ${fail.join(' | ')}` : ''}`);

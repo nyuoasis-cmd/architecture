@@ -3,7 +3,8 @@
 //
 // architecture 의 외부 부작용(실측 — sprint 와 다름):
 //   · sprint 에 있던 emit:activity-record(youthschool 공유 테이블) / upload:sketch(Storage) 는 architecture 에 없음.
-//   · 외부 비가역/유료 효과 = Anthropic 호출 (lab-ai.ts · vibe-my-turn.ts). 챗봇(chat-service)은
+//   · 외부 비가역/유료 효과 = Anthropic 호출 (lab-ai.ts). 「내 차례」(vibe-my-turn.ts)는 2026-08-18
+//     라우트째 철거됐고, 챗봇(chat-service)은
 //     2026-08-17 체험 재구조화로 철거됐다 — AI 보조는 체험(실습실 ai▸ 목소리) 안에 산다.
 // 자기 테이블 mutation(sessions/participants/progress/chats)은 부작용이 아니라
 // QA 격리·태깅(qaTagFields)으로 다룬다.
