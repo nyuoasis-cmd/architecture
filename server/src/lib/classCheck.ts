@@ -1,4 +1,5 @@
-import { MY_TURN_LIMITS, myTurnGuardEnabled } from "./vibe-my-turn";
+import { LAB_AI_LIMITS } from "./lab-ai";
+import { MY_TURN_LIMITS, MY_TURN_MAX_OUTPUT_TOKENS, myTurnGuardEnabled } from "./vibe-my-turn";
 import { createHash } from "node:crypto";
 
 /**
@@ -49,6 +50,12 @@ export function classCheckBlock() {
     return {
       capPolicy: "none" as const,
       caps: {},
+      // 🔑 출력 상한은 가드 스위치와 무관한 «호출당 크기» 라 롤백 상태에서도 말한다 —
+      //    축2-b 스모크가 이 값을 caps: 로 중계해야 원장이 «런타임 실효값» 으로 선다(aab 선례).
+      tokenCaps: {
+        LAB_MAX_OUTPUT_TOKENS: LAB_AI_LIMITS.maxOutputTokens,
+        MYTURN_MAX_OUTPUT_TOKENS: MY_TURN_MAX_OUTPUT_TOKENS,
+      },
       used: null,
       providerFingerprint: providerFingerprints(),
     };
@@ -66,6 +73,12 @@ export function classCheckBlock() {
       //    이 두 줄이 빠지면, 읽는 쪽은 자습 학생도 학생당 한도를 쓰는 줄 알고 여유를 잘못 계산한다.
       MYTURN_SHARED_PER_MIN: MY_TURN_LIMITS.sharedPerMin,
       MYTURN_SHARED_DAILY_CAP: MY_TURN_LIMITS.sharedDaily,
+    },
+    // 🔑 env 조정형 «출력 상한» 의 런타임 실효값 — 레포를 읽으면 기본값만 얻는다(수업 당일
+    //    무배포 상향을 놓친다). 축2-b 가 이 값을 원장에 적재한다(§1-C 2차 개정 3, aab 선례).
+    tokenCaps: {
+      LAB_MAX_OUTPUT_TOKENS: LAB_AI_LIMITS.maxOutputTokens,
+      MYTURN_MAX_OUTPUT_TOKENS: MY_TURN_MAX_OUTPUT_TOKENS,
     },
     used: null,
     providerFingerprint: providerFingerprints(),

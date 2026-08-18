@@ -280,6 +280,19 @@ async function runAiRoutes(ptCookie) {
     'tokByModel:없음',
     'tokModels:없음',
   ];
+  // 🚨 출력 상한이 env 라 **런타임 실효값**을 중계한다(§1-C, aab 선례) — 레포 기본값만 믿으면
+  //    수업 당일 무배포 상향을 놓친다. 못 얻으면 적지 않는다(빈 값은 «모름»과 «없음»을 섞는다).
+  try {
+    const health = await api('/api/health');
+    const caps = health.body?.classCheck?.tokenCaps;
+    if (caps && typeof caps === 'object') {
+      const field = Object.entries(caps)
+        .filter(([, v]) => Number.isFinite(v) && v > 0)
+        .map(([k, v]) => `${k}=${v}`)
+        .join(',');
+      if (field) parts.push(`caps:${field}`);
+    }
+  } catch { /* 상한 중계 실패는 판정을 바꾸지 않는다 — 러너가 «원장 미적재» 로 정직하게 말한다 */ }
   return ` aiusage=${parts.join(';')} ai=ok:${ok.join(',') || '없음'}|fail:${fail.join(';') || '없음'}`;
 }
 
