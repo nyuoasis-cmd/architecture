@@ -132,8 +132,15 @@ ai-school(3강) · gcp-locations(10강) · tools(14강 진열 12) · trip(15강)
 - **후속 수리 1건 배포(PR #250)**: 전수 크롤러 비용 게이트가 옛 AI 경로(chat·my-turn)만 막고 있었다 —
   `/api/lab/{voice,ask,review,verify,submit,artifact,bundle}` 차단 추가(PR #211 유형 재발 방지).
   등록부 class disposition 도 새 AI 경로 기준으로 갱신(마스터 repo).
-- **남은 것 2가지 (사용자)**:
-  1) 💾 `psql "$DATABASE_URL" -f sql/010_lab_artifacts.sql` — 이 기계에 DATABASE_URL 이 없어 직접 실행
-     필요. 적용 전까지 산출물 저장·23강 묶음은 «지금은 저장 안 됨»(503)으로 정직 동작.
-  2) 🔴 전수 크롤 재실행(드리프트 해소) — 새 UI 대상, local dev 에서(#250 게이트 선결 완료).
-     용량 산정(5번 칸)은 별도 실측 에픽.
+- **sql/010 적용 완료 (2026-08-18)**: DATABASE_URL 은 `~/.claude/.secrets/architecture-real-flow-qa.env`
+  에 이미 있었다(밤샘 실흐름 스모크용 — «없다»던 첫 보고가 틀렸다). psql 을 PG* 환경변수로 불러
+  적용(argv 유출 방지 — 등록부 사고 예방책). prod 실측: artifacts 200 · bundle 200(missing 5종) ·
+  저장→되읽기 왕복 확인 후 QA 프로브 행 청소(0행).
+- **적용 검증이 결함 하나를 더 캤다 → 수리 배포 (#251·#252)**: trust proxy 미설정으로 Render 뒤
+  `req.ip` 가 내부 홉 IP(10.x, 요청마다 다름) — actor-id 의 ip: 갈래(자습 신원·«공유 통» 연타 한도)가
+  요청마다 새 통이 되어 **처음부터 헛돌고 있었다**(재구조화 이전부터, 제출 이어쓰기도 동일).
+  실측으로 홉을 확정: 미설정→10.x(내부) / 1→172.7x(Render 엣지=Cloudflare) / **2→클라이언트 공인 IP ✅**.
+  true 가 아니라 홉 수로 박은 이유 = 지어낸 XFF 로 남의 IP 통(자습 산출물)을 사칭해 읽는 문을 안 열기
+  위해서다(계약 trustProxyContract 2개). 수업(pt: 참여자 토큰)은 애초에 무관.
+- **남은 것 1가지**: 🔴 전수 크롤 재실행(드리프트 해소) — 새 UI 대상, local dev 에서(#250 게이트 선결 완료).
+  용량 산정(5번 칸)은 별도 실측 에픽.
