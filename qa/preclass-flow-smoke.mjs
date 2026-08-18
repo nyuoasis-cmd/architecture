@@ -16,12 +16,16 @@
 //   S2 삭제 = 세션 PK **그리고** 마커가 동시에 맞을 때만. like/prefix/시각범위 삭제 0건.
 //   S3 격리 = 만든 세션의 소유자가 QA 교사이고, 교사 목록에 그 세션이 보인다.
 //   S4 실패 = 잔존 ID 를 보고하고 멈춘다. "혹시 모르니 넓게" 금지.
-//   S5 AI  = **소비 0**. 이 앱의 유료 경로(/api/chat · /api/vibe/my-turn)를 한 번도 치지 않고,
-//      끝나고 DB 에서 우리 세션의 chat 행이 0인지 **되읽어 확인**한다.
+//   S5 AI  = 모드가 둘이다. **기본 = 소비 0**(아래 AI_ROUTES 를 한 번도 치지 않는다) ·
+//      **AI 모드(PRECLASS_AI_ROUTES=1) = 폐쇄 목록 각 정확히 1회**(축2-b 러너 전용).
+//      기본 모드는 끝나고 DB 에서 우리 세션의 chat 행이 0인지 **되읽어 확인**한다.
 //      🔑 "안 불렀다" 는 선언이 아니라 관측이어야 한다 — 흐름이 몰래 부르면 그게 사고다.
+//      🚨 AI 모드는 **실제로 돈을 쓴다**(6라우트 — lab-submit 은 서버가 검증 2회를 재호출해
+//         제공자 호출은 7회다). 손으로 켤 때는 그걸 알고 켤 것.
 //
 // 로드: set -a; source ~/.claude/.secrets/architecture-real-flow-qa.env; set +a
-//       node ~/architecture/qa/preclass-flow-smoke.mjs
+//       node ~/architecture/qa/preclass-flow-smoke.mjs                       # 기본(무료) — 밤샘
+//       PRECLASS_AI_ROUTES=1 node ~/architecture/qa/preclass-flow-smoke.mjs  # 💸 축2-b
 // 마지막 줄: `PRECLASS_FLOW=architecture RESULT=PASS|FAIL detail=...` (Tier2 bash 가 파싱)
 
 import { randomUUID } from 'node:crypto';
@@ -34,7 +38,10 @@ const BASE = (process.env.QA_BASE_URL || 'https://architecture.teachermate.co.kr
 const SECRET = process.env.QA_AUTH_SECRET || '';
 const EXPECT_TEACHER = process.env.QA_ACCOUNT_TEACHER_ID || '';
 const DB = process.env.DATABASE_URL || '';
-const TIMEOUT_MS = Number(process.env.PRECLASS_FLOW_TIMEOUT_MS || '90000');
+// 🔑 축2-b 모드 — 러너(shared/qa/class-check/axis2b.mjs)가 PRECLASS_AI_ROUTES=1 을 실어 켠다.
+const AI_MODE = process.env.PRECLASS_AI_ROUTES === '1';
+// AI 모드는 실호출 7회(순차)라 기본 90s 로는 «느림» 이 «죽음» 으로 둔갑한다.
+const TIMEOUT_MS = Number(process.env.PRECLASS_FLOW_TIMEOUT_MS || (AI_MODE ? '300000' : '90000'));
 
 const RUN_ID = randomUUID().replace(/-/gu, '').slice(0, 16);
 const MARKER = `[QA ${RUN_ID}]`;
@@ -114,9 +121,10 @@ async function q(sql) {
   }
 }
 
-async function api(path, { method = 'GET', body, bearer } = {}) {
+async function api(path, { method = 'GET', body, bearer, cookie } = {}) {
   const headers = { 'content-type': 'application/json' };
   if (bearer) headers.authorization = `Bearer ${bearer}`;
+  if (cookie) headers.cookie = cookie;
   const res = await fetch(`${BASE}${path}`, {
     method,
     headers,
@@ -125,12 +133,23 @@ async function api(path, { method = 'GET', body, bearer } = {}) {
   const text = await res.text();
   let parsed = {};
   try { parsed = text ? JSON.parse(text) : {}; } catch { parsed = { _raw: text.slice(0, 160) }; }
-  return { status: res.status, body: parsed };
+  // 🔑 join 이 arch_pt 참여자 쿠키를 Set-Cookie 로 준다 — AI 모드가 학생 신원으로 치려면 필요하다.
+  const setCookies = typeof res.headers.getSetCookie === 'function' ? res.headers.getSetCookie() : [];
+  return { status: res.status, body: parsed, setCookies };
 }
 
-// 🚨 유료 경로. 이 스모크는 **한 번도** 이 목록을 치지 않는다(S5).
+// 🚨 유료 경로(폐쇄 목록 — shared/qa/class-check/manifests/ai-routes.architecture.json 과 1:1).
+//    기본 모드는 **한 번도** 이 목록을 치지 않는다(S5). AI 모드는 각 정확히 1회 친다.
 //    새 AI 라우트가 생기면 여기 추가할 것 — 목록에 없으면 «안 쳤다» 를 주장할 근거도 없다.
-const AI_ROUTES = ['/api/chat', '/api/vibe/my-turn'];
+//    🔑 2026-08-18 체험 재구조화: /api/chat 철거 → 목록에서 제거. 실습실 5종(voice 포함) 추가.
+const AI_ROUTES = [
+  '/api/lab/review',
+  '/api/lab/verify',
+  '/api/lab/ask',
+  '/api/lab/submit',
+  '/api/lab/voice',
+  '/api/vibe/my-turn',
+];
 
 async function teardown() {
   tearingDown = true;
@@ -149,13 +168,99 @@ async function teardown() {
   const parts = await q(
     `select count(*) from architecture_participants where session_id = '${createdSessionId}'`,
   );
+  // 🔑 AI 모드의 lab-submit 이 만든 제출·계보 행도 participant cascade 로 함께 사라져야 한다.
+  //    participants 가 이미 지워졌으므로 스모크가 잡아 둔 참여자 UUID 로 직접 센다.
+  let labRows = '0';
+  if (participantId) {
+    labRows = await q(
+      `select (select count(*) from architecture_lab_submissions where participant_id = '${participantId}') + ` +
+        `(select count(*) from architecture_lab_artifacts where participant_id = '${participantId}')`,
+    );
+  }
   return {
-    removed: [`architecture_sessions:${left === '0' ? 1 : 0}`, `architecture_participants:${parts === '0' ? 'cascade' : parts}`],
-    leftover: left === '0' && parts === '0' ? [] : [createdSessionId],
+    removed: [
+      `architecture_sessions:${left === '0' ? 1 : 0}`,
+      `architecture_participants:${parts === '0' ? 'cascade' : parts}`,
+      `lab_rows:${labRows === '0' ? 'cascade' : labRows}`,
+    ],
+    leftover: left === '0' && parts === '0' && labRows === '0' ? [] : [createdSessionId],
   };
 }
 
 let token = '';
+let participantId = '';
+
+/**
+ * 💸 축2-b — 매니페스트 폐쇄 목록(ai-routes.architecture.json)과 1:1 인 6라우트를 각 1회 친다.
+ *
+ * 🚨 학생 신원(arch_pt 쿠키)으로 친다 — ip: 신원으로 치면 lab-submit 의 제출·계보 행이
+ *    참여자 cascade 밖(owner_token)에 남아 S4 잔존이 된다.
+ * 🚨 반환 문자열에서 `aiusage=` 가 `ai=` **앞** 이어야 한다 — 공용 파서의 `fail:(.*)$` 가
+ *    줄 끝까지 삼키기 때문(axis2b.mjs parseAiField).
+ * 🔑 이 앱은 토큰 사용량을 **어디에도 적재하지 않는다**(2026-08-18 실측: lib/lab-ai.ts ·
+ *    lib/vibe-my-turn.ts 에 supabase/usage 적재 코드 0건). 그래서 tokRows/tokIn/tokOut 은
+ *    «0 이 측정됐다» 가 아니라 «셀 원장이 없다» 는 뜻으로 0 을 적는다(brand 선례).
+ *    출력 상계는 매니페스트의 max_tokens 상수로 러너가 잡는다.
+ */
+async function runAiRoutes(ptCookie) {
+  const ok = [];
+  const fail = [];
+  const routeCalls = new Map();
+  const mark = (id, passed, why) => (passed ? ok.push(id) : fail.push(`${id}:${why}`));
+  const hit = (id) => routeCalls.set(id, (routeCalls.get(id) || 0) + 1);
+  const startedAt = Date.now();
+  // 실행마다 문장을 가른다 — 캐시 히트로 «키가 죽어도 200» 이 나는 것을 막는다(aab 실측 선례).
+  const salt = RUN_ID.slice(0, 6);
+  const draft = `대상: 우리 반 안내문 (${salt}). 규칙: 존댓말을 쓴다. 날짜를 맨 위에 적는다. 준비물을 목록으로 적는다. 예외: 우천 시 별도 공지. 안 하는 것: 개인 연락처를 싣지 않는다.`;
+
+  const call = async (id, path, body) => {
+    hit(id);
+    try {
+      const r = await api(path, { method: 'POST', body, cookie: ptCookie });
+      return r;
+    } catch (err) {
+      mark(id, false, redact(err?.message || err).slice(0, 70));
+      return null;
+    }
+  };
+
+  let r = await call('lab-review', '/api/lab/review', { draft });
+  if (r) mark('lab-review', r.status === 200 && !!r.body?.review, r.status !== 200 ? `HTTP ${r.status}` : '응답에 review 없음');
+
+  r = await call('lab-verify', '/api/lab/verify', { rules: draft });
+  if (r) mark('lab-verify', r.status === 200 && Array.isArray(r.body?.outputs), r.status !== 200 ? `HTTP ${r.status}` : '응답에 outputs 없음');
+
+  r = await call('lab-ask', '/api/lab/ask', { question: `파서가 뭐예요 (${salt})` });
+  if (r) mark('lab-ask', r.status === 200 && typeof r.body?.answer === 'string', r.status !== 200 ? `HTTP ${r.status}` : '응답에 answer 없음');
+
+  // 🚨 submit 은 서버가 검증(모델 2회)을 재호출한다 — 폐쇄 목록에서 빠뜨리기 쉬운 자리(매니페스트 why 참조).
+  r = await call('lab-submit', '/api/lab/submit', { qaId: 'ch18_q04', rules: draft });
+  if (r) mark('lab-submit', r.status === 200 && Number.isInteger(r.body?.revision), r.status !== 200 ? `HTTP ${r.status}` : '응답에 revision 없음');
+
+  r = await call('lab-voice', '/api/lab/voice', {
+    text: `이제 뭘 하면 돼? (${salt})`,
+    missionGoal: 'ls 로 어떤 파일이 있는지 확인해 보세요.',
+    nextCommand: 'ls',
+  });
+  if (r) mark('lab-voice', r.status === 200 && Array.isArray(r.body?.reply) && r.body.reply.length > 0, r.status !== 200 ? `HTTP ${r.status}` : '응답에 reply 없음');
+
+  r = await call('vibe-my-turn', '/api/vibe/my-turn', { qaId: 'ch18_q04', prompt: draft });
+  if (r) mark('vibe-my-turn', r.status === 200 && Array.isArray(r.body?.covered), r.status !== 200 ? `HTTP ${r.status}` : '응답에 covered 없음');
+
+  const spanSec = ((Date.now() - startedAt) / 1000).toFixed(1);
+  console.log(`[ai] 폐쇄 목록 ${ok.length}/${ok.length + fail.length} 성공${fail.length ? ` — 실패: ${fail.join(' | ')}` : ''}`);
+
+  const parts = [
+    `calls:${[...routeCalls.values()].reduce((a, b) => a + b, 0)}`,
+    `routes:${[...routeCalls.entries()].map(([id, n]) => `${id}=${n}`).join(',')}`,
+    `spanSec:${spanSec}`,
+    'maxInflight:1', // 순차 호출 — 실측 동시 in-flight 는 항상 1이다.
+    'tokRows:0;tokIn:0;tokOut:0', // 🚨 «측정된 0» 이 아니라 «셀 원장이 없다» — 위 doc 주석 참조.
+    'tokByModel:없음',
+    'tokModels:없음',
+  ];
+  return ` aiusage=${parts.join(';')} ai=ok:${ok.join(',') || '없음'}|fail:${fail.join(';') || '없음'}`;
+}
 
 async function main() {
   // ── S0 재료 ───────────────────────────────────────────────────────────────
@@ -215,6 +320,10 @@ async function main() {
   if (joined.status !== 200 && joined.status !== 201) {
     await done(false, `join 실패:${joined.status} ${JSON.stringify(joined.body).slice(0, 140)}`);
   }
+  // AI 모드가 «학생 한 명» 신원(pt:)으로 치기 위한 참여자 쿠키. 기본 모드에서는 안 쓴다.
+  const ptCookie = (joined.setCookies || [])
+    .map((c) => c.split(';')[0])
+    .find((c) => c.startsWith('arch_pt='));
   log('join', `학생 ${NICK} 입장`);
 
   // ── 교사 모니터링 — 참여자가 실제로 보이는가 ─────────────────────────────
@@ -224,7 +333,12 @@ async function main() {
   if (!list.some((p) => p?.nickname === NICK)) {
     await done(false, `참여자 미노출: join 은 201 인데 교사 화면에 ${NICK} 이 없다 (200 뒤에서 끊긴 구간)`);
   }
+  participantId = list.find((p) => p?.nickname === NICK)?.id || '';
   log('teacher-participants', `${list.length}명 · 방금 들어온 학생 노출 확인`);
+
+  // ── 💸 축2-b — 폐쇄 목록 각 1회 실호출 (PRECLASS_AI_ROUTES=1 에서만) ─────────
+  let aiField = '';
+  if (AI_MODE) aiField = await runAiRoutes(ptCookie);
 
   // ── S3b 교사 목록에 내 세션이 보이는가 ───────────────────────────────────
   const mine = await api('/api/sessions', { bearer: token });
@@ -250,10 +364,18 @@ async function main() {
       `join architecture_participants p on p.id = c.participant_id ` +
       `where p.session_id = '${createdSessionId}'`,
   );
-  if (chats !== '0') {
+  if (!AI_MODE && chats !== '0') {
     await done(false, `S5-AI누수: 유료 경로를 한 번도 안 쳤는데 chat 행이 ${chats}건 (흐름이 몰래 부른다)`);
   }
-  log('S5-ai-zero', `유료 경로 ${AI_ROUTES.length}종 미호출 · chat 행 0건 되읽기 확인`);
+  if (AI_MODE) {
+    // 🔑 AI 모드의 S5 는 «0 소비» 가 아니라 «폐쇄 목록 각 1회» 다 — 결과는 ai= 필드가 보고한다.
+    //    chats 되읽기는 유지한다: 재구조화 후 어떤 경로도 chats 를 쓰지 않으므로 여기서도 0 이어야
+    //    한다(0 이 아니면 몰래 쓰는 경로가 생긴 것).
+    if (chats !== '0') await done(false, `S5-chats유령: AI 모드에서도 chats 는 0 이어야 하는데 ${chats}건`);
+    log('S5-ai-mode', `폐쇄 목록 ${AI_ROUTES.length}종 각 1회 실호출 — 결과는 ai= 필드`);
+  } else {
+    log('S5-ai-zero', `유료 경로 ${AI_ROUTES.length}종 미호출 · chat 행 0건 되읽기 확인`);
+  }
 
   // ── teardown ──────────────────────────────────────────────────────────────
   const purge = await teardown();
@@ -262,7 +384,7 @@ async function main() {
   }
   log('teardown', `잔존 0 (${JSON.stringify(purge.removed)})`);
 
-  await done(true, `steps=${steps.length} runId=${RUN_ID}`);
+  await done(true, `steps=${steps.length} runId=${RUN_ID}${aiField}`);
 }
 
 const guard = setTimeout(async () => {
