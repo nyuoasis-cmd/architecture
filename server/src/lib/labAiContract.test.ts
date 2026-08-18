@@ -39,8 +39,8 @@ test('2) 앱 안에 지출 천장이 없다 — 상한은 API 키 쪽에 있다'
   for (const gone of ['budgetVerdict', 'registerUsageCost', 'LabBudgetError', 'ai-spend']) {
     assert.equal(source.includes(gone), false, `앱 안의 지출 천장(${gone})이 되살아났다`)
   }
-  // 「내 차례」도 같다 — 같은 실수를 다른 라우트가 반복하지 않게 같이 본다.
-  assert.equal(read('vibe-my-turn.ts').includes('budgetVerdict'), false, 'vibe-my-turn 에 앱 내 지출 천장이 되살아났다')
+  // 🔑 예전엔 「내 차례」(vibe-my-turn.ts)도 같이 봤다 — 2026-08-18 라우트째 철거되어 볼 파일이 없다.
+  //    같은 실수가 새 라우트에서 반복되면 그 라우트의 계약이 잡는다.
 })
 
 test('3) 주머니를 나누지 않는다 — 챗봇 예산과 실습 예산을 갈라 두면 관리할 자리가 둘이 된다', () => {

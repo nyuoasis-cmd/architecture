@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { isParticipantKey } from './actor-id';
-import { envInt } from './vibe-my-turn';
+import { envInt } from './env-int';
 import { env } from '../env';
 
 /**

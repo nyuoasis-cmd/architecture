@@ -14,20 +14,21 @@
 
 - **Client**: React 19 + Vite 8 + TypeScript + Tailwind v4
 - **Server**: Express 5 + TypeScript
-- **AI**: **Claude Haiku 4.5** (`@anthropic-ai/sdk`) — 1) 학생 챗봇 2) ✋「내 차례」 판정(`/api/vibe/my-turn`). prompt caching + DB 답변 캐시 + JSON 단발 응답(streaming X).
-  🚨 **prod 는 「내 차례」 호출 통제가 꺼져 있다** — `MYTURN_GUARD_ENABLED=0`(2026-08-18 jery 결정, Render env).
-  ✋ 내 차례 탭이 철거돼 실호출이 0에 가까운데, 지키는 것 없는 전역 분당 캡 120 이 30명 수업을 막고 있었기 때문이다
-  (용량 산정 R7 = 수용 6명). 지금 `/health` 는 `capPolicy: "none"` 이라고 **정직하게** 말한다.
-  🔑 코드 기본값은 여전히 «켬»이라 로컬·테스트는 통제가 켜진 채 돈다 — 「켜짐/꺼짐」은 코드가 아니라 **prod env** 에서 본다.
-  근거 = `docs/HANDOFF-experience-deploy-qa-2026-08-18.md` §6. 신원은 `resolveActorId` 하나만 쓴다 — 참여자 토큰=학생 한 명, 없으면 «여럿이 뭉친 통»으로 갈라 다른 한도를 준다(IP 로 학생을 세면 교실 전체가 한 명이 된다).
-  한도는 전부 Render env 로 **무배포** 조정: 「내 차례」 `MYTURN_*`(학생 분당 10·하루 300·**쿨타임 0** / 공유 분당 10·하루 1,000 / 전역 분당 120·하루 4,000 — **지금 prod 는 `MYTURN_GUARD_ENABLED=0` 이라 이 값들이 걸리지 않는다**, 되돌리려면 `=1`) · 챗봇 `CHAT_*` 4층.
+- **AI**: **Claude Haiku 4.5** (`@anthropic-ai/sdk`) — **실습실 5경로 하나뿐**(`/api/lab/` voice·ask·review·verify·submit). prompt caching + JSON 단발 응답(streaming X).
+  🚨 학생 챗봇(`/api/chat`)은 2026-08-17 체험 재구조화로, ✋「내 차례」(`/api/vibe/my-turn`)는 2026-08-18 에 **철거됐다**.
+  「내 차례」는 탭이 먼저 없어진 뒤 **아무도 부르지 않는 AI 라우트**로 남아 있었는데, 그게 앱 전역 분당 캡
+  (`MYTURN_PER_MIN` 120)을 끌고 다니면서 30명 수업의 병목으로 잡혔다(용량 산정 R7 = 수용 6명).
+  🚨 되살리지 말 것 — `classCheck.test.ts` 가 «MYTURN_* 캡의 부활»과 «app 스코프 캡의 등장»을 둘 다 빨갛게 잡는다.
+  판정 원료였던 클라이언트 `myTurn` 데이터 12강분은 **12강 터미널 미션 이식 원료로 남겨 뒀다**(jery 결정) — 화면에 나오지 않는다.
+  신원은 `resolveActorId` 하나만 쓴다 — 참여자 토큰=학생 한 명, 없으면 «여럿이 뭉친 통»으로 갈라 다른 한도를 준다(IP 로 학생을 세면 교실 전체가 한 명이 된다).
   💸 **앱 안에는 지출 천장이 없다 — 일부러 없다**(2026-08-15 jery). 상한은 **API 키 쪽에** 걸려 있다.
   🚨 되살리지 말 것: 앱 안의 천장·주머니 분리·학생당 호출 횟수 한도. 그건 «수업을 멈출 수 있는 자리»를
   하나씩 더 만드는 일이고, **중요한 건 수업이지 비용이 아니다** — API 비용보다 수업에 문제가 생겼을 때의
   리스크가 훨씬 크다. 학생이 수업 도중 「횟수를 다 썼습니다」를 만나는 것이, AI 를 몇 번 더 부르는 것보다 나쁘다.
-  🔑 실습실에 남은 통제는 전부 **돈이 아니라 수업을 지킨다**: 시간 제한 · 동시성 큐 · 이탈 취소 · 입출력 크기.
-  계약 `labAiContract` 1)~3) 이 «한도가 없다»를 지킨다.
-  (「내 차례」의 `MYTURN_*` 는 돈이 아니라 **연타·폭주** 방지값이다.)
+  🔑 실습실에 남은 통제는 전부 **돈이 아니라 수업을 지킨다**: 시간 제한 · 동시성 큐 · 이탈 취소 · 입출력 크기 ·
+  목소리 연타 창(`LAB_VOICE_ACTOR_PER_MIN`, per-key). 전부 Render env 로 **무배포** 조정(`LAB_*`).
+  🔑 **앱 전역(app 스코프) 캡은 이제 하나도 없다** — `/health` 의 `classCheck.capPolicy` 가 `none` 이라고 말하는 것은
+  거짓이 아니라 사실이다. 계약 `labAiContract` 1)~3) 이 «한도가 없다»를, `classCheck.test.ts` 가 «없으면 없다고 말한다»를 지킨다.
 
 - **DB**: Supabase PostgreSQL (테이블 prefix `architecture_*`)
 - **Auth**: 카카오 OAuth + DEV 로그인

@@ -6,7 +6,6 @@ import { resolve } from 'node:path';
 import { env } from './env';
 import { buildCopyrightIndex } from './lib/copyright-index';
 import labRouter from './routes/lab';
-import vibeRouter from './routes/vibe';
 import joinRouter from './routes/join';
 import progressRouter from './routes/progress';
 import quizRouter from './routes/quiz';
@@ -56,7 +55,11 @@ if (process.env.QA_AUTH_ENABLED === 'true') {
 app.use('/api/join', joinRouter);
 app.use('/api/progress', progressRouter);
 app.use('/api/quiz', quizRouter);
-app.use('/api/vibe', vibeRouter);
+// 🚨 «내 차례»(/api/vibe/my-turn)는 2026-08-18 철거했다 — 되살리지 말 것.
+//    학생 화면의 ✋ 탭이 2026-08-17 에 먼저 없어졌고, 그 뒤로 **아무도 부르지 않는 AI 라우트**만
+//    남아 있었다. 남은 것이 아무 일도 안 하는 게 아니라, 앱 전역 분당 캡(MYTURN_PER_MIN 120)을
+//    끌고 다니면서 30명 수업의 병목으로 잡혔다(용량 산정 R7 = 수용 6명).
+//    판정 원료였던 클라이언트 myTurn 데이터는 «12강 터미널 미션 이식 원료» 로 남겨 둔다(jery 결정).
 app.use('/api/lab', labRouter);
 app.use('/api/sessions', sessionsRouter);
 app.use('/api/teacher-explain', teacherExplainRouter);
