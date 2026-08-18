@@ -55,6 +55,22 @@ export const manifest: CrawlManifest = {
     { path: '/join', role: 'anon' },
     { path: '/library', role: 'anon' },
     { path: '/library/1/ch01_q01', role: 'anon' }, // self-learn = LearnPage(mode=self) 정적 렌더(인증·세션 불요)
+    // 🎯 2026-08-18 체험 재구조화 앵커 — coverage-diff 가 «새 체험 부품 화면 전부 미도달»로 지목.
+    //    강마다 부품이 처음 서는 문항 하나씩(터미널·유사 GitHub·피싱·견학 키트·졸업). AI·쓰기 라우트는
+    //    forbiddenRoutes 의 /api/lab/* 차단(#250)이 막으므로 눌러도 과금·잔존이 없다.
+    { path: '/library/18/ch18_q01', role: 'anon' }, // 12강 터미널(공유 실습실 시작)
+    { path: '/library/18/ch18_q04', role: 'anon' }, // 12강 제출부
+    { path: '/library/22/ch22_q03', role: 'anon' }, // 피싱 판별 미니 체험
+    { path: '/library/22/ch22_q04', role: 'anon' }, // 가짜 GitHub PR 대본 + 짝 링크 키트
+    { path: '/library/10/ch10_q01', role: 'anon' }, // 견학 키트 시범(지도)
+    { path: '/library/11/ch11_q01', role: 'anon' }, // 11강 미니 실습실(ask — 차단됨)
+    { path: '/library/19/ch19_q01', role: 'anon' }, // 13강 미니 실습실
+    { path: '/library/21/ch21_q01', role: 'anon' }, // 19강 TDD 미니 실습실
+    { path: '/library/23/ch23_q01', role: 'anon' }, // 23강 졸업(bundle — 차단됨)
+    { path: '/library/5/ch05_q03', role: 'anon' },  // 5강 X-ray
+    { path: '/library/8/ch08_q02', role: 'anon' },  // 8강 택배
+    { path: '/library/3/ch03_q04', role: 'anon' },  // 3강 배포 대본 + 키트
+    { path: '/library/20/ch20_q01', role: 'anon' }, // 16강 이슈 대본 + 키트
     { path: '/demos-preview/showcase', role: 'anon' },
     // 🎯 L1↔L2 커버리지 diff 가 지목한 사각지대 — 데모(demos/chNN/*)는 그 문항 화면에서만 렌더된다.
     //    이 22개가 없으면 L1 분모의 demos 38개가 «미도달»로 남는다(2026-08-13 실측).
