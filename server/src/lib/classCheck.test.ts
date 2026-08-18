@@ -45,10 +45,15 @@ test('classCheckBlock: 캡이 있으면 있다고, 없으면 없다고 «명시�
 })
 
 test('classCheckBlock: 폐쇄 목록 — 키를 늘리려면 이 테스트도 같이 고쳐야 한다', () => {
+  // 🔑 2026-08-18 tokenCaps 추가 — env 조정형 출력 상한의 런타임 실효값(축2-b 가 caps: 로 중계).
   assert.deepEqual(
     Object.keys(classCheckBlock()).sort(),
-    ['capPolicy', 'caps', 'providerFingerprint', 'used']
+    ['capPolicy', 'caps', 'providerFingerprint', 'tokenCaps', 'used']
   )
+  // 출력 상한 두 키가 항상 숫자로 선다 — 스모크가 «숫자만 중계» 하므로 비면 조용히 빠진다.
+  const caps = (classCheckBlock() as { tokenCaps: Record<string, number> }).tokenCaps
+  assert.deepEqual(Object.keys(caps).sort(), ['LAB_MAX_OUTPUT_TOKENS', 'MYTURN_MAX_OUTPUT_TOKENS'])
+  for (const [k, v] of Object.entries(caps)) assert.ok(Number.isFinite(v) && v > 0, `${k} 가 숫자가 아니다`)
 })
 
 test('providerFingerprints: 키가 없으면 항목 자체를 안 넣는다', () => {

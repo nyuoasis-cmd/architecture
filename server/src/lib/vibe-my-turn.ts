@@ -11,7 +11,7 @@ import { env } from '../env';
 const HAIKU_MODEL = 'claude-haiku-4-5-20251001';
 
 // 🚨 출력 상한. 이 값이 곧 «한 호출이 최대 얼마인가»의 절반이다 — 올릴 때는 돈이 같이 올라간다.
-const MY_TURN_MAX_OUTPUT_TOKENS = envInt('MYTURN_MAX_OUTPUT_TOKENS', 800);
+export const MY_TURN_MAX_OUTPUT_TOKENS = envInt('MYTURN_MAX_OUTPUT_TOKENS', 800);
 // 🚨 매달린 호출이 동시성 자리를 물고 있지 않게. 수업 중 30명이 동시에 누르는 자리다.
 const MY_TURN_TIMEOUT_MS = envInt('MYTURN_TIMEOUT_MS', 20000) ;
 
