@@ -24,8 +24,12 @@ import { test } from 'node:test'
 const root = path.resolve(__dirname, '..', '..', '..')
 
 // dist = 빌드 산출물(src 에서 지운 테스트의 잔해가 남는다), node_modules = 남의 코드.
+// 🔑 `.orca` = orca 가 만드는 git 워크트리(`.orca/worktrees/<브랜치>/`) — 이 레포의 **사본**이다.
+//    거르지 않으면 사본 안의 테스트 파일이 통째로 「미등록」으로 잡혀, 워크트리를 쓰는 사람의
+//    로컬만 빨개진다(CI 에는 `.orca` 가 없어 초록 = 재현 안 되는 빨강). `.worktrees` 는 이미
+//    거르고 있었는데 경로가 한 겹 달라 새던 자리다.
 const SKIP_DIRS = new Set([
-  'node_modules', 'dist', 'build', '.git', '.worktrees', '.ao',
+  'node_modules', 'dist', 'build', '.git', '.worktrees', '.orca', '.ao',
   'playwright-report', 'test-results', 'coverage',
 ])
 const TEST_FILE = /\.(test|spec)\.(mts|mjs|cjs|js|ts|tsx)$/
