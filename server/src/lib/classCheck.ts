@@ -1,4 +1,4 @@
-import { LAB_AI_LIMITS } from "./lab-ai";
+import { LAB_AI_LIMITS, VOICE_ACTOR_PER_MIN } from "./lab-ai";
 import { MY_TURN_LIMITS, MY_TURN_MAX_OUTPUT_TOKENS, myTurnGuardEnabled } from "./vibe-my-turn";
 import { createHash } from "node:crypto";
 
@@ -49,7 +49,10 @@ export function classCheckBlock() {
     // 롤백 스위치로 통제를 끈 상태 = 앱 캡이 실제로 없는 상태. 있는 척하지 않는다.
     return {
       capPolicy: "none" as const,
-      caps: {},
+      // 🔑 voice 연타 창은 «내 차례» 가드 스위치와 무관하게 항상 켜져 있다 — 롤백 상태에서도 말한다.
+      caps: {
+        LAB_VOICE_ACTOR_PER_MIN: { value: VOICE_ACTOR_PER_MIN, scope: "per-key", audience: "all" },
+      },
       // 🔑 출력 상한은 가드 스위치와 무관한 «호출당 크기» 라 롤백 상태에서도 말한다 —
       //    축2-b 스모크가 이 값을 caps: 로 중계해야 원장이 «런타임 실효값» 으로 선다(aab 선례).
       tokenCaps: {
@@ -62,17 +65,22 @@ export function classCheckBlock() {
   }
   return {
     capPolicy: "app-daily" as const,
+    // 🔑 §1-E E-3/E-4 (2026-08-18): 캡은 숫자가 아니라 {value, scope, audience} 로 말한다 —
+    //    숫자만 주면 축3(R6·R7)이 «학급 총량을 묶는 캡인지» 알 수 없어 검증 불가로 떨어진다.
+    //    scope: app(앱 전역 통) | per-key(신원별 통) · audience: all | verified(참여자 토큰) | anon(자습 통).
     caps: {
-      MYTURN_DAILY_CAP: MY_TURN_LIMITS.globalDaily,
-      MYTURN_PER_MIN: MY_TURN_LIMITS.globalPerMin,
-      MYTURN_ACTOR_DAILY_CAP: MY_TURN_LIMITS.actorDaily,
+      MYTURN_DAILY_CAP: { value: MY_TURN_LIMITS.globalDaily, scope: "app", audience: "all" },
+      MYTURN_PER_MIN: { value: MY_TURN_LIMITS.globalPerMin, scope: "app", audience: "all" },
+      MYTURN_ACTOR_DAILY_CAP: { value: MY_TURN_LIMITS.actorDaily, scope: "per-key", audience: "verified" },
       // 🚨 쿨타임을 0 으로 내린 뒤 학생 한 명의 연타를 막는 유일한 한도다. 선언에서 빠지면
       //    읽는 쪽은 학생 쪽에 분당 제한이 없는 줄 알고 동시 수용력을 과대평가한다.
-      MYTURN_ACTOR_PER_MIN: MY_TURN_LIMITS.actorPerMin,
+      MYTURN_ACTOR_PER_MIN: { value: MY_TURN_LIMITS.actorPerMin, scope: "per-key", audience: "verified" },
       // 🔑 참여자 토큰이 없는 «라이브러리 자습» 은 여럿이 한 통에 뭉칠 수 있어 별도 한도를 쓴다.
       //    이 두 줄이 빠지면, 읽는 쪽은 자습 학생도 학생당 한도를 쓰는 줄 알고 여유를 잘못 계산한다.
-      MYTURN_SHARED_PER_MIN: MY_TURN_LIMITS.sharedPerMin,
-      MYTURN_SHARED_DAILY_CAP: MY_TURN_LIMITS.sharedDaily,
+      MYTURN_SHARED_PER_MIN: { value: MY_TURN_LIMITS.sharedPerMin, scope: "per-key", audience: "anon" },
+      MYTURN_SHARED_DAILY_CAP: { value: MY_TURN_LIMITS.sharedDaily, scope: "per-key", audience: "anon" },
+      // 터미널 AI 목소리의 연타 창(소진 아님) — 가드 스위치와 무관하게 항상 켜져 있다.
+      LAB_VOICE_ACTOR_PER_MIN: { value: VOICE_ACTOR_PER_MIN, scope: "per-key", audience: "all" },
     },
     // 🔑 env 조정형 «출력 상한» 의 런타임 실효값 — 레포를 읽으면 기본값만 얻는다(수업 당일
     //    무배포 상향을 놓친다). 축2-b 가 이 값을 원장에 적재한다(§1-C 2차 개정 3, aab 선례).

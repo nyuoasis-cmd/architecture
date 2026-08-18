@@ -38,7 +38,9 @@ test('classCheckBlock: 캡이 있으면 있다고, 없으면 없다고 «명시�
   process.env.MYTURN_GUARD_ENABLED = '0'
   const off = classCheckBlock()
   assert.equal(off.capPolicy, 'none', '통제를 껐으면 캡이 있는 척하지 않는다')
-  assert.deepEqual(off.caps, {})
+  // 🔑 2026-08-18: voice 연타 창은 가드 스위치 밖이라 롤백 상태에서도 말한다 — MYTURN_* 만 사라진다.
+  assert.deepEqual(Object.keys(off.caps), ['LAB_VOICE_ACTOR_PER_MIN'])
+  assert.equal(Object.keys(off.caps).some((k) => k.startsWith('MYTURN_')), false, '껐는데 내 차례 캡이 남아 있다')
 
   if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED
   else process.env.MYTURN_GUARD_ENABLED = saved

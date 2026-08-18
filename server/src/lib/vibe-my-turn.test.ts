@@ -75,11 +75,14 @@ test('/health 의 캡 선언이 실제 통제값과 같다 — 선언만 바뀌�
   //    기본값에 기대지 않고 명시적으로 켠다 — 기본값이 또 바뀌어도 이 검사의 뜻은 그대로여야 한다.
   process.env.MYTURN_GUARD_ENABLED = '1';
   try {
-    const block = classCheckBlock() as { capPolicy: string; caps: Record<string, number> };
+    // 🔑 §1-E E-3 (2026-08-18): 캡은 {value, scope, audience} 로 말한다 — 값 비교는 .value 로.
+    const block = classCheckBlock() as { capPolicy: string; caps: Record<string, { value: number; scope: string; audience: string }> };
     assert.equal(block.capPolicy, 'app-daily', '전역 일일 캡이 있는데 none 이라 말하면 여유를 과대평가하게 된다');
-    assert.equal(block.caps.MYTURN_DAILY_CAP, MY_TURN_LIMITS.globalDaily);
-    assert.equal(block.caps.MYTURN_PER_MIN, MY_TURN_LIMITS.globalPerMin);
-    assert.equal(block.caps.MYTURN_ACTOR_DAILY_CAP, MY_TURN_LIMITS.actorDaily);
+    assert.equal(block.caps.MYTURN_DAILY_CAP.value, MY_TURN_LIMITS.globalDaily);
+    assert.equal(block.caps.MYTURN_DAILY_CAP.scope, 'app');
+    assert.equal(block.caps.MYTURN_PER_MIN.value, MY_TURN_LIMITS.globalPerMin);
+    assert.equal(block.caps.MYTURN_ACTOR_DAILY_CAP.value, MY_TURN_LIMITS.actorDaily);
+    assert.equal(block.caps.MYTURN_ACTOR_DAILY_CAP.scope, 'per-key');
   } finally {
     if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;
     else process.env.MYTURN_GUARD_ENABLED = saved;
@@ -213,9 +216,10 @@ test('/health 가 공유 통 한도까지 선언한다 — 안 말하면 읽는 
   const saved = process.env.MYTURN_GUARD_ENABLED;
   process.env.MYTURN_GUARD_ENABLED = '1';
   try {
-    const block = classCheckBlock() as { caps: Record<string, number> };
-    assert.equal(block.caps.MYTURN_SHARED_PER_MIN, MY_TURN_LIMITS.sharedPerMin);
-    assert.equal(block.caps.MYTURN_SHARED_DAILY_CAP, MY_TURN_LIMITS.sharedDaily);
+    const block = classCheckBlock() as { caps: Record<string, { value: number; audience: string }> };
+    assert.equal(block.caps.MYTURN_SHARED_PER_MIN.value, MY_TURN_LIMITS.sharedPerMin);
+    assert.equal(block.caps.MYTURN_SHARED_PER_MIN.audience, 'anon');
+    assert.equal(block.caps.MYTURN_SHARED_DAILY_CAP.value, MY_TURN_LIMITS.sharedDaily);
   } finally {
     if (saved === undefined) delete process.env.MYTURN_GUARD_ENABLED;
     else process.env.MYTURN_GUARD_ENABLED = saved;
