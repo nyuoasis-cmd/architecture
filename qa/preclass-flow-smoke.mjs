@@ -30,9 +30,30 @@
 
 import { randomUUID } from 'node:crypto';
 import { execFile } from 'node:child_process';
+import { readFileSync } from 'node:fs';
+import { homedir } from 'node:os';
+import { join } from 'node:path';
 import { promisify } from 'node:util';
 
 const pexec = promisify(execFile);
+
+/**
+ * 앱 시크릿 자체 로드 — **env 가 이미 갖고 있으면 손대지 않는다**(brand loadDbSecret 선례).
+ * 축2/축2-b 러너(shared/qa/class-check)는 공용 preclass-qa.env 만 싣기 때문에,
+ * architecture 전용 키(QA_AUTH_SECRET 등)는 여기서 스스로 읽는다. 파일이 없으면 조용히
+ * 넘어가고 판정은 S0 재료검사가 한다(스택트레이스에 묻히지 않게).
+ */
+(function loadAppSecrets() {
+  const KEYS = ['QA_AUTH_SECRET', 'QA_ACCOUNT_TEACHER_ID', 'DATABASE_URL', 'QA_BASE_URL'];
+  if (KEYS.every((k) => process.env[k])) return;
+  let raw = '';
+  try { raw = readFileSync(join(homedir(), '.claude', '.secrets', 'architecture-real-flow-qa.env'), 'utf8'); } catch { return; }
+  for (const line of raw.split('\n')) {
+    const m = /^\s*(?:export\s+)?([A-Z_]+)\s*=\s*(.+?)\s*$/u.exec(line);
+    if (!m || !KEYS.includes(m[1]) || process.env[m[1]]) continue;
+    process.env[m[1]] = m[2].replace(/^['"]|['"]$/gu, '');
+  }
+})();
 
 const BASE = (process.env.QA_BASE_URL || 'https://architecture.teachermate.co.kr').replace(/\/$/u, '');
 const SECRET = process.env.QA_AUTH_SECRET || '';
