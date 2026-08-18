@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>체험 목업 2/3 — 유사 GitHub (대본형 + 산출물 슬롯)</title>
+<style>
+  :root{
+    --paper:#faf9f7; --card:#ffffff; --ink:#1c1917; --ink2:#44403c; --faint:#78716c;
+    --line:#e7e5e4; --accent:#0f766e;
+    --gh-bg:#f6f8fa; --gh-line:#d1d9e0; --gh-ink:#1f2328; --gh-faint:#59636e;
+    --gh-blue:#0969da; --gh-green:#1a7f37; --gh-green-bg:#2da44e; --gh-purple:#8250df;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1280px;margin:0 auto;padding:36px 24px 90px}
+  header h1{font-size:24px;margin:0 0 8px;letter-spacing:-.02em}
+  header p{margin:0 0 4px;color:var(--ink2);font-size:14px}
+  .meta{font-size:12.5px;color:var(--faint);font-family:ui-monospace,Menlo,monospace}
+  .note{background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:12px 16px;
+    font-size:13.5px;color:#78350f;margin:18px 0 28px}
+
+  .app{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);
+    box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  .qhead{padding:20px 26px 0}
+  .qhead .no{font-size:12px;color:var(--faint)}
+  .qhead h2{font-size:20px;margin:2px 0 12px;letter-spacing:-.02em}
+  .tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);padding:0 26px;font-size:13.5px}
+  .tabs div{padding:9px 13px;color:var(--faint);border-bottom:2px solid transparent;white-space:nowrap}
+  .tabs div.on{color:var(--ink);font-weight:700;border-bottom-color:var(--ink)}
+  .tabs .t-badge{font-size:10px;font-weight:700;color:#9a3412;background:#ffedd5;
+    border-radius:999px;padding:1px 6px;margin-left:4px;vertical-align:1px}
+  .body{padding:20px 26px 30px}
+
+  /* 1단계: 짝 링크 견학 카드 */
+  .step{font-size:12px;font-weight:700;color:var(--faint);letter-spacing:.04em;margin:0 0 8px}
+  .tourcard{display:flex;gap:14px;align-items:center;border:1px solid var(--line);
+    border-radius:12px;padding:14px 18px;background:#fafaf9;margin-bottom:22px;flex-wrap:wrap}
+  .tourcard .emoji{font-size:26px}
+  .tourcard .tt{font-weight:700;font-size:14.5px}
+  .tourcard .td{font-size:13px;color:var(--faint)}
+  .tourcard .go{margin-left:auto;background:var(--ink);color:#fff;border:0;border-radius:9px;
+    padding:9px 16px;font-size:13px;font-weight:700;white-space:nowrap}
+  .tourcard .done{margin-left:auto;color:var(--accent);font-weight:700;font-size:13px;white-space:nowrap}
+
+  /* 가짜 GitHub 프레임 */
+  .gh{border:1px solid var(--gh-line);border-radius:10px;overflow:hidden;color:var(--gh-ink);
+    font-size:13.5px;position:relative}
+  .gh .practice{position:absolute;top:10px;right:12px;font-size:11px;font-weight:700;
+    color:#9a3412;background:#ffedd5;border:1px solid #fdba74;border-radius:999px;padding:2px 10px}
+  .gh header.h{background:var(--gh-bg);border-bottom:1px solid var(--gh-line);padding:12px 18px;margin:0}
+  .gh .repo{font-size:14px}
+  .gh .repo b{color:var(--gh-blue)}
+  .gh .ghtabs{display:flex;gap:16px;padding:8px 18px 0;background:var(--gh-bg);
+    border-bottom:1px solid var(--gh-line);font-size:13px}
+  .gh .ghtabs span{padding:6px 2px 8px;color:var(--gh-faint)}
+  .gh .ghtabs span.on{color:var(--gh-ink);font-weight:700;box-shadow:inset 0 -2px 0 #fd8c73}
+  .gh .ghtabs span.mute{opacity:.45}
+  .gh .pr{padding:18px}
+  .gh .pr h3{font-size:17px;margin:0 0 2px;font-weight:600}
+  .gh .pr h3 .num{color:var(--gh-faint);font-weight:400}
+  .gh .state{display:inline-block;background:var(--gh-green-bg);color:#fff;border-radius:999px;
+    font-size:12px;font-weight:700;padding:3px 12px;margin:6px 0 16px}
+  .gh .box{border:1px solid var(--gh-line);border-radius:8px;margin-bottom:14px;overflow:hidden}
+  .gh .box .bh{background:var(--gh-bg);border-bottom:1px solid var(--gh-line);
+    padding:8px 14px;font-size:12.5px;color:var(--gh-faint)}
+  .gh .box .bh b{color:var(--gh-ink)}
+  .gh .box .bb{padding:12px 14px;white-space:pre-wrap;font-size:13.5px;line-height:1.75}
+  .gh .slot{outline:2px dashed var(--gh-purple);outline-offset:-2px;background:#faf8ff}
+  .gh .slotlabel{font-size:11px;font-weight:700;color:var(--gh-purple);padding:6px 14px 0}
+  .gh .review .bb{color:var(--gh-ink)}
+  .gh .review .who{color:var(--gh-purple);font-weight:700}
+  .gh .mergebar{display:flex;gap:12px;align-items:center;border:1px solid var(--gh-line);
+    border-radius:8px;padding:12px 14px;background:#fff}
+  .gh .mergebar .ok{color:var(--gh-green);font-weight:700;font-size:13px}
+  .gh .mergebtn{background:var(--gh-green-bg);color:#fff;border:0;border-radius:7px;
+    padding:8px 18px;font-size:13.5px;font-weight:700}
+  .gh .dim-note{font-size:12px;color:var(--gh-faint);margin-top:10px}
+
+  .legend{margin:34px 0 0}
+  .legend h3{font-size:15px;margin:0 0 8px}
+  .legend table{border-collapse:collapse;font-size:13px;width:100%;max-width:760px}
+  .legend td{border:1px solid var(--line);padding:7px 12px;vertical-align:top}
+  .legend td:first-child{white-space:nowrap;font-weight:700;background:#fafaf9}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>체험 목업 2/3 — 유사 GitHub 「대본형 + 산출물 슬롯」</h1>
+  <p>예시 = 22강 4번(넘김 쪽지 → PR → Merge). 체험 탭 안에서 «1단계 진짜 견학 → 2단계 유사 페이지 진행» 이 한 흐름.</p>
+  <p class="meta">근거: docs/MAP-experience-23lessons-v1.md · SDD 결정 8·16 / 2026-08-17</p>
+</header>
+<div class="note">
+  보라 점선 상자가 <b>산출물 슬롯</b>입니다 — 학생이 앞 문항에서 쓴 넘김 쪽지가 그대로 들어옵니다.
+  회색으로 흐린 탭·버튼은 대본 밖이라 눌리지 않고, 우상단 「연습용」 표지는 항상 떠 있습니다.
+</div>
+
+<!-- ExperienceScreen: 유사 GitHub -->
+<div class="app">
+  <div class="qhead">
+    <div class="no">22강 · 4번</div>
+    <h2>내 넘김 쪽지를 직접 내 볼까요?</h2>
+  </div>
+  <nav class="tabs">
+    <div>📖 읽기</div>
+    <div class="on">🧭 체험</div>
+    <div>📝 퀴즈</div>
+    <div>📋 설명 노트<span class="t-badge">교사</span></div>
+  </nav>
+
+  <div class="body">
+    <div class="step">1단계 — 진짜 먼저 보기</div>
+    <div class="tourcard">
+      <span class="emoji">🚌</span>
+      <div>
+        <div class="tt">진짜 GitHub 의 합쳐진 PR 하나를 구경하고 오세요</div>
+        <div class="td">새 탭이 열려요 · 관찰 미션: 이 PR 은 파일을 몇 개 바꿨나요? → <b>답: 3개 ✓</b></div>
+      </div>
+      <div class="done">견학 완료 ✓</div>
+    </div>
+
+    <div class="step">2단계 — 이제 내 차례 (연습용 저장소에서)</div>
+
+    <!-- 비유 다리: 읽기 탭에서 심은 생활 비유가 화면 단계와 1:1 로 이어짐 -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;border:1px solid var(--line);
+      border-radius:12px;padding:12px 16px;margin-bottom:12px;background:#f0faf7;font-size:13px">
+      <b style="color:var(--accent)">📖 아까 읽은 비유</b>
+      <span style="color:var(--faint)">학급 문집에 글 싣기 —</span>
+      <span style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px">1 쪽지 내기 = Open</span>
+      <span style="color:var(--faint)">→</span>
+      <span style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px">2 선생님 검토 = Review</span>
+      <span style="color:var(--faint)">→</span>
+      <span style="background:#fff;border:1px solid var(--line);border-radius:999px;padding:2px 10px">3 문집에 싣기 = Merge</span>
+    </div>
+
+    <!-- 도슨트 자막: 매 단계 생활어 한 문장 (대본이 단계마다 갈아끼움) -->
+    <div style="display:flex;gap:10px;align-items:center;border:1px solid #c7d2fe;background:#eef2ff;
+      border-radius:12px;padding:11px 16px;margin-bottom:12px;font-size:13.5px;color:#3730a3">
+      <span style="font-size:18px">🧭</span>
+      <div><b>지금 하는 일</b> — 내가 만든 걸 다음 사람에게 넘기는 «쪽지»를 내는 중이에요.
+        GitHub 는 이 쪽지를 <b>Pull request(PR)</b> 라고 불러요. <span style="color:#6366f1">(이번 체험의 새 용어는 PR·Merge 둘뿐)</span></div>
+    </div>
+
+    <div class="gh">
+      <div class="practice">연습용 — 진짜 GitHub 아님</div>
+      <header class="h"><div class="repo">📦 <b>우리반-1모둠 / 급식-알리미</b></div></header>
+      <div class="ghtabs">
+        <span class="mute">Code</span><span class="mute">Issues</span><span class="on">Pull requests</span><span class="mute">Actions</span>
+      </div>
+      <div class="pr">
+        <h3>급식 메뉴 알림 기능 넘김 <span class="num">#4</span></h3>
+        <div class="state">Open</div>
+
+        <div class="box slot">
+          <div class="slotlabel">내 산출물 — 3번 문항에서 쓴 넘김 쪽지가 여기 들어와요</div>
+          <div class="bh"><b>나</b> 님이 열었습니다</div>
+          <div class="bb">한 것: 급식 메뉴를 아침 8시에 알려 주는 기능을 만들었어요.
+안 한 것: 알레르기 표시는 아직 안 했어요.
+다음 사람에게: 메뉴 데이터는 school-menu.txt 에서 읽어요. 이 파일을 지우면 안 돼요.</div>
+        </div>
+
+        <div class="box review">
+          <div class="bh"><span class="who">reviewer-bot</span> 님이 리뷰를 남겼습니다</div>
+          <div class="bb">「안 한 것」을 적어 준 덕분에 다음 사람이 헛수고를 안 하겠어요. 👍
+한 가지만 — «어떻게 확인했는지»가 없어요. 확인 방법 한 줄을 붙이면 승인할게요.</div>
+        </div>
+
+        <div class="mergebar">
+          <span class="ok">✓ 검사 통과 · 리뷰 승인됨</span>
+          <div style="margin-left:auto;text-align:right">
+            <button class="mergebtn">Merge pull request</button>
+            <div style="font-size:11.5px;color:var(--gh-faint);margin-top:3px">= 내 쪽지를 받아들여 문집에 싣기 (비유 3단계)</div>
+          </div>
+        </div>
+        <div class="dim-note">흐린 탭·버튼은 이 연습 흐름에서는 눌리지 않아요 — 이유가 궁금하면 눌러 보세요(설명이 떠요).</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="legend">
+  <h3>이 화면의 규칙 (구현 계약 후보)</h3>
+  <table>
+    <tr><td>1단계 견학 카드</td><td>짝 링크 필수(새 탭). 관찰 미션 답 입력 → 체크포인트. 링크 사망·차단 시 앱 내 스냅샷 폴백.</td></tr>
+    <tr><td>연습용 표지</td><td>가짜 GitHub 화면에 항상 표시 — 진실성 장치(REPLAY 라벨과 같은 이유).</td></tr>
+    <tr><td>산출물 슬롯</td><td>학생이 앞에서 쓴 것이 그대로 들어옴(서버 저장, 참여자 토큰). 슬롯은 보라 점선으로 표시.</td></tr>
+    <tr><td>대본형</td><td>정해진 흐름의 버튼만 작동. 대본 밖 요소는 흐림 + 누르면 «왜 안 눌리는지» 설명.</td></tr>
+    <tr><td>단일 상태 기계</td><td>이 프레임 하나(저장소→파일→이슈→테스트→PR→병합)를 3·16·22·23강이 나눠 쓴다.</td></tr>
+    <tr><td>비유 다리</td><td>읽기 탭에서 심은 생활 비유(학급 문집)가 체험 위에 띠로 재등장 — 화면 단계와 1:1 연결.</td></tr>
+    <tr><td>도슨트 자막</td><td>매 단계 생활어 한 문장이 항상 떠 있음(대본이 갈아끼움). 새 영어 용어는 한 체험에 최대 2개.</td></tr>
+  </table>
+</div>
+</div>
+</body>
+</html>
