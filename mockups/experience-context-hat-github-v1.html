@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>체험 맥락 목업 2/3 — 유사 GitHub(3강)</title>
+<style>
+  :root{
+    --paper:#faf9f7; --card:#ffffff; --ink:#1c1917; --ink2:#44403c; --faint:#78716c;
+    --line:#e7e5e4; --accent:#0f766e; --accent-soft:#f0faf7;
+    --why:#7c3aed; --why-bg:#f6f3ff; --why-line:#ddd6fe;
+    --when:#b45309; --when-bg:#fffbeb; --when-line:#fde68a;
+    --now:#1d4ed8; --now-bg:#eff6ff; --now-line:#bfdbfe;
+    --term-bg:#0e100d; --term-line:#272b22; --term-ink:#dce0d3; --term-dim:#7f867a;
+    --term-ok:#96c97e; --term-ai:#c4b5fd;
+    --gh-bg:#f6f8fa; --gh-line:#d1d9e0; --gh-ink:#1f2328; --gh-faint:#59636e;
+    --gh-blue:#0969da; --gh-green:#1f883d; --gh-purple:#8250df;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:'Pretendard Variable',Pretendard,-apple-system,BlinkMacSystemFont,'Noto Sans KR',sans-serif;
+    line-height:1.7;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1120px;margin:0 auto;padding:34px 22px 90px}
+  header h1{font-size:23px;margin:0 0 8px;letter-spacing:-.02em}
+  header p{margin:0 0 4px;color:var(--ink2);font-size:14px}
+  .meta{font-size:12.5px;color:var(--faint);font-family:ui-monospace,Menlo,monospace;margin-top:6px}
+  .callout{border-radius:10px;padding:13px 16px;font-size:13.5px;margin:18px 0}
+  .callout b{font-weight:700}
+  .ask{background:#fef2f2;border:1px solid #fecaca;color:#7f1d1d}
+  .plan{background:var(--accent-soft);border:1px solid #a7d9cb;color:#134e4a}
+  h2.sec{font-size:16px;margin:34px 0 10px;letter-spacing:-.01em}
+  h2.sec span{font-size:12.5px;color:var(--faint);font-weight:400;margin-left:8px}
+
+  .app{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--card);
+    box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  .qhead{padding:16px 22px 0}
+  .qhead .no{font-size:11.5px;color:var(--faint)}
+  .qhead h3{font-size:17px;margin:2px 0 10px;letter-spacing:-.02em;font-weight:600}
+  .tabs{display:flex;gap:14px;border-bottom:1px solid var(--line);padding:0 22px;font-size:13.5px}
+  .tabs .t{padding:8px 2px 9px;color:var(--faint);border-bottom:2px solid transparent}
+  .tabs .t.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+  .body{padding:16px 22px 22px}
+
+  /* ── 제안하는 공통 머리표 ── */
+  .hat{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}
+  .hat .row{display:flex;gap:0;border-bottom:1px solid var(--line)}
+  .hat .cell{flex:1;padding:11px 14px;border-right:1px solid var(--line)}
+  .hat .cell:last-child{border-right:0}
+  .hat .lab{font-size:11px;font-weight:800;letter-spacing:.02em;display:block;margin-bottom:3px}
+  .hat .txt{font-size:13px;line-height:1.65;color:var(--ink2)}
+  .hat .txt b{color:var(--ink)}
+  .c-why{background:var(--why-bg)} .c-why .lab{color:var(--why)}
+  .c-when{background:var(--when-bg)} .c-when .lab{color:var(--when)}
+  .now{display:flex;align-items:center;gap:10px;padding:11px 14px;background:var(--now-bg)}
+  .now .lab{font-size:11px;font-weight:800;color:var(--now);flex:none}
+  .now .txt{font-size:13.5px;color:#1e3a5f;flex:1}
+  .now code{font-family:ui-monospace,Menlo,monospace;background:#fff;border:1px solid var(--now-line);
+    border-radius:5px;padding:1px 6px;font-size:12.5px;color:#1e3a5f}
+  .prog{flex:none;font-family:ui-monospace,Menlo,monospace;font-size:12px;color:#1d4ed8;
+    background:#fff;border:1px solid var(--now-line);border-radius:999px;padding:2px 9px}
+
+  /* ── 터미널 ── */
+  .split{display:flex;gap:12px;margin-top:12px;align-items:stretch}
+  .term{flex:1;min-width:0;border:1px solid var(--term-line);border-radius:10px;overflow:hidden;background:var(--term-bg)}
+  .term .out{padding:11px 13px;font-family:ui-monospace,Menlo,monospace;font-size:12.6px;
+    line-height:1.7;color:var(--term-ink);min-height:250px;white-space:pre-wrap}
+  .term .d{color:var(--term-dim)} .term .k{color:var(--term-ok)} .term .a{color:var(--term-ai)}
+  .term .i{color:#fff;font-weight:700}
+  .term .bar{display:flex;align-items:center;gap:8px;border-top:1px solid var(--term-line);
+    background:#191c16;padding:8px 11px;font-family:ui-monospace,Menlo,monospace;font-size:12.2px}
+  .term .bar .p{color:var(--term-ok);font-weight:700}
+  .term .bar .ph{color:#5c6357;flex:1}
+  .term .bar .btn{border:1px solid #384030;background:#20251c;color:var(--term-ink);
+    border-radius:6px;padding:2px 11px;font-size:11.5px}
+  .cards{width:290px;flex:none;display:flex;flex-direction:column;gap:8px}
+  .cmd{border:1px solid var(--line);border-radius:10px;background:#fff;padding:10px 12px}
+  .cmd.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-soft)}
+  .cmd .n{font-family:ui-monospace,Menlo,monospace;font-size:13px;font-weight:700;color:var(--accent)}
+  .cmd dl{margin:6px 0 0;font-size:12.2px;line-height:1.6}
+  .cmd dt{font-weight:800;font-size:10.5px;letter-spacing:.02em;margin-top:5px}
+  .cmd dd{margin:1px 0 0;color:var(--ink2)}
+  .cmd .w dt{color:var(--why)} .cmd .u dt{color:var(--when)} .cmd .m dt{color:var(--faint)}
+
+  /* ── GitHub ── */
+  .gh{border:1px solid var(--gh-line);border-radius:10px;overflow:hidden;background:#fff;
+    color:var(--gh-ink);font-size:13.5px;position:relative;margin-top:12px}
+  .gh .badge{position:absolute;right:10px;top:8px;border:1px solid #fdba74;background:#ffedd5;
+    color:#7c2d12;border-radius:999px;padding:1px 9px;font-size:11px;font-weight:700}
+  .gh .rh{border-bottom:1px solid var(--gh-line);background:var(--gh-bg);padding:9px 14px;font-size:14px}
+  .gh .rh b{color:var(--gh-blue)}
+  .gh .nav{display:flex;gap:16px;border-bottom:1px solid var(--gh-line);background:var(--gh-bg);
+    padding:6px 14px 0;font-size:13px}
+  .gh .nav span{padding:2px 0 7px;color:var(--gh-faint);opacity:.45}
+  .gh .nav span.on{opacity:1;color:var(--gh-ink);font-weight:700;box-shadow:inset 0 -2px 0 #fd8c73}
+  .gh .pane{padding:14px}
+  .gh .file{display:flex;gap:12px;border-bottom:1px solid var(--gh-line);padding:7px 0}
+  .gh .file:last-child{border-bottom:0}
+  .gh .file .fn{font-family:ui-monospace,Menlo,monospace;font-size:12.5px;color:var(--gh-blue)}
+  .gh .file .fs{color:var(--gh-faint);font-size:12.5px}
+  .gh .go{margin-top:12px;background:var(--gh-green);color:#fff;border:0;border-radius:8px;
+    padding:7px 15px;font-size:13.5px;font-weight:700}
+  .bridge{display:flex;flex-wrap:wrap;gap:7px;align-items:center;border:1px solid var(--line);
+    border-radius:10px;background:var(--accent-soft);padding:9px 13px;font-size:12.5px;margin-top:12px}
+  .bridge b{color:var(--accent)}
+  .bridge .st{border:1px solid var(--line);background:#fff;border-radius:999px;padding:1px 9px;color:var(--faint)}
+  .bridge .st.on{border-color:var(--accent);color:var(--ink);font-weight:700}
+
+  /* ── 견학 ── */
+  .mission{border:1px solid var(--line);border-radius:14px;background:#fff;padding:14px 16px;margin-top:12px}
+  .mission .top{display:flex;align-items:center;gap:9px;margin-bottom:5px}
+  .mission .bg{background:#eef2ff;color:#4338ca;border-radius:999px;padding:1px 9px;font-size:10.5px;font-weight:700}
+  .mission h4{font-size:14px;margin:0;font-weight:600}
+  .mission p{font-size:13px;margin:0;color:var(--ink2)}
+  .mission ol{margin:8px 0 0;padding-left:20px;font-size:13px;color:var(--ink2)}
+  .chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+  .chips .c{border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:12.5px}
+  .sub{display:flex;gap:8px;margin-top:11px}
+  .sub input{flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 11px;font-size:13px;
+    font-family:inherit;color:var(--faint)}
+  .sub button{border:1px solid var(--line);background:#fff;border-radius:8px;padding:0 14px;
+    font-size:12.5px;font-weight:600}
+
+  /* ── Before/After ── */
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:12px}
+  .ba>div{border:1px solid var(--line);border-radius:12px;background:#fff;padding:14px 16px}
+  .ba h4{margin:0 0 8px;font-size:13px}
+  .ba .x{color:#b91c1c} .ba .o{color:#15803d}
+  .ba ul{margin:0;padding-left:19px;font-size:13px;color:var(--ink2)}
+  .ba li{margin-bottom:5px}
+  @media (max-width:860px){ .split{flex-direction:column} .cards{width:auto} .ba{grid-template-columns:1fr}
+    .hat .row{flex-direction:column} .hat .cell{border-right:0;border-bottom:1px solid var(--line)} }
+
+  table.q{border-collapse:collapse;width:100%;font-size:13px;margin-top:10px}
+  table.q th,table.q td{border:1px solid var(--line);padding:8px 11px;text-align:left;vertical-align:top}
+  table.q th{background:#f5f5f4;font-size:12px;font-weight:700}
+  footer{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--faint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>체험 맥락 목업 2/3 — 유사 GitHub형</h1>
+  <p>3강 배포. jery 요청 5 「3강 체험도 그렇고 맥락이 없다」가 지목한 그 화면.</p>
+  <p class="meta">2026-08-19 · 회의용 · 구현 아님 · 부품 = github(GhSimTab) · 데이터 = client/src/data/gh-scripts.ts CH03_SCRIPT</p>
+</header>
+
+<div class="callout ask">
+<b>jery 요청 5</b> — 「<b>3강 체험</b>도 그렇고 체험 탭이 전부 <b>맥락이 없어</b> 학생도 교사도 이해하기 어렵다」
+<br><b>지금 화면의 실제 상태</b>: 3강(github형)에는 이미 두 가지가 있다 — 「📖 아까 읽은 비유」(단계 다리)와
+「🧭 지금 하는 일」(도슨트 자막). <b>그런데 둘 다 «지금»만 말한다.</b>
+<b>왜 이걸 하나</b>(배포를 왜 배우나)와 <b>언제 쓰나</b>(이걸 실제로 만나는 장면)는 없다.
+그래서 학생은 버튼을 순서대로 누르지만 «무엇을 배운 건지»를 못 집는다.
+</div>
+
+<div class="callout plan">
+<b>제안 = 「🧭 체험 머리표」 하나를 부품 3종에 공통으로 붙인다.</b> 세 질문에 늘 답이 떠 있고, <b>스크롤로 사라지지 않는다</b>.
+<br>1) <b>왜 하나</b> — 이 체험이 붙잡아 주는 개념 한 개 + 생활 비유 &nbsp;·&nbsp;
+2) <b>언제 쓰나</b> — 학생이 실제로 만날 장면 &nbsp;·&nbsp;
+3) <b>지금 할 일</b> — 다음 한 걸음 하나 + 진행 N/M
+</div>
+
+
+<h2 class="sec">제안 화면 <span>3강 · 🧭 체험 탭 · 유사 GitHub(대본형)</span></h2>
+<div class="app">
+  <div class="qhead">
+    <div class="no">3강 · 2번</div>
+    <h3>내가 만든 것을 남이 보게 하려면 무엇이 필요한가요?</h3>
+  </div>
+  <div class="tabs"><div class="t">읽기</div><div class="t on">🧭 체험</div><div class="t">퀴즈</div><div class="t">📋 설명 노트</div></div>
+  <div class="body">
+
+    <div class="hat">
+      <div class="row">
+        <div class="cell c-why">
+          <span class="lab">왜 하나</span>
+          <div class="txt">내 컴퓨터에 있는 것은 <b>나만 본다</b>. 남이 보게 하려면 «누구나 닿는 곳»에
+          올려 두고 <b>주소</b>를 줘야 한다 — 그게 <b>배포</b>다. 오늘은 그 스위치를 한 번 켠다.</div>
+        </div>
+        <div class="cell c-when">
+          <span class="lab">언제 쓰나</span>
+          <div class="txt"><b>여러분이 누른 모든 링크가 누군가의 배포 결과다.</b>
+          학교 홈페이지, 포트폴리오, 동아리 소개 페이지 — 만들었는데 주소가 없으면
+          «완성»이 아니라 «서랍 속»이다.</div>
+        </div>
+      </div>
+      <div class="now">
+        <span class="lab">지금 할 일</span>
+        <div class="txt">Pages 스위치를 켜세요 — 서랍 속 작품을 게시판에 거는 버튼이에요.</div>
+        <span class="prog">단계 2/4</span>
+      </div>
+    </div>
+
+    <div class="bridge">
+      <b>📖 아까 읽은 비유</b> <span style="color:var(--faint)">학교 게시판에 작품 걸기 —</span>
+      <span class="st">1 작품 완성 = 내 컴퓨터</span>
+      <span class="st on">2 게시판에 걸기 = 배포</span>
+      <span class="st">3 전교생이 봄 = 주소</span>
+    </div>
+
+    <div class="gh">
+      <span class="badge">연습용 화면</span>
+      <div class="rh">📦 <b>우리반-1모둠 / 소개-페이지</b></div>
+      <div class="nav"><span>Code</span><span>Issues</span><span>Pull requests</span><span class="on">Pages</span></div>
+      <div class="pane">
+        <div style="border:1px solid var(--gh-line);border-radius:8px;padding:11px 13px;font-size:13px;line-height:1.8">
+          Pages 가 꺼져 있어요 — 아직 아무도 이 저장소를 웹에서 못 봐요.
+        </div>
+        <button class="go">Pages 켜기 — 게시판에 걸어요</button>
+      </div>
+    </div>
+
+    <p style="font-size:12.5px;color:var(--faint);margin:11px 0 0">
+      흐린 탭·버튼은 이 연습 흐름에서는 눌리지 않아요 — 이유가 궁금하면 눌러 보세요(설명이 떠요).
+    </p>
+  </div>
+</div>
+
+<h2 class="sec">무엇이 달라지나</h2>
+<div class="ba">
+  <div>
+    <h4 class="x">지금</h4>
+    <ul>
+      <li>「📖 아까 읽은 비유」 + 「🧭 지금 하는 일」 <b>둘 다 «지금»</b>만 말한다</li>
+      <li>왜 배포를 배우는지가 <b>읽기 탭에만</b> 있고, 체험으로 넘어오면 끊긴다</li>
+      <li>학생은 초록 버튼을 순서대로 누르고 끝난다 — <b>«무엇을 배웠나»가 안 남는다</b></li>
+      <li>교사도 이 화면만 보고는 «이 체험의 목표»를 한 문장으로 말하기 어렵다</li>
+    </ul>
+  </div>
+  <div>
+    <h4 class="o">제안</h4>
+    <ul>
+      <li>머리표가 <b>왜/언제</b> 두 칸을 더한다 — 비유 다리와 도슨트는 <b>그대로 둔다</b>(잘 되고 있다)</li>
+      <li>「언제 쓰나」가 학생 생활로 착지한다 — <b>«네가 누른 모든 링크»</b></li>
+      <li>단계 <b>N/M</b> — 대본이 몇 걸음인지 처음부터 보인다</li>
+      <li>교사가 머리표 두 칸을 <b>그대로 읽으면</b> 도입 설명이 된다</li>
+    </ul>
+  </div>
+</div>
+
+<h2 class="sec">회의에서 정할 것</h2>
+<table class="q">
+  <tr><th>결정</th><th>선택지</th><th>파급</th></tr>
+  <tr><td>머리표와 <b>기존 두 띠</b>의 관계</td>
+      <td>1) 셋 다 유지(위 그림) &nbsp; 2) 도슨트를 머리표 「지금 할 일」로 <b>흡수</b> &nbsp; 3) 비유 다리를 머리표 안으로</td>
+      <td>1) 은 띠가 세 줄이라 화면 위쪽이 두껍다. 2) 가 가장 얇지만 <code>docent</code> 데이터 23강분의 자리를 옮긴다</td></tr>
+  <tr><td>「왜/언제」를 <b>강 단위</b>로 쓸까 <b>문항 단위</b>로 쓸까</td>
+      <td>1) 강 하나에 한 벌(=23벌) &nbsp; 2) 문항마다(=131벌)</td>
+      <td>1) 은 지금 <code>GhScript</code>·<code>MiniLab</code> 이 이미 강 단위라 자리가 맞다. 2) 는 분량이 6배</td></tr>
+  <tr><td>교사용 문구와 <b>겹치나</b></td>
+      <td>「📋 설명 노트」에 이미 있는 것과 중복되면 어디를 정본으로</td>
+      <td>노트는 <b>교사 전용</b>이고 머리표는 <b>학생도 본다</b> — 겹쳐도 되지만 노트가 머리표를 <b>반복</b>하면 교사가 두 번 읽는다</td></tr>
+</table>
+
+<footer>
+  architecture · 회의용 목업(구현 아님) · 확정 뒤 23강 전개는 별도 에픽 ·
+  근거 = <code>docs/HANDOFF-fixlist-2026-08-19.md</code> §2.5 · §3 PR9
+</footer>
+</div>
+</body>
+</html>
