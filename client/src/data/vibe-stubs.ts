@@ -25,11 +25,28 @@ export function isVibeChapterId(chapterId: number): boolean {
   return chapterId >= VIBE_FIRST_CHAPTER_ID;
 }
 
-/** 본문 아래 붙는 «⚡ 실제로 있었던 일» — teachermate 운영에서 나온 실화만 쓴다. */
+/**
+ * 본문 아래 붙는 «⚡ 실제로 있었던 일» — teachermate 운영에서 나온 실화만 쓴다.
+ *
+ * 🚨 **날짜(`period`)는 2026-08-19 에 뺐다**(jery). 「2026년 7월」 같은 표기는 학생에게
+ *    아무 손잡이가 아니었다 — 언제 일어났는지는 배울 것과 무관하고, 그러면서 사고가
+ *    «오래된 옛날 일»처럼 읽히게 만들었다. 되살리지 말 것: `extrasContract` 가 잡는다.
+ *
+ * 🔑 대신 들어온 두 줄이 학생이 붙잡을 손잡이다:
+ *    · `cause`   = **IT 개념어 한 개 + 쉬운 말 풀이**. 「무슨 개념이었나」에 답한다.
+ *      예) 「경쟁 상태 — 두 일이 순서를 약속하지 않고 동시에 달린 것」
+ *    · `symptom` = **화면에서 무엇이 잘못 보였는지** 한 줄.
+ *      예) 「저장은 성공이라고 떴는데 열어 보면 백지」
+ *
+ * 🚨 둘은 **없을 수 있다**(optional). 105건을 강 묶음으로 채우는 중이고,
+ *    «모든 건에 있다»를 계약으로 요구하지 않는다 — 없는 것은 없는 채로 두고
+ *    **있는 것이 성한지만** 본다(CLAUDE.md 교안 철거 항목의 같은 원칙).
+ */
 export type VibeIncident = {
-  period: string;
   title: string;
   body: string;
+  cause?: string;
+  symptom?: string;
 };
 
 export type VibeTourMissionKind = 'daily' | 'self' | 'live' | 'archive';
