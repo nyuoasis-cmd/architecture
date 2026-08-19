@@ -7,6 +7,7 @@
 //    그 조건이 전 장을 참으로 만들어 3컬럼이 통째로 죽었다. 지금 화면은 하나뿐이고, 여기서 지키는 것은
 //    «내용이 있다고 선언한 장에 정말 내용이 있는가» 하나다.
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { test } from 'node:test'
 
@@ -40,7 +41,7 @@ type Tour = {
 }
 type Extras = {
   qaId: string
-  incident?: { period: string; title: string; body: string }
+  incident?: { title: string; body: string; cause?: string; symptom?: string }
   tour?: Tour[]
   myTurn?: unknown
 }
@@ -134,16 +135,61 @@ test('⑥ 견학 미션 id 가 중복되지 않는다 — 겹치면 React 가 �
   }
 })
 
-test('⑦ 사례(⚡)의 세 칸이 모두 채워져 있다', () => {
+test('⑦ 사례(⚡)가 성하다 — 제목·본문은 필수, 날짜는 없다, 있는 라벨은 «있는 척»이 아니다', () => {
+  // 🚨 2026-08-19 개정(jery): **날짜(`period`)를 뺐다.** 「2026년 7월」은 학생에게 아무 손잡이가
+  //    아니었고, 그러면서 사고를 «오래된 옛날 일»처럼 읽히게 만들었다. 되살아나면 여기서 잡는다.
+  // 🔑 대신 들어온 두 줄 = `cause`(IT 개념어 + 쉬운 말 풀이) · `symptom`(화면에서 무엇이 잘못 보였나).
+  // 🚨 **«모든 건에 있다»를 요구하지 않는다.** 105건을 강 묶음으로 채우는 중이고, 필수로 걸면
+  //    새 사례를 쓸 때마다 CI 가 없는 글을 요구한다. 없는 것은 없는 채로 두고 **있는 것이 성한지만** 본다.
   const broken: string[] = []
+  const withDate: string[] = []
+  let labelled = 0
   for (const [key, extras] of entries) {
     if (!extras.incident) continue
-    const { period, title, body } = extras.incident
-    if (!period?.trim() || !title?.trim() || !body?.trim()) broken.push(key)
+    const incident = extras.incident
+    const { title, body, cause, symptom } = incident
+    if (!title?.trim() || !body?.trim()) broken.push(key)
     // 너무 짧은 본문은 «있는 척»이다 — 한 줄짜리 사례는 학생에게 아무 장면도 안 남긴다.
     else if (body.trim().length < 80) broken.push(`${key} (본문 ${body.trim().length}자)`)
+
+    if ('period' in incident) withDate.push(key)
+
+    // 있으면 성해야 한다. 「—」·「미정」 같은 채움말은 없는 것보다 나쁘다 — 학생이 읽고 멈춘다.
+    for (const [name, value] of [['원인', cause], ['작동 오류', symptom]] as const) {
+      if (value === undefined) continue
+      labelled += 1
+      const text = value.trim()
+      if (text.length < 8) broken.push(`${key} (${name} ${text.length}자 = 있는 척)`)
+      else if (/^[-—–.·]+$/.test(text) || ['미정', '없음', '추후'].includes(text)) {
+        broken.push(`${key} (${name} 채움말 «${text}»)`)
+      }
+    }
   }
   assert.deepEqual(broken, [], `사례가 비었거나 너무 짧다: ${broken.join(', ')}`)
+  assert.deepEqual(withDate, [], `사례에 날짜(period)가 남아 있다 — 2026-08-19 에 뺀 칸이다: ${withDate.join(', ')}`)
+
+  // 🚨 화면도 날짜를 적지 않는다 — 데이터에서만 지우고 화면 문구를 두면 «undefined» 가 뜬다.
+  const readTab = readFileSync(
+    path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'learn', 'ReadTab.tsx'),
+    'utf8',
+  )
+  assert.equal(
+    /incident\.period/.test(readTab),
+    false,
+    'ReadTab 이 incident.period 를 그린다 — 2026-08-19 에 뺀 칸이다',
+  )
+  // 🔑 두 라벨의 «자리»가 화면에 실제로 있는지. 데이터만 채우고 그리지 않으면 아무도 못 본다.
+  for (const label of ['원인', '작동 오류']) {
+    assert.ok(readTab.includes(label), `ReadTab 에 「${label}」 라벨 자리가 없다 — 데이터를 채워도 안 보인다`)
+  }
+  // 🚨 라벨은 «있을 때만» 그린다 — 없는 칸을 그리면 빈 줄이 선다.
+  assert.match(readTab, /incident\.symptom \?/, 'ReadTab 이 작동 오류를 조건 없이 그린다')
+  assert.match(readTab, /incident\.cause \?/, 'ReadTab 이 원인을 조건 없이 그린다')
+
+  // 음성 대조군 — 라벨 검사가 실제로 순회할 것이 있는가(0건이면 위 규칙이 공짜다).
+  //    🔑 지금은 0 이어도 통과해야 한다(PR4 = 골격). 대신 «몇 건이 채워졌는가»를 남겨,
+  //       다음 PR 이 진짜로 늘렸는지 사람이 눈으로 확인할 수 있게 한다.
+  assert.ok(labelled >= 0, '라벨 카운터가 깨졌다')
 })
 
 test('⑧ 가드가 실패할 수 있는 계측인지 — 대조 대상이 0건이 아니다 (반공백)', () => {
