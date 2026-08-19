@@ -1,0 +1,165 @@
+# 핸드오프 — jery 수정 요청 6건 (2026-08-19)
+
+브랜치 `architecture-qa-260819` / 워크트리 `.orca/worktrees/architecture-qa-260819`.
+이 문서는 **착수 전 조사와 계획**이다. 코드는 아직 한 줄도 고치지 않았다.
+
+---
+
+## 0. 원문 요청 (jery 구술, 순서 그대로)
+
+1. 수업 세션 **종료** 대신 **삭제** 버튼으로 대체
+2. 수업 상세 대시보드가 정책과 다름 — 타 서비스 확인 후, 필요 없는 **QR 이미지** 등 제거. **QR 전체화면**도 수정
+3. **「실제로 있었던 일」에서 날짜 삭제** + **원인을 IT 지식 관점에서 쉽게 추가** (어떤 작동 오류였는지)
+4. 체험 화면에서 `echo` 를 쳐 봤는데 — **왜 하는지·언제 쓰는지**를 알려 줄 것. 전달 방식은 **목업으로 회의**
+5. 3강 체험도 그렇고 **체험 탭이 전부 맥락이 없어** 학생도 교사도 이해하기 어렵다
+6. **시연 탭의 단계 넘김 버튼이 하단**이라 인지하기 어렵다 — 시연 그림 **위**로
+
+---
+
+## 1. 확정된 결정 (2026-08-19 jery)
+
+| 항목 | 결정 | 버린 선택지 |
+|---|---|---|
+| 요청 1 범위 | **수업 상세 화면만 교체.** 종료 상태·서버 `/end` 라우트·상태 뱃지·목록 카드 흐름은 유지 | 종료 개념 전면 폐기 / 종료+삭제 병치 |
+| 요청 3 형식 | **라벨 두 줄 추가** — 구조화 필드 `cause`(원인) · `symptom`(작동 오류)를 새로 넣는다 | 본문에 녹여 재작성 / 원인 한 줄만 |
+
+🚨 **요청 1 의 파급 고지(승인 완료)**: 이 변경 뒤 수업 상세에서는 **진행 중인 수업도 확인 1회로 영구 삭제**된다.
+참여자 명단과 학습 기록이 함께 사라지고 되돌릴 수 없다. 지금 살아 있는 금지 규칙
+(CLAUDE.md 「되돌리지 말 것 셋」 3항 = 진행 중 카드의 삭제 버튼)을 **수업 상세에 한해** 해제하는 것이다.
+목록 카드는 그대로 둔다 — 진행 중이면 종료, 종료된 뒤에 삭제.
+
+---
+
+## 2. 실측 조사 결과
+
+### 2.1 요청 6 — 시연 단계 버튼이 «하단»인 진짜 이유
+
+`client/src/components/learn/ContentPanel.tsx:317`
+
+```
+<div className="flex flex-col-reverse gap-3 sm:flex-col sm:gap-0">
+  <div ref={inlineHostRef} …><InlineComponent … /></div>
+  <ScenarioPicker … />
+</div>
+```
+
+자식 순서가 [시연 그림, 시나리오 버튼]인데 `flex-col-reverse` 라서 **폰에서는 버튼이 위**,
+`sm:flex-col` 로 **PC에서만 아래**로 내려간다. 교사가 쓰는 화면이 정확히 그 갈래다.
+「단계」의 실체 = `ScenarioPicker` 의 시나리오 탭(예: 1강 `입력 → 메모리 → 처리 → 출력`).
+
+### 2.2 요청 2 — 수업 상세·QR 정책 위반 5건
+
+정본: `shared/DESIGN-POLICY.md` §10 v3(2026-08-07) · `shared/BUILDER-UX-POLICY.md` §4-A·§5.
+타 서비스 기준 구현: `ai-app-builder/client/src/components/QrModal.tsx` · `brand/client/src/components/JoinQrOverlay.tsx`
+(`block-design-v2` 는 `@teachermate/shared` 의 `QRFullscreen`·`QRButton` 을 그대로 쓴다).
+
+| 번호 | 위반 | 위치 | 근거 |
+|---|---|---|---|
+| 1 | 상세 헤더에 **132px QR 이미지를 직접** 박아 둠(`<QrInline size={132}>`) | `pages/TeacherSessionPage.tsx` 헤더 우측 | §10 금지 「카드에 QR 이미지 직접 표시」 |
+| 2 | 버튼 문구가 「📱 QR 전체화면」 | 같은 파일 액션 줄 | §10 정본 문구 = 「QR코드」(Primary · h-10 · radius 13 · 13px/600 · 15×15 QR 아이콘 · min-w 92px) |
+| 3 | 목록 카드의 QR 버튼이 **아이콘 전용** | `components/teacher/SessionCard.tsx:139~` | §10 금지 「QR 아이콘만 단독 사용 — 반드시 텍스트 병행」 |
+| 4 | QR 전체화면이 **어두운 배경**(`bg-black/40`·`bg-black/70`) · `z-50` · 영문 "Join Code"/"Join URL" · 세션 이름 없음 · 참여자 수 없음 · 안내 문구 12~14px | `components/common/QrFullscreenModal.tsx` · `QrFullscreen.tsx` · `QrInline.tsx` | §5 금지 「어두운 배경」 · §10 v3 표(흰 배경 · `z-[100]` · 세션명 · emerald 펄스 참여자 수 5초 폴링 · 안내 16px/≥640px 20px `keep-all`) · DESIGN-POLICY UI 언어(한국어) |
+| 5 | QR 전체화면 **입구가 둘**이고 코드가 갈라져 있음 | `QrFullscreenModal`(교사 상세) · `QrFullscreen`(학습 화면 시연) | 한쪽만 고치면 다른 쪽이 그대로 남는다 — `qrFullscreenSize.test.ts` 가 이미 «둘 다» 세고 있는 이유 |
+
+✅ **건드리지 않을 것**: QR **크기 체계**는 이미 §10 v3 준수다
+(코드 `clamp(96px,18vw,200px)`, QR 한 변 `w-[min(70vw,70vh)] md:w-[min(45vw,45vh)]`, 고정 px 상한 없음).
+`qrFullscreenSize.test.ts` 가 이 값을 지키고 있으므로 손대면 빨개진다.
+
+### 2.3 요청 1 — 종료·삭제의 현재 배선
+
+- 서버: `server/src/routes/sessions.ts:487` `POST /:id/end` · `:536` `DELETE /:id`(둘 다 teacher_id 소유 검사)
+- 클라: `lib/session-client.ts` 의 `endSession` · `deleteSession`
+- 상세(`TeacherSessionPage`)는 **종료만** 부른다. 삭제는 목록 카드(`SessionCard`)의 **종료된 수업에만** 있다
+- `status='ended'` 에 학생 참여 차단(L3 join)과 쓰기/AI 게이트가 매달려 있다 → **그래서 종료 자체는 남긴다**
+
+### 2.4 요청 3 — 「⚡ 실제로 있었던 일」 현황
+
+- 자료형 `VibeIncident` = `{ period, title, body }` — `client/src/data/vibe-stubs.ts:29`
+- 표시: `components/learn/ReadTab.tsx:35` 에서 `⚡ 실제로 있었던 일 · {incident.period}`
+- 대상 **105건** (23강 전체, 131문항 중 105문항). 강별 분포:
+  ch01 4 · ch02 4 · ch03 7 · ch04 7 · ch05 7 · ch06 10 · ch07 4 · ch08 7 · ch09 5 · ch10 7 ·
+  ch11 2 · ch12 6 · ch13 6 · ch14 3 · ch15 6 · ch16 5 · ch17 4 · ch18 1 · ch19 2 · ch20 3 ·
+  ch21 2 · ch22 2 · ch23 1
+- 🚨 계약이 걸려 있다: `server/src/lib/extrasContract.test.ts:140~142` 가 **`period` 를 필수**로 검사한다.
+  날짜를 지우려면 이 계약을 같이 고쳐야 한다 — 안 고치면 CI 가 빨개진다.
+- 지금 본문(`body`)은 이미 원인을 서사로 풀고 있는 것이 많다. 없는 것은 **원인이라는 이름표**와
+  **IT 개념어**다 — 학생이 「무슨 개념이었나」로 붙잡을 손잡이가 없다.
+
+### 2.5 요청 4·5 — 체험 탭에 맥락이 없는 구조적 이유
+
+- 체험의 맥락이 **전부 터미널 스크롤백 안**에 산다:
+  `aboutLines`(탭 열 때 딱 1회) · `help` 의 명령 설명(`MiniCommand.what`) · `mission.goal`.
+  → `lib/mini-lab.ts:106~135`. 몇 줄만 치면 **위로 밀려 사라지고**, 다시 보려면
+  `help`·`missions` 를 쳐야 한다는 사실을 **미리 알고 있어야** 한다.
+- 어디에도 **「왜 하나 / 실무에선 언제 쓰나」가 없다**. `echo` 설명은
+  "친 것을 컴퓨터가 받아 그대로 돌려준다"까지 = **동작만**이다(`data/mini-labs/ch01.ts:23`).
+- 부품 3종이 **각자 다른 말투로 연다** — 공통 「이 체험은 무엇을 위한 것인가」 틀이 없어
+  강을 옮길 때마다 다시 적응해야 한다:
+  - `terminal` — 스크롤백 (1·5·8·11강, 12강 실습실, 13·19강)
+  - `github` — 1단계/2단계 카드 (`GhSimTab`. **3강 ch03**, 16강 ch20, 22강 ch22)
+  - `tour` — 미션 카드 (`TourKit`/`TourTab`. 나머지 강의 기본 부품)
+  - `composite` — 23강 하나
+  배정 정본 = `client/src/data/experience.ts`, 지도 = `docs/MAP-experience-23lessons-v1.md`
+
+---
+
+## 3. 실행 계획 (1 마일스톤 = 1 커밋 = 1 PR)
+
+### PR1 — 시연 탭 단계 버튼을 그림 위로 (요청 6)
+- `ContentPanel.tsx:317` 의 `flex-col-reverse … sm:flex-col` 제거 → 어느 폭에서든 `ScenarioPicker` 가 먼저
+- `ScenarioPicker` 의 `mt-6` 을 아래 여백으로 옮김
+- 계약: `learnLayoutContract.test.ts` 에 «시나리오 선택이 `InlineComponent` 앞에 온다» 1건 추가
+- 규모: 파일 2개, 가장 작다 → **여기서 시작한다**
+
+### PR2 — 수업 상세·QR 정책 정합 (요청 2)
+- 상세 헤더의 `QrInline` **제거**, 액션 줄 버튼을 정본 「QR코드」로
+- `SessionCard` 의 아이콘 전용 QR → 텍스트 병행
+- `QrFullscreenModal` + `QrFullscreen` 을 **한 컴포넌트로 통합**하고 §10 v3 로 정합:
+  흰 배경 · `z-[100]` · 한국어 라벨 · 세션 이름 · 참여자 수(emerald 펄스, 5초 폴링) ·
+  안내 16px/≥640px 20px `keep-all`. **크기 체계는 그대로**
+- 계약: `qrFullscreenSize.test.ts` 를 통합 구조에 맞춰 개정 + 배경·z·한국어·참여자 수 검사 추가.
+  `sessionDetailContract.test.ts` 에 «헤더에 QR 이미지 없음 + QR 버튼 텍스트 병행» 추가
+
+### PR3 — 수업 상세 「수업 종료」 → 「수업 삭제」 (요청 1)
+- `TeacherSessionPage`: `endSession` → `deleteSession`, 성공 시 `/teacher` 복귀
+- 확인 모달 문구는 카드의 삭제 모달과 동일
+  ("참여자 명단과 학습 기록도 함께 영구 삭제됩니다. 되돌릴 수 없어요.")
+- 서버 `/end`·`status`·상태 뱃지·목록 카드 흐름은 **손대지 않는다**
+- 계약: `sessionDetailContract.test.ts` 1) 을 삭제 기준으로 개정(확인 모달 없이 실행되지 않는다는 이빨은 유지)
+- 문서: CLAUDE.md 「되돌리지 말 것 셋」 3항에 **상세 화면 예외** 한 줄과 그 근거
+
+### PR4~PR8 — 「⚡ 실제로 있었던 일」 날짜 삭제 + 원인·오류 추가 (요청 3, 105건)
+- **PR4 = 골격**: `VibeIncident` 에서 `period` 제거, `cause`·`symptom` 추가.
+  `ReadTab.tsx:35` 에서 날짜 제거 + 라벨 두 줄 렌더.
+  `extrasContract.test.ts:140~142` 의 `period` 필수 → `cause`·`symptom` 필수로 교체
+- **PR5~PR8 = 콘텐츠 105건**, 강 묶음으로 분할:
+  ch01~05(29건) / ch06~10(33건) / ch11~17(32건) / ch18~23(11건)
+- 작성 규칙:
+  - `cause` = **IT 개념어 한 개 + 쉬운 말 풀이**. 예: 「경쟁 상태 — 두 일이 순서를 약속하지 않고 동시에 달린 것」
+  - `symptom` = **화면에서 무엇이 잘못 보였는지** 한 줄. 예: 「저장은 성공이라고 떴는데 열어 보면 백지」
+  - 콘텐츠 정책 유지: 참고 도서 차용 0%, 티처메이트 운영에서 실제로 있었던 일만
+
+### PR9 — 🧭 체험 탭 공통 맥락 틀 (요청 4·5) — **목업 + 회의, 구현 아님**
+- 목업 3장을 `mockups/` 에 HTML 로:
+  1) 터미널형 — 1강 `echo` (요청 4의 그 화면)
+  2) github형 — 3강 (요청 5가 지목한 화면)
+  3) 견학형 — 대표 문항 하나
+- 각 목업이 답해야 하는 질문 셋: **왜 이걸 하나 · 언제 쓰나 · 지금 무엇을 하면 되나**
+- 회의로 확정 → 확정 뒤 **별도 에픽**으로 23강 전개. 이 PR에서 23강을 건드리지 않는다
+
+---
+
+## 4. 순서와 검증
+
+착수 순서: **PR1 → PR2 → PR3 → PR9 목업(회의 대기 중 병행) → PR4~PR8 콘텐츠**
+
+- 매 PR: `cd server && npm test` — 계약이 정본이다.
+  🔑 **재확인 결과 264개**(2026-08-19 실측). CLAUDE.md·이 문서에 적혀 있던 157 은 낡은 숫자다.
+  워크트리에서는 `server`·`client` 양쪽에 `npm install` 이 먼저 필요하다(계약이 클라 소스를 읽는다).
+- CI = `l1-fast.yml`, `main` 보호(required check `fast`)
+- 기본 브랜치는 `main`(master 아님) — **`main` 머지 = prod 자동배포**
+
+## 5. 착수 전 재확인할 것
+
+- `docs/RUNBOOK-polish-base-chapters.md` §0 「상태 재확인」 — 이 문서의 숫자도 적힌 순간의 관측이다
+- 105건·157개 같은 숫자는 손으로 세지 말고 다시 센다

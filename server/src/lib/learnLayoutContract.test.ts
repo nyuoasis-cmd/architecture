@@ -15,6 +15,8 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { test } from 'node:test'
 
+import { stripComments } from './strip-comments'
+
 const ROOT = path.resolve(__dirname, '..', '..', '..')
 const read = (rel: string) => readFileSync(path.join(ROOT, rel), 'utf8')
 
@@ -211,6 +213,45 @@ test('9) 체험 탭은 학생 탭이다 — 교사 블록 안으로 들어가면
   )
   // 실습실(LabTab)은 체험 탭 안에서 그려진다 — 렌더 자리가 사라지면 12강 실습이 통째로 죽는다.
   assert.ok(/<LabTab\b/.test(source), `${CONTENT_PANEL} 이 실습실(LabTab)을 그리지 않는다`)
+})
+
+test('10) 🎮 시연의 단계 선택은 그림 «위»에 온다 — 어느 폭에서든', () => {
+  // 🚨 왜 있는가(2026-08-19 jery): 시연 탭의 자식 순서는 [시연 그림, 단계 선택]인데
+  //    감싼 div 가 `flex-col-reverse … sm:flex-col` 이었다. 그래서 폰에서는 버튼이 위,
+  //    **PC에서만 그림 아래**로 내려갔다 — 교사가 시연하는 화면이 정확히 그 갈래라,
+  //    다음 단계로 넘길 버튼을 화면 아래에서 찾아야 했다.
+  // 🔑 여기서 막는 것은 «reverse 를 다시 쓰는 것»과 «DOM 순서가 다시 뒤집히는 것» 둘이다.
+  //    한쪽만 보면 나머지 하나로 같은 증상이 돌아온다.
+  // 🔑 주석을 걷어내고 본다 — 이 계약은 「무엇이 되살아났나」를 낱말로 잡기 때문에,
+  //    «전에는 flex-col-reverse 였다»고 적은 주석 한 줄이 계약을 빨갛게 만든다.
+  const source = stripComments(read(CONTENT_PANEL))
+
+  const demoBlock = source.match(/activeTab === 'demo' && InlineComponent \? \(([\s\S]*?)\n {8}\) : null}/)
+  assert.ok(demoBlock, `${CONTENT_PANEL} 에서 🎮 시연 탭 렌더 블록을 찾지 못했다`)
+  const block = demoBlock![1]
+
+  const pickerAt = block.indexOf('<ScenarioPicker')
+  const inlineAt = block.indexOf('<InlineComponent')
+  assert.ok(pickerAt >= 0, '시연 탭에 단계 선택(ScenarioPicker)이 없다')
+  assert.ok(inlineAt >= 0, '시연 탭에 시연 그림(InlineComponent)이 없다')
+  assert.ok(
+    pickerAt < inlineAt,
+    '단계 선택이 시연 그림보다 뒤에 있다 — PC에서 버튼이 그림 아래로 내려간다(2026-08-19 jery)',
+  )
+
+  assert.equal(
+    /flex-col-reverse/.test(block),
+    false,
+    '시연 탭에 flex-col-reverse 가 되살아났다 — 폭에 따라 순서가 뒤집히면 같은 증상이 돌아온다',
+  )
+
+  // 음성 대조군 — 블록 추출·순서 비교가 실제로 뒤집힌 순서를 잡는지.
+  const probe = '<div><InlineComponent /><ScenarioPicker /></div>'
+  assert.equal(
+    probe.indexOf('<ScenarioPicker') < probe.indexOf('<InlineComponent'),
+    false,
+    '순서 비교가 뒤집힌 순서를 통과시키면 10) 은 실패할 수 없는 계측이다',
+  )
 })
 
 test('6) 가드가 실패할 수 있는 계측인지 — 대조 대상 파일이 비어 있지 않다', () => {

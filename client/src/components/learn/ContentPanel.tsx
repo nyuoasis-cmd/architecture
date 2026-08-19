@@ -315,10 +315,13 @@ export default function ContentPanel({
 
         {activeTab === 'demo' && InlineComponent ? (
           <div className="flex flex-col px-4 py-6 lg:px-8">
-            <div className="flex flex-col-reverse gap-3 sm:flex-col sm:gap-0">
-              <div ref={inlineHostRef} className={`mx-auto w-full ${inlineMaxWidth}`}>
-                <InlineComponent key={`${qaId}:${scenarioId}`} scenarioId={scenarioId} />
-              </div>
+            {/*
+              🚨 단계(시나리오) 선택은 **어느 폭에서든 시연 그림 위**에 온다(2026-08-19 jery).
+              전에는 `flex-col-reverse … sm:flex-col` 이라 폰에서만 위였고 PC에서는 그림 아래로
+              내려갔다 — 교사가 쓰는 화면이 정확히 그 갈래라, 다음 단계로 넘길 버튼을 찾지 못했다.
+              계약 learnLayoutContract 10) 이 이 순서를 지킨다.
+            */}
+            <div className="flex flex-col gap-4">
               {demo ? (
                 <ScenarioPicker
                   demo={demo}
@@ -327,6 +330,9 @@ export default function ContentPanel({
                   scenarioId={scenarioId}
                 />
               ) : null}
+              <div ref={inlineHostRef} className={`mx-auto w-full ${inlineMaxWidth}`}>
+                <InlineComponent key={`${qaId}:${scenarioId}`} scenarioId={scenarioId} />
+              </div>
             </div>
           </div>
         ) : null}
@@ -483,7 +489,7 @@ function ScenarioPicker({
   const activeLabel = demo.scenarios.find((scenario) => scenario.id === scenarioId)?.label;
 
   return (
-    <div className="mx-auto mt-6 flex w-full max-w-[860px] flex-col gap-3">
+    <div className="mx-auto flex w-full max-w-[860px] flex-col gap-3">
       <div
         aria-label="시연 시나리오 선택"
         className="flex flex-wrap gap-1.5 rounded-full border bg-white p-1"
