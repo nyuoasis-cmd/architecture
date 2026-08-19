@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Avatar from '../common/Avatar';
 import ConfirmModal from '../common/ConfirmModal';
-import QrFullscreenModal from '../common/QrFullscreenModal';
+import QrFullscreen from '../common/QrFullscreen';
 import { CHAPTERS } from '../../data/qa-stubs';
 import { formatRelativeTime } from '../../lib/format';
 import { deleteSession, endSession, SessionClientError, type SessionRecord } from '../../lib/session-client';
@@ -137,9 +137,14 @@ export default function SessionCard({ session }: SessionCardProps) {
           <div className="flex flex-shrink-0 items-center gap-2">
             {isActive ? (
               <>
+                {/*
+                  🚨 아이콘 하나만 있던 버튼이다 — §10 금지 「QR 아이콘만 단독 사용 — 반드시
+                     텍스트 병행」. 시니어 교사 비중이 높은 사용자층이라 아이콘만으로는
+                     «이게 QR 인가 설정인가»에서 멈춘다. §10 정본 = 채움 스타일 + 「QR코드」.
+                  🔤 치수도 §10 표 — h-10 · radius 13 · px-3.5 · min-w 92 · 13px/600 · 아이콘 15×15.
+                */}
                 <button
-                  aria-label="QR 코드 보기"
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-[10px] border border-[var(--color-border)] bg-white text-stone-600 hover:bg-stone-50"
+                  className="inline-flex h-10 min-w-[92px] items-center justify-center gap-1.5 rounded-[13px] bg-stone-950 px-3.5 text-[13px] font-semibold text-white transition-colors duration-150 hover:bg-[var(--color-text-body)]"
                   onClick={(event) => {
                     event.stopPropagation();
                     setIsQrOpen(true);
@@ -149,19 +154,20 @@ export default function SessionCard({ session }: SessionCardProps) {
                   <svg
                     aria-hidden="true"
                     fill="none"
-                    height="16"
+                    height="15"
                     stroke="currentColor"
                     strokeLinecap="round"
                     strokeLinejoin="round"
                     strokeWidth="1.8"
                     viewBox="0 0 24 24"
-                    width="16"
+                    width="15"
                   >
                     <rect height="6" rx="1" width="6" x="3" y="3" />
                     <rect height="6" rx="1" width="6" x="15" y="3" />
                     <rect height="6" rx="1" width="6" x="3" y="15" />
                     <path d="M15 12 L21 12 M15 15 L18 15 L18 21 L15 21 L15 18" />
                   </svg>
+                  QR코드
                 </button>
                 <button
                   className="inline-flex h-10 items-center rounded-[10px] px-3.5 text-[13px] text-stone-500 hover:bg-stone-100"
@@ -248,7 +254,14 @@ export default function SessionCard({ session }: SessionCardProps) {
         )}
       </article>
 
-      {isQrOpen ? <QrFullscreenModal code={session.code} onClose={() => setIsQrOpen(false)} /> : null}
+      {/*
+        🚨 참여자 수는 **넘기지 않는다** — 「내 수업」 목록은 폴링하지 않아서 열 때의 숫자로 굳는다.
+           프로젝터에 굳은 숫자를 「참여 N명」으로 띄우면 교사가 «아직 3명뿐»으로 잘못 읽는다.
+           살아 있는 숫자가 필요하면 수업 상세(6초 폴링)에서 열면 된다.
+      */}
+      {isQrOpen ? (
+        <QrFullscreen code={session.code} onClose={() => setIsQrOpen(false)} sessionName={session.name} />
+      ) : null}
 
       {isConfirmingEnd ? (
         <ConfirmModal

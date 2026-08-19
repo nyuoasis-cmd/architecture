@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { Navigate, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import QrFullscreenModal from '../components/common/QrFullscreenModal';
 import { StudentExitGuard } from '../components/StudentExitGuard';
 import ChapterNavPanel from '../components/learn/ChapterNavPanel';
 import ContentPanel from '../components/learn/ContentPanel';

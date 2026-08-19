@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
+import { QrCode } from 'lucide-react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import ConfirmModal from '../components/common/ConfirmModal';
-import QrFullscreenModal from '../components/common/QrFullscreenModal';
-import QrInline from '../components/common/QrInline';
+import QrFullscreen from '../components/common/QrFullscreen';
 import ParticipantList from '../components/teacher/ParticipantList';
 import { CHAPTERS, getQasByChapterId } from '../data/qa-stubs';
 import { formatRelativeTime } from '../lib/format';
@@ -127,6 +127,12 @@ export default function TeacherSessionPage() {
     'inline-flex h-10 items-center rounded-[10px] bg-stone-950 px-5 text-sm font-medium text-white disabled:bg-stone-300';
   const secondaryCta =
     'inline-flex h-10 items-center rounded-[10px] border border-[var(--color-border)] bg-white px-5 text-sm font-medium text-stone-800 hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60';
+  // 🔤 §10 QR 버튼 치수 정본 — h-10 · radius **13** · px-3.5 · min-w 92 · 13px/600 · 아이콘 gap 6px.
+  //    옆 버튼(radius 10)과 3px 다르지만, 치수를 적어 둔 표가 정본이라 표를 따른다.
+  const qrCtaBase =
+    'inline-flex h-10 min-w-[92px] items-center justify-center gap-1.5 rounded-[13px] px-3.5 text-[13px] font-semibold transition-[background-color,border-color] duration-150 disabled:cursor-not-allowed disabled:opacity-60';
+  const qrCtaPrimary = `${qrCtaBase} bg-stone-950 text-white hover:bg-[var(--color-text-body)]`;
+  const qrCtaSecondary = `${qrCtaBase} border border-[var(--color-border)] bg-white text-stone-800 hover:bg-stone-50`;
 
   return (
     <main className="mx-auto w-full max-w-[900px] px-6 py-8">
@@ -173,9 +179,11 @@ export default function TeacherSessionPage() {
             </p>
           </div>
 
-          <div className="flex-shrink-0 rounded-xl border border-[var(--color-border)] bg-white p-3">
-            <QrInline code={currentSession.code} size={132} />
-          </div>
+          {/*
+            🚨 여기 132px QR 이미지가 박혀 있었다 — §10 금지 「카드에 QR 이미지 직접 표시」.
+               작아서 프로젝터로는 못 쓰고, 그러면서 헤더 폭을 잡아먹어 수업 이름을 밀어냈다.
+               QR 은 아래 「QR코드」 버튼이 여는 **전체화면** 하나로만 보여 준다.
+          */}
         </div>
 
         {/*
@@ -214,13 +222,23 @@ export default function TeacherSessionPage() {
           >
             🎬 시연하기
           </button>
+          {/*
+            🔤 문구는 §10 정본 **「QR코드」** 다 — 「📱 QR 전체화면」은 «전체화면»이라는 구현
+               낱말을 교사에게 떠넘긴 것이었다. 아이콘은 15×15 QR 패턴 + 텍스트 병행
+               (§10 금지 「QR 아이콘만 단독 사용」).
+            ⚠️ **한 가지 의도된 예외**: §10 은 QR 버튼을 항상 Primary 로 두지만, 이 화면에서는
+               학생이 들어온 뒤 1차 CTA 가 「🎬 시연하기」로 넘어간다(2026-08-16 신입샘 t2 수정).
+               둘을 동시에 Primary 로 두면 «지금 무엇을 누르나»가 사라지므로, 순서·강조를
+               바꾸는 그 규칙을 유지한다. 바꾼 것은 문구·아이콘·치수(h-10·radius 13·13px/600)다.
+          */}
           <button
-            className={hasParticipants ? secondaryCta : primaryCta}
+            className={hasParticipants ? qrCtaSecondary : qrCtaPrimary}
             disabled={isEnded}
             onClick={() => setIsQrFullscreen(true)}
             type="button"
           >
-            📱 QR 전체화면
+            <QrCode size={15} strokeWidth={1.9} />
+            QR코드
           </button>
           <button
             className="ml-auto inline-flex h-10 items-center rounded-[10px] px-3.5 text-[13px] text-stone-500 hover:bg-stone-100 disabled:opacity-50"
@@ -283,7 +301,12 @@ export default function TeacherSessionPage() {
       </section>
 
       {isQrFullscreen ? (
-        <QrFullscreenModal code={currentSession.code} onClose={() => setIsQrFullscreen(false)} />
+        <QrFullscreen
+          code={currentSession.code}
+          onClose={() => setIsQrFullscreen(false)}
+          participantCount={participants.length}
+          sessionName={currentSession.name}
+        />
       ) : null}
 
       {isConfirmingEnd ? (
