@@ -4,7 +4,13 @@
 //    confirm() 조차 없었다 — 그래서 오히려 더 나빴다. 진행 중인 수업이 오클릭 한 번에 끝나고,
 //    그 순간부터 학생은 못 들어온다. 되돌리는 길은 없다(새 수업을 만들고 코드를 다시 나눠 줘야 한다).
 //
-// 🔑 그래서 여기서 지키는 것은 «모달이 예쁜가»가 아니라 **endSession 호출이 확인 뒤에만 있는가**이다.
+// 🚨 **2026-08-19 개정 — 이 화면의 파괴 동작은 종료가 아니라 「삭제」다**(jery, 파급 고지 후 승인).
+//    되돌릴 수 없는 정도가 한 단계 올라갔다: 종료는 참여만 막았지만 삭제는 **참여자 명단과 학습
+//    기록까지 영구 소거**한다. 그리고 이제 **진행 중인 수업에도** 걸린다. 그러니 이 계약의 이빨은
+//    전보다 **더** 중요하다 — 확인 모달이 사라지면 오클릭 한 번에 반 하나의 기록이 없어진다.
+//    🔑 목록 카드는 그대로다(«진행 중이면 종료, 종료된 뒤에 삭제») — 그쪽은 sessionListContract 5).
+//
+// 🔑 그래서 여기서 지키는 것은 «모달이 예쁜가»가 아니라 **deleteSession 호출이 확인 뒤에만 있는가**이다.
 //    버튼 onClick 에 직결되는 순간 계약이 빨개진다.
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
@@ -18,19 +24,55 @@ const read = (rel: string) => readFileSync(path.join(ROOT, rel), 'utf8')
 const DETAIL = 'client/src/pages/TeacherSessionPage.tsx'
 const MODAL = 'client/src/components/common/ConfirmModal.tsx'
 
-test('1) 수업 종료는 확인 모달을 거친다 — 버튼 onClick 에 직결되지 않는다', () => {
+test('1) 수업 삭제는 확인 모달을 거친다 — 버튼 onClick 에 직결되지 않는다', () => {
   const source = read(DETAIL)
 
-  assert.ok(/<ConfirmModal\b/.test(source), `${DETAIL} 에 확인 모달이 없다 — 종료가 오클릭 한 번에 실행된다`)
+  assert.ok(/<ConfirmModal\b/.test(source), `${DETAIL} 에 확인 모달이 없다 — 삭제가 오클릭 한 번에 실행된다`)
 
-  const calls = [...source.matchAll(/endSession\(/g)].map((match) => match.index ?? -1)
-  assert.equal(calls.length, 1, `endSession 호출이 ${calls.length}곳이다 — 확인을 거치지 않는 통로가 생겼는지 볼 것`)
+  const calls = [...source.matchAll(/deleteSession\(/g)].map((match) => match.index ?? -1)
+  assert.equal(calls.length, 1, `deleteSession 호출이 ${calls.length}곳이다 — 확인을 거치지 않는 통로가 생겼는지 볼 것`)
 
   const modalAt = source.indexOf('<ConfirmModal')
   assert.ok(
     calls[0] > modalAt,
-    'endSession 이 확인 모달보다 앞에서 불린다 — 모달 밖에서 종료가 실행되는 자리다',
+    'deleteSession 이 확인 모달보다 앞에서 불린다 — 모달 밖에서 삭제가 실행되는 자리다',
   )
+
+  // 🚨 파괴 모달은 destructive 톤이어야 한다 — 종료(중립)와 **같은 얼굴로 뜨면** 교사가
+  //    «참여만 막는 그 버튼»으로 읽고 누른다. 이제 지워지는 것은 기록 전체다.
+  assert.match(source, /tone="destructive"/, `${DETAIL} 의 삭제 확인 모달이 destructive 톤이 아니다`)
+
+  // 🔑 문구는 목록 카드의 삭제 모달과 같아야 한다 — 같은 일에 다른 말을 쓰면 교사가 의심한다.
+  const detailBody = stripComments(source)
+  for (const copy of ['참여자 명단과 학습 기록도 함께 영구 삭제됩니다. 되돌릴 수 없어요.', '이 수업을 삭제할까요?']) {
+    assert.ok(detailBody.includes(copy), `${DETAIL} 의 삭제 확인 문구가 목록 카드와 다르다: «${copy}»`)
+    assert.ok(
+      stripComments(read('client/src/components/teacher/SessionCard.tsx')).includes(copy),
+      `목록 카드 쪽 문구가 바뀌었다 — 두 화면이 갈라지면 이 검사가 그 사실을 알려 준다: «${copy}»`,
+    )
+  }
+})
+
+test('1-A) 이 화면에는 종료 버튼이 없다 — 종료는 목록 카드의 일이다 (2026-08-19 jery)', () => {
+  // 🚨 상세에서 종료와 삭제를 **나란히** 두지 않는다. 되돌릴 수 없는 정도가 다른 두 버튼이
+  //    한 칸 차이로 붙어 있으면, 참여만 막으려던 손이 기록을 지운다.
+  // 🔑 서버 `/end` 라우트와 `status='ended'` 는 그대로다 — 학생 참여 차단(L3 join)과
+  //    쓰기·AI 게이트가 거기 매달려 있다. 없어진 것은 **이 화면의 버튼** 하나뿐이고,
+  //    상태 뱃지(「종료」)는 여전히 그린다.
+  const body = stripComments(read(DETAIL))
+  assert.equal(/endSession/.test(body), false, `${DETAIL} 이 아직 endSession 을 부른다`)
+  assert.equal(/수업 종료|종료됨/.test(body), false, `${DETAIL} 에 종료 버튼 문구가 남아 있다`)
+  assert.ok(body.includes('수업 삭제'), `${DETAIL} 에 「수업 삭제」 버튼이 없다`)
+  // 상태 뱃지는 남는다 — 종료된 수업을 열었을 때 «종료»라고 말해 주지 않으면 교사가 헷갈린다.
+  assert.ok(body.includes('종료'), `${DETAIL} 이 종료 상태를 표시하지 않는다`)
+})
+
+test('1-B) 삭제 뒤 없는 수업 화면에 남지 않는다 — 목록으로 돌려보내고 스토어에서도 지운다', () => {
+  // 🚨 지운 뒤 그대로 있으면 화면이 «없는 수업»을 그리고, 폴링이 404 를 물어 오면서
+  //    「참여자 목록을 새로고침하지 못했습니다」가 뜬다 — 교사는 삭제가 실패한 줄 안다.
+  const body = stripComments(read(DETAIL))
+  assert.match(body, /navigate\('\/teacher'/, `${DETAIL} 이 삭제 뒤 목록으로 돌아가지 않는다`)
+  assert.match(body, /removeTeacherSession\(/, `${DETAIL} 이 스토어에서 지운 수업을 남긴다`)
 })
 
 test('2) confirm()·alert() 로 확인을 때우지 않는다 (§6 금지)', () => {
@@ -124,7 +166,7 @@ test('9) 시연 문구가 용어 정본(ui-glossary §H) 한 계열이다 — �
 })
 
 test('10) 없는 버튼을 약속하지 않는다 — 「수업을 시작하세요」 금지 (2026-08-16 신입샘 t2)', () => {
-  // 🚨 이 화면에 있는 버튼은 시연하기·QR코드·수업 종료 셋뿐이다. «시작»은 없고, 없는 게 맞다 —
+  // 🚨 이 화면에 있는 버튼은 시연하기·QR코드·수업 삭제 셋뿐이다. «시작»은 없고, 없는 게 맞다 —
   //    학생은 코드로 들어오는 순간 각자 진행한다. 그런데 문구가 시작을 약속하면 초임 교사는
   //    「학생이 들어왔어요! 근데 수업을 어떻게 시작하지?」에서 멈춘다(신입샘 s3 vs s5).
   // 🔑 그래서 검사는 «버튼이 있는가»가 아니라 **«없는 것을 약속하지 않는가»**를 본다.
@@ -143,7 +185,7 @@ test('10) 없는 버튼을 약속하지 않는다 — 「수업을 시작하세�
 
   // 🚨 음성 대조군 — 검사가 실제로 문구를 보고 있는가. 화면에 실제로 있는 버튼 셋은 그대로여야 한다.
   //    🔤 QR 버튼 문구는 2026-08-19 에 §10 정본 「QR코드」로 바뀌었다(구 「📱 QR 전체화면」).
-  for (const label of ['🎬 시연하기', 'QR코드', '수업 종료']) {
+  for (const label of ['🎬 시연하기', 'QR코드', '수업 삭제']) {
     assert.ok(body.includes(label), `${DETAIL} 에서 «${label}» 이 사라졌다 — 이 검사가 헛돌고 있다`)
   }
 })

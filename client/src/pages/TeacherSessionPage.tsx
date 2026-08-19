@@ -6,22 +6,23 @@ import QrFullscreen from '../components/common/QrFullscreen';
 import ParticipantList from '../components/teacher/ParticipantList';
 import { CHAPTERS, getQasByChapterId } from '../data/qa-stubs';
 import { formatRelativeTime } from '../lib/format';
-import { endSession, getSession, getSessionParticipants, SessionClientError } from '../lib/session-client';
+import { deleteSession, getSession, getSessionParticipants, SessionClientError } from '../lib/session-client';
 import { useSessionStore } from '../store/session-store';
 
 export default function TeacherSessionPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
-  const [isEnding, setIsEnding] = useState(false);
-  const [isConfirmingEnd, setIsConfirmingEnd] = useState(false);
-  const [endError, setEndError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isForbidden, setIsForbidden] = useState(false);
   const [isQrFullscreen, setIsQrFullscreen] = useState(false);
   const currentSession = useSessionStore((state) => state.currentSession);
   const participants = useSessionStore((state) => state.participants);
   const setCurrentSession = useSessionStore((state) => state.setCurrentSession);
   const setParticipants = useSessionStore((state) => state.setParticipants);
+  const removeTeacherSession = useSessionStore((state) => state.removeTeacherSession);
 
   useEffect(() => {
     if (!id) {
@@ -240,16 +241,28 @@ export default function TeacherSessionPage() {
             <QrCode size={15} strokeWidth={1.9} />
             QR코드
           </button>
+          {/*
+            🚨 **여기는 「수업 종료」가 아니라 「수업 삭제」다**(2026-08-19 jery, 파급 고지 후 승인).
+               상세 화면에서 교사가 원하는 것은 «이 수업을 치우는 것»이었고, 종료는 그걸 해 주지
+               않아 목록에 계속 남았다. 그래서 **이 화면에서만** 삭제로 바꿨다.
+            🚨 그 대가를 분명히 적어 둔다 — **진행 중인 수업도 확인 1회로 영구 삭제된다.**
+               참여자 명단과 학습 기록이 함께 사라지고 되돌릴 수 없다. CLAUDE.md 「되돌리지 말 것 셋」
+               3항(진행 중 카드의 삭제 버튼)은 **목록 카드에 대해서는 그대로 살아 있다** —
+               목록에서는 여전히 «진행 중이면 종료, 종료된 뒤에 삭제»다.
+            🔑 종료 자체는 서버에 남는다 — `status='ended'` 에 학생 참여 차단(L3 join)과
+               쓰기·AI 게이트가 매달려 있어서, 종료를 없애면 그 게이트들이 갈 곳을 잃는다.
+               없어진 것은 «이 화면의 버튼» 하나다.
+          */}
           <button
             className="ml-auto inline-flex h-10 items-center rounded-[10px] px-3.5 text-[13px] text-stone-500 hover:bg-stone-100 disabled:opacity-50"
-            disabled={isEnding || isEnded}
+            disabled={isDeleting}
             onClick={() => {
-              setEndError(null);
-              setIsConfirmingEnd(true);
+              setDeleteError(null);
+              setIsConfirmingDelete(true);
             }}
             type="button"
           >
-            {isEnded ? '종료됨' : '수업 종료'}
+            수업 삭제
           </button>
         </div>
 
@@ -309,32 +322,38 @@ export default function TeacherSessionPage() {
         />
       ) : null}
 
-      {isConfirmingEnd ? (
+      {/*
+        🔑 문구는 목록 카드의 삭제 모달과 **한 글자도 다르지 않게** 맞춘다 — 같은 일에 다른 말을
+           쓰면 교사가 «상세의 삭제는 뭔가 다른가»를 의심한다. tone="destructive" 도 같다.
+        🚨 지운 뒤에는 이 화면이 가리키는 수업이 없다 — 그래서 목록으로 돌려보낸다.
+           스토어에서도 지운다(안 지우면 목록이 없는 수업을 한 번 더 그린다).
+      */}
+      {isConfirmingDelete ? (
         <ConfirmModal
-          confirmLabel="종료"
-          description="학생들이 더 이상 참여할 수 없어요. 이미 저장된 학습 기록은 그대로 남아요."
-          error={endError}
-          isPending={isEnding}
+          confirmLabel="삭제"
+          description="참여자 명단과 학습 기록도 함께 영구 삭제됩니다. 되돌릴 수 없어요."
+          error={deleteError}
+          isPending={isDeleting}
           onClose={() => {
-            if (!isEnding) {
-              setIsConfirmingEnd(false);
+            if (!isDeleting) {
+              setIsConfirmingDelete(false);
             }
           }}
           onConfirm={async () => {
-            setIsEnding(true);
-            setEndError(null);
+            setIsDeleting(true);
+            setDeleteError(null);
             try {
-              const ended = await endSession(currentSession.id);
-              setCurrentSession({ ...currentSession, ...ended });
-              setIsConfirmingEnd(false);
+              await deleteSession(currentSession.id);
+              removeTeacherSession(currentSession.id);
+              navigate('/teacher', { replace: true });
             } catch (caught) {
-              setEndError(caught instanceof Error ? caught.message : '수업을 종료하지 못했습니다.');
-            } finally {
-              setIsEnding(false);
+              setIsDeleting(false);
+              setDeleteError(caught instanceof Error ? caught.message : '수업을 삭제하지 못했습니다.');
             }
           }}
-          pendingLabel="종료 중…"
-          title="이 수업을 종료할까요?"
+          pendingLabel="삭제 중…"
+          title="이 수업을 삭제할까요?"
+          tone="destructive"
         />
       ) : null}
     </main>
