@@ -64,19 +64,23 @@ export default function QrFullscreen({ code, sessionName, participantCount, onCl
       onClick={onClose}
       role="dialog"
     >
+      {/*
+        🔑 닫기 X 는 **패널 밖 화면 우상단**에 둔다. 패널 안 `absolute right-0 top-0` 에 두면
+           패널 폭이 내용에 맞춰 줄어드는 순간 X 가 수업 이름 위로 겹친다.
+      */}
+      <button
+        aria-label="닫기"
+        className="fixed right-4 top-4 inline-flex h-11 w-11 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100"
+        onClick={onClose}
+        type="button"
+      >
+        ✕
+      </button>
+
       <div
-        className="relative m-auto flex max-w-[92vw] flex-col items-center gap-4"
+        className="m-auto flex max-w-[92vw] flex-col items-center gap-4"
         onClick={(event) => event.stopPropagation()}
       >
-        <button
-          aria-label="닫기"
-          className="absolute right-0 top-0 inline-flex h-10 w-10 items-center justify-center rounded-full text-stone-500 hover:bg-stone-100"
-          onClick={onClose}
-          type="button"
-        >
-          ✕
-        </button>
-
         {sessionName ? <p className="mb-1 text-base text-stone-500">{sessionName}</p> : null}
 
         <div className="select-all font-mono text-[clamp(96px,18vw,200px)] font-bold leading-none tracking-[0.12em] text-stone-950">
