@@ -5,9 +5,12 @@
 // 프로젝터(1920×1080)에서만 조용히 잘린다 — 기준 구현이라면 486px 이 나올 자리다.
 // 「모바일에서 잘 보이니 됐다」로 이런 결함이 오래 살아남는다.
 //
-// 🔑 **입구가 둘이다.** 이 레포에는 QR 전체화면이 두 개 있고 죽은 중복이 아니다 —
-//    `QrFullscreenModal` = 교사 세션 화면, `QrFullscreen` = 학습 미리보기 패널.
-//    한쪽만 고치면 나머지 한쪽에서 그대로 잘린다. 그래서 이 파일은 **둘 다** 센다.
+// 🔑 **입구는 하나다**(2026-08-19 통합). 전에는 둘이었다 — `QrFullscreenModal`(교사 화면)과
+//    `QrFullscreen`(학습 화면). 죽은 중복이 아니라 **둘 다 살아 있으면서 조금씩 달랐다**:
+//    배경이 `bg-black/40` 대 `bg-black/70`, 라벨이 "Join Code" 대 "Join URL". 정책 한 줄을
+//    고칠 때마다 두 곳을 고쳐야 했고 실제로 한쪽만 고쳐진 채 남았다. 지금은 한 컴포넌트다.
+//    🚨 그래도 아래 「입구 목록이 실제 전부를 덮는다」는 남긴다 — 새 입구가 또 생기는 것이
+//       이 결함의 원래 형태였고, 목록에 없으면 위 검사들이 조용히 통과한다.
 //
 // 🔑 상한은 QR 자신에만 있는 게 아니다. QR 을 담은 카드가 px 로 묶여 있으면
 //    (옛 `max-w-md` / `max-w-2xl`) 카드가 먼저 막아서 QR 상한만 지워봐야 화면은 그대로다.
@@ -24,7 +27,7 @@ import { transformSync } from 'esbuild'
 const CLIENT_COMMON = path.resolve(__dirname, '..', '..', '..', 'client', 'src', 'components', 'common')
 
 /** QR 전체화면 입구. 새 입구가 생기면 여기에 더한다 — 하나만 고치는 사고를 막는 목록이다. */
-const ENTRANCES = ['QrFullscreenModal.tsx', 'QrFullscreen.tsx']
+const ENTRANCES = ['QrFullscreen.tsx']
 
 function sourceOf(file: string): string {
   const raw = readFileSync(path.join(CLIENT_COMMON, file), 'utf8')
@@ -75,6 +78,57 @@ for (const file of ENTRANCES) {
 
   test(`${file}: 참여 코드가 프로젝터에서 읽히는 크기다`, () => {
     assert.match(sourceOf(file), /text-\[clamp\(96px,18vw,200px\)\]/, `${file}: 참여 코드가 §10 v3 크기가 아니다`)
+  })
+}
+
+for (const file of ENTRANCES) {
+  test(`${file}: 배경이 흰색이고 z-[100] 이다 — 프로젝터로 쏘는 화면이다`, () => {
+    // 🚨 왜 있는가(2026-08-19 jery): 두 입구가 각각 `bg-black/40`·`bg-black/70` 이었다.
+    //    §10 금지 「어두운 배경 (프로젝터 가시성 저하)」 — 교실 뒤에서 QR 이 안 찍힌다.
+    //    어두운 배경은 «모달처럼 보이게» 하려던 것이었고, 이 화면은 모달이 아니다.
+    const overlay = /className="fixed inset-0[^"]*"/.exec(sourceOf(file))?.[0]
+    assert.ok(overlay, `${file}: 오버레이 컨테이너를 찾지 못했다`)
+    assert.match(overlay as string, /\bbg-white\b/, `${file}: 배경이 흰색이 아니다(§10 금지: 어두운 배경)`)
+    assert.doesNotMatch(overlay as string, /bg-black|bg-stone-[89]|bg-neutral-[89]/, `${file}: 어두운 배경이 되살아났다`)
+    assert.match(overlay as string, /z-\[100\]/, `${file}: §10 v3 는 z-[100] 을 요구한다(z-50 은 다른 층에 덮인다)`)
+  })
+
+  test(`${file}: 화면 문구가 한국어 정본이다 — 영문 라벨을 다시 붙이지 않는다`, () => {
+    // 🚨 "Join Code" · "Join URL" 이 프로젝터에 떠 있었다 — DESIGN-POLICY UI 언어는 한국어다.
+    //    수업 중 교실 앞에 영어가 뜨면 학생이 «내가 뭘 해야 하나»를 못 읽는다.
+    const code = sourceOf(file)
+    // 🔑 대소문자를 구분한다 — `joinUrl` **변수 이름**은 영문 라벨이 아니다. 앞서 `/join url/i`
+    //    로 잡으려다 변수를 라벨로 오인해 계약이 «고칠 수 없는 빨강»이 됐다.
+    assert.doesNotMatch(code, /"[^"]*Join (Code|URL)|>\s*Join (Code|URL)|Join Code|Join URL/, `${file}: 영문 라벨이 남아 있다`)
+    assert.ok(
+      code.includes('QR 코드를 스캔하거나 코드를 입력하세요'),
+      `${file}: §10 정본 안내 문구가 없다`,
+    )
+    // §10 표 — 안내 16px / ≥640px 20px · keep-all.
+    assert.match(code, /text-base[\s\S]{0,80}sm:text-xl/, `${file}: 안내 문구가 16px→20px 두 갈래가 아니다`)
+    assert.match(code, /keep-all/, `${file}: 안내 문구에 keep-all 이 없다 — 낱말이 중간에서 끊긴다`)
+  })
+
+  test(`${file}: 참여자 수는 살아 있을 때만 그린다 — 모르는 것을 아는 것처럼 말하지 않는다`, () => {
+    // 🔑 §10 은 참여자 수(emerald 펄스)를 요구한다. 그런데 이 앱에는 그 숫자를 **모르는 입구**가
+    //    있다 — 학습 화면(시연작)은 명단을 들고 있지 않고, 「내 수업」 목록은 폴링하지 않는다.
+    // 🚨 그래서 0 을 기본값으로 두지 않는다. `participantCount = 0` 이면 프로젝터에
+    //    「참여 0명」이 굳은 채로 떠서, 교사가 «아직 아무도 안 들어왔다»로 잘못 읽는다.
+    const code = sourceOf(file)
+    assert.match(code, /participantCount/, `${file}: 참여자 수를 받지 않는다(§10 표)`)
+    assert.doesNotMatch(
+      code,
+      /participantCount\s*=\s*0|participantCount\s*\?\?\s*0/,
+      `${file}: 참여자 수에 0 기본값이 붙었다 — 모르는 것을 「0명」이라고 말한다`,
+    )
+    assert.match(
+      code,
+      // esbuild 가 `undefined` 를 `void 0` 으로 바꾼다 — 변환 뒤 소스를 보므로 둘 다 받는다.
+      /participantCount === (?:undefined|void 0) \? null/,
+      `${file}: 모를 때 그 줄을 빼는 갈래가 없다`,
+    )
+    assert.match(code, /animate-pulse[\s\S]{0,60}bg-emerald-500/, `${file}: emerald 펄스 dot 이 없다(§10 표)`)
+    assert.match(code, /text-\[clamp\(24px,3vw,32px\)\]/, `${file}: 참여자 수 크기가 §10 표와 다르다`)
   })
 }
 

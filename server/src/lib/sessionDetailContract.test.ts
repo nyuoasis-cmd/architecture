@@ -124,7 +124,7 @@ test('9) 시연 문구가 용어 정본(ui-glossary §H) 한 계열이다 — �
 })
 
 test('10) 없는 버튼을 약속하지 않는다 — 「수업을 시작하세요」 금지 (2026-08-16 신입샘 t2)', () => {
-  // 🚨 이 화면에 있는 버튼은 시연하기·QR 전체화면·수업 종료 셋뿐이다. «시작»은 없고, 없는 게 맞다 —
+  // 🚨 이 화면에 있는 버튼은 시연하기·QR코드·수업 종료 셋뿐이다. «시작»은 없고, 없는 게 맞다 —
   //    학생은 코드로 들어오는 순간 각자 진행한다. 그런데 문구가 시작을 약속하면 초임 교사는
   //    「학생이 들어왔어요! 근데 수업을 어떻게 시작하지?」에서 멈춘다(신입샘 s3 vs s5).
   // 🔑 그래서 검사는 «버튼이 있는가»가 아니라 **«없는 것을 약속하지 않는가»**를 본다.
@@ -142,7 +142,44 @@ test('10) 없는 버튼을 약속하지 않는다 — 「수업을 시작하세�
   )
 
   // 🚨 음성 대조군 — 검사가 실제로 문구를 보고 있는가. 화면에 실제로 있는 버튼 셋은 그대로여야 한다.
-  for (const label of ['🎬 시연하기', '📱 QR 전체화면', '수업 종료']) {
+  //    🔤 QR 버튼 문구는 2026-08-19 에 §10 정본 「QR코드」로 바뀌었다(구 「📱 QR 전체화면」).
+  for (const label of ['🎬 시연하기', 'QR코드', '수업 종료']) {
     assert.ok(body.includes(label), `${DETAIL} 에서 «${label}» 이 사라졌다 — 이 검사가 헛돌고 있다`)
   }
+})
+
+test('11) QR 은 전체화면 하나로만 보여 준다 — 헤더에 이미지를 박지 않고, 아이콘만 두지 않는다', () => {
+  // 🚨 왜 있는가(2026-08-19 jery): 상세 헤더에 `<QrInline size={132}>` 로 **132px QR 이미지가
+  //    직접 박혀** 있었다 — DESIGN-POLICY §10 금지 「카드에 QR 이미지 직접 표시」. 프로젝터로
+  //    쓸 수 없는 크기인데 헤더 폭을 잡아먹어 수업 이름을 밀어냈다.
+  // 🚨 목록 카드의 QR 버튼은 **아이콘 하나뿐**이었다 — §10 금지 「QR 아이콘만 단독 사용」.
+  //    시니어 교사 비중이 높은 사용자층이라 아이콘만으로는 «QR 인가 설정인가»에서 멈춘다.
+  // 🔑 두 자리를 한 계약에서 본다 — 한쪽만 고치고 끝내는 것이 이 결함이 오래 산 방식이었다.
+  const detail = stripComments(read(DETAIL))
+  const card = stripComments(read('client/src/components/teacher/SessionCard.tsx'))
+
+  assert.equal(/QrInline/.test(detail), false, `${DETAIL} 에 QR 이미지가 직접 박혀 있다(§10 금지)`)
+  assert.equal(
+    /<QRCodeSVG\b/.test(detail),
+    false,
+    `${DETAIL} 이 QR 을 직접 그린다 — QR 은 전체화면 컴포넌트 하나만 그려야 한다`,
+  )
+
+  for (const [name, source] of [['수업 상세', detail], ['목록 카드', card]] as const) {
+    assert.ok(source.includes('QR코드'), `${name} 의 QR 버튼에 「QR코드」 텍스트가 없다(§10 금지: 아이콘 단독)`)
+    assert.equal(
+      /QR\s?전체화면/.test(source),
+      false,
+      `${name} 에 구 문구 「QR 전체화면」이 남아 있다 — «전체화면»은 구현 낱말이다`,
+    )
+    // §10 버튼 표 — h-10 · radius 13 · min-w 92 · 13px/600.
+    assert.ok(
+      /min-w-\[92px\][\s\S]{0,200}rounded-\[13px\]|rounded-\[13px\][\s\S]{0,200}min-w-\[92px\]/.test(source),
+      `${name} 의 QR 버튼 치수가 §10 표(radius 13 · min-w 92)와 다르다`,
+    )
+    assert.ok(/text-\[13px\] font-semibold/.test(source), `${name} 의 QR 버튼 글자가 13px/600 이 아니다`)
+  }
+
+  // 음성 대조군 — 「QR코드」 검사가 아이콘 전용 버튼을 실제로 잡는지.
+  assert.equal('<button aria-label="QR 코드 보기"><svg /></button>'.includes('QR코드'), false, '11) 이 실패할 수 없는 계측이면 안 된다')
 })
