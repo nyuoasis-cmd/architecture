@@ -199,6 +199,11 @@ test('11) QR 은 전체화면 하나로만 보여 준다 — 헤더에 이미지
   // 🔑 두 자리를 한 계약에서 본다 — 한쪽만 고치고 끝내는 것이 이 결함이 오래 산 방식이었다.
   const detail = stripComments(read(DETAIL))
   const card = stripComments(read('client/src/components/teacher/SessionCard.tsx'))
+  // 🚨 2026-08-19 추가: 버튼 «이름»을 안내 문구에 박아 둔 자리가 더 있었다.
+  //    ParticipantList 의 빈 상태가 「📱 QR 전체화면」인 채로 남아, 교사에게 **화면에 없는
+  //    버튼**을 가리키고 있었다. 계약이 두 파일만 보고 있어서 놓쳤고, 배포된 번들을
+  //    문자열로 훑다가 잡혔다. 이름을 부르는 곳은 전부 같은 묶음으로 본다.
+  const roster = stripComments(read('client/src/components/teacher/ParticipantList.tsx'))
 
   assert.equal(/QrInline/.test(detail), false, `${DETAIL} 에 QR 이미지가 직접 박혀 있다(§10 금지)`)
   assert.equal(
@@ -206,6 +211,15 @@ test('11) QR 은 전체화면 하나로만 보여 준다 — 헤더에 이미지
     false,
     `${DETAIL} 이 QR 을 직접 그린다 — QR 은 전체화면 컴포넌트 하나만 그려야 한다`,
   )
+
+  // 🔑 안내 문구만 있는 파일(ParticipantList)은 «구 문구가 없는가»만 본다 —
+  //    거기엔 버튼이 없으므로 치수 검사를 걸면 영영 통과할 수 없는 계약이 된다.
+  assert.equal(
+    /QR\s?전체화면/.test(roster),
+    false,
+    'ParticipantList 의 안내 문구에 구 「QR 전체화면」이 남아 있다 — 없는 버튼을 가리킨다',
+  )
+  assert.ok(roster.includes('QR코드'), 'ParticipantList 가 학생을 받는 방법을 안내하지 않는다')
 
   for (const [name, source] of [['수업 상세', detail], ['목록 카드', card]] as const) {
     assert.ok(source.includes('QR코드'), `${name} 의 QR 버튼에 「QR코드」 텍스트가 없다(§10 금지: 아이콘 단독)`)

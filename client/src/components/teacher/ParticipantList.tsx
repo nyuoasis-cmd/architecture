@@ -44,7 +44,13 @@ export default function ParticipantList({ participants, totalQas }: ParticipantL
     return (
       <div className="rounded-xl border border-dashed border-[var(--color-border)] bg-white px-6 py-10 text-center">
         <p className="text-sm font-medium text-stone-700">아직 들어온 학생이 없어요</p>
-        <p className="mt-1 text-sm text-stone-500">「📱 QR 전체화면」을 교실 화면에 띄우면 학생이 코드로 들어옵니다.</p>
+        {/*
+          🚨 버튼 «이름»을 문구에 박을 때는 그 버튼과 한 묶음으로 고쳐야 한다. 2026-08-19 에
+             §10 정본 「QR코드」로 바꾸면서 여기가 「📱 QR 전체화면」인 채로 남아, 교사에게
+             **화면에 없는 버튼**을 가리키고 있었다(배포된 번들을 훑다가 잡았다).
+          🔑 sessionDetailContract 11) 이 이제 이 파일까지 함께 본다.
+        */}
+        <p className="mt-1 text-sm text-stone-500">위쪽 「QR코드」를 눌러 교실 화면에 띄우면 학생이 코드로 들어옵니다.</p>
       </div>
     );
   }
