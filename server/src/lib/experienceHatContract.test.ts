@@ -126,3 +126,21 @@ test('8) 데이터가 없는 강은 머리표 없이 뜬다 — «전 강에 머
   const hat = read('components/learn/ExperienceHat.tsx')
   assert.match(hat, /if \(!hat\) return null/, '머리표가 데이터 없이도 무언가를 그리려 한다')
 })
+
+test('9) 도슨트 띠가 되살아나지 않는다 — 머리표가 흡수했다 (결정 D-2)', () => {
+  // 🚨 안 정하면 화면 위에 띠가 세 줄로 쌓인다(비유 다리 + 도슨트 + 머리표).
+  //    도슨트 **데이터**(GhScriptStep.docent)는 그대로 산다 — 없어진 것은 «자기 띠»뿐이다.
+  const tab = read('components/learn/GhSimTab.tsx')
+  assert.doesNotMatch(tab, /지금 하는 일/, '유사 GitHub 에 도슨트 띠가 되살아났다 — 띠가 세 줄로 쌓인다')
+  assert.doesNotMatch(tab, /step\.docent/, '도슨트를 부품이 다시 그린다 — 머리표와 두 곳에서 말한다')
+
+  // 흡수한 쪽이 실제로 말하는가 — 머리표의 「지금 할 일」이 도슨트를 받는다.
+  const panel = read('components/learn/ContentPanel.tsx')
+  assert.match(panel, /docent/, '머리표가 도슨트를 받지 않는다 — 흡수해 놓고 아무도 말하지 않는 자막이 된다')
+})
+
+test('10) 유사 GitHub 의 비유 다리는 살아 있다 (D-2 는 도슨트만 흡수했다)', () => {
+  const tab = read('components/learn/GhSimTab.tsx')
+  assert.match(tab, /아까 읽은 비유/, '비유 다리까지 없앴다 — 읽기 탭에서 심은 비유가 화면과 끊긴다')
+  assert.match(tab, /새 용어는/, '새 용어 안내가 도슨트 띠와 함께 사라졌다')
+})
