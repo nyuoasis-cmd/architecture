@@ -89,6 +89,7 @@ export default function ContentPanel({
   const miniSession = useLearnStore((state) => state.miniSession);
   const labMissionIndex = useLearnStore((state) => state.labMissionIndex);
   const ghSession = useLearnStore((state) => state.ghSession);
+  const tourProgress = useLearnStore((state) => state.tourProgress);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [teacherExplain, setTeacherExplain] = useState<TeacherExplainBlock | null>(null);
   const [teacherExplainStatus, setTeacherExplainStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
@@ -123,8 +124,12 @@ export default function ContentPanel({
         progress: { done: Math.min(at, script.steps.length), total: script.steps.length },
       };
     }
+    // 견학 — 부품이 보고한 진행만 받는다. 다른 문항의 보고는 버린다(qaId 대조).
+    if (tourProgress && tourProgress.qaId === qaId) {
+      return { now: null, progress: { done: tourProgress.done, total: tourProgress.total } };
+    }
     return { now: null, progress: null };
-  }, [chapter.id, ghSession, labMissionIndex, miniSession]);
+  }, [chapter.id, ghSession, labMissionIndex, miniSession, qaId, tourProgress]);
   const inlineMeta = qaId ? getDemoComponent(qaId) : undefined;
 
   const tabs = useMemo(() => {

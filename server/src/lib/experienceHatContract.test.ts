@@ -144,3 +144,11 @@ test('10) 유사 GitHub 의 비유 다리는 살아 있다 (D-2 는 도슨트만
   assert.match(tab, /아까 읽은 비유/, '비유 다리까지 없앴다 — 읽기 탭에서 심은 비유가 화면과 끊긴다')
   assert.match(tab, /새 용어는/, '새 용어 안내가 도슨트 띠와 함께 사라졌다')
 })
+
+test('11) 견학 진행은 «지금 문항»의 것만 머리표에 온다 — 옆 문항 진행이 새면 거짓말이 된다', () => {
+  const tour = read('components/learn/TourTab.tsx')
+  assert.match(tour, /setTourProgress\(\{ qaId/, '견학이 진행을 문항 이름표와 함께 보고하지 않는다')
+  assert.match(tour, /return \(\) => setTourProgress\(null\)/, '견학을 떠날 때 보고를 거두지 않는다 — 다음 화면에 남는다')
+  const panel = read('components/learn/ContentPanel.tsx')
+  assert.match(panel, /tourProgress\.qaId === qaId/, '머리표가 남의 문항 진행을 그대로 받는다')
+})
