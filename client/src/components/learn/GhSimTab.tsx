@@ -89,17 +89,12 @@ export default function GhSimTab({ script, onArtifact }: GhSimTabProps) {
             {index + 1} {stage}
           </span>
         ))}
-      </div>
-
-      {/* 도슨트 자막 — 매 단계 생활어 한 문장이 항상 떠 있다 (쉬움 3원칙 2) */}
-      <div className="flex items-start gap-2.5 rounded-xl border border-indigo-200 bg-indigo-50 px-4 py-3 text-[13.5px] text-indigo-900">
-        <span className="text-[17px]">🧭</span>
-        <div>
-          <b>지금 하는 일</b> — {done ? script.outro : step.docent}
-          {script.newTerms.length > 0 ? (
-            <span className="text-indigo-500"> (이번 체험의 새 용어는 {script.newTerms.join('·')} 뿐)</span>
-          ) : null}
-        </div>
+        {/* 🔑 새 용어 안내는 도슨트 띠가 데려가던 것 — 띠가 머리표로 흡수되면서 여기로 옮겼다(결정 D-2). */}
+        {script.newTerms.length > 0 ? (
+          <span className="text-[12px] text-[var(--color-text-muted)]">
+            (이번 체험의 새 용어는 {script.newTerms.join('·')} 뿐)
+          </span>
+        ) : null}
       </div>
 
       {/* 가짜 GitHub 프레임 */}

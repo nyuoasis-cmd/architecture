@@ -88,6 +88,7 @@ export default function ContentPanel({
   const setLabMissionIndex = useLearnStore((state) => state.setLabMissionIndex);
   const miniSession = useLearnStore((state) => state.miniSession);
   const labMissionIndex = useLearnStore((state) => state.labMissionIndex);
+  const ghSession = useLearnStore((state) => state.ghSession);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [teacherExplain, setTeacherExplain] = useState<TeacherExplainBlock | null>(null);
   const [teacherExplainStatus, setTeacherExplainStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
@@ -112,8 +113,18 @@ export default function ContentPanel({
     if (chapter.id === LAB_CHAPTER_ID) {
       return { now: null, progress: { done: labMissionIndex, total: LAB_MISSIONS.length } };
     }
+    // 유사 GitHub — 도슨트 자막이 머리표 「지금 할 일」로 들어왔다(결정 D-2). 띠를 세 줄로 쌓지 않는다.
+    const script = getGhScript(chapter.id);
+    if (script) {
+      const at = ghSession?.scopeId === script.scopeId ? ghSession.stepIndex : 0;
+      const done = at >= script.steps.length;
+      return {
+        now: done ? script.outro : (script.steps[at]?.docent ?? null),
+        progress: { done: Math.min(at, script.steps.length), total: script.steps.length },
+      };
+    }
     return { now: null, progress: null };
-  }, [chapter.id, labMissionIndex, miniSession]);
+  }, [chapter.id, ghSession, labMissionIndex, miniSession]);
   const inlineMeta = qaId ? getDemoComponent(qaId) : undefined;
 
   const tabs = useMemo(() => {
