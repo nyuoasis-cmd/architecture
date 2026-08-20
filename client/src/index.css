@@ -1040,3 +1040,193 @@
     scrollbar-width: none;
   }
 }
+
+/* ── 📋 설명 노트의 «층 3개» (2026-08-20 jery 승인) ───────────────────────────
+   층 1 = 수업 중 30초 · 층 2 = 수업 전 3분 · 층 3 = 물어보는 학생이 있을 때만.
+   🔑 층 1 은 «수업 중에 흘깃 보는 것»이라 다른 층보다 글자가 크고 여백이 넓다.
+      같은 크기로 그리면 30초 안에 눈이 못 찾는다. */
+.teacher-layers__tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.teacher-layers__tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 7px 8px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.teacher-layers__tab.is-active {
+  border-color: var(--color-accent);
+  background: color-mix(in srgb, var(--color-accent) 10%, white);
+  color: var(--color-text-primary);
+}
+
+.teacher-layers__tab-label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.teacher-layers__tab-hint {
+  font-size: 10px;
+  opacity: 0.75;
+}
+
+.teacher-layers__panel.is-hidden {
+  display: none;
+}
+
+.teacher-layers__panel > * + * {
+  margin-top: 12px;
+}
+
+.teacher-layers__opening,
+.teacher-layers__closing {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--color-time-before) 12%, white);
+  color: color-mix(in srgb, var(--color-time-before) 82%, black);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.65;
+}
+
+.teacher-layers__closing {
+  background: color-mix(in srgb, var(--color-time-after) 12%, white);
+  color: color-mix(in srgb, var(--color-time-after) 82%, black);
+}
+
+.teacher-layers__steps {
+  margin: 0;
+  padding-left: 20px;
+}
+
+.teacher-layers__steps li + li {
+  margin-top: 12px;
+}
+
+/* 학생이 화면에서 «하는 것» — 치는·누르는·짚는 것. 말과 섞이면 수업 중에 못 찾는다. */
+.teacher-layers__act {
+  margin: 0 0 4px;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: var(--color-bg-input);
+  color: var(--color-text-primary);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.teacher-layers__say {
+  color: var(--color-text-body);
+  font-size: 13px;
+  line-height: 1.7;
+}
+
+.teacher-layers__say p {
+  margin: 0 0 6px;
+}
+
+.teacher-layers__say p:last-child {
+  margin-bottom: 0;
+}
+
+.teacher-layers__why-heading {
+  margin: 0 0 6px;
+  color: var(--color-text-primary);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.teacher-layers__why-body {
+  color: var(--color-text-body);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.teacher-layers__why-body p {
+  margin: 0 0 8px;
+}
+
+.teacher-layers__why-body p:last-child {
+  margin-bottom: 0;
+}
+
+/* 🚨 「여기서 끊으세요」 — 비유의 한계 또는 오해의 경계. 이 칸을 못 찾으면 오해를 심는다. */
+.teacher-layers__stop {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--color-misconception-label) 35%, white);
+  background: color-mix(in srgb, var(--color-misconception-label) 8%, white);
+}
+
+.teacher-layers__stop-label {
+  margin: 0 0 6px;
+  color: var(--color-misconception-label);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.teacher-layers__stop-body {
+  color: color-mix(in srgb, var(--color-misconception-label) 88%, black);
+  font-size: 12px;
+  line-height: 1.75;
+}
+
+.teacher-layers__stop-body p {
+  margin: 0 0 8px;
+}
+
+.teacher-layers__stop-body p:last-child {
+  margin-bottom: 0;
+}
+
+.teacher-layers__more {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.teacher-layers__background > * + * {
+  margin-top: 10px;
+}
+
+/* 층이 있을 때 «훑기/정독» 토글 자리에 들어가는 이름표. */
+.teacher-explain-panel__mode-note {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+/* 🖨️ 인쇄 — 층 1 만 보이면 «수업 전에 읽을 것»이 종이에서 사라진다. 전부 편다. */
+@media print {
+  .teacher-layers__tabs,
+  .teacher-layers__more {
+    display: none;
+  }
+
+  .teacher-layers__panel.is-hidden {
+    display: block;
+  }
+}
