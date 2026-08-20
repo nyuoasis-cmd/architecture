@@ -69,6 +69,12 @@ type LearnStoreState = {
   labSession: { qaId: string; state: LabState; lines: LabEvent[]; history: string[] } | null;
   ghSession: GhSession | null;
   miniSession: MiniSession | null;
+  /**
+   * 🧭 견학 진행 — 머리표가 「얼마나 남았나」를 말하려면 부품 밖에서 세야 한다.
+   * 🔑 부품(TourTab)이 **보고만** 한다. 여기 값으로 미션 상태를 되돌리지 않는다 — 진실은 부품 안에 있다.
+   * 🔑 `qaId` 를 함께 들고 있어야 옆 문항의 진행이 머리표에 새지 않는다.
+   */
+  tourProgress: { qaId: string; done: number; total: number } | null;
   setCurrentQaId: (qaId: string) => void;
   setScenarioId: (scenarioId: string) => void;
   setMobileTab: (mobileTab: MobileTab) => void;
@@ -77,6 +83,7 @@ type LearnStoreState = {
   setLabSession: (update: LabSessionUpdate) => void;
   setGhSession: (update: GhSessionUpdate) => void;
   setMiniSession: (update: MiniSessionUpdate) => void;
+  setTourProgress: (tourProgress: { qaId: string; done: number; total: number } | null) => void;
   resetForQa: (qaId: string, scenarioId: string) => void;
 };
 
@@ -92,6 +99,7 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
   labSession: null,
   ghSession: null,
   miniSession: null,
+  tourProgress: null,
   setCurrentQaId: (currentQaId) => set({ currentQaId }),
   setScenarioId: (scenarioId) => set({ scenarioId }),
   setMobileTab: (mobileTab) => set({ mobileTab }),
@@ -103,6 +111,7 @@ export const useLearnStore = create<LearnStoreState>((set) => ({
     set((store) => ({ ghSession: typeof update === 'function' ? update(store.ghSession) : update })),
   setMiniSession: (update) =>
     set((store) => ({ miniSession: typeof update === 'function' ? update(store.miniSession) : update })),
+  setTourProgress: (tourProgress) => set({ tourProgress }),
   // 🔑 문항을 바꿔도 **탭 상태는 유지한다**(읽기 → 읽기). 매번 첫 탭으로 튕기면
   //    «견학만 몰아서 보는» 동선이 끊긴다. 새 문항에 그 탭이 없으면 ContentPanel 이 접는다.
   resetForQa: (currentQaId, scenarioId) => set({ currentQaId, scenarioId }),

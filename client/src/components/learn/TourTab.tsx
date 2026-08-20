@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { VibeTourMission } from '../../data/vibe-stubs';
+import { useLearnStore } from '../../store/learn-store';
 
 type TourTabProps = {
   qaId: string;
@@ -29,6 +30,14 @@ export default function TourTab({ qaId, missions }: TourTabProps) {
   }, [qaId]);
 
   const doneCount = missions.filter((mission) => done[mission.id]).length;
+  const setTourProgress = useLearnStore((store) => store.setTourProgress);
+
+  // 🧭 머리표에 진행을 **보고만** 한다 — 머리표가 「얼마나 남았나」에 답하려면 부품 밖에서 세야 한다.
+  //    🔑 여기서 읽어 되돌리지 않는다. 미션의 진실은 이 부품 안에 있다.
+  useEffect(() => {
+    setTourProgress({ qaId, done: doneCount, total: missions.length });
+    return () => setTourProgress(null);
+  }, [doneCount, missions.length, qaId, setTourProgress]);
 
   return (
     <div className="mx-auto flex w-full max-w-[720px] flex-col gap-4 px-5 py-7">
