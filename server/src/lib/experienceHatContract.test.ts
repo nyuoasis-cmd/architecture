@@ -152,3 +152,11 @@ test('11) 견학 진행은 «지금 문항»의 것만 머리표에 온다 — �
   const panel = read('components/learn/ContentPanel.tsx')
   assert.match(panel, /tourProgress\.qaId === qaId/, '머리표가 남의 문항 진행을 그대로 받는다')
 })
+
+test('12) 계측 — 몇 강에 머리표가 있는가 (판정 아님. 다음 사람이 다시 세지 않게)', () => {
+  const withHat = Object.keys(HAT_BY_CHAPTER).length
+  const overrides = Object.keys(HAT_BY_QA).length
+  console.log(`[체험 머리표] 강 ${withHat}/${CHAPTERS.length} · 문항 덮어쓰기 ${overrides}개`)
+  // 🔑 «전 강 필수»를 여기서 걸지 않는다(계약 8번의 이유). 세어서 적어 둘 뿐이다.
+  assert.ok(withHat > 0, '머리표가 한 강도 없다 — 그러면 이 계약 전체가 아무것도 안 보고 있다')
+})
