@@ -7,9 +7,10 @@ import type { Chapter, QaStub } from '../../data/qa-stubs';
 import { getExtras } from '../../data/learn-extras';
 import { getGhScript } from '../../data/gh-scripts';
 import { getMiniLab } from '../../data/mini-labs';
+import { missionIndexOfMini, nextStepOfMini } from '../../lib/mini-lab';
 import { PHISHING_QA_ID } from '../../data/phishing-check';
 import { getTourKit } from '../../data/tour-kits';
-import { LAB_CHAPTER_ID, LAB_QA_ID, LAB_QA_MISSION_SPANS } from '../../data/vibe-lab-ch18';
+import { LAB_CHAPTER_ID, LAB_MISSIONS, LAB_QA_ID, LAB_QA_MISSION_SPANS } from '../../data/vibe-lab-ch18';
 import { labSaveArtifact } from '../../lib/lab-api';
 import { getDemoComponent } from '../../demos/registry';
 import { DEMO_LAYOUT_MAX_WIDTH } from '../../demos/types';
@@ -17,6 +18,7 @@ import { getTeacherExplain, TeacherExplainClientError, type TeacherExplainBlock 
 import { earnedMissionIndex, missionIndexOf } from '../../lib/lab-shell';
 import { reportLabMission } from '../../lib/progress';
 import { useLearnStore, type ContentTab } from '../../store/learn-store';
+import ExperienceHat from './ExperienceHat';
 import GhSimTab from './GhSimTab';
 import GraduationExhibit from './GraduationExhibit';
 import LabTab from './LabTab';
@@ -84,12 +86,34 @@ export default function ContentPanel({
   const contentTab = useLearnStore((state) => state.contentTab);
   const setContentTab = useLearnStore((state) => state.setContentTab);
   const setLabMissionIndex = useLearnStore((state) => state.setLabMissionIndex);
+  const miniSession = useLearnStore((state) => state.miniSession);
+  const labMissionIndex = useLearnStore((state) => state.labMissionIndex);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [teacherExplain, setTeacherExplain] = useState<TeacherExplainBlock | null>(null);
   const [teacherExplainStatus, setTeacherExplainStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
   const [teacherExplainMessage, setTeacherExplainMessage] = useState<string | null>(null);
 
   const extras = getExtras(qaId);
+
+  /**
+   * 🧭 머리표의 «지금 할 일»·진행 — 부품이 아는 살아 있는 값. 데이터의 `now` 보다 이것이 우선한다.
+   * 🔑 지금은 터미널형 두 갈래(미니 실습실 · 12강 실습실)만 셀 수 있다.
+   *    셀 수 없는 부품은 `null` 로 두고 머리표는 데이터의 한 걸음만 그린다 — 지어내지 않는다.
+   */
+  const hatLive = useMemo(() => {
+    const miniLab = getMiniLab(chapter.id);
+    if (miniLab && miniSession?.scopeId === miniLab.scopeId) {
+      const next = nextStepOfMini(miniLab, miniSession.state);
+      return {
+        now: next ? `${next} — 쳐 보세요.` : null,
+        progress: { done: missionIndexOfMini(miniLab, miniSession.state), total: miniLab.missions.length },
+      };
+    }
+    if (chapter.id === LAB_CHAPTER_ID) {
+      return { now: null, progress: { done: labMissionIndex, total: LAB_MISSIONS.length } };
+    }
+    return { now: null, progress: null };
+  }, [chapter.id, labMissionIndex, miniSession]);
   const inlineMeta = qaId ? getDemoComponent(qaId) : undefined;
 
   const tabs = useMemo(() => {
@@ -343,7 +367,17 @@ export default function ContentPanel({
           강별 배정(MAP-experience-23lessons)대로 부품을 채운다.
         */}
         {activeTab === 'exp' ? (
-          chapter.id === LAB_CHAPTER_ID ? (
+          <>
+            {/*
+              🧭 체험 머리표 — 부품 3종이 **공용으로 하나만** 쓴다(결정 D-5). 미는 자리도 여기 한 곳뿐이다.
+              🚨 부품 안에 각자 만들지 말 것 — 같은 것이 두 벌이면 한쪽만 고쳐지고 강마다 화면이 달라진다.
+              🔑 `sticky` 로 붙어 있어 스크롤로 사라지지 않는다 — 맥락이 스크롤백 안에서 밀려 사라지는 것이
+                 jery 요청 4(「왜 하는지·언제 쓰는지를 알려 줄 것」)의 진원이었다.
+            */}
+            <div className="sticky top-0 z-10 bg-[var(--color-bg-page)] pb-1">
+              <ExperienceHat chapterId={chapter.id} liveNow={hatLive.now} progress={hatLive.progress} qaId={qaId} />
+            </div>
+            {chapter.id === LAB_CHAPTER_ID ? (
             <div className="flex h-full flex-col p-3 lg:p-4">
               {/* 🔑 전 문항이 같은 실습실을 이어 쓴다(SDD 결정 21) — 그래서 아래 LabTab 에는
                   지금 문항이 아니라 **대표 이름표(LAB_QA_ID)** 를 준다. 제출·진도·상태가 한 줄에 쌓인다. */}
@@ -428,10 +462,11 @@ export default function ContentPanel({
               <TourTab missions={extras.tour} qaId={qaId} />
             </div>
           ) : (
-            <div className="mx-auto w-full max-w-[720px] px-5 py-7 text-sm text-[var(--color-text-muted)]">
-              이 문항의 체험은 준비 중이에요. 📖 읽기와 📝 퀴즈를 먼저 진행해 주세요.
-            </div>
-          )
+              <div className="mx-auto w-full max-w-[720px] px-5 py-7 text-sm text-[var(--color-text-muted)]">
+                이 문항의 체험은 준비 중이에요. 📖 읽기와 📝 퀴즈를 먼저 진행해 주세요.
+              </div>
+            )}
+          </>
         ) : null}
 
         {activeTab === 'quiz' ? (
