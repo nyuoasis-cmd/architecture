@@ -170,7 +170,9 @@ export default function SessionCard({ session }: SessionCardProps) {
                   QR코드
                 </button>
                 <button
-                  className="inline-flex h-11 items-center rounded-[10px] px-3.5 text-[13px] text-stone-500 hover:bg-stone-100"
+                  /* §10-A: 종료 = 테두리 중립 텍스트 버튼 · h44 · radius 10 · 1px border · text-muted.
+                     테두리가 없으면 «누를 수 있는 것»으로 안 읽혀 교사가 카드를 열어 종료를 찾는다. */
+                  className="inline-flex h-11 items-center rounded-[10px] border border-[var(--color-border)] px-3.5 text-[13px] text-stone-500 hover:bg-stone-100"
                   onClick={(event) => {
                     event.stopPropagation();
                     setEndError(null);
