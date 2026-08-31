@@ -62,7 +62,7 @@ export default function TeacherDashboardPage() {
           </p>
         </div>
         <button
-          className="inline-flex h-10 flex-shrink-0 items-center gap-1.5 rounded-[10px] bg-stone-950 px-5 text-sm font-medium text-white hover:bg-stone-800"
+          className="inline-flex h-11 flex-shrink-0 items-center gap-1.5 rounded-[10px] bg-stone-950 px-5 text-sm font-medium text-white hover:bg-stone-800"
           onClick={() => setIsModalOpen(true)}
           type="button"
         >
@@ -96,13 +96,29 @@ export default function TeacherDashboardPage() {
       */}
       {isEmpty ? (
         <div className="flex flex-col items-center rounded-[12px] border border-dashed border-[var(--color-border)] bg-white px-6 py-14 text-center">
-          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-100 text-lg" aria-hidden="true">
-            📚
+          {/*
+            🚨 이모지(📚) 를 쓰지 않는다(BUILDER-UX §8 D12) — 기기마다 크기·모양이 달라
+               화면이 장난스러워지고, 폰트가 없는 기기에서는 두부(□)로 뜬다. 선 아이콘만.
+          */}
+          <div className="flex h-11 w-11 items-center justify-center rounded-full bg-stone-100 text-stone-400" aria-hidden="true">
+            <svg
+              fill="none"
+              height="20"
+              stroke="currentColor"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth="1.8"
+              viewBox="0 0 24 24"
+              width="20"
+            >
+              <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H10a2 2 0 0 1 2 2v13a1.5 1.5 0 0 0-1.5-1.5h-5A1.5 1.5 0 0 1 4 16z" />
+              <path d="M20 5.5A1.5 1.5 0 0 0 18.5 4H14a2 2 0 0 0-2 2v13a1.5 1.5 0 0 1 1.5-1.5h5A1.5 1.5 0 0 0 20 16z" />
+            </svg>
           </div>
           <p className="mt-4 text-base font-medium text-stone-900">아직 만든 수업이 없어요</p>
           <p className="mt-1 text-sm text-stone-500">수업을 만들면 학생들이 참여할 수 있어요</p>
           <button
-            className="mt-5 inline-flex h-10 items-center rounded-[10px] bg-stone-950 px-5 text-sm font-medium text-white hover:bg-stone-800"
+            className="mt-5 inline-flex h-11 items-center rounded-[10px] bg-stone-950 px-5 text-sm font-medium text-white hover:bg-stone-800"
             onClick={() => setIsModalOpen(true)}
             type="button"
           >
@@ -127,7 +143,8 @@ export default function TeacherDashboardPage() {
       */}
       {endedSessions.length > 0 ? (
         <section className={activeSessions.length > 0 ? 'mt-10' : ''}>
-          <p className="mb-3 text-xs tracking-[0.05em] text-stone-400">종료됨</p>
+          {/* 상태 낱말 5종 고정(D11) — 「종료됨」은 폐기, 「종료」로 통일한다. */}
+          <p className="mb-3 text-xs tracking-[0.05em] text-stone-400">종료</p>
           <div className="flex flex-col gap-3">
             {endedSessions.map((session) => (
               <SessionCard key={session.id} session={session} />
