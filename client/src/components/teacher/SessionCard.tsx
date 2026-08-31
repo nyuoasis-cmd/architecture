@@ -141,10 +141,10 @@ export default function SessionCard({ session }: SessionCardProps) {
                   🚨 아이콘 하나만 있던 버튼이다 — §10 금지 「QR 아이콘만 단독 사용 — 반드시
                      텍스트 병행」. 시니어 교사 비중이 높은 사용자층이라 아이콘만으로는
                      «이게 QR 인가 설정인가»에서 멈춘다. §10 정본 = 채움 스타일 + 「QR코드」.
-                  🔤 치수도 §10 표 — h-10 · radius 13 · px-3.5 · min-w 92 · 13px/600 · 아이콘 15×15.
+                  🔤 치수도 §10 표 — h-11(44px, D9) · radius 13 · px-3.5 · min-w 92 · 13px/600 · 아이콘 15×15.
                 */}
                 <button
-                  className="inline-flex h-10 min-w-[92px] items-center justify-center gap-1.5 rounded-[13px] bg-stone-950 px-3.5 text-[13px] font-semibold text-white transition-colors duration-150 hover:bg-[var(--color-text-body)]"
+                  className="inline-flex h-11 min-w-[92px] items-center justify-center gap-1.5 rounded-[13px] bg-stone-950 px-3.5 text-[13px] font-semibold text-white transition-colors duration-150 hover:bg-[var(--color-text-body)]"
                   onClick={(event) => {
                     event.stopPropagation();
                     setIsQrOpen(true);
@@ -170,7 +170,7 @@ export default function SessionCard({ session }: SessionCardProps) {
                   QR코드
                 </button>
                 <button
-                  className="inline-flex h-10 items-center rounded-[10px] px-3.5 text-[13px] text-stone-500 hover:bg-stone-100"
+                  className="inline-flex h-11 items-center rounded-[10px] px-3.5 text-[13px] text-stone-500 hover:bg-stone-100"
                   onClick={(event) => {
                     event.stopPropagation();
                     setEndError(null);
@@ -183,7 +183,7 @@ export default function SessionCard({ session }: SessionCardProps) {
               </>
             ) : (
               <button
-                className="inline-flex h-10 items-center rounded-[10px] px-3.5 text-[13px] text-rose-700 hover:bg-rose-50"
+                className="inline-flex h-11 items-center rounded-[10px] px-3.5 text-[13px] text-rose-700 hover:bg-rose-50"
                 onClick={(event) => {
                   event.stopPropagation();
                   setDeleteError(null);
@@ -211,7 +211,7 @@ export default function SessionCard({ session }: SessionCardProps) {
           ).map(([label, value], index) => (
             <div className={`text-center ${index > 0 ? 'border-l border-stone-100' : ''}`} key={label}>
               <div
-                className="text-lg font-semibold leading-tight text-stone-900"
+                className="text-[20px] font-semibold leading-tight text-stone-900"
                 style={{ fontFamily: 'var(--font-heading)' }}
               >
                 {value}
