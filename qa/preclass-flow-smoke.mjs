@@ -368,6 +368,41 @@ async function main() {
   participantId = list.find((p) => p?.nickname === NICK)?.id || '';
   log('teacher-participants', `${list.length}명 · 방금 들어온 학생 노출 확인`);
 
+  // ── 🩸 학생 진도 저장 — «200 뒤에서 조용히 죽는» 자리 (2026-09-10 라이브 사고) ──
+  //
+  //    이 스모크는 여태 `/api/progress` 를 **한 번도 안 쳤다.** 그래서 prod 에서 학생 진도
+  //    저장이 전부 500 이던 것을 아무도 못 봤다 — 마이그레이션 009 미적용 + 되돌리기가
+  //    `42703` 만 보고 PostgREST 의 `PGRST204` 를 놓친 것이 겹쳤다.
+  //    🔑 교사 화면(participants)은 그동안 **정상 200** 이었다. 그래서 「교사 화면이 뜬다」는
+  //       「학생 진도가 저장된다」의 증거가 아니다 — 이 앱에서 그 둘은 다른 경로다.
+  //    🚨 실습 칸(lab_*)도 «같이» 친다. 그 칸이 이 사고의 진원지였다.
+  const readAt = new Date().toISOString();
+  const prog = await api('/api/progress', {
+    method: 'PATCH', cookie: ptCookie,
+    body: { qa_id: 'ch01_q01', read_at: readAt },
+  });
+  if (prog.status !== 200) {
+    await done(false, `progress-write 실패:${prog.status} ${JSON.stringify(prog.body).slice(0, 140)}`
+      + ' — 학생 진도가 저장되지 않는다(교사 화면은 멀쩡히 뜬다)');
+  }
+  const progLab = await api('/api/progress', {
+    method: 'PATCH', cookie: ptCookie,
+    body: { qa_id: 'ch12_q03', lab_mission_index: 1, lab_earned_index: 1 },
+  });
+  if (progLab.status !== 200) {
+    await done(false, `progress-lab 실패:${progLab.status} ${JSON.stringify(progLab.body).slice(0, 140)}`
+      + ' — 실습 미션 자리가 저장되지 않는다(sql/009 미적용 또는 PGRST204 미처리)');
+  }
+  // 🚨 200 을 믿지 않고 **되읽는다.** 이 앱의 사고가 정확히 「200 인데 안 저장」이 아니라
+  //    「500 인데 아무도 안 봄」이었으므로, 여기서는 행이 실제로 생겼는지까지 확인한다.
+  const progRows = await q(
+    `select count(*) from architecture_progress where participant_id = '${participantId}'`,
+  );
+  if (Number(progRows) < 2) {
+    await done(false, `progress-readback: 200 인데 행이 ${progRows}개 (기대 2) — 저장이 흘러갔다`);
+  }
+  log('progress-write', `읽음·퀴즈·실습 저장 + 되읽기 ${progRows}행 ✓`);
+
   // ── 💸 축2-b — 폐쇄 목록 각 1회 실호출 (PRECLASS_AI_ROUTES=1 에서만) ─────────
   let aiField = '';
   if (AI_MODE) aiField = await runAiRoutes(ptCookie);
