@@ -9,7 +9,18 @@ import { qaTagFields } from '../lib/qa-context';
 const router = Router();
 
 /** Postgres `undefined_column`. 🔑 «칸이 아직 없다»와 «DB 가 고장났다»는 조치가 다르다. */
-const UNDEFINED_COLUMN = '42703';
+// 🩸 **칸이 없다고 말하는 코드가 «둘» 이다.** 2026-09-10 라이브 사고:
+//    이 상수가 `42703` 하나뿐이라 아래 되돌리기가 **한 번도 안 켜졌고**, prod 에서
+//    학생 진도 저장이 전부 500 이었다(마이그레이션 009 미적용 + 이 미스매치).
+//    🔑 왜 42703 이 안 오는가: PostgREST 는 그 요청을 **Postgres 에 보내지도 않는다** —
+//       스키마 캐시 단계에서 `PGRST204` 로 막는다. 실측:
+//       `{"code":"PGRST204","message":"Could not find the 'lab_mission_index' column ... in the schema cache"}`
+//    🚨 그래서 둘 다 봐야 한다. 하나만 보면 「되돌리기가 있는데 안 도는」 상태가 되고,
+//       그건 되돌리기가 **없는 것보다 나쁘다**(있다고 믿고 넘어가므로).
+const UNDEFINED_COLUMN = '42703';          // Postgres 가 직접 답할 때
+const SCHEMA_CACHE_MISS = 'PGRST204';      // PostgREST 가 앞에서 막을 때(실제로 오는 쪽)
+const isMissingColumn = (error: { code?: string } | null | undefined) =>
+  error?.code === UNDEFINED_COLUMN || error?.code === SCHEMA_CACHE_MISS;
 
 /**
  * 🔑 실습실 미션 자리(`lab_*`)는 **실습 문항의 진도 행에만** 담긴다. 다른 문항에서는 안 온다.
@@ -101,7 +112,7 @@ async function writeProgress(identity: ProgressIdentity, input: z.infer<typeof p
   };
   let existingRows: ProgressLookupRow[] | null;
   const firstLookup = await baseQuery.limit(1);
-  if (firstLookup.error && firstLookup.error.code === UNDEFINED_COLUMN) {
+  if (firstLookup.error && isMissingColumn(firstLookup.error)) {
     // 🔑 실습 칸 없이 다시 읽는다. 여기서 터지면 «지금 값»을 몰라 뒤로 가기 방지(keepMax)가 헛돈다.
     const fallback = identity.participantId
       ? await supabase
@@ -157,7 +168,7 @@ async function writeProgress(identity: ProgressIdentity, input: z.infer<typeof p
 
   if (existing) {
     const first = await supabase.from('architecture_progress').update(payload).eq('id', existing.id);
-    if (first.error && first.error.code === UNDEFINED_COLUMN) {
+    if (first.error && isMissingColumn(first.error)) {
       const retry = await supabase
         .from('architecture_progress')
         .update(withoutLab(payload))
@@ -176,7 +187,7 @@ async function writeProgress(identity: ProgressIdentity, input: z.infer<typeof p
 
   const row = { ...payload, ...qaTagFields() };
   const first = await supabase.from('architecture_progress').insert(row);
-  if (first.error && first.error.code === UNDEFINED_COLUMN) {
+  if (first.error && isMissingColumn(first.error)) {
     const retry = await supabase.from('architecture_progress').insert(withoutLab(row));
     if (retry.error) {
       throw new Error('progress_insert_failed');

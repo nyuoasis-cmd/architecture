@@ -8,7 +8,12 @@ import { summarizeSessionActivity, type ActivityProgressRow } from '../lib/sessi
 import { tallyLabMissions, tallyProgressRows, type ProgressRow } from '../lib/session-progress';
 
 /** Postgres `undefined_column`. 🔑 «칸이 아직 없다»와 «DB 가 고장났다»는 조치가 다르다. */
-const UNDEFINED_COLUMN = '42703';
+// 🩸 progress.ts 와 **같은 미스매치**가 여기에도 있었다 — PostgREST 는 42703 이 아니라
+//    `PGRST204`(스키마 캐시)로 막는다. 이쪽이 안 켜지면 교사 화면이 500 이다.
+const UNDEFINED_COLUMN = '42703';          // Postgres 가 직접 답할 때
+const SCHEMA_CACHE_MISS = 'PGRST204';      // PostgREST 가 앞에서 막을 때(실제로 오는 쪽)
+const isMissingColumn = (error: { code?: string } | null | undefined) =>
+  error?.code === UNDEFINED_COLUMN || error?.code === SCHEMA_CACHE_MISS;
 import { getSupabaseAdminClient } from '../lib/supabase';
 import { qaTagFields } from '../lib/qa-context';
 import { ALL_CHAPTER_IDS, getChapterContexts, getQaContextById } from '../data/chapter-content';
@@ -136,7 +141,7 @@ async function listParticipantsWithProgress(sessionId: string) {
     .from('architecture_progress')
     .select('participant_id, qa_id, lab_mission_index, lab_earned_index')
     .in('participant_id', participantIds);
-  if (withLab.error && withLab.error.code === UNDEFINED_COLUMN) {
+  if (withLab.error && isMissingColumn(withLab.error)) {
     const withoutLab = await supabase
       .from('architecture_progress')
       .select('participant_id, qa_id')
