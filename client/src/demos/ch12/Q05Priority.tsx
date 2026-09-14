@@ -8,7 +8,7 @@ import type { DemoComponentProps } from '../types';
 type Bucket = 'must' | 'later' | 'never';
 
 const BUCKETS: { key: Bucket; label: string; hint: string; cls: string }[] = [
-  { key: 'must', label: '필수', hint: '없으면 앱이 아님', cls: 'border-[#2d4a3e] bg-[#C9E0D4] text-[#2d4a3e]' },
+  { key: 'must', label: '필수', hint: '없으면 앱이 아님', cls: 'border-accent-mint-text bg-accent-mint text-accent-mint-text' },
   { key: 'later', label: '나중', hint: '있으면 좋음', cls: 'border-amber-400 bg-amber-100 text-amber-900' },
   { key: 'never', label: '안 함', hint: '이번엔 하지 않기로 «정함»', cls: 'border-rose-300 bg-rose-100 text-rose-800' },
 ];

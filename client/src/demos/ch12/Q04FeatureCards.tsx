@@ -64,7 +64,7 @@ export default function Q04FeatureCards(_props: DemoComponentProps) {
                   <button
                     className={`rounded-md border px-2.5 py-1 text-[12px] font-medium ${
                       choice === true
-                        ? 'border-[#2d4a3e] bg-[#C9E0D4] text-[#2d4a3e]'
+                        ? 'border-accent-mint-text bg-accent-mint text-accent-mint-text'
                         : 'border-[var(--color-border)] bg-white text-[var(--color-text-muted)] hover:bg-[var(--color-bg-input)]'
                     }`}
                     onClick={() => setPicked((prev) => ({ ...prev, [card.id]: true }))}

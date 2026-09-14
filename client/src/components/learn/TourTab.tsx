@@ -92,7 +92,7 @@ export default function TourTab({ qaId, missions }: TourTabProps) {
                       key={key}
                       className={`rounded-full border px-3.5 py-1.5 text-left text-[12.5px] font-medium transition ${
                         isOpen
-                          ? 'border-transparent bg-[#C9E0D4] font-semibold text-[#2d4a3e]'
+                          ? 'border-accent-mint-tag bg-accent-mint font-semibold text-accent-mint-text'
                           : 'border-[var(--color-border)] bg-white text-[var(--color-text-primary)] hover:bg-[var(--color-bg-input)]'
                       }`}
                       onClick={() => setOpened((prev) => ({ ...prev, [key]: true }))}

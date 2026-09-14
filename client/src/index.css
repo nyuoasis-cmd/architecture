@@ -4,6 +4,10 @@
 @source "../node_modules/@teachermate/shared/dist/**/*.{js,ts}";
 
 @theme {
+  /* 한결 v1.14 민트 3종 — 공용 패키지 핀(2c96006)이 옛 값이라 여기서 덮는다. 핀을 올리면 이 3줄은 지운다 · §9.B-2.4 */
+  --color-accent-mint: #DDF3EC;
+  --color-accent-mint-tag: #7EC8B5;
+  --color-accent-mint-text: #17644F;
   --color-bg-page: var(--color-surface);
   --color-bg-subtle: var(--color-surface-alt);
   --color-border-strong: var(--color-border-hover);
