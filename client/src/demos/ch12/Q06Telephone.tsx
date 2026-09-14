@@ -62,7 +62,7 @@ export default function Q06Telephone(_props: DemoComponentProps) {
         </div>
 
         {finished ? (
-          <p className="rounded-lg bg-[#C9E0D4] px-3.5 py-2.5 text-[12.5px] font-medium leading-[1.8] text-[#2d4a3e]">
+          <p className="rounded-lg border border-accent-mint-tag bg-accent-mint px-3.5 py-2.5 text-[12.5px] font-medium leading-[1.8] text-accent-mint-text">
             아무도 거짓말하지 않았습니다. 각자 <b>덜 중요해 보이는 조건을 하나씩 흘렸을</b> 뿐이에요. 나흘 만에 «못
             빌림»이 사라지고 «2주»가 «2주 정도»가 됐습니다.
           </p>

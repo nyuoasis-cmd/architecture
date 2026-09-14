@@ -70,7 +70,7 @@ export default function Q06PlanGaps(_props: DemoComponentProps) {
           })}
         </div>
         {openedCount === PROBES.length ? (
-          <p className="rounded-lg bg-[#C9E0D4] px-3.5 py-2.5 text-[12.5px] font-medium leading-[1.8] text-[#2d4a3e]">
+          <p className="rounded-lg border border-accent-mint-tag bg-accent-mint px-3.5 py-2.5 text-[12.5px] font-medium leading-[1.8] text-accent-mint-text">
             세 칸이 전부 비어 있습니다. 실망할 일이 아니라 <b>내 차례가 왔다는 신호</b>예요 — 세 칸은 우리 교실을 아는
             사람만 채울 수 있는 칸이니까요.
           </p>

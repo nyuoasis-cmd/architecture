@@ -146,7 +146,7 @@ export default function Q02DesignDoc(_props: DemoComponentProps) {
             </button>
           ))}
           {active ? (
-            <p className="rounded-lg bg-[#C9E0D4] px-3.5 py-2.5 text-[12.5px] leading-[1.8] text-[#2d4a3e]">
+            <p className="rounded-lg border border-accent-mint-tag bg-accent-mint px-3.5 py-2.5 text-[12.5px] leading-[1.8] text-accent-mint-text">
               {active.answer}
             </p>
           ) : (

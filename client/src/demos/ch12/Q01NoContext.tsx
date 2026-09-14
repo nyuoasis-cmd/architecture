@@ -49,7 +49,7 @@ export default function Q01NoContext(_props: DemoComponentProps) {
           })}
         </div>
         {openedCount === ASKED.length ? (
-          <p className="rounded-lg bg-[#C9E0D4] px-3.5 py-2.5 text-[12.5px] font-medium leading-[1.8] text-[#2d4a3e]">
+          <p className="rounded-lg border border-accent-mint-tag bg-accent-mint px-3.5 py-2.5 text-[12.5px] font-medium leading-[1.8] text-accent-mint-text">
             AI가 되물은 세 가지가 이 장에서 배울 목차와 그대로 겹칩니다. 즉 "앱 만들어줘"가 실패한 건 AI가 못해서가
             아니라 <b>이 칸들이 비어 있었기</b> 때문이에요.
           </p>
