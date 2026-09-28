@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { CHAPTERS, getQasByChapterId, type Chapter } from '../data/qa-stubs';
 import { getChapterProgress, useProgressMap } from '../lib/progress';
 import { getSession, SessionClientError, type SessionDetail } from '../lib/session-client';
+import { StudentExitGuard } from '../components/StudentExitGuard';
 
 type FilterId = 'all' | 'inProgress';
 
@@ -132,6 +133,8 @@ export default function LibraryPage() {
 
   return (
     <main className="mx-auto w-full max-w-[1100px] px-6 py-10">
+      {/* 🔙 §9.H-18 v2.4 — 학생에게 수업 목차는 입장 직후 «첫 화면» 이다. 여기서 뒤로가기 = 「수업에서 나갈까요?」 */}
+      <StudentExitGuard when={isPreviewMode && isStudentMode} />
       {isPreviewMode && !isStudentMode ? (
         <div className="mb-6 flex flex-wrap items-center gap-3">
           <Link
