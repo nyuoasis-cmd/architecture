@@ -45,7 +45,8 @@ export default function JoinPage() {
         participantId: joined.participant_id,
         nickname: joined.nickname,
       });
-      navigate(`/library?sessionId=${joined.session_id}`);
+      // 🔙 replace — 입장 화면을 기록에서 치워 수업 목차가 «첫 화면» 이 된다(§9.H-18 v2.4 · 뒤로가기 = 나가기 확인).
+      navigate(`/library?sessionId=${joined.session_id}`, { replace: true });
     } catch (caught) {
       if (caught instanceof SessionClientError) {
         if (caught.status === 404) {
