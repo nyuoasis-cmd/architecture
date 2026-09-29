@@ -237,7 +237,9 @@ export default function ContentPanel({
 
   const handleScenarioHash = (nextScenarioId: string) => {
     if (typeof window !== 'undefined') {
-      window.history.replaceState(null, '', `#${nextScenarioId}`);
+      // 🚨 state 는 그대로 둔다 — null 로 덮으면 react-router 의 칸 번호(idx)와 나가기 가드 표식이 지워져,
+      //    2강 이후에서 시나리오를 바꾼 뒤 뒤로가기가 앞 강 대신 「수업에서 나갈까요?」를 띄운다(§9.H-18 · 2026-09-29 라이브 재현).
+      window.history.replaceState(window.history.state, '', `#${nextScenarioId}`);
     }
     onScenarioChange(nextScenarioId);
   };
