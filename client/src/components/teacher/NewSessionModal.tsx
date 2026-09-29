@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CHAPTERS } from '../../data/qa-stubs';
 import { createSession, type SessionRecord } from '../../lib/session-client';
+import { useBackClosable } from '@teachermate/shared/back';
 
 // 🚨 2026-08-11: 서버가 chapter_ids 를 1~10 으로 막던 것을 풀었다(등록부 전체 허용).
 //    이제 바이브코딩 강도 수업 세션으로 열린다 — 그전에는 라이브러리 자습으로만 닿았다.
@@ -18,6 +19,8 @@ type NewSessionModalProps = {
 };
 
 export default function NewSessionModal({ onClose, onCreated }: NewSessionModalProps) {
+  // 창이 열린 채 뒤로가기 = 창만 닫힘(DESIGN-POLICY §9.H-18 v2.4 표 첫 줄)
+  useBackClosable(true, onClose);
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);

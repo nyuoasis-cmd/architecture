@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { useBackClosable } from '@teachermate/shared/back';
 
 /**
  * 되돌릴 수 없는 일(수업 종료·삭제) 앞에 서는 확인 모달. BUILDER-UX-POLICY §6.
@@ -23,6 +24,8 @@ export type ConfirmModalProps = {
   isPending?: boolean;
   onConfirm: () => void;
   onClose: () => void;
+  /** 뒤로가기로 이 창만 닫기(기본 켬). 확인 뒤 다른 화면으로 가는 창은 false — 화면이 useBackClosable 의 closeThen 을 쓴다. */
+  closeOnBack?: boolean;
 };
 
 export default function ConfirmModal({
@@ -36,8 +39,11 @@ export default function ConfirmModal({
   isPending = false,
   onConfirm,
   onClose,
+  closeOnBack = true,
 }: ConfirmModalProps) {
   const cancelRef = useRef<HTMLButtonElement | null>(null);
+  // 창이 열린 채 뒤로가기 = 창만 닫힘(DESIGN-POLICY §9.H-18 v2.4 표 첫 줄)
+  useBackClosable(closeOnBack, onClose);
 
   useEffect(() => {
     const previousOverflow = document.body.style.overflow;

@@ -10,7 +10,7 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.104.1",
     "@tailwindcss/postcss": "^4.2.2",
-    "@teachermate/shared": "github:nyuoasis-cmd/teachermate-shared#a4072de",
+    "@teachermate/shared": "github:nyuoasis-cmd/teachermate-shared#f5c941a",
     "js-cookie": "^3.0.5",
     "lucide-react": "^1.14.0",
     "postcss": "^8.5.9",
