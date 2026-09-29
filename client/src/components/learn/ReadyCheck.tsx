@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useBackClosable } from '@teachermate/shared/back';
 
 /**
  * 준비 점검 — 수업 입장 직후 1화면 (SDD 결정 19). 목차 밖이다 — «0강»을 세우지 않는다.
@@ -17,6 +18,9 @@ export function readyCheckSeen(sessionId: string): boolean {
 }
 
 export default function ReadyCheck({ sessionId, onDone }: { sessionId: string; onDone: () => void }) {
+  // 창이 열린 채 뒤로가기 = 창만 닫힘(DESIGN-POLICY §9.H-18 v2.4 표 첫 줄)
+  // 뒤로가기는 «이번엔 닫기» — 다 봤다고 적지 않아서(finish 아님) 다음 입장 때 한 번 더 뜬다.
+  useBackClosable(true, onDone);
   const [korean, setKorean] = useState('');
   const [tabOpened, setTabOpened] = useState(false);
   const [linkResult, setLinkResult] = useState<'none' | 'ok' | 'blocked'>('none');

@@ -1,6 +1,7 @@
 import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { GLOSSARY, type GlossaryEntry } from '../../data/teacher-glossary';
+import { useBackClosable } from '@teachermate/shared/back';
 
 type GlossaryProps = {
   text: string;
@@ -120,6 +121,8 @@ function isMobileViewport() {
 
 function useGlossaryMarkup(text: string, sharedSeenTerms?: ReadonlySet<string>) {
   const [activeEntry, setActiveEntry] = useState<GlossaryEntry | null>(null);
+  // 창이 열린 채 뒤로가기 = 창만 닫힘(DESIGN-POLICY §9.H-18 v2.4 표 첫 줄)
+  useBackClosable(activeEntry !== null, () => setActiveEntry(null));
   const [activeTrigger, setActiveTrigger] = useState<HTMLButtonElement | null>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);

@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
+import { useBackClosable } from '@teachermate/shared/back';
 
 /**
  * 학생 참여 QR 전체화면 — DESIGN-POLICY §10 「전체화면 오버레이 v3」(2026-08-07).
@@ -36,6 +37,8 @@ type QrFullscreenProps = {
 };
 
 export default function QrFullscreen({ code, sessionName, participantCount, onClose }: QrFullscreenProps) {
+  // 창이 열린 채 뒤로가기 = 창만 닫힘(DESIGN-POLICY §9.H-18 v2.4 표 첫 줄)
+  useBackClosable(true, onClose);
   const joinUrl =
     typeof window === 'undefined'
       ? `https://architecture.teachermate.co.kr/join?code=${code}`

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { QrCode } from 'lucide-react';
 import { Link, Navigate, useNavigate, useParams } from 'react-router-dom';
 import ConfirmModal from '../components/common/ConfirmModal';
@@ -8,13 +8,20 @@ import { CHAPTERS, getQasByChapterId } from '../data/qa-stubs';
 import { formatRelativeTime } from '../lib/format';
 import { deleteSession, getSession, getSessionParticipants, SessionClientError } from '../lib/session-client';
 import { useSessionStore } from '../store/session-store';
+import { useBackClosable } from '@teachermate/shared/back';
 
 export default function TeacherSessionPage() {
   const { id = '' } = useParams();
   const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const isDeletingRef = useRef(isDeleting);
+  isDeletingRef.current = isDeleting;
   const [isConfirmingDelete, setIsConfirmingDelete] = useState(false);
+  // 삭제 창은 지운 뒤 목록으로 바꿔 끼운다 — 화면이 훅을 쥐고 창 칸을 먼저 치운 뒤에 간다(closeThen).
+  const { closeThen: closeDeleteThen } = useBackClosable(isConfirmingDelete, () => {
+    if (!isDeletingRef.current) setIsConfirmingDelete(false);
+  });
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [isForbidden, setIsForbidden] = useState(false);
   const [isQrFullscreen, setIsQrFullscreen] = useState(false);
@@ -330,6 +337,7 @@ export default function TeacherSessionPage() {
       */}
       {isConfirmingDelete ? (
         <ConfirmModal
+          closeOnBack={false}
           confirmLabel="삭제"
           description="참여자 명단과 학습 기록도 함께 영구 삭제됩니다. 되돌릴 수 없어요."
           error={deleteError}
@@ -345,7 +353,7 @@ export default function TeacherSessionPage() {
             try {
               await deleteSession(currentSession.id);
               removeTeacherSession(currentSession.id);
-              navigate('/teacher', { replace: true });
+              closeDeleteThen(() => navigate('/teacher', { replace: true }));
             } catch (caught) {
               setIsDeleting(false);
               setDeleteError(caught instanceof Error ? caught.message : '수업을 삭제하지 못했습니다.');
